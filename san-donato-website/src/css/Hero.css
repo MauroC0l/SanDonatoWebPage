@@ -2,16 +2,16 @@
 .hero-section {
     background: white;
     color: #002b5c;
-    padding: clamp(1.5rem, 4vw, 3rem) 1vw;
+    padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw; /* ridottissimo */
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: left;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 
     /* fade in */
     opacity: 0;
-    animation: fadeIn 1s ease forwards;
+    animation: fadeIn 0.8s ease forwards;
 }
 
 .hero-content {

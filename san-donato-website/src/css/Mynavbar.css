@@ -65,6 +65,10 @@
 }
 
 /* Dropdown */
+.dropdown {
+    position: relative; /* 🔹 serve per ancorare il menu al pulsante */
+}
+
 .dropdown-toggle {
     background: rgba(255,255,255,0.15);
     border: none;
@@ -73,6 +77,7 @@
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.3s ease;
+
 }
 
 .dropdown-toggle:hover {
