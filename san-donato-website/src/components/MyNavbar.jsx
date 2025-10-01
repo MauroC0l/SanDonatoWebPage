@@ -1,8 +1,59 @@
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FaHome, FaNewspaper, FaImages, FaUsers, FaEnvelope } from "react-icons/fa";
+import {
+    FaHome,
+    FaNewspaper,
+    FaImages,
+    FaUsers,
+    FaEnvelope,
+    FaCalendarAlt,
+    FaFileAlt,
+    FaHandshake,
+    FaChild,
+    FaScroll,
+    FaBars
+} from "react-icons/fa";
 import "../css/MyNavbar.css";
 
 export default function MyNavbar() {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const mainLinks = [
+        { to: "/", label: "Home", icon: <FaHome /> },
+        { to: "/news", label: "News", icon: <FaNewspaper /> },
+        { to: "/galleria", label: "Galleria", icon: <FaImages /> },
+        { to: "/sports", label: "Sport & Attività", icon: <FaCalendarAlt /> },
+        { to: "/modulistica-tariffe", label: "Modulistica & Tariffe", icon: <FaFileAlt /> },
+        { to: "/iscrizione-rinnovo", label: "Iscrizione & Rinnovo", icon: <FaHandshake /> },
+        { to: "/sponsor", label: "Sponsor", icon: <FaScroll /> },
+        { to: "/chi-siamo", label: "Chi Siamo", icon: <FaUsers /> },
+    ];
+
+    const dropdownLinks = [
+        { to: "/contatti", label: "Contatti", icon: <FaEnvelope /> },
+        { to: "/privacy", label: "Privacy", icon: <FaFileAlt /> },
+        { to: "/tutela-minori", label: "Tutela dei minori", icon: <FaChild /> },
+        { to: "/safeguarding", label: "Politiche Safeguarding", icon: <FaUsers /> },
+        { to: "/cinquepermille", label: "5*1000", icon: <FaScroll /> },
+        { to: "/contributi-pubblici", label: "Contributi pubblici", icon: <FaScroll /> },
+    ];
+
+    // 🔹 Chiude il dropdown quando si clicca un link
+    const handleDropdownClick = () => {
+        setDropdownOpen(false);
+    };
+
     return (
         <header className="navbar">
             <div className="navbar-container">
@@ -11,42 +62,42 @@ export default function MyNavbar() {
                 </div>
 
                 <nav className="navbar-nav">
-                    <NavLink to="/" end className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        <FaHome className="nav-icon" /> Home
-                    </NavLink>
-                    <NavLink to="/news" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        <FaNewspaper className="nav-icon" /> News
-                    </NavLink>
-                    <NavLink to="/galleria" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        <FaImages className="nav-icon" /> Galleria
-                    </NavLink>
-                    <NavLink to="/chi-siamo" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        <FaUsers className="nav-icon" /> Chi Siamo
-                    </NavLink>
-                    <NavLink to="/contatti" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                        <FaEnvelope className="nav-icon" /> Contatti
-                    </NavLink>
-                    
+                    {mainLinks.map((link) => (
+                        <NavLink
+                            key={link.to}
+                            to={link.to}
+                            end={link.to === "/"}
+                            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                        >
+                            <span className="nav-icon">{link.icon}</span> {link.label}
+                        </NavLink>
+                    ))}
 
+                    <div className="dropdown" ref={dropdownRef}>
+                        <button
+                            className="dropdown-toggle"
+                            onClick={() => setDropdownOpen(!dropdownOpen)}
+                        >
+                            <FaBars /> Menu
+                        </button>
+
+                        {dropdownOpen && (
+                            <div className="dropdown-menu show">
+                                {dropdownLinks.map((link) => (
+                                    <NavLink
+                                        key={link.to}
+                                        to={link.to}
+                                        className="dropdown-item"
+                                        onClick={handleDropdownClick}
+                                    >
+                                        {link.icon} {link.label}
+                                    </NavLink>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </nav>
             </div>
         </header>
     );
-
-    /*
-        chi siamo
-        sport e attività
-        modulistica e tariffe
-        iscrizione rinnovo
-        statuto
-        politiche safeguarding
-        tutela dei minori
-        galleria
-        privacy
-        sponsor
-        5*1000
-        contributi pubblici
-        contatti
-
-    */
 }
