@@ -1,0 +1,3 @@
+.container {
+    padding: clamp(1rem, 2vw, 2rem);
+}

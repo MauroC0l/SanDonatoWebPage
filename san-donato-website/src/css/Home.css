@@ -1,0 +1,4 @@
+.section-spacing {
+    margin-top: clamp(2rem, 6vw, 5rem);
+    margin-bottom: clamp(2rem, 6vw, 5rem);
+}

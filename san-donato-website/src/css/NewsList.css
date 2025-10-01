@@ -1,0 +1,42 @@
+.container h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    color: #004080;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.grid {
+    display: grid;
+    gap: clamp(1rem, 2vw, 2rem);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.card h3 {
+    color: #FF6600;
+    font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+
+.card p {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    margin-bottom: 1rem;
+}
+
+.card a {
+    margin-top: auto;
+    font-weight: bold;
+    color: #004080;
+    text-decoration: none;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
