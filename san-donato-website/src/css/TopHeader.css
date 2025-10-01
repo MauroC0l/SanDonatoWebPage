@@ -8,11 +8,11 @@
 .top-header-container {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: center; /* 🔹 centra verticalmente social + contatti */
     padding: clamp(0.3rem, 1vw, 0.5rem) clamp(1rem, 2vw, 2rem);
-    max-width: 1200px;
     margin: auto;
 }
+
 
 .contact-info {
     font-size: clamp(0.75rem, 1vw, 0.95rem);
@@ -25,11 +25,8 @@
 }
 
 .social-icons a {
-    font-size: clamp(1rem, 1.5vw, 1.4rem); /* icone più piccole */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(0.3rem, 0.5vw, 0.5rem);
+    font-size: clamp(0.9rem, 1.2vw, 1.2rem);  
+    padding: clamp(0.3rem, 0.5vw, 0.45rem);   
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease;

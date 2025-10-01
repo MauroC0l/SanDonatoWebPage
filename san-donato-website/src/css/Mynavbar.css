@@ -7,14 +7,15 @@
 
 .navbar-container {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between; /* Logo a sinistra, link centrati */
+    justify-content: center; /* centra tutto il contenuto */
     padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem);
+    position: relative; /* per posizionare logo */
 }
 
 .navbar-logo {
-    flex: 1;
+    position: absolute; /* fissiamo il logo a sinistra */
+    left: clamp(1rem, 3vw, 2rem);
 }
 
 .navbar-logo .logo-text {
@@ -26,10 +27,9 @@
 
 .navbar-nav {
     display: flex;
-    flex-wrap: wrap;
     gap: clamp(0.5rem, 1vw, 1.5rem);
-    justify-content: center; /* Centra i link */
-    flex: 2; /* Occupa più spazio */
+    justify-content: center;
+    flex: none; /* evita che si allarghi inutilmente */
 }
 
 .nav-link {

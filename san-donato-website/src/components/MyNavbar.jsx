@@ -26,8 +26,27 @@ export default function MyNavbar() {
                     <NavLink to="/contatti" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                         <FaEnvelope className="nav-icon" /> Contatti
                     </NavLink>
+                    
+
                 </nav>
             </div>
         </header>
     );
+
+    /*
+        chi siamo
+        sport e attività
+        modulistica e tariffe
+        iscrizione rinnovo
+        statuto
+        politiche safeguarding
+        tutela dei minori
+        galleria
+        privacy
+        sponsor
+        5*1000
+        contributi pubblici
+        contatti
+
+    */
 }

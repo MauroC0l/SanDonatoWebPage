@@ -1,36 +1,69 @@
 .hero-section {
     background: linear-gradient(135deg, #ff6600, #ff8533);
     color: white;
-    padding: clamp(2rem, 5vw, 3rem) 1rem;
+    padding: clamp(2rem, 5vw, 3rem) 0.5rem; 
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: left; /* testo allineato a sinistra */
 }
 
 .hero-content {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center; /* centra il contenuto orizzontalmente */
-    gap: clamp(2rem, 6vw, 6rem); /* spazio tra testo e logo */
-    flex-wrap: wrap;
+    justify-content: space-between; /* testo e logo distanziati */
+    gap: clamp(2rem, 5vw, 4rem);
+    flex-wrap: nowrap; /* forziamo tutto su una riga */
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
 }
 
 .hero-text {
-    max-width: 700px; /* abbastanza spazio per testo */
-    text-align: center; /* testo centrato */
-    flex: 1; /* occupa spazio disponibile */
+    flex: 1; /* occupa tutto lo spazio possibile */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 2rem;
 }
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 500;
+    line-height: 1.2;
+    color: #004080;
+    margin-top: 0.2rem;
+}
+
 
 .hero-logo-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0; /* evita ridimensionamento indesiderato */
-    margin-right: clamp(-5rem, -7vw, -7rem); /* margine destro dinamico */
+    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .hero-logo {
-    width: clamp(320px, 30vw, 550px); /* logo grande e dinamico */
+    width: clamp(250px, 25vw, 400px);
     height: auto;
+    transition: transform 0.3s ease;
+}
+
+.hero-logo:hover {
+    transform: scale(1.05);
 }
 
 /* Mobile responsiveness */
@@ -38,6 +71,11 @@
     .hero-content {
         flex-direction: column;
         text-align: center;
+    }
+
+    .hero-text {
+        padding-right: 0;
+        margin-bottom: 1rem;
     }
 
     .hero-logo {
