@@ -1,6 +1,6 @@
 /* Hero.css */
 .hero-section {
-    background: white;
+    background:  rgba(255, 255, 255, 0.95);
     color: #002b5c;
     padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw; /* ridottissimo */
     display: flex;

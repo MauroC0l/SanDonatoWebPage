@@ -1,0 +1,7 @@
+DA FARE
+gestione amministratore CSM
+quando cambi pagina con la navbar, la scrollbar sposta un po tutto. Occhio
+Finire home (notizie)
+Finire le altre pagine
+
+FATTE

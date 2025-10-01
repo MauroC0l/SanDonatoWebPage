@@ -1,37 +1,29 @@
-import { useEffect, useState } from 'react'
-import '../css/NewsList.css'
-
 import { useNavigate } from 'react-router-dom'
 import Button from 'react-bootstrap/Button'
+import '../css/NewsList.css'
 
-export default function NewsList() {
-    const [posts, setPosts] = useState([])
-
+export default function NewsList({ news }) {
     const navigate = useNavigate()
 
-    useEffect(() => {
-        // Demo: se il sito ha feed RSS o API, qui si sostituisce l'endpoint.
-        // Per ora carichiamo un mock rapido.
-        
-        const mock = [
-            { id: 1, title: 'Inizio stagione: iscrizioni aperte', excerpt: 'Le iscrizioni per la stagione 2025-26 sono aperte...' },
-            { id: 2, title: 'Torneo di calcetto', excerpt: 'Sabato 12 ottobre torneo giovanile...' }
-        ]
-        setPosts(mock)
-    }, [])
-
-
-
     return (
-        <div className="container py-8">
-            <h2>Ultime notizie</h2>
-            <div className="grid grid-cols-3">
-                {posts.map(p => (
-                    <article key={p.id} className="card">
-                        <h3>{p.title}</h3>
-                        <p>{p.excerpt}</p>
-                        <Button onClick={() => navigate(`/news/${p.id}`)}>Leggi</Button>
-                        
+        <div className="news-container container py-8">
+            <h2 className="news-heading">Ultime notizie</h2>
+            <div className="news-grid">
+                {news.map(p => (
+                    <article key={p.id} className="news-card">
+                        {p.image && <img src={`${p.image}`} alt={p.title} className="news-image" />}
+                        <div className="news-content">
+                            <h3 className="news-title">{p.title}</h3>
+                            <div className="news-meta">{p.date} — {p.author}</div>
+                            <p className="news-excerpt">{p.excerpt}</p>
+                            <Button 
+                                className="news-btn"
+                                onClick={() => navigate(`/news/${p.id}`)}
+                                variant="outline-warning"
+                            >
+                                Leggi
+                            </Button>
+                        </div>
                     </article>
                 ))}
             </div>

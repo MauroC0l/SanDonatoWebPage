@@ -1,4 +1,10 @@
 /* --- Global spacing --- */
+.home-wrapper {
+    background:  rgba(255, 255, 255, 0.95);
+}
+
+
+
 .section-spacing {
     margin-top: clamp(2rem, 5vw, 5rem);
     margin-bottom: clamp(2rem, 5vw, 5rem);
