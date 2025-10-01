@@ -1,17 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
 import {
-    FaHome,
-    FaNewspaper,
-    FaImages,
-    FaUsers,
-    FaEnvelope,
-    FaCalendarAlt,
-    FaFileAlt,
-    FaHandshake,
-    FaChild,
-    FaScroll,
-    FaBars
+    FaHome, FaNewspaper, FaImages, FaUsers,
+    FaEnvelope, FaCalendarAlt, FaFileAlt,
+    FaHandshake, FaChild, FaScroll, FaBars
 } from "react-icons/fa";
 import "../css/MyNavbar.css";
 
@@ -44,15 +36,10 @@ export default function MyNavbar() {
         { to: "/contatti", label: "Contatti", icon: <FaEnvelope /> },
         { to: "/privacy", label: "Privacy", icon: <FaFileAlt /> },
         { to: "/tutela-minori", label: "Tutela dei minori", icon: <FaChild /> },
-        { to: "/safeguarding", label: "Politiche Safeguarding", icon: <FaUsers /> },
-        { to: "/cinquepermille", label: "5*1000", icon: <FaScroll /> },
+        { to: "/safeguarding", label: "Safeguarding", icon: <FaUsers /> },
+        { to: "/cinquepermille", label: "5x1000", icon: <FaScroll /> },
         { to: "/contributi-pubblici", label: "Contributi pubblici", icon: <FaScroll /> },
     ];
-
-    // 🔹 Chiude il dropdown quando si clicca un link
-    const handleDropdownClick = () => {
-        setDropdownOpen(false);
-    };
 
     return (
         <header className="navbar">
@@ -88,7 +75,7 @@ export default function MyNavbar() {
                                         key={link.to}
                                         to={link.to}
                                         className="dropdown-item"
-                                        onClick={handleDropdownClick}
+                                        onClick={() => setDropdownOpen(false)}
                                     >
                                         {link.icon} {link.label}
                                     </NavLink>

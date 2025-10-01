@@ -3,8 +3,8 @@ import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import "../css/TopHeader.css";
 
 export default function TopHeader() {
-    const phoneNumber = "+39 123 456 7890"; // phone mock
-    const email = "info@polisportiva.it"; // email mock
+    const phoneNumber = "+39 123 456 7890"; 
+    const email = "info@polisportiva.it";
 
     return (
         <div className="top-header">

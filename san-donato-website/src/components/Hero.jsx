@@ -3,7 +3,7 @@ import "../css/Hero.css";
 export default function Hero() {
     const title = "Polisportiva San Donato";
     const subtitle = "Lo sport in borgo San Donato a Torino";
-    const message = "Iscrizioni aperte, attività per tutte le età.";
+    const message = "\"Chi giova divertendosi vince sempre\""; 
     const logoImage = "logo-polisportiva.png";
 
     return (
@@ -20,6 +20,7 @@ export default function Hero() {
                         alt="Logo Polisportiva San Donato"
                         className="hero-logo"
                     />
+                    <div className="hero-message">{message}</div> 
                 </div>
             </div>
         </section>
