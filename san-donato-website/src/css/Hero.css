@@ -31,13 +31,14 @@
 }
 
 .hero-title {
-    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-size: clamp(2.3rem, 4.6vw, 3.68rem);
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
 
 .hero-subtitle {
     font-size: clamp(1.3rem, 2vw, 1.8rem);

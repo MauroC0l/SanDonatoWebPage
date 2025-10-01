@@ -44,9 +44,10 @@ export default function MyNavbar() {
     return (
         <header className="navbar">
             <div className="navbar-container">
-                <div className="navbar-logo">
+                {/* TODO:: Da aggiungere?  */}              
+                 {/*  <div className="navbar-logo">
                     <Link to="/" className="logo-text">Polisportiva San Donato</Link>
-                </div>
+                </div> */}
 
                 <nav className="navbar-nav">
                     {mainLinks.map((link) => (
