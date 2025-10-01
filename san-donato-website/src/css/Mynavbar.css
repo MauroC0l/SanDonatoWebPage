@@ -1,0 +1,72 @@
+.navbar {
+    background: linear-gradient(90deg, #004080, #FF6600);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(0.9rem, 1vw, 1.1rem);
+    color: white;
+}
+
+.navbar-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between; /* Logo a sinistra, link centrati */
+    padding: clamp(0.5rem, 2vw, 1rem) clamp(1rem, 3vw, 2rem);
+}
+
+.navbar-logo {
+    flex: 1;
+}
+
+.navbar-logo .logo-text {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.navbar-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.5rem, 1vw, 1.5rem);
+    justify-content: center; /* Centra i link */
+    flex: 2; /* Occupa più spazio */
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: clamp(0.5rem, 1vw, 0.8rem);
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    font-weight: bold;
+    border-bottom: 2px solid white;
+}
+
+.nav-icon {
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+        align-items: center; /* Centra i link su mobile */
+    }
+}

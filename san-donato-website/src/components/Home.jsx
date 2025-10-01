@@ -1,5 +1,4 @@
 import { Container } from "react-bootstrap";
-import Hero from "./Hero";
 import NewsList from "./NewsList";
 import Gallery from "./Gallery";
 
@@ -12,7 +11,6 @@ export default function Home() {
 
     return (
         <>
-            <Hero />
             <Container className="section-spacing">
                 <NewsList />
             </Container>

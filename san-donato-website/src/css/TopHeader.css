@@ -1,0 +1,73 @@
+.top-header {
+    background-color: #002b5c;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: clamp(0.75rem, 1vw, 0.95rem);
+}
+
+.top-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(0.3rem, 1vw, 0.5rem) clamp(1rem, 2vw, 2rem);
+    max-width: 1200px;
+    margin: auto;
+}
+
+.contact-info {
+    font-size: clamp(0.75rem, 1vw, 0.95rem);
+}
+
+.social-icons {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.8rem, 2vw, 1.5rem);
+}
+
+.social-icons a {
+    font-size: clamp(1rem, 1.5vw, 1.4rem); /* icone più piccole */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.3rem, 0.5vw, 0.5rem);
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+
+.social-icons a::before {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 2px;
+    width: 0%;
+    background: #ff6600;
+    transition: width 0.3s ease;
+}
+
+.social-icons a:hover::before {
+    width: 60%;
+}
+
+.social-icons a:hover {
+    color: #ff6600;
+    transform: scale(1.2);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .top-header-container {
+        flex-direction: column;
+        gap: clamp(0.3rem, 1vw, 0.5rem);
+        text-align: center;
+    }
+
+    .social-icons {
+        margin-bottom: clamp(0.2rem, 0.5vw, 0.4rem);
+    }
+}
