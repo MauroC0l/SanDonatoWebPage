@@ -27,7 +27,7 @@ export default function MyNavbar() {
         { to: "/galleria", label: "Galleria", icon: <FaImages /> },
         { to: "/sports", label: "Sport & Attività", icon: <FaCalendarAlt /> },
         { to: "/modulistica-tariffe", label: "Modulistica & Tariffe", icon: <FaFileAlt /> },
-        { to: "/iscrizione-rinnovo", label: "Iscrizione & Rinnovo", icon: <FaHandshake /> },
+        { to: "/iscrizione-rinnovo", label: "Iscrizione", icon: <FaHandshake /> },
         { to: "/sponsor", label: "Sponsor", icon: <FaScroll /> },
         { to: "/chi-siamo", label: "Chi Siamo", icon: <FaUsers /> },
     ];
