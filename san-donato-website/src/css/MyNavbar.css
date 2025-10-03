@@ -1,0 +1,140 @@
+/* MyNavbar.css */
+.navbar {
+    background: #002b5c;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 0.8rem 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    opacity: 0;
+    animation: fadeDown 0.8s ease forwards;
+    animation-delay: 0.2s;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.logo-text {
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: color 0.3s;
+}
+
+.logo-text:hover {
+    color: #ff6600;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 auto;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    color: white;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background: rgba(255,255,255,0.15);
+    color: #ff6600;
+    transform: translateY(-2px);
+}
+
+.nav-link.active {
+    font-weight: 600;
+    border-bottom: 3px solid #ff6600;
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative; /* 🔹 serve per ancorare il menu al pulsante */
+}
+
+.dropdown-toggle {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+}
+
+.dropdown-toggle:hover {
+    background: rgba(255,255,255,0.3);
+    color: #ff6600;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: white;
+    color: black;
+    min-width: 180px;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    padding: 0.5rem 0;
+
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #222;
+    transition: background 0.2s ease;
+    border-radius: 4px;
+}
+
+.dropdown-item:hover {
+    background: #f8f8f8;
+    color: #ff6600;
+}
+
+/* Animazioni */
+@keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .navbar-nav { flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
+}
+
+@media (max-width: 768px) {
+    .navbar-container { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .navbar-nav { flex-direction: column; width: 100%; }
+    .dropdown-menu { right: auto; left: 0; width: 100%; }
+}
