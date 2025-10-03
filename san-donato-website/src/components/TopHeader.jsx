@@ -1,5 +1,5 @@
-import React from "react";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
+import { SiTiktok } from "react-icons/si";
 import "../css/TopHeader.css";
 
 import { FiMapPin, FiPhone, FiMail, FiHome } from "react-icons/fi";
@@ -20,8 +20,11 @@ export default function TopHeader() {
                     <a href="https://www.instagram.com/poli_sandonato/" target="_blank" rel="noopener noreferrer">
                         <FaInstagram />
                     </a>
-                    <a href="https://www.youtube.com/channel/UCmiLH1iB43wExROqDINTL2w" target="_blank" rel="noopener noreferrer">
+                    <a href="https://www.youtube.com/@PolisportivaSanDonato" target="_blank" rel="noopener noreferrer">
                         <FaYoutube />
+                    </a>
+                    <a href="https://www.tiktok.com/@sando_to?_t=ZN-90F6uVwJWtS&_r=1" target="_blank" rel="noopener noreferrer">
+                        <SiTiktok />
                     </a>
                 </div>
                 <div className="contact-info">

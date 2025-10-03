@@ -1,15 +1,14 @@
 /* Hero.css */
 .hero-section {
-    background:  rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.95);
     color: #002b5c;
-    padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw; /* ridottissimo */
+    padding: clamp(0.03536rem, 0.08817vw, 0.08817rem) 0.08817vw;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: left;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 0.909px 3.636px rgba(0,0,0,0.05);
 
-    /* fade in */
     opacity: 0;
     animation: fadeIn 0.8s ease forwards;
 }
@@ -19,43 +18,42 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(1.5rem, 4vw, 3.5rem);
+    gap: clamp(1.3635rem, 3.636vw, 3.1815rem);
     max-width: 90vw;
     margin: 0 auto;
-    padding: 2vw;
+    padding: 1.818vw;
 
     opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(36.36px);
     animation: slideUp 1s ease forwards;
     animation-delay: 0.3s;
 }
 
 .hero-title {
-    font-size: clamp(2.3rem, 4.6vw, 3.68rem);
+    font-size: clamp(2.0907rem, 4.1814vw, 3.34512rem);
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04545em;
 }
 
-
 .hero-subtitle {
-    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    font-size: clamp(1.1817rem, 1.818vw, 1.6362rem);
     font-weight: 500;
     color: #ff6600;
-    margin-top: 0.3em;
+    margin-top: 0.2727em;
 }
 
 .hero-message {
-    font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+    font-size: clamp(0.8181rem, 1.3635vw, 1.0908rem);
     color: #002b5c;
-    margin-top: 1em;  
+    margin-top: 0.909em;
     text-align: center;
     font-style: italic;
 
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18.18px);
     animation: fadeUp 1s ease forwards;
     animation-delay: 1.2s;
 }
@@ -65,13 +63,14 @@
     flex-direction: column;
     align-items: center;
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(27.27px);
     animation: fadeLeft 1s ease forwards;
     animation-delay: 0.9s;
 }
 
 .hero-logo {
-    width: clamp(150px, 20vw, 300px);
+    width: clamp(90.9px, 13.635vw, 163.62px);
+    height: auto;
     transition: transform 0.3s ease;
 }
 
@@ -88,6 +87,6 @@
 /* Mobile */
 @media (max-width: 768px) {
     .hero-content { flex-direction: column; text-align: center; }
-    .hero-subtitle { margin-bottom: 1rem; }
-    .hero-logo { width: clamp(120px, 40vw, 220px); margin-top: 1rem; }
+    .hero-subtitle { margin-bottom: 0.909rem; }
+    .hero-logo { width: clamp(109.08px, 36.36vw, 199.98px); margin-top: 0.909rem; }
 }
