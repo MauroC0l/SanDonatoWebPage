@@ -1,46 +1,25 @@
-/* --- Home.css --- */
-
-/* --- Global spacing --- */
-.home-wrapper {
-    background: rgba(255, 255, 255, 0.95);
-}
-
-.section-spacing {
-    margin-top: clamp(-2rem, -3vw, -1rem); /* sezione notizie molto vicina */
-    margin-bottom: clamp(2rem, 5vw, 5rem);
-}
-
-/* --- About Section (Home Hero) --- */
+/* --- About Section --- */
 .about-section {
     position: relative;
     height: clamp(30vh, 50%, 35vh);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
     text-align: center;
     overflow: hidden;
     padding: clamp(1rem, 3vw, 2rem);
-
-    background: url('/homeBackground.jpg') center/cover no-repeat;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeSlideUp 1s ease forwards;
-    animation-delay: 0.3s;
     transition: background-image 1s ease-in-out;
 }
 
-/* Overlay nero */
-.about-section::before {
-    content: "";
+.about-overlay {
     position: absolute;
     top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 0;
 }
 
-/* Contenuto sopra overlay */
 .about-content {
     position: relative;
     z-index: 1;
@@ -49,33 +28,20 @@
 }
 
 .about-subtitle {
-    font-size: clamp(1.5rem, 4vw, 2.8rem);
+    font-size: clamp(1.2rem, 4vw, 2.8rem);
     font-weight: 700;
     margin-bottom: clamp(1rem, 2vw, 1.5rem);
     color: #ffe5b4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    opacity: 0;
-    transform: translateY(15px);
-    animation: fadeSlideUp 1s ease forwards;
-    animation-delay: 0.5s;
 }
 
 .about-text {
     font-size: clamp(0.9rem, 2vw, 1.4rem);
     line-height: 1.6;
-    max-width: clamp(300px, 90%, 700px);
+    max-width: 90%;
     margin: 0 auto;
-
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeSlideUp 1s ease forwards;
-    animation-delay: 0.7s;
+    color: white;
 }
 
-/* Wave decorativa */
 .about-wave {
     position: absolute;
     bottom: 0;
@@ -88,36 +54,31 @@
 }
 
 /* --- Animations --- */
-@keyframes fadeSlideUp {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes waveMove {
     0% { background-position-x: 0; }
     100% { background-position-x: 1000px; }
 }
 
 /* --- Responsive --- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .about-section {
         height: clamp(25vh, 40%, 30vh);
         padding: clamp(1rem, 4vw, 1.5rem);
     }
     .about-subtitle {
-        font-size: clamp(1.2rem, 5vw, 2rem);
+        font-size: clamp(1.2rem, 5vw, 2.2rem);
     }
     .about-text {
         font-size: clamp(0.85rem, 4vw, 1.2rem);
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .about-section {
         height: clamp(22vh, 35%, 26vh);
     }
     .about-subtitle {
-        font-size: clamp(1rem, 5vw, 1.6rem);
+        font-size: clamp(1rem, 5vw, 1.8rem);
         margin-bottom: 0.6rem;
     }
     .about-text {

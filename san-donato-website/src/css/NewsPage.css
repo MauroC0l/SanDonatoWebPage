@@ -1,0 +1,350 @@
+/* --- Spaziatura tra sezioni --- */
+.section-spacing {
+    margin-top: clamp(-2rem, -3vw, -1rem); /* sezione notizie molto vicina */
+    margin-bottom: clamp(2rem, 5vw, 5rem);
+}
+
+/* --- Sezione principale --- */
+.news-section {
+  background: rgba(248, 250, 252, 0.98);
+  padding: 3rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeSlideUp 0.8s ease forwards;
+}
+
+.news-section-title {
+  text-align: center;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  color: #1d3557;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.news-section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #ff7b33; 
+  border-radius: 2px;
+}
+
+/* --- Layout principale --- */
+.news-layout {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+}
+
+/* --- Sidebar --- */
+.news-sidebar {
+  flex: 0 0 260px;
+  background: linear-gradient(180deg, #1d3557, #457b9d);
+  color: #f1faee;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-sidebar h4 {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.news-sidebar h4::after {
+  content: "";
+  position: absolute;
+  bottom: -0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 3px;
+  background: #ff7b33;
+  border-radius: 3px;
+}
+
+/* Hover checkbox e label */
+.custom-checkbox:hover .form-check-input {
+  border-color: #ff7b33;
+  box-shadow: 0 0 5px rgba(255, 123, 51, 0.6);
+}
+
+.custom-checkbox:hover .form-check-label {
+  color: #ff7b33;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+/* Hover sui dropdown e datepicker */
+.news-sidebar .form-select:hover,
+.news-sidebar .form-control.custom-datepicker:hover {
+  border-color: #ff7b33;
+  box-shadow: 0 0 5px rgba(255, 123, 51, 0.6);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* --- Form --- */
+.news-sidebar .form-group {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(241, 250, 238, 0.3);
+}
+
+.news-sidebar .form-label {
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.news-sidebar .form-check {
+  margin-bottom: 0.4rem;
+}
+
+/* Contenitore checkbox in linea */
+.custom-checkbox {
+  display: flex;
+  align-items: center; /* centra verticalmente */
+  gap: 8px; /* spazio uniforme tra box e testo */
+}
+
+/* Checkbox */
+.custom-checkbox .form-check-input {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f1faee;
+  border-radius: 6px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* evita che si deformi */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0; /* elimina margini di default bootstrap */
+}
+
+/* Stato checked */
+.custom-checkbox .form-check-input:checked {
+  background-color: #ff7b33;
+  border-color: #ff7b33;
+  box-shadow: 0 0 6px rgba(230, 57, 70, 0.6);
+}
+
+.custom-checkbox .form-check-input:checked::after {
+  content: "✔";
+  font-size: 0.85rem;
+  color: #fff;
+  line-height: 1;
+}
+
+/* Testo */
+.custom-checkbox .form-check-label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin: 0; /* elimina offset di default */
+}
+
+.custom-checkbox .form-check-input:checked ~ .form-check-label {
+  color: #f1faee;
+  font-weight: 600;
+}
+
+/* --- Bottone reset --- */
+.filter-reset-btn {
+  width: 100%;
+  background: #ff7b33;
+  color: #f1faee;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+}
+
+.filter-reset-btn:hover {
+  background: #d62828;
+  transform: translateY(-2px);
+}
+
+/* --- Input e Select --- */
+.news-sidebar .form-control,
+.news-sidebar .form-select {
+  border-radius: 10px;
+  border: 1px solid #a8dadc;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.95rem;
+  background-color: #f1faee;
+  color: #1d3557;
+  transition: all 0.2s ease;
+}
+
+.news-sidebar .form-control:focus,
+.news-sidebar .form-select:focus {
+  border-color: #ff7b33;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3);
+  outline: none;
+}
+
+/* --- Cards --- */
+.news-card {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.news-img-wrapper {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.news-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.news-card:hover img {
+  transform: scale(1.05);
+}
+
+.news-card .card-body {
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.news-card .card-title {
+  font-size: 1.1rem;
+  color: #1d3557;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.news-card .card-subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 0.7rem;
+}
+
+.news-card .card-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 1.2rem;
+  color: #444;
+}
+
+/* --- DatePicker personalizzato --- */
+.custom-datepicker {
+  border-radius: 10px;
+  border: 1px solid #a8dadc;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.95rem;
+  background-color: #f1faee;
+  color: #1d3557;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.custom-datepicker:focus {
+  border-color: #ff7b33;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3);
+  outline: none;
+}
+
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.custom-header-selects {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modern-select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 0.9rem;
+  color: #333;
+  transition: all 0.2s ease-in-out;
+}
+
+.modern-select:hover {
+  border-color: #aaa;
+  background-color: #fff;
+}
+
+.modern-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  background-color: #fff;
+}
+
+/* --- Pulsante “Leggi di più” --- */
+.read-btn {
+  background-color: #1d3557;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+.read-btn:hover {
+  background-color: #457b9d;
+}
+
+/* --- Responsività --- */
+@media (max-width: 992px) {
+  .news-layout {
+    flex-direction: column;
+  }
+  .news-sidebar {
+    width: 100%;
+    position: static;
+  }
+}
+
+/* --- Animazione --- */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

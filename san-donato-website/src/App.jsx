@@ -1,14 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import Home from "./components/Home";
-import About from "./components/About";
-import News from "./components/News";
+import HomePage from "./components/HomePage";
+import About from "./components/AboutSection";
+import News from "./components/NewsPage";
 import GalleryPage from "./components/GalleryPage";
 import MyNavbar from "./components/MyNavbar";
 import Hero from "./components/Hero";
 import TopHeader from "./components/TopHeader"; 
+import AboutSection from "./components/AboutSection";
 
 export default function App() {
-
+  // PROVA UN DUE TREEEEE
   return (
     <div className="page-wrapper"> {/* Wrapper per full width & height */}
 
@@ -18,11 +19,14 @@ export default function App() {
 
       <MyNavbar />  {/* Navbar sotto l'header */}
 
+      <AboutSection /> {/* Informazioni sulla PSD */}
+
+
       <main className="flex-grow w-full px-0"> 
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/chi-siamo" element={<About />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/news" element={<News />} />
+          <Route path="/chi-siamo" element={<About />} />
           <Route path="/galleria" element={<GalleryPage />} />
         </Routes>
       </main>
