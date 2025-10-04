@@ -2,8 +2,8 @@ import "../css/Hero.css";
 
 export default function Hero() {
     const title = "Polisportiva San Donato";
-    const subtitle = "Lo sport in borgo San Donato a Torino";
-    const message = "\"Chi giova divertendosi vince sempre\""; 
+    const subtitle = "La community dello sport in San Donato a Torino";
+    const message = "\"Chi gioca divertendosi vince sempre\""; 
     const logoImage = "logo-polisportiva.png";
 
     return (

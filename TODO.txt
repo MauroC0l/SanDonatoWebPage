@@ -1,4 +1,10 @@
 DA FARE
+sistemare la home affinchè sia precisa nella prima schermata (che non si veda il sotto tipo, pagina fissa?)
+    - se premi "news": 
+       > se parti dalla home "si leva" ciò che c'è sopra e si aprono le news
+       > se parti da un'altra pagina, si apre la home e si va direttamente alle news
+       [forse aggiungere una barra che si muove con tutte le recenti info???]
+sistemare la rotella per i caricamenti
 gestione amministratore CSM
 quando cambi pagina con la navbar, la scrollbar sposta un po tutto. Occhio
 Finire home (notizie)
