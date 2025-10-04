@@ -1,8 +1,8 @@
-/* Hero.css */
+/* --- Hero.css --- */
 .hero-section {
-    background:  rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.95);
     color: #002b5c;
-    padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw; /* ridottissimo */
+    padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,6 +14,7 @@
     animation: fadeIn 0.8s ease forwards;
 }
 
+/* Contenuto principale */
 .hero-content {
     display: flex;
     flex-direction: row;
@@ -30,6 +31,7 @@
     animation-delay: 0.3s;
 }
 
+/* Testi */
 .hero-title {
     font-size: clamp(2.3rem, 4.6vw, 3.68rem);
     font-weight: 700;
@@ -38,7 +40,6 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
-
 
 .hero-subtitle {
     font-size: clamp(1.3rem, 2vw, 1.8rem);
@@ -60,6 +61,7 @@
     animation-delay: 1.2s;
 }
 
+/* Logo */
 .hero-logo-container {
     display: flex;
     flex-direction: column;
@@ -85,9 +87,22 @@
 @keyframes fadeLeft { to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-/* Mobile */
+/* --- Responsive --- */
 @media (max-width: 768px) {
-    .hero-content { flex-direction: column; text-align: center; }
-    .hero-subtitle { margin-bottom: 1rem; }
-    .hero-logo { width: clamp(120px, 40vw, 220px); margin-top: 1rem; }
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 4vw;
+    }
+
+    .hero-logo {
+        width: clamp(120px, 40vw, 220px);
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title { font-size: clamp(1.6rem, 6vw, 2rem); }
+    .hero-subtitle { font-size: clamp(1rem, 4vw, 1.2rem); }
+    .hero-message { font-size: clamp(0.8rem, 3vw, 1rem); }
 }

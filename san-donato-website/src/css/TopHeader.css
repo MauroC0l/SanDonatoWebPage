@@ -1,4 +1,6 @@
-/* TopHeader.css */
+/* --- TopHeader.css --- */
+
+/* Barra superiore */
 .top-header {
     background: #002b5c;
     color: white;
@@ -10,6 +12,7 @@
     animation: fadeDown 0.8s ease forwards;
 }
 
+/* Contenitore principale */
 .top-header-container {
     display: flex;
     justify-content: space-between;
@@ -18,8 +21,28 @@
     margin: auto;
 }
 
+/* Info contatti */
 .contact-info {
-    font-size: clamp(0.75rem, 1vw, 0.95rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(0.8rem, 2vw, 1.2rem);
+    color: white;
+    font-size: clamp(0.8rem, 1vw, 1rem);
+    align-items: center;
+}
+
+.contact-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Icone */
+.contact-icon {
+    color: #ff6600bd; 
+    width: clamp(1rem, 1.5vw, 1.2rem);
+    height: auto;
 }
 
 .social-icons {
@@ -44,39 +67,28 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.contact-info {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(0.8rem, 2vw, 1.2rem);
-    color: white; /* testo bianco */
-    font-size: clamp(0.8rem, 1vw, 1rem);
-    align-items: center;
-}
-
-.contact-info span {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.contact-icon {
-    color: #ff6600bd; 
-    width: clamp(1rem, 1.5vw, 1.2rem);
-    height: auto;
-}
-
 /* Animation */
 @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile */
+/* --- Responsive --- */
 @media (max-width: 768px) {
     .top-header-container {
         flex-direction: column;
         gap: 0.4rem;
         text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-icons {
+        gap: 0.6rem;
+    }
+    .contact-info {
+        font-size: 0.75rem;
+        flex-direction: column;
+        gap: 0.4rem;
     }
 }

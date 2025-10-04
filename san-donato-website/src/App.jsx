@@ -8,7 +8,7 @@ import Hero from "./components/Hero";
 import TopHeader from "./components/TopHeader"; 
 
 export default function App() {
-  // PROVA UN DUE TREEEEE
+
   return (
     <div className="page-wrapper"> {/* Wrapper per full width & height */}
 
