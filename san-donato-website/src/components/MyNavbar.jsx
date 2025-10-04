@@ -48,16 +48,19 @@ export default function MyNavbar() {
                  {/*  <div className="navbar-logo">
                     <Link to="/" className="logo-text">Polisportiva San Donato</Link>
                 </div> */}
-
+                
                 <nav className="navbar-nav">
-                    {mainLinks.map((link) => (
+                    {mainLinks.map((link, i) => (
                         <NavLink
                             key={link.to}
                             to={link.to}
                             end={link.to === "/"}
-                            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                            className={({ isActive }) =>
+                                isActive ? "nav-link active" : "nav-link"
+                            }
+                            data-index={i} // utile per nascondere alcuni link via CSS
                         >
-                            <span className="nav-icon">{link.icon}</span> {link.label}
+                            {link.icon} <span>{link.label}</span>
                         </NavLink>
                     ))}
 
