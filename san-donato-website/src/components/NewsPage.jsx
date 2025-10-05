@@ -22,7 +22,7 @@ const months = [
 ];
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1980 + 1 }, (_, i) => 1980 + i);
+const years = Array.from({ length: currentYear - 1990 + 1 }, (_, i) => 1990 + i);
 
 /* =====================================================
    📰 Componente principale che gestisce filtri e notizie
@@ -85,8 +85,8 @@ export default function NewsPage() {
      ✅ Funzione generica per aggiungere/rimuovere filtri
      --------------------------------------------------- */
   const toggleFilter = useCallback((value, setFilter) => {
-    setFilter(prev => 
-      prev.includes(value) 
+    setFilter(prev =>
+      prev.includes(value)
         ? prev.filter(v => v !== value)   // Se già selezionato → rimuovilo
         : [...prev, value]                // Altrimenti → aggiungilo
     );
@@ -99,7 +99,7 @@ export default function NewsPage() {
     return mockNews
       // Filtro per sport e autore
       .filter(n => (!sportFilter.length || sportFilter.includes(n.sport)) &&
-                   (!authorFilter.length || authorFilter.includes(n.author)))
+        (!authorFilter.length || authorFilter.includes(n.author)))
       // Filtro per intervallo di date
       .filter(n => {
         const newsDate = parseDate(n.date);

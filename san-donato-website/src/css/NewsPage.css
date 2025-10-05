@@ -261,57 +261,6 @@
   color: #444;
 }
 
-/* --- DatePicker personalizzato --- */
-.custom-datepicker {
-  border-radius: 10px;
-  border: 1px solid #a8dadc;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.95rem;
-  background-color: #f1faee;
-  color: #1d3557;
-  width: 100%;
-  transition: all 0.2s ease;
-}
-
-.custom-datepicker:focus {
-  border-color: #ff7b33;
-  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3);
-  outline: none;
-}
-
-.custom-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.custom-header-selects {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.modern-select {
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-  font-size: 0.9rem;
-  color: #333;
-  transition: all 0.2s ease-in-out;
-}
-
-.modern-select:hover {
-  border-color: #aaa;
-  background-color: #fff;
-}
-
-.modern-select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-  background-color: #fff;
-}
-
 /* --- Pulsante “Leggi di più” --- */
 .read-btn {
   background-color: #1d3557;
@@ -418,3 +367,243 @@
 }
 
 
+/* ================================
+   DATEPICKER STILIZZATO MODERNO
+   ================================ */
+.custom-datepicker {
+  border-radius: 14px;
+  border: 1px solid #ccc;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+  background-color: #f9fafb;
+  color: #1d3557;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.custom-datepicker:focus {
+  border-color: #ff7b33;
+  box-shadow: 0 0 0 3px rgba(255, 123, 51, 0.3);
+  outline: none;
+}
+
+/* ================================
+   HEADER DATEPICKER (mese + anno)
+   ================================ */
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem;
+  background: #1d3557;
+  color: white;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.custom-header button {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.custom-header button:hover {
+  color: #ff7b33;
+}
+
+.custom-header-selects {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.custom-month-select{
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #fff;
+  font-size: 0.95rem;
+  color: #1d3557;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.custom-year-select {
+  max-height: calc(6 * 2.4rem); /* 6 voci altezza circa */
+  overflow-y: auto;
+  background-color: #f1faee;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.95rem;
+  color: #1d3557;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Forza scrollbar nel dropdown anno */
+.custom-year-select option {
+  padding: 0.4rem 0.6rem;
+}
+
+.custom-month-select:hover,
+.custom-year-select:hover {
+  background-color: #f1faee;
+}
+
+.custom-month-select:focus,
+.custom-year-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 123, 51, 0.4);
+}
+
+/* ================================
+   CALENDARIO
+   ================================ */
+.react-datepicker {
+  font-family: 'Segoe UI', sans-serif;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.react-datepicker__header {
+  background-color: #1d3557;
+  color: white;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+
+.react-datepicker__current-month {
+  font-weight: 600;
+}
+
+.react-datepicker__day-name,
+.react-datepicker__day {
+  font-size: 0.9rem;
+}
+
+.react-datepicker__day:hover {
+  background-color: #ff7b33;
+  color: white;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #ff7b33;
+  color: white;
+  border-radius: 50%;
+}
+
+.react-datepicker__day--today {
+  font-weight: bold;
+  color: #1d3557;
+}
+
+
+.react-datepicker__navigation--previous:hover,
+.react-datepicker__navigation--next:hover {
+  color: #ff7b33;
+}
+
+/* ================================
+   FOOTER DATEPICKER: Pulsante conferma
+   ================================ */
+.react-datepicker__footer {
+  display: flex;
+  justify-content: center;
+  padding: 0.6rem;
+  background: #f1faee;
+  border-top: 1px solid #ddd;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+
+.datepicker-confirm-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #ff7b33;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.datepicker-confirm-btn:hover {
+  background: #d95a2c;
+  transform: translateY(-1px);
+}
+
+/* ================================
+   NASCONDERE LE FRECCE DI NAVIGAZIONE
+   ================================ */
+.react-datepicker__navigation--previous,
+.react-datepicker__navigation--next {
+    display: none !important;
+    pointer-events: none !important;
+}
+
+/* ================================
+   STILIZZAZIONE DROPDOWN DATEPICKER ANNO
+   ================================ */
+
+/* Altezza del menu anno: mostra 5 anni */
+.custom-year-select {
+  max-height: calc(5 * 2.4rem); /* circa 5 voci altezza */
+  overflow-y: auto;
+  background-color: #f1faee;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.95rem;
+  color: #1d3557;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover sul dropdown anno */
+.custom-year-select:hover {
+  background-color: #ff914d; /* colore arancio soft */
+  color: white;
+}
+
+/* Focus */
+.custom-year-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 145, 77, 0.4);
+}
+
+/* Opzioni del menu anno */
+.custom-year-select option {
+  padding: 0.4rem 0.6rem;
+  background-color: #f1faee;
+  color: #1d3557;
+  border-radius: 4px;
+}
+
+/* Scrollbar personalizzata per il menu anno */
+.custom-year-select::-webkit-scrollbar {
+  width: 6px; /* sottile */
+}
+
+.custom-year-select::-webkit-scrollbar-thumb {
+  background-color: #ff914d;
+  border-radius: 10px;
+}
+
+.custom-year-select::-webkit-scrollbar-track {
+  background-color: #f1faee;
+}
+
+/* Firefox scrollbar */
+.custom-year-select {
+  scrollbar-width: thin;
+  scrollbar-color: #ff914d #f1faee;
+}
