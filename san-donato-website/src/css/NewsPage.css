@@ -348,3 +348,73 @@
     transform: translateY(0);
   }
 }
+
+
+/* --- Riduzione dimensioni card --- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.0rem;
+  width: 100%;
+}
+
+.news-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+}
+
+.news-img-wrapper {
+  height: 140px; /* ridotta da 180px */
+}
+
+.news-card .card-body {
+  padding: 0.8rem 1rem; /* meno spazio interno */
+}
+
+.news-card .card-title {
+  font-size: 1rem; /* più compatto */
+  margin-bottom: 0.4rem;
+}
+
+.news-card .card-subtitle {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.news-card .card-text {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  margin-bottom: 0.8rem;
+}
+
+.read-btn {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.8rem;
+}
+
+/* --- Adattamento responsive --- */
+@media (max-width: 1400px) {
+  .news-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .news-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

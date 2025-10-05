@@ -1,4 +1,7 @@
 DA FARE
+/news
+sistemare la scrollbar dell'anno
+
 sistemare la rotella per i caricamenti
 gestione amministratore CSM
 Finire home (notizie)
@@ -7,3 +10,5 @@ Finire le altre pagine
 FATTE
 - sistemata la view in mobile
 - aggiunto badge "new" alle notizie recenti
+- sistemata route /news 
+- sistemare la lista di news in /news (+ sulla stessa riga, +divisione per pagine)

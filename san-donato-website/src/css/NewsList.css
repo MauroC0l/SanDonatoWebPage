@@ -1,39 +1,40 @@
 .news-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
+  width: 98%;
+  padding: 1rem 0;
 }
 
-/* --- Griglia: 4 per riga su desktop --- */
+/* --- Griglia --- */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 colonne */
-  gap: 1.8rem;
+  grid-template-columns: repeat(4, minmax(240px, 1fr)); /* card più piccole e flessibili */
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: start;
   width: 100%;
 }
 
-/* Responsività: mantieni 4 colonne fino a larghezze inferiori */
+/* Responsività */
 @media (max-width: 1400px) {
   .news-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
   }
 }
 
 @media (max-width: 1200px) {
   .news-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 colonne */
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
   }
 }
 
 @media (max-width: 900px) {
   .news-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 colonne */
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
   }
 }
 
 @media (max-width: 600px) {
   .news-grid {
-    grid-template-columns: 1fr; /* 1 colonna */
+    grid-template-columns: 1fr;
   }
 }
 
@@ -46,6 +47,7 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
+  height: 100%; /* uniforma le altezze */
 }
 
 .news-card:hover {
@@ -56,7 +58,7 @@
 /* Immagine */
 .news-image-wrapper {
   width: 100%;
-  height: 180px;
+  height: 150px; /* ridotta da 180px → 150px */
   overflow: hidden;
 }
 
@@ -74,7 +76,7 @@
 
 /* Contenuto */
 .news-content {
-  padding: 1rem;
+  padding: 0.8rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -82,37 +84,79 @@
 
 .news-title {
   color: #ff6600;
-  font-size: 1.1rem;
+  font-size: 1rem; /* leggermente più piccola */
   font-weight: 700;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 .news-meta {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
 }
 
 .news-excerpt {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #333;
   flex-grow: 1;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .news-btn {
   align-self: flex-start;
   font-weight: 600;
-  padding: 0.45rem 1rem;
+  padding: 0.35rem 0.9rem;
   color: white;
   background: linear-gradient(120deg, #ff6600, #ff8533);
   border: none;
   border-radius: 6px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .news-btn:hover {
   background: linear-gradient(120deg, #ff8533, #ff6600);
   transform: translateY(-2px);
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  gap: 0.5rem;
+}
+
+.page-btn {
+  background: #d0d0d0; /* grigio più scuro */
+  border: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s ease;
+  color: #333;
+}
+
+.page-btn:hover {
+  background: #b0b0b0; /* ancora più scuro al passaggio */
+}
+
+.page-btn.active {
+  background: linear-gradient(120deg, #ff6600, #ff8533);
+  color: white;
+}
+
+.no-news-message {
+  display: flex;                /* attiva flexbox */
+  justify-content: center;      /* centra orizzontalmente */
+  align-items: center;          /* (opzionale) centra verticalmente */
+  width: 100%;
+  padding: 1rem;
+  margin-top: 50px;
+  margin-left: 280px;
+  font-size: 1.2rem;
+  color: #555;
+  font-weight: 500;
 }
