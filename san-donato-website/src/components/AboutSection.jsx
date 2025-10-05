@@ -16,7 +16,7 @@ export default function AboutSection() {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentImageIndex(prev => (prev + 1) % aboutImages.length);
-        }, 30000);
+        }, 6000); // 6 secondi di intervallo
         return () => clearInterval(interval);
     }, [aboutImages.length]);
 

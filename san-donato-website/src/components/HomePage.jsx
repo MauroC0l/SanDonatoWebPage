@@ -14,6 +14,8 @@ export default function HomePage() {
     return (
         <div className="home-wrapper">
             <Container className="section-spacing">
+                <AboutSection /> {/* Informazioni sulla PSD con Carosello */}
+
                 <NewsList news={mockNews} />
             </Container>
         </div>

@@ -40,14 +40,23 @@ export default function NewsList({ news }) {
             </div>
             <div className="news-content">
               <h3 className="news-title">{p.title}</h3>
-              <div className="news-meta">{p.date} — {p.author}</div>
-              <p className="news-excerpt">{p.excerpt}</p>
-              <Button
-                className="news-btn"
-                onClick={() => navigate(`/news/${p.id}`)}
-              >
-                Leggi
-              </Button>
+
+              {/* Subtitle */}
+              {p.subtitle && <div className="news-subtitle">{p.subtitle}</div>}
+
+              {/* Preview invece di excerpt */}
+              <p className="news-excerpt">{p.preview}</p>
+
+              <div className="news-footer">
+                <div className="news-meta">{p.date} — {p.author}</div>
+
+                <Button
+                  className="news-btn"
+                  onClick={() => navigate(`/news/${p.id}`)}
+                >
+                  Leggi
+                </Button>
+              </div>
             </div>
           </article>
         ))}

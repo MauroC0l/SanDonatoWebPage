@@ -24,7 +24,6 @@ export default function MyNavbar() {
     const mainLinks = [
         { to: "/", label: "Home", icon: <FaHome /> },
         { to: "/news", label: "News", icon: <FaNewspaper /> },
-        { to: "/galleria", label: "Galleria", icon: <FaImages /> },
         { to: "/sports", label: "Sport & Attività", icon: <FaCalendarAlt /> },
         { to: "/modulistica-tariffe", label: "Modulistica & Tariffe", icon: <FaFileAlt /> },
         { to: "/iscrizione-rinnovo", label: "Iscrizione", icon: <FaHandshake /> },
@@ -36,7 +35,6 @@ export default function MyNavbar() {
         { to: "/contatti", label: "Contatti", icon: <FaEnvelope /> },
         { to: "/privacy", label: "Privacy", icon: <FaFileAlt /> },
         { to: "/tutela-minori", label: "Tutela dei minori", icon: <FaChild /> },
-        { to: "/safeguarding", label: "Safeguarding", icon: <FaUsers /> },
         { to: "/cinquepermille", label: "5x1000", icon: <FaScroll /> },
         { to: "/contributi-pubblici", label: "Contributi pubblici", icon: <FaScroll /> },
     ];
