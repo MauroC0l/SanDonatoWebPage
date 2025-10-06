@@ -608,38 +608,3 @@
   scrollbar-color: #ff914d #f1faee;
 }
 
-/* Bottone filtri mobile */
-.mobile-filter-btn {
-  margin-bottom: 1rem;
-  width: 120px;
-  background-color: #ff7b33;
-  color: #fff;
-  font-weight: 600;
-  border-radius: 12px;
-  border: none;
-  padding: 0.5rem 1rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  transition: all 0.3s ease;
-}
-
-.mobile-filter-btn:hover {
-  background-color: #d62828;
-  transform: translateY(-1px);
-}
-
-/* Offcanvas personalizzata */
-.news-sidebar-offcanvas .offcanvas-body {
-  padding: 1.5rem;
-}
-
-.news-sidebar-offcanvas .offcanvas-header {
-  background-color: #1d3557;
-  color: #fff;
-}
-
-/* Overlay semitrasparente */
-.offcanvas-backdrop.show {
-  background-color: rgba(0,0,0,0.5);
-}

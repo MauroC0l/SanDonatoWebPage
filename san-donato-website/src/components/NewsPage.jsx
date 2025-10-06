@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Form, Button, Offcanvas } from "react-bootstrap";
+import { Form, Button } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import NewsList from "./NewsList";
 import { getAllPosts } from "../api/API.mjs";
@@ -29,6 +29,7 @@ const formatDate = (isoDate) => {
 
 const cleanText = (text) => {
   if (!text) return "";
+
   const replacements = [
     [/&#8211;/g, ""],
     [/&#038;/g, ""],
@@ -43,6 +44,7 @@ const cleanText = (text) => {
     [/PSD_[^\s]*/g, ""],
     [/5xmille&nbsp;/g, ""]
   ];
+
   return replacements.reduce(
     (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
     text
@@ -61,10 +63,6 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
 
   const [startDate, endDate] = dateRange;
-
-  // Mobile Offcanvas
-  const [showFilters, setShowFilters] = useState(false);
-  const toggleFilters = () => setShowFilters(prev => !prev);
 
   /* Recupero notizie */
   useEffect(() => {
@@ -127,52 +125,53 @@ export default function NewsPage() {
         </div>
       ) : (
         <div className="news-layout">
-          {/* Bottone filtri per mobile */}
-          <Button className="mobile-filter-btn d-lg-none" onClick={toggleFilters}>
-            Filtri
-          </Button>
+          {/* Sidebar */}
+          <aside className="news-sidebar">
+            <h4>Filtri</h4>
+            <Form>
+              <FilterGroup label="Sport" options={sportsList} selected={sportFilter} toggleFilter={toggleFilter} setFilter={setSportFilter} />
+              <FilterGroup label="Pubblicatore" options={authorsList} selected={authorFilter} toggleFilter={toggleFilter} setFilter={setAuthorFilter} />
 
-          {/* Sidebar Offcanvas mobile */}
-          <Offcanvas show={showFilters} onHide={toggleFilters} placement="start" className="news-sidebar-offcanvas">
-            <Offcanvas.Header closeButton>
-              <Offcanvas.Title>Filtri</Offcanvas.Title>
-            </Offcanvas.Header>
-            <Offcanvas.Body>
-              <FilterForm 
-                sportsList={sportsList}
-                authorsList={authorsList}
-                sportFilter={sportFilter}
-                authorFilter={authorFilter}
-                toggleFilter={toggleFilter}
-                setSportFilter={setSportFilter}
-                setAuthorFilter={setAuthorFilter}
-                startDate={startDate}
-                endDate={endDate}
-                setDateRange={setDateRange}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-                handleResetFilters={handleResetFilters}
-              />
-            </Offcanvas.Body>
-          </Offcanvas>
+              {/* Filtro periodo */}
+              <Form.Group className="form-group">
+                <Form.Label className="form-label">Periodo</Form.Label>
+                <DatePicker
+                  selectsRange
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={setDateRange}
+                  className="form-control custom-datepicker"
+                  placeholderText="Seleziona intervallo"
+                  isClearable
+                  renderCustomHeader={({ date, changeYear, changeMonth, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled }) => (
+                    <div className="custom-header">
+                      <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--previous">&lt;</button>
+                      <div className="custom-header-selects">
+                        <select value={date.getMonth()} onChange={({ target }) => changeMonth(Number(target.value))} className="custom-month-select modern-select">
+                          {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                        </select>
+                        <select value={date.getFullYear()} onChange={({ target }) => changeYear(Number(target.value))} className="custom-year-select modern-select">
+                          {years.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                      <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--next">&gt;</button>
+                    </div>
+                  )}
+                />
+              </Form.Group>
 
-          {/* Sidebar desktop */}
-          <aside className="news-sidebar d-none d-lg-block">
-            <FilterForm 
-              sportsList={sportsList}
-              authorsList={authorsList}
-              sportFilter={sportFilter}
-              authorFilter={authorFilter}
-              toggleFilter={toggleFilter}
-              setSportFilter={setSportFilter}
-              setAuthorFilter={setAuthorFilter}
-              startDate={startDate}
-              endDate={endDate}
-              setDateRange={setDateRange}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
-              handleResetFilters={handleResetFilters}
-            />
+              {/* Ordinamento */}
+              <Form.Group className="form-group">
+                <Form.Label className="form-label">Ordina per data</Form.Label>
+                <Form.Select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="form-select">
+                  <option value="desc">Dal più recente</option>
+                  <option value="asc">Dal meno recente</option>
+                </Form.Select>
+              </Form.Group>
+
+              {/* Reset */}
+              <Button className="filter-reset-btn" onClick={handleResetFilters}>Reset Filtri</Button>
+            </Form>
           </aside>
 
           {/* Lista notizie */}
@@ -184,63 +183,6 @@ export default function NewsPage() {
     </section>
   );
 }
-
-/* ==============================
-   Componente filtro completo
-   ============================== */
-const FilterForm = ({
-  sportsList, authorsList,
-  sportFilter, authorFilter,
-  toggleFilter, setSportFilter, setAuthorFilter,
-  startDate, endDate, setDateRange,
-  sortOrder, setSortOrder,
-  handleResetFilters
-}) => (
-  <Form>
-    <FilterGroup label="Sport" options={sportsList} selected={sportFilter} toggleFilter={toggleFilter} setFilter={setSportFilter} />
-    <FilterGroup label="Pubblicatore" options={authorsList} selected={authorFilter} toggleFilter={toggleFilter} setFilter={setAuthorFilter} />
-
-    {/* Filtro periodo */}
-    <Form.Group className="form-group">
-      <Form.Label className="form-label">Periodo</Form.Label>
-      <DatePicker
-        selectsRange
-        startDate={startDate}
-        endDate={endDate}
-        onChange={setDateRange}
-        className="form-control custom-datepicker"
-        placeholderText="Seleziona intervallo"
-        isClearable
-        renderCustomHeader={({ date, changeYear, changeMonth, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled }) => (
-          <div className="custom-header">
-            <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--previous">&lt;</button>
-            <div className="custom-header-selects">
-              <select value={date.getMonth()} onChange={({ target }) => changeMonth(Number(target.value))} className="custom-month-select modern-select">
-                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-              </select>
-              <select value={date.getFullYear()} onChange={({ target }) => changeYear(Number(target.value))} className="custom-year-select modern-select">
-                {years.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-            <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--next">&gt;</button>
-          </div>
-        )}
-      />
-    </Form.Group>
-
-    {/* Ordinamento */}
-    <Form.Group className="form-group">
-      <Form.Label className="form-label">Ordina per data</Form.Label>
-      <Form.Select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="form-select">
-        <option value="desc">Dal più recente</option>
-        <option value="asc">Dal meno recente</option>
-      </Form.Select>
-    </Form.Group>
-
-    {/* Reset */}
-    <Button className="filter-reset-btn" onClick={handleResetFilters}>Reset Filtri</Button>
-  </Form>
-);
 
 /* Componente filtro checkbox */
 const FilterGroup = ({ label, options, selected, toggleFilter, setFilter }) => (
