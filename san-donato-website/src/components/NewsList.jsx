@@ -48,7 +48,10 @@ export default function NewsList({ news }) {
               <p className="news-excerpt">{p.preview}</p>
 
               <div className="news-footer">
-                <div className="news-meta">{p.date} — {p.author}</div>
+                <div className="news-author-date">
+                  <div className="news-author">{p.author}</div>
+                  <div className="news-date">{p.date}</div>
+                </div>
 
                 <Button
                   className="news-btn"
@@ -57,12 +60,12 @@ export default function NewsList({ news }) {
                   Leggi
                 </Button>
               </div>
+
             </div>
           </article>
         ))}
       </div>
 
-      {/* PAGINAZIONE */}
       {totalPages > 1 && (
         <div className="pagination">
           {Array.from({ length: totalPages }, (_, i) => (
@@ -76,6 +79,8 @@ export default function NewsList({ news }) {
           ))}
         </div>
       )}
+
+      
     </div>
   );
 }
