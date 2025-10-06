@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import NewsList from "./NewsList";
-import { getPostsPage } from "../api/API.mjs";
+import { getAllPosts } from "../api/API.mjs";
 import "react-datepicker/dist/react-datepicker.css";
 import "../css/NewsPage.css";
 
@@ -49,7 +49,7 @@ export default function NewsPage() {
 
   const fetchNews = useCallback(async () => {
     setLoading(true);
-    const { posts, totalPages } = await getPostsPage(10, page);
+    const { posts, totalPages } = await getAllPosts(10, page);
     const cleaned = posts.map(post => ({
       ...post,
       date: formatDate(post.date),
