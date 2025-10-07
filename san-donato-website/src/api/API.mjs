@@ -134,3 +134,42 @@ function decodeHTML(html) {
   txt.innerHTML = html;
   return txt.value;
 }
+
+
+/**
+ * 🔹 Recupera automaticamente tutti i post e restituisce le 4 notizie più recenti per ogni categoria di sport
+ * @returns {Promise<Object>} Oggetto con chiavi le categorie e valori array dei 4 post più recenti
+ */
+export async function getLatestPostsByCategory() {
+  try {
+    // Recupera tutti i post
+    const posts = await getAllPosts();
+
+    if (!Array.isArray(posts)) return {};
+
+    // Raggruppa per sport
+    const grouped = posts.reduce((acc, post) => {
+      const category = post.sport || "Altro";
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(post);
+      return acc;
+    }, {});
+
+    // Ordina ciascun gruppo per data decrescente e prendi i primi 4
+    Object.keys(grouped).forEach(category => {
+      grouped[category] = grouped[category]
+        .sort((a, b) => {
+          const dateA = new Date(a.date.split('/').reverse().join('-'));
+          const dateB = new Date(b.date.split('/').reverse().join('-'));
+          return dateB - dateA;
+        })
+        .slice(0, 4);
+    });
+
+    return grouped;
+
+  } catch (error) {
+    console.error("❌ Errore nel recupero delle ultime notizie per categoria:", error);
+    return {};
+  }
+}

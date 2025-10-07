@@ -1,23 +1,66 @@
+import React, { useEffect, useState, useMemo } from "react";
 import { Container } from "react-bootstrap";
 import NewsList from "./NewsList";
 import AboutSection from "./AboutSection";
+import { getLatestPostsByCategory } from "../api/api";
 import "../css/HomePage.css";
 
+
+// Lightweight, memo-friendly homepage that minimizes re-renders
 export default function HomePage() {
-    const mockNews = [
-        { id: 1, title: "Iscrizioni aperte per la scuola calcio 2025", date: "04/10/2025", sport: "Calcio", author: "Staff PSD", image: "immaginiNotizie/scuolaCalcio.jpg", excerpt: "La scuola calcio apre le iscrizioni per tutti i bambini dai 6 ai 12 anni." },
-        { id: 2, title: "Torneo di Pallavolo giovanile", date: "20/09/2025", sport: "Pallavolo", author: "Staff PSD", image: "immaginiNotizie/torneoPallavolo.jpg", excerpt: "Si terrà il torneo di pallavolo giovanile presso la palestra comunale." },
-        { id: 3, title: "Nuovo corso di basket", date: "15/10/2025", sport: "Basket", author: "Staff PSD", image: "immaginiNotizie/corsoBasket.jpg", excerpt: "Iscriviti al nuovo corso di basket per principianti!" },
-        { id: 4, title: "Camp estivo sportivo PSD", date: "05/07/2025", sport: "Multisport", author: "Dirigenza", image: "immaginiNotizie/campoEstivo.jpg", excerpt: "Il camp estivo PSD è aperto a tutti i bambini." },
-    ];
+const [newsByCategory, setNewsByCategory] = useState({});
 
-    return (
-        <div className="home-wrapper">
-            <Container className="section-spacing">
-                <AboutSection /> {/* Informazioni sulla PSD con Carosello */}
 
-                <NewsList news={mockNews} />
-            </Container>
-        </div>
-    );
+useEffect(() => {
+let mounted = true;
+
+
+async function fetchNews() {
+try {
+const grouped = await getLatestPostsByCategory();
+// Order once in a compact, predictable way
+const orderedCategories = ["Altro", "Calcio", "Pallavolo", "Basket", "Minivolley"];
+const sortedGrouped = {};
+
+
+// Use a single pass to preserve order and avoid creating lots of intermediate objects
+for (const cat of orderedCategories) {
+if (grouped?.[cat]?.length) sortedGrouped[cat] = grouped[cat];
+}
+
+
+if (mounted) setNewsByCategory(sortedGrouped);
+} catch (err) {
+// Consider logging to a monitoring service in production
+// console.error('Failed fetching news', err);
+}
+}
+
+
+fetchNews();
+return () => {
+mounted = false; // avoid state updates after unmount
+};
+}, []);
+
+
+// memoize the array of keys so child components only receive stable props
+const categories = useMemo(() => Object.keys(newsByCategory), [newsByCategory]);
+
+
+return (
+<div className="hp-root">
+<Container fluid className="hp-container">
+<AboutSection />
+
+
+{categories.map((category) => (
+<section key={category} className="hp-section">
+<h2 className="hp-title">{category}</h2>
+<NewsList news={newsByCategory[category]} />
+</section>
+))}
+</Container>
+</div>
+);
 }

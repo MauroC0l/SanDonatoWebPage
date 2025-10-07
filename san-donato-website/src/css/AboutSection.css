@@ -1,7 +1,7 @@
 /* --- About Section --- */
 .about-section {
     position: relative;
-    height: clamp(30vh, 50%, 35vh);
+    height: clamp(32vh, 32vw, 32vh);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,6 +10,7 @@
     padding: clamp(1rem, 3vw, 2rem);
     transition: background-image 1s ease-in-out;
 }
+
 
 .about-overlay {
     position: absolute;
@@ -67,5 +68,25 @@
     }
     .about-text {
         font-size: clamp(0.8rem, 3vw, 1rem);
+    }
+}
+
+
+
+
+
+
+/* Media query */
+@media (max-width: 1024px) {
+    .about-section {
+        min-height: 45vh;
+        height: 50vh;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-section {
+        min-height: 40vh;
+        height: 45vh;
     }
 }
