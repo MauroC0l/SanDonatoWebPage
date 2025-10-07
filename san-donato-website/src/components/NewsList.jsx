@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import '../css/NewsList.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import "../css/NewsList.css";
 
 export default function NewsList({ news }) {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const newsPerPage = 12;
 
-  // Se non ci sono news, mostra messaggio centrato orizzontalmente
   if (!news || news.length === 0) {
     return (
       <div className="no-news-message">
@@ -17,34 +16,24 @@ export default function NewsList({ news }) {
     );
   }
 
-  // Calcola pagine
   const totalPages = Math.ceil(news.length / newsPerPage);
-  const indexOfLastNews = currentPage * newsPerPage;
-  const indexOfFirstNews = indexOfLastNews - newsPerPage;
-  const currentNews = news.slice(indexOfFirstNews, indexOfLastNews);
+  const currentNews = news.slice((currentPage - 1) * newsPerPage, currentPage * newsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div className="news-container container">
       <div className="news-grid">
-        {currentNews.map(p => (
+        {currentNews.map((p) => (
           <article key={p.id} className="news-card">
             <div className="news-image-wrapper">
               {p.image && <img src={p.image} alt={p.title} className="news-image" />}
             </div>
             <div className="news-content">
               <h3 className="news-title">{p.title}</h3>
-
-              {/* Subtitle */}
-              {p.subtitle && <div className="news-subtitle">{p.subtitle}</div>}
-
-              {/* Preview invece di excerpt */}
               <p className="news-excerpt">{p.preview}</p>
 
               <div className="news-footer">
@@ -52,15 +41,10 @@ export default function NewsList({ news }) {
                   <div className="news-author">{p.author}</div>
                   <div className="news-date">{p.date}</div>
                 </div>
-
-                <Button
-                  className="news-btn"
-                  onClick={() => navigate(`/news/${p.id}`)}
-                >
+                <Button className="news-btn" onClick={() => navigate(`/news/${p.id}`)}>
                   Leggi
                 </Button>
               </div>
-
             </div>
           </article>
         ))}
@@ -71,7 +55,7 @@ export default function NewsList({ news }) {
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
-              className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+              className={`page-btn ${currentPage === i + 1 ? "active" : ""}`}
               onClick={() => handlePageChange(i + 1)}
             >
               {i + 1}
@@ -79,8 +63,6 @@ export default function NewsList({ news }) {
           ))}
         </div>
       )}
-
-      
     </div>
   );
 }
