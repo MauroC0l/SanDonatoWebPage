@@ -1,64 +1,68 @@
-/* ---- Variables & small reset ---- */
-:root{
---bg-start: #fdfcfb;
---bg-end: #f5f7fa;
---brand: #002b5c;
---accent: #ff6600;
---muted: #777;
---card-radius: 10px;
---container-gap: 0.5rem;
+/* ===========================
+   🌈 Home Page Styles
+   =========================== */
+
+:root {
+  --bg-start: #fdfcfb;
+  --bg-end: #f5f7fa;
+  --brand: #002b5c;
+  --accent: #ff6600;
+  --muted: #777;
+  --card-radius: 10px;
+  --container-gap: clamp(0.5rem, 2vw, 2rem);
 }
 
-
-/* Minimal selector depth for performance */
-.hp-root{
-background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
-font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
-color: #111;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
+.hp-root {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+  font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
+  color: #111;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-
-.hp-container{
-margin: 0 auto;
-padding: 0 var(--container-gap);
-max-width: 1200px; /* keeps lines readable */
+/* Contenitore fluido e centrato */
+.hp-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--container-gap);
 }
 
-
-/* Section compact spacing */
-.hp-section{
-margin: 0;
-padding: 0.4rem 0; /* tighten vertical rhythm */
-scroll-margin-top: 1.5rem; /* better anchor behavior */
-contain: layout; /* improves rendering containment */
+/* Sezioni notizie */
+.hp-section {
+  margin: 0;
+  padding: clamp(0.8rem, 2vw, 2rem) 0;
+  scroll-margin-top: clamp(1rem, 3vw, 2rem);
+  contain: layout;
 }
 
-
-.hp-title{
-text-align: center;
-font-size: clamp(1.5rem, 3.2vw, 2.2rem);
-color: var(--brand);
-font-weight: 700;
-margin: 0.2rem 0 0.35rem;
-line-height: 1.05;
+/* Titoli sezioni */
+.hp-title {
+  text-align: center;
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  color: var(--brand);
+  font-weight: 700;
+  margin: clamp(0.3rem, 1vw, 0.8rem) 0 clamp(0.8rem, 2vw, 1.5rem);
+  line-height: 1.1;
 }
 
-
-.hp-title::after{
-content: "";
-display: block;
-width: 56px;
-height: 3px;
-background: linear-gradient(90deg, var(--accent), #ff8533);
-border-radius: 2px;
-margin: 0.25rem auto 0;
+.hp-title::after {
+  content: "";
+  display: block;
+  width: clamp(40px, 6vw, 70px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #ff8533);
+  border-radius: 2px;
+  margin: 0.3rem auto 0;
 }
 
-
-/* NewsList / cards layout styles: keep minimal specificity so cached rules are reused */
-.news-grid{
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+/* Layout griglia news */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(220px, 25%, 320px), 1fr));
+  gap: clamp(1rem, 2vw, 1.5rem);
+  justify-content: center;
 }

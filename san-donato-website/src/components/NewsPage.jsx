@@ -7,51 +7,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../css/NewsPage.css";
 
 /* ==============================
-   🔧 Funzioni di utilità
-   ============================== */
-const months = [
-  "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
-  "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
-];
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1990 + 1 }, (_, i) => 1990 + i);
-
-const parseDate = (str) => str ? new Date(str) : new Date(0);
-
-const formatDate = (isoDate) => {
-  if (!isoDate) return "";
-  const dateObj = new Date(isoDate);
-  const day = String(dateObj.getDate()).padStart(2, "0");
-  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-  const year = dateObj.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
-const cleanText = (text) => {
-  if (!text) return "";
-
-  const replacements = [
-    [/&#8211;/g, ""],
-    [/&#038;/g, ""],
-    [/&#8217;/g, "'"],
-    [/<\/?p>/g, ""],
-    [/&hellip;/g, ""],
-    [/: \[...\]/g, ""],
-    [/5&#215;1000/g, ""],
-    [/&#8220;/g, ""],
-    [/&#8221;/g, ""],
-    [/\[\]/g, ""],
-    [/PSD_[^\s]*/g, ""],
-    [/5xmille&nbsp;/g, ""]
-  ];
-
-  return replacements.reduce(
-    (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
-    text
-  ).trim();
-};
-
-/* ==============================
    📰 Componente principale
    ============================== */
 export default function NewsPage() {
@@ -69,12 +24,7 @@ export default function NewsPage() {
     const fetchNews = async () => {
       setLoading(true);
       const posts = await getAllPosts();
-      setNews(posts.map(post => ({
-        ...post,
-        date: formatDate(post.date),
-        title: cleanText(post.title),
-        preview: cleanText(post.preview),
-      })));
+      setNews(posts);
       setLoading(false);
     };
     fetchNews();
@@ -88,6 +38,9 @@ export default function NewsPage() {
   const toggleFilter = useCallback((value, setFilter) => {
     setFilter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }, []);
+
+  /* Parsing date helper */
+  const parseDate = (str) => str ? new Date(str) : new Date(0);
 
   /* News filtrate e ordinate */
   const filteredNews = useMemo(() => {
@@ -114,7 +67,6 @@ export default function NewsPage() {
     setSortOrder("desc");
   }, []);
 
-  /* Render */
   return (
     <section className="news-section">
       <h2 className="news-section-title">Notizie della Polisportiva San Paolo</h2>
@@ -143,20 +95,6 @@ export default function NewsPage() {
                   className="form-control custom-datepicker"
                   placeholderText="Seleziona intervallo"
                   isClearable
-                  renderCustomHeader={({ date, changeYear, changeMonth, decreaseMonth, increaseMonth, prevMonthButtonDisabled, nextMonthButtonDisabled }) => (
-                    <div className="custom-header">
-                      <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--previous">&lt;</button>
-                      <div className="custom-header-selects">
-                        <select value={date.getMonth()} onChange={({ target }) => changeMonth(Number(target.value))} className="custom-month-select modern-select">
-                          {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-                        </select>
-                        <select value={date.getFullYear()} onChange={({ target }) => changeYear(Number(target.value))} className="custom-year-select modern-select">
-                          {years.map(y => <option key={y} value={y}>{y}</option>)}
-                        </select>
-                      </div>
-                      <button onClick={increaseMonth} disabled={nextMonthButtonDisabled} className="react-datepicker__navigation react-datepicker__navigation--next">&gt;</button>
-                    </div>
-                  )}
                 />
               </Form.Group>
 

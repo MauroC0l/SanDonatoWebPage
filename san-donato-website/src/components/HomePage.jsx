@@ -5,62 +5,61 @@ import AboutSection from "./AboutSection";
 import { getLatestPostsByCategory } from "../api/api";
 import "../css/HomePage.css";
 
-
-// Lightweight, memo-friendly homepage that minimizes re-renders
 export default function HomePage() {
-const [newsByCategory, setNewsByCategory] = useState({});
+  const [newsByCategory, setNewsByCategory] = useState({});
+  const [loading, setLoading] = useState(true); // 🟠 Stato per il caricamento
 
+  useEffect(() => {
+    let mounted = true;
 
-useEffect(() => {
-let mounted = true;
+    async function fetchNews() {
+      try {
+        const grouped = await getLatestPostsByCategory();
+        const orderedCategories = ["Altro", "Calcio", "Pallavolo", "Basket", "Minivolley"];
+        const sortedGrouped = {};
 
+        for (const cat of orderedCategories) {
+          if (grouped?.[cat]?.length) sortedGrouped[cat] = grouped[cat];
+        }
 
-async function fetchNews() {
-try {
-const grouped = await getLatestPostsByCategory();
-// Order once in a compact, predictable way
-const orderedCategories = ["Altro", "Calcio", "Pallavolo", "Basket", "Minivolley"];
-const sortedGrouped = {};
+        if (mounted) {
+          setNewsByCategory(sortedGrouped);
+          setLoading(false); // ✅ Fine caricamento
+        }
+      } catch (err) {
+        console.error("Errore nel caricamento delle news:", err);
+        if (mounted) setLoading(false);
+      }
+    }
 
+    fetchNews();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-// Use a single pass to preserve order and avoid creating lots of intermediate objects
-for (const cat of orderedCategories) {
-if (grouped?.[cat]?.length) sortedGrouped[cat] = grouped[cat];
-}
+  const categories = useMemo(() => Object.keys(newsByCategory), [newsByCategory]);
 
+  return (
+    <div className="hp-root">
+      {/* Sezione Hero full width */}
+      <AboutSection />
 
-if (mounted) setNewsByCategory(sortedGrouped);
-} catch (err) {
-// Consider logging to a monitoring service in production
-// console.error('Failed fetching news', err);
-}
-}
-
-
-fetchNews();
-return () => {
-mounted = false; // avoid state updates after unmount
-};
-}, []);
-
-
-// memoize the array of keys so child components only receive stable props
-const categories = useMemo(() => Object.keys(newsByCategory), [newsByCategory]);
-
-
-return (
-<div className="hp-root">
-<Container fluid className="hp-container">
-<AboutSection />
-
-
-{categories.map((category) => (
-<section key={category} className="hp-section">
-<h2 className="hp-title">{category}</h2>
-<NewsList news={newsByCategory[category]} />
-</section>
-))}
-</Container>
-</div>
-);
+      {/* 🔄 Loader visibile finché i dati non sono caricati */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <Container fluid className="hp-container">
+          {categories.map((category) => (
+            <section key={category} className="hp-section">
+              <h2 className="hp-title">{category}</h2>
+              <NewsList news={newsByCategory[category]} />
+            </section>
+          ))}
+        </Container>
+      )}
+    </div>
+  );
 }
