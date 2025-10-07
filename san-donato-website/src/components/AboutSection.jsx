@@ -40,7 +40,6 @@ export default function AboutSection() {
                     favorendo aggregazione, socialità e benessere sul territorio.
                 </p>
             </div>
-            <div className="about-wave"></div>
         </section>
     );
 }

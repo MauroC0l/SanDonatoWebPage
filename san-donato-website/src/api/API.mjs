@@ -78,6 +78,7 @@ function normalizePost(post, authorMap) {
   const image = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
   const author = authorMap[post.author] || post._embedded?.author?.[0]?.name || "Staff";
   const date = formatDate(post.date);
+  const link = post.link || ""; // 🔹 nuovo campo aggiunto
 
   return {
     id: post.id,
@@ -88,6 +89,7 @@ function normalizePost(post, authorMap) {
     sport,
     author,
     date,
+    link, 
   };
 }
 

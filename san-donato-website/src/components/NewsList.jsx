@@ -4,9 +4,9 @@ import Button from "react-bootstrap/Button";
 import "../css/NewsList.css";
 
 export default function NewsList({ news }) {
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const newsPerPage = 12;
+  const navigate = useNavigate();
 
   if (!news || news.length === 0) {
     return (
@@ -41,7 +41,10 @@ export default function NewsList({ news }) {
                   <div className="news-author">{p.author}</div>
                   <div className="news-date">{p.date}</div>
                 </div>
-                <Button className="news-btn" onClick={() => navigate(`/news/${p.id}`)}>
+                <Button
+                  className="news-btn"
+                  onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
+                >
                   Leggi
                 </Button>
               </div>

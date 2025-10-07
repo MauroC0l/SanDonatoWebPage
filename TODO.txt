@@ -1,5 +1,4 @@
 DA FARE
-> visualizzare singole notizie
 > pagina iscrizione / rinnovo
 > pagina degli sponsor
 > riscrivere la home dividendo le notizie per sport
@@ -18,3 +17,5 @@ FATTE
 - sistemata route /news 
 - sistemata la lista di news in /news (+ sulla stessa riga, +divisione per pagine)
 - sistemata la scrollbar dell'anno
+- visualizzare singole notizie
+

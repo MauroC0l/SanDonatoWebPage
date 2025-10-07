@@ -10,12 +10,16 @@ Strutura dei component (in ordine per route e per apparizione nella pagina)
 
 - Route /
     - HomePage : suddiviso in:
-            > About: carosello con immagini (definito in Home)
+            > AboutSection: carosello con immagini (definito in Home)
             > NewsList: mostra il component NewsList TODO: deve mostrare le 4 più recenti notizie
 
 - Route /news
-    - News : in cui vengono mostrate tutte le news
-            > inoltre mostra una sidebar con i filtri per sport e per data (nota: le checkbox si aggiornano in base alle variabili 'sport' e 'author' degli oggetti "news")
+    - NewsPage : 
+            > mostra una sidebar con i filtri per sport e per data (nota: le checkbox si aggiornano in base alle variabili 'sport' e 'author' degli oggetti "news")
+            > NewsList: mostra tutte le notizie presenti nel db
+
+- Route /news/:id
+    - NewsDetail: mostra i dettagli relativi alla notizia
 
 - Route /sports
 
