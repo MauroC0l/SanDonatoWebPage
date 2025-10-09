@@ -1,12 +1,15 @@
 DA FARE
-> pagina iscrizione / rinnovo
+> Sistemare pulsante filtri dal telefono 
+
+
+> "Modulistica&tariffe" e "iscrizioni" le farei diventare "iscriviti" e -> ci metterei dentro le info per l'iscrizione e il link "Iscrizione & Rinnovi"
 > pagina degli sponsor
-> riscrivere la home dividendo le notizie per sport
 > nella home aggiungere calendario partite, classifiche delle squadre, risultati della settimana [guardare file inviati]
-> modificare "sport e attivita" in "sport"
+> Aggiornare sezione partite con calendari
+> sistemare gestione immagini
+> Chi siamo… te lo scrivo
 
 
-sistemare la rotella per i caricamenti
 gestione amministratore CSM
 Finire home (notizie)
 Finire le altre pagine
@@ -19,3 +22,9 @@ FATTE
 - sistemata la scrollbar dell'anno
 - visualizzare singole notizie
 
+- "menu" rinominato in "documenti"
+- messi prima i contatti… che si vedano subito
+- Il menu "sport e attività" ridotto a "sport" e ci metterei le squadre e le classifiche ecc
+- modificata "sport e attivita" in "sport"
+- riscritta la home dividendo le notizie per sport
+- sestemata la rotella per i caricamenti

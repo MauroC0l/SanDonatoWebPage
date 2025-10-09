@@ -24,15 +24,14 @@ export default function MyNavbar() {
     const mainLinks = [
         { to: "/", label: "Home", icon: <FaHome /> },
         { to: "/news", label: "News", icon: <FaNewspaper /> },
-        { to: "/sports", label: "Sport & Attività", icon: <FaCalendarAlt /> },
-        { to: "/modulistica-tariffe", label: "Modulistica & Tariffe", icon: <FaFileAlt /> },
-        { to: "/iscrizione-rinnovo", label: "Iscrizione", icon: <FaHandshake /> },
+        { to: "/sports", label: "Sport", icon: <FaCalendarAlt /> },
+        { to: "/iscrizione-rinnovo", label: "Iscriviti", icon: <FaHandshake /> },
         { to: "/sponsor", label: "Sponsor", icon: <FaScroll /> },
         { to: "/chi-siamo", label: "Chi Siamo", icon: <FaUsers /> },
+        { to: "/contatti", label: "Contatti", icon: <FaEnvelope /> },
     ];
 
     const dropdownLinks = [
-        { to: "/contatti", label: "Contatti", icon: <FaEnvelope /> },
         { to: "/privacy", label: "Privacy", icon: <FaFileAlt /> },
         { to: "/tutela-minori", label: "Tutela dei minori", icon: <FaChild /> },
         { to: "/cinquepermille", label: "5x1000", icon: <FaScroll /> },
@@ -67,7 +66,7 @@ export default function MyNavbar() {
                             className="dropdown-toggle"
                             onClick={() => setDropdownOpen(!dropdownOpen)}
                         >
-                            <FaBars /> Menu
+                            <FaBars /> Documenti
                         </button>
 
                         {dropdownOpen && (
