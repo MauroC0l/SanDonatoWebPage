@@ -1,27 +1,25 @@
 /* ---------------------------------------
-   SPONSOR PAGE - FADE CAROUSEL MINIMAL
+   SPONSOR PAGE - FLUID FADE CAROUSEL
 --------------------------------------- */
 
 .sponsor-page {
   background-color: #fff;
   min-height: 60vh;
-  padding: 2rem 1rem;
+  padding: clamp(1rem, 3vw, 3rem);
   font-family: "Inter", "Poppins", sans-serif;
   color: #111;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* centra titolo e carosello orizzontalmente */
+  justify-content: center; /* centra verticalmente tutto */
+  gap: clamp(1.5rem, 4vw, 4rem); /* spazio dinamico tra titolo e carosello */
 }
 
 .page-title {
   text-align: center;
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 8rem; 
-  margin-top: -8rem;
   background: linear-gradient(90deg, #0077ff, #00c4b4);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -30,11 +28,11 @@
 /* -------- CAROUSEL -------- */
 .sponsor-carousel {
   position: relative;
-  width: 550px;
-  height: 220px;
   display: flex;
+  align-items: center; /* centra verticalmente immagine e frecce */
   justify-content: center;
-  align-items: center;
+  width: clamp(260px, 60vw, 700px); /* fluido: minimo 260px, max 700px */
+  aspect-ratio: 5 / 2; /* mantiene proporzione immagine */
 }
 
 .sponsor-slide {
@@ -48,10 +46,12 @@
 }
 
 .sponsor-image {
-  width: 420px; /* 🔹 Immagine leggermente più grande */
+  width: clamp(150px, 65%, 500px);
   height: auto;
   object-fit: contain;
   transition: transform 0.3s ease, filter 0.3s ease;
+  margin: 0 auto;
+  display: block;
 }
 
 .sponsor-image:hover {
@@ -64,86 +64,64 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 4.5rem; /* 🔹 Frecce più grandi */
+  font-size: clamp(1.8rem, 4vw, 4rem);
   color: #0077ff;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.2s ease, color 0.2s ease;
-
-  background-color: #fff;
+  border: none;
+  background: none;
+  padding: 0;
+  line-height: 1;
+  transition: transform 0.25s ease, color 0.25s ease;
+  outline: none;
 }
 
 .arrow:hover {
-  transform: translateY(-50%) scale(1.2); /* leggero ingrandimento on hover */
-  color: #00c4b4; /* colore hover */
-  border-color: #fff;
+  transform: translateY(-50%) scale(1.15);
+  color: #00c4b4;
 }
-
 
 .arrow:focus,
 .arrow:active {
-  border: none;
-  outline: none;
   color: #00c4b4;
   filter: drop-shadow(0 0 2px #fff);
 }
 
-
+/* -------- POSIZIONAMENTO FRECCE -------- */
 .arrow-left {
-  left: -200px;
+  left: clamp(0.5rem, 2vw, 2rem);
 }
 
 .arrow-right {
-  right: -200px;
+  right: clamp(0.5rem, 2vw, 2rem);
 }
 
 /* -------- RESPONSIVE -------- */
 @media (max-width: 768px) {
   .sponsor-carousel {
-    width: 400px;
-    height: 180px;
+    width: 85%;
   }
 
   .sponsor-image {
-    width: 320px;
-  }
-
-  .arrow {
-    font-size: 2rem;
-  }
-
-  .arrow-left {
-    left: -30px;
-  }
-
-  .arrow-right {
-    right: -30px;
+    width: 70%;
   }
 }
 
 @media (max-width: 480px) {
   .sponsor-carousel {
-    width: 280px;
-    height: 130px;
+    width: 90%;
+    aspect-ratio: 4 / 3; /* più alto per telefoni */
   }
 
   .sponsor-image {
-    width: 220px;
+    width: 75%;
   }
 
   .arrow {
-    font-size: 1.7rem;
-  }
-
-  .arrow-left {
-    left: -25px;
-  }
-
-  .arrow-right {
-    right: -25px;
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
   }
 
   .page-title {
-    font-size: 1.8rem;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
   }
 }
