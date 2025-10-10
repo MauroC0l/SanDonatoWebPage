@@ -1,0 +1,149 @@
+/* ---------------------------------------
+   SPONSOR PAGE - FADE CAROUSEL MINIMAL
+--------------------------------------- */
+
+.sponsor-page {
+  background-color: #fff;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+  font-family: "Inter", "Poppins", sans-serif;
+  color: #111;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8rem; 
+  margin-top: -8rem;
+  background: linear-gradient(90deg, #0077ff, #00c4b4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* -------- CAROUSEL -------- */
+.sponsor-carousel {
+  position: relative;
+  width: 550px;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sponsor-slide {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.sponsor-slide.active {
+  opacity: 1;
+}
+
+.sponsor-image {
+  width: 420px; /* 🔹 Immagine leggermente più grande */
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.sponsor-image:hover {
+  transform: scale(1.08);
+  filter: brightness(1.05);
+}
+
+/* -------- FRECCE MINIMAL -------- */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 4.5rem; /* 🔹 Frecce più grandi */
+  color: #0077ff;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, color 0.2s ease;
+
+  background-color: #fff;
+}
+
+.arrow:hover {
+  transform: translateY(-50%) scale(1.2); /* leggero ingrandimento on hover */
+  color: #00c4b4; /* colore hover */
+  border-color: #fff;
+}
+
+
+.arrow:focus,
+.arrow:active {
+  border: none;
+  outline: none;
+  color: #00c4b4;
+  filter: drop-shadow(0 0 2px #fff);
+}
+
+
+.arrow-left {
+  left: -200px;
+}
+
+.arrow-right {
+  right: -200px;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 768px) {
+  .sponsor-carousel {
+    width: 400px;
+    height: 180px;
+  }
+
+  .sponsor-image {
+    width: 320px;
+  }
+
+  .arrow {
+    font-size: 2rem;
+  }
+
+  .arrow-left {
+    left: -30px;
+  }
+
+  .arrow-right {
+    right: -30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sponsor-carousel {
+    width: 280px;
+    height: 130px;
+  }
+
+  .sponsor-image {
+    width: 220px;
+  }
+
+  .arrow {
+    font-size: 1.7rem;
+  }
+
+  .arrow-left {
+    left: -25px;
+  }
+
+  .arrow-right {
+    right: -25px;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+}

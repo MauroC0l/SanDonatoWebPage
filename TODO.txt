@@ -1,8 +1,5 @@
 DA FARE
-> Sistemare pulsante filtri dal telefono 
-
-
-> "Modulistica&tariffe" e "iscrizioni" le farei diventare "iscriviti" e -> ci metterei dentro le info per l'iscrizione e il link "Iscrizione & Rinnovi"
+> ci metterei dentro le info per l'iscrizione e il link "Iscrizione & Rinnovi"
 > pagina degli sponsor
 > nella home aggiungere calendario partite, classifiche delle squadre, risultati della settimana [guardare file inviati]
 > Aggiornare sezione partite con calendari
@@ -28,3 +25,5 @@ FATTE
 - modificata "sport e attivita" in "sport"
 - riscritta la home dividendo le notizie per sport
 - sestemata la rotella per i caricamenti
+- sistemato pulsante filtri dal telefono 
+- "Modulistica&tariffe" e "iscrizioni" le diventato "iscriviti" 
