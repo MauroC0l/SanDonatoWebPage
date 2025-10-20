@@ -10,6 +10,9 @@ DA FARE
 > Chi siamo… te lo scrivo
 
 
+> far si che le misure della home page scalino insieme e topHeader, heroSection e aboutSection occupino sempre tutta la prima schermata
+> sistemare la lingua e ordinamento dati nel datapicker
+
 gestione amministratore CSM
 Finire home (notizie)
 Finire le altre pagine

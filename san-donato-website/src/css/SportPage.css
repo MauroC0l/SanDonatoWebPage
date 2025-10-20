@@ -1,0 +1,174 @@
+:root {
+  --brand: #002b5c;
+  --accent: #ff6600;
+  --accent-hover: #ff8533;
+  --bg-light: #f5f7fa;
+  --shadow-light: rgba(0, 0, 0, 0.08);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --radius: 16px; /* arrotondamento maggiore */
+  --font-main: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
+}
+
+/* ===== CONTAINER PRINCIPALE ===== */
+.sportPageContainer {
+  background: linear-gradient(180deg, #fdfcfb, var(--bg-light));
+  min-height: 100vh;
+  padding: 1.5rem;
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--brand);
+  background: linear-gradient(90deg, rgba(255, 102, 0, 0.15), rgba(0, 43, 92, 0.1));
+  border-radius: var(--radius);
+  padding: 0.8rem 2rem;
+  box-shadow: 0 4px 20px var(--shadow-light);
+  margin-bottom: 2rem;
+  position: relative;
+}
+.header::after {
+  content: "";
+  position: absolute;
+  bottom: -0.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 2px;
+}
+
+/* ===== CALENDARIO ===== */
+.calendarWrapper {
+  width: 100%;
+  max-width: 1300px;
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 5px 20px var(--shadow-medium);
+}
+
+/* ===== TOOLBAR ===== */
+.rbc-toolbar-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  background: var(--bg-light);
+  padding: 0.8rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2.5px 10px var(--shadow-light);
+}
+.toolbar-month {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--brand);
+}
+.toolbar-buttons button {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  margin: 0 0.15rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.toolbar-buttons button:hover {
+  transform: translateY(-1.5px);
+  background: linear-gradient(135deg, var(--accent-hover), #ffa366);
+}
+.toolbar-buttons .active-view {
+  background: linear-gradient(135deg, #002b5c, #1d3557);
+}
+
+/* ===== TESTO CALENDARIO ===== */
+.rbc-calendar,
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  color: var(--brand);
+  font-size: 0.95rem;
+}
+.rbc-header,
+.rbc-time-header,
+.rbc-agenda-table th {
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.rbc-date-cell {
+  color: var(--brand);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+/* ===== EVENTI ===== */
+.rbc-event {
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.2s ease;
+  padding: 0.3rem 0.6rem;
+  margin: 0 0 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.rbc-event:hover {
+  white-space: normal;
+  overflow: visible;
+  z-index: 50;
+}
+.rbc-month-view .rbc-event:hover {
+  transform: scale(1.06);
+  box-shadow: 0 3px 10px var(--shadow-medium), 0 0 5px var(--accent-hover);
+}
+.rbc-time-view:not(.rbc-day-view) .rbc-event:hover {
+  transform: scale(1.01);
+  box-shadow: 0 5px 15px var(--shadow-medium), 0 0 8px rgba(255, 102, 0, 0.3);
+}
+.rbc-day-view .rbc-event:hover {
+  transform: scale(1.01);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(255, 102, 0, 0.35);
+}
+.rbc-event-content {
+  padding-right: 0 !important;
+}
+
+.rbc-allday-cell {
+  display: none !important;
+}
+
+
+/* ===== TOOLTIP ===== */
+.event-tooltip-click {
+  animation: fadeIn 0.15s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 640px) {
+  .rbc-toolbar-custom {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .toolbar-buttons button {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.8rem;
+  }
+}

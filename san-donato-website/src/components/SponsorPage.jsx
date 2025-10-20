@@ -68,6 +68,10 @@ export default function SponsorPage() {
         <button className="arrow arrow-right" onClick={handleNext}>
           &#8250;
         </button>
+
+        <button className="arrow arrow-left" onClick={handlePrev}>
+          &#8249;
+        </button>
       </div>
     </div>
   );
