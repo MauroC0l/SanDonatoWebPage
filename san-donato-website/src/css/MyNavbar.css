@@ -1,170 +1,221 @@
 /* --- MyNavbar.css --- */
 
-/* Navbar base */
+/* 1. Base Reset & Variabili */
+:root {
+  --primary-color: #002b5c;
+  --accent-color: #ff6600;
+  --text-white: #ffffff;
+  --nav-height: 70px;
+}
+
+/* Navbar Container Principale */
 .navbar {
-    background: #002b5c;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    padding: 0.8rem 2rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    opacity: 0;
-    animation: fadeDown 0.8s ease forwards;
-    animation-delay: 0.2s;
+  background: var(--primary-color);
+  color: var(--text-white);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-/* Layout principale */
 .navbar-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    width: 100%;
+  display: flex;
+  justify-content: space-between; /* Spazia logo e menu */
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1.5rem;
 }
 
-/* Collegamenti */
+/* Logo (Opzionale ma consigliato per mobile) */
+.navbar-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-white);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* 2. Menu Desktop (Default) */
 .navbar-nav {
-    display: flex;
-    align-items: center;
-    gap: clamp(0.5rem, 2vw, 1rem);
-    flex-wrap: wrap;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
 }
 
 .nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    font-size: clamp(0.85rem, 1.2vw, 1rem);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent; /* Reset per button */
 }
 
 .nav-link:hover {
-    background: rgba(255,255,255,0.15);
-    color: #ff6600;
-    transform: translateY(-2px);
+  background: rgba(255,255,255,0.1);
+  color: var(--accent-color);
 }
 
 .nav-link.active {
-    font-weight: 600;
-    border-bottom: 2px solid #ff6600;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--accent-color);
+  font-weight: 700;
 }
 
-/* Dropdown */
+/* Icona Hamburger (nascosta su desktop) */
+.mobile-menu-icon {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: white;
+}
+
+/* 3. Dropdown Styles */
 .dropdown {
-    position: relative;
+  position: relative;
 }
 
 .dropdown-toggle {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    font-size: clamp(0.85rem, 1vw, 1rem);
+  width: 100%;
+  justify-content: flex-start; /* Allinea a sinistra su mobile */
 }
 
-.dropdown-toggle:hover {
-    background: rgba(255,255,255,0.25);
-    color: #ff6600;
-}
-
-/* Menu a discesa */
 .dropdown-menu {
-    position: absolute;
-    top: 110%;
-    right: 0;
-    background: white;
-    color: black;
-    min-width: 180px;
-    border-radius: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    padding: 0.5rem 0;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.25s ease;
+  position: absolute;
+  top: 120%; /* Spazio sotto il bottone */
+  right: 0;
+  background: white;
+  min-width: 200px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+  z-index: 101;
 }
 
 .dropdown-menu.show {
-    opacity: 1;
-    transform: translateY(0);
+  display: flex;
+  animation: slideInDown 0.3s ease;
 }
 
 .dropdown-item {
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-    color: #222;
-    border-radius: 4px;
+  padding: 0.8rem 1rem;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 0.9rem;
 }
 
 .dropdown-item:hover {
-    background: #f8f8f8;
-    color: #ff6600;
+  background: #f0f0f0;
+  color: var(--accent-color);
 }
 
-/* Animazione */
-@keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Freccia animata nel dropdown */
+.arrow {
+  margin-left: auto;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+.arrow.rotate {
+  transform: rotate(180deg);
 }
 
-/* --- RESPONSIVE --- */
 
-/* Tablet */
-@media (max-width: 1024px) {
-    .navbar-nav {
-        gap: 0.5rem;
-    }
+/* =========================================
+   MOBILE RESPONSIVENESS (Max 960px)
+   ========================================= */
+@media screen and (max-width: 960px) {
+  
+  /* Mostra l'icona hamburger */
+  .mobile-menu-icon {
+    display: block;
+  }
+
+  /* Trasforma la nav in un pannello verticale */
+  .navbar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Allinea tutto a sinistra */
+    width: 100%;
+    position: absolute;
+    top: var(--nav-height); /* Appare sotto la barra */
+    left: -100%; /* Nascondi fuori schermo a sinistra */
+    background: var(--primary-color);
+    padding: 1rem 0;
+    transition: all 0.5s ease;
+    opacity: 0;
+    height: calc(100vh - var(--nav-height)); /* Tutta l'altezza dello schermo */
+    overflow-y: auto; /* Permetti lo scroll se il menu è lungo */
+    box-shadow: inset 0 10px 10px -10px rgba(0,0,0,0.5);
+  }
+
+  /* Quando il menu è aperto */
+  .navbar-nav.active {
+    left: 0;
+    opacity: 1;
+  }
+
+  /* Stile dei link su mobile */
+  .nav-link {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0;
+  }
+
+  .nav-link:hover {
+    background: rgba(255,255,255,0.05);
+    transform: none; /* Rimuovi animazioni desktop */
+  }
+
+  /* Gestione Dropdown su Mobile */
+  .dropdown {
+    width: 100%;
+  }
+
+  .dropdown-menu {
+    position: static; /* Non più absolute, spinge il contenuto sotto */
+    background: rgba(0,0,0,0.2); /* Sfondo scuro integrato */
+    box-shadow: none;
+    width: 100%;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .dropdown-item {
+    color: rgba(255,255,255,0.8);
+    padding-left: 3rem; /* Indenta i sotto-menu */
+  }
+
+  .dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
 }
 
-/* Smartphone */
-@media (max-width: 768px) {
-    .navbar {
-        padding: 0.5rem 1rem;
-    }
-
-    /* Mostra solo i primi 3 link */
-    .nav-link[data-index="3"],
-    .nav-link[data-index="4"],
-    .nav-link[data-index="5"],
-    .nav-link[data-index="6"],
-    .nav-link[data-index="7"] {
-        display: none;
-    }
-
-    .dropdown-toggle {
-        margin-left: auto;
-    }
-
-    .navbar-nav {
-        justify-content: space-between;
-        width: 100%;
-    }
-}
-
-/* Schermi molto piccoli */
-@media (max-width: 480px) {
-    .nav-link span {
-        display: none; /* Mostra solo icone, per massima compattezza */
-    }
-
-    .nav-link {
-        padding: 0.4rem;
-        font-size: 1rem;
-    }
-
-    .dropdown-toggle {
-        padding: 0.4rem 0.6rem;
-    }
+/* Animazioni */
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
