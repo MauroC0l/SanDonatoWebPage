@@ -1,6 +1,5 @@
 /* --- MyNavbar.css --- */
 
-/* 1. Base Reset & Variabili */
 :root {
   --primary-color: #002b5c;
   --accent-color: #ff6600;
@@ -8,7 +7,7 @@
   --nav-height: 70px;
 }
 
-/* Navbar Container Principale */
+/* Navbar Base */
 .navbar {
   background: var(--primary-color);
   color: var(--text-white);
@@ -25,49 +24,49 @@
 
 .navbar-container {
   display: flex;
-  justify-content: space-between; /* Spazia logo e menu */
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* Allargato per far stare più pulsanti */
   padding: 0 1.5rem;
 }
 
-/* Logo (Opzionale ma consigliato per mobile) */
+/* Logo */
 .navbar-logo {
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-white);
   text-transform: uppercase;
   letter-spacing: 1px;
+  white-space: nowrap; /* Evita che il logo vada a capo */
 }
 
-/* 2. Menu Desktop (Default) */
+/* Menu Desktop */
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem; /* Ridotto il gap per far stare tutto */
   list-style: none;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem; /* Padding ridotto leggermente */
   color: rgba(255,255,255,0.9);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.3s ease;
-  font-size: 0.95rem;
+  font-size: 0.85rem; /* Font leggermente più piccolo per desktop */
   font-weight: 500;
-  cursor: pointer;
-  border: none;
-  background: transparent; /* Reset per button */
+  white-space: nowrap; /* Impedisce al testo dei bottoni di andare a capo */
 }
 
 .nav-link:hover {
   background: rgba(255,255,255,0.1);
   color: var(--accent-color);
+  transform: translateY(-2px);
 }
 
 .nav-link.active {
@@ -76,7 +75,7 @@
   font-weight: 700;
 }
 
-/* Icona Hamburger (nascosta su desktop) */
+/* Icona Hamburger (nascosta su schermi grandi) */
 .mobile-menu-icon {
   display: none;
   font-size: 1.8rem;
@@ -84,138 +83,48 @@
   color: white;
 }
 
-/* 3. Dropdown Styles */
-.dropdown {
-  position: relative;
-}
-
-.dropdown-toggle {
-  width: 100%;
-  justify-content: flex-start; /* Allinea a sinistra su mobile */
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 120%; /* Spazio sotto il bottone */
-  right: 0;
-  background: white;
-  min-width: 200px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  padding: 0.5rem;
-  display: none;
-  flex-direction: column;
-  z-index: 101;
-}
-
-.dropdown-menu.show {
-  display: flex;
-  animation: slideInDown 0.3s ease;
-}
-
-.dropdown-item {
-  padding: 0.8rem 1rem;
-  color: #333;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  border-radius: 8px;
-  transition: background 0.2s;
-  font-size: 0.9rem;
-}
-
-.dropdown-item:hover {
-  background: #f0f0f0;
-  color: var(--accent-color);
-}
-
-/* Freccia animata nel dropdown */
-.arrow {
-  margin-left: auto;
-  font-size: 0.8rem;
-  transition: transform 0.3s ease;
-}
-.arrow.rotate {
-  transform: rotate(180deg);
-}
-
-
 /* =========================================
-   MOBILE RESPONSIVENESS (Max 960px)
+   RESPONSIVE (Mobile & Tablet)
+   Trigger a 1200px perché ci sono tanti pulsanti
    ========================================= */
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 1200px) {
   
-  /* Mostra l'icona hamburger */
   .mobile-menu-icon {
     display: block;
   }
 
-  /* Trasforma la nav in un pannello verticale */
   .navbar-nav {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Allinea tutto a sinistra */
+    align-items: flex-start;
     width: 100%;
     position: absolute;
-    top: var(--nav-height); /* Appare sotto la barra */
-    left: -100%; /* Nascondi fuori schermo a sinistra */
+    top: var(--nav-height);
+    left: -100%; /* Nascosto a sinistra */
     background: var(--primary-color);
-    padding: 1rem 0;
-    transition: all 0.5s ease;
+    padding: 1rem 0 2rem 0;
+    transition: all 0.4s ease-in-out;
     opacity: 0;
-    height: calc(100vh - var(--nav-height)); /* Tutta l'altezza dello schermo */
-    overflow-y: auto; /* Permetti lo scroll se il menu è lungo */
+    height: calc(100vh - var(--nav-height));
+    overflow-y: auto; /* Scrollabile se non ci sta nello schermo */
     box-shadow: inset 0 10px 10px -10px rgba(0,0,0,0.5);
   }
 
-  /* Quando il menu è aperto */
   .navbar-nav.active {
     left: 0;
     opacity: 1;
   }
 
-  /* Stile dei link su mobile */
   .nav-link {
     width: 100%;
     padding: 1.2rem 2rem;
-    font-size: 1.1rem;
+    font-size: 1.1rem; /* Font più grande su mobile per leggibilità */
     border-bottom: 1px solid rgba(255,255,255,0.05);
     border-radius: 0;
+    transform: none !important; /* Disabilita animazione hover su touch */
   }
 
   .nav-link:hover {
     background: rgba(255,255,255,0.05);
-    transform: none; /* Rimuovi animazioni desktop */
   }
-
-  /* Gestione Dropdown su Mobile */
-  .dropdown {
-    width: 100%;
-  }
-
-  .dropdown-menu {
-    position: static; /* Non più absolute, spinge il contenuto sotto */
-    background: rgba(0,0,0,0.2); /* Sfondo scuro integrato */
-    box-shadow: none;
-    width: 100%;
-    border-radius: 0;
-    padding: 0;
-  }
-
-  .dropdown-item {
-    color: rgba(255,255,255,0.8);
-    padding-left: 3rem; /* Indenta i sotto-menu */
-  }
-
-  .dropdown-item:hover {
-    background: rgba(255,255,255,0.1);
-    color: white;
-  }
-}
-
-/* Animazioni */
-@keyframes slideInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
