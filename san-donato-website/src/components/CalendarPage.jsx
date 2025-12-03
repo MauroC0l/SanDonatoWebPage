@@ -71,7 +71,8 @@ const IconCalendar = () => <svg width="20" height="20" fill="none" stroke="curre
 const IconClock = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const IconCheck = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
-const IconX = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+const IconFilter = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>;
 
 // --- COMPONENTI UI ---
 
@@ -91,12 +92,13 @@ const EventPill = ({ event, onClick }) => {
       onClick={(e) => { e.stopPropagation(); onClick(event); }}
       className="cp-event-pill"
       style={{ 
-        backgroundColor: `var(--cp-cat-${event.cssVar}-bg)`,
-        color: `var(--cp-cat-${event.cssVar}-text)`,
-        borderLeftColor: `var(--cp-cat-${event.cssVar}-text)`
+        '--pill-bg': `var(--cp-cat-${event.cssVar}-bg)`,
+        '--pill-text': `var(--cp-cat-${event.cssVar}-text)`,
+        '--pill-dot': `var(--cp-cat-${event.cssVar}-dot)`
       }}
+      title={event.title}
     >
-      {event.title}
+      <span className="cp-pill-text">{event.title}</span>
     </div>
   );
 };
@@ -107,6 +109,7 @@ export default function ModernCalendarPage() {
   const [activeFilters, setActiveFilters] = useState(Object.keys(CATEGORIES));
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("month");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => { setEvents(generateMockEvents()); }, []);
 
@@ -165,70 +168,85 @@ export default function ModernCalendarPage() {
 
       <div className="cp-main-grid">
         
-        {/* SIDEBAR */}
-        <aside className="cp-sidebar">
-          <div className="cp-card">
-            <h3 className="cp-card-title">Calendario Sport</h3>
-            <p className="cp-card-subtitle">Stagione 2025/2026</p>
-            
-            <div className="cp-stat-box">
-               <div className="cp-stat-icon">🏆</div>
-               <div>
-                 <div className="cp-stat-value">{events.length}</div>
-                 <div className="cp-stat-label">Match Totali</div>
-               </div>
-            </div>
-            <button className="cp-btn-primary">
-              <span style={{ fontSize: '1.2rem', lineHeight: 0 }}>+</span> Nuovo Evento
-            </button>
-          </div>
+        {/* SIDEBAR (Drawer su mobile) */}
+        <>
+            {isMobileSidebarOpen && <div className="cp-backdrop" onClick={() => setIsMobileSidebarOpen(false)} />}
+            <aside className={`cp-sidebar ${isMobileSidebarOpen ? 'cp-mobile-open' : ''}`}>
+                <div className="cp-mobile-drag-handle"></div>
+                <div className="cp-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h3 className="cp-card-title">Calendario Sport</h3>
+                        {/* Chiudi solo su mobile se necessario */}
+                        <button className="cp-btn-close-mobile" onClick={() => setIsMobileSidebarOpen(false)}><IconX /></button>
+                    </div>
+                    <p className="cp-card-subtitle">Stagione 2025/2026</p>
+                    
+                    <div className="cp-stat-box">
+                    <div className="cp-stat-icon">🏆</div>
+                    <div>
+                        <div className="cp-stat-value">{events.length}</div>
+                        <div className="cp-stat-label">Match Totali</div>
+                    </div>
+                    </div>
+                    <button className="cp-btn-primary">
+                    <span style={{ fontSize: '1.2rem', lineHeight: 0 }}>+</span> Nuovo Evento
+                    </button>
+                </div>
 
-          <div className="cp-card" style={{ flex: 1 }}>
-            <div className="cp-filter-header">
-               <span className="cp-filter-title">Categorie</span>
-               <span className="cp-filter-count">{filteredEvents.length}</span>
-            </div>
-            <div>
-              {Object.entries(CATEGORIES).map(([key, value]) => (
-                <FilterToggle 
-                  key={key} 
-                  label={value.id} 
-                  cssVar={value.cssVar} 
-                  checked={activeFilters.includes(key)} 
-                  onChange={() => toggleFilter(key)}
-                />
-              ))}
-            </div>
-          </div>
-          
-          <div className="cp-info-box">
-            <div className="cp-info-label">Prossimo Match</div>
-            {events.length > 0 && (
-                <>
-                    <div className="cp-info-match">{events[0].title}</div>
-                    <div className="cp-info-date">{formatDate(events[0].start)}</div>
-                </>
-            )}
-          </div>
-        </aside>
+                <div className="cp-card" style={{ flex: 1 }}>
+                    <div className="cp-filter-header">
+                    <span className="cp-filter-title">Categorie</span>
+                    <span className="cp-filter-count">{filteredEvents.length}</span>
+                    </div>
+                    <div>
+                    {Object.entries(CATEGORIES).map(([key, value]) => (
+                        <FilterToggle 
+                        key={key} 
+                        label={value.id} 
+                        cssVar={value.cssVar} 
+                        checked={activeFilters.includes(key)} 
+                        onChange={() => toggleFilter(key)}
+                        />
+                    ))}
+                    </div>
+                </div>
+                
+                <div className="cp-info-box">
+                    <div className="cp-info-label">Prossimo Match</div>
+                    {events.length > 0 && (
+                        <>
+                            <div className="cp-info-match">{events[0].title}</div>
+                            <div className="cp-info-date">{formatDate(events[0].start)}</div>
+                        </>
+                    )}
+                </div>
+            </aside>
+        </>
 
         {/* MAIN AREA */}
         <main className="cp-calendar-wrapper">
             <div className="cp-toolbar">
-              <div className="cp-toolbar-title">
-                <h2>{view === 'month' ? `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Agenda'}</h2>
-                <p>Gestisci e visualizza tutti i match in programma</p>
+              <div className="cp-toolbar-header-row">
+                 <div className="cp-toolbar-title">
+                    <h2>{view === 'month' ? `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Agenda'}</h2>
+                 </div>
+                 {/* Mobile Filter Button */}
+                 <button className="cp-btn-mobile-filter" onClick={() => setIsMobileSidebarOpen(true)}>
+                    <IconFilter />
+                 </button>
               </div>
 
-              <div className="cp-nav-controls">
-                <button onClick={() => handleNavigate("PREV")} className="cp-btn-icon"><IconChevronLeft /></button>
-                <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Oggi</button>
-                <button onClick={() => handleNavigate("NEXT")} className="cp-btn-icon"><IconChevronRight /></button>
-              </div>
+              <div className="cp-toolbar-actions-row">
+                  <div className="cp-nav-controls">
+                    <button onClick={() => handleNavigate("PREV")} className="cp-btn-icon"><IconChevronLeft /></button>
+                    <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Oggi</button>
+                    <button onClick={() => handleNavigate("NEXT")} className="cp-btn-icon"><IconChevronRight /></button>
+                  </div>
 
-              <div className="cp-view-controls">
-                <button onClick={() => setView('month')} className={`cp-btn-view ${view === 'month' ? 'cp-active' : ''}`}>Mese</button>
-                <button onClick={() => setView('list')} className={`cp-btn-view ${view === 'list' ? 'cp-active' : ''}`}>Lista</button>
+                  <div className="cp-view-controls">
+                    <button onClick={() => setView('month')} className={`cp-btn-view ${view === 'month' ? 'cp-active' : ''}`}>Mese</button>
+                    <button onClick={() => setView('list')} className={`cp-btn-view ${view === 'list' ? 'cp-active' : ''}`}>Lista</button>
+                  </div>
               </div>
             </div>
 
@@ -245,7 +263,7 @@ export default function ModernCalendarPage() {
                                 return (
                                     <div key={idx} className={`cp-day-cell ${dayObj.isCurrentMonth ? 'cp-current-month' : 'cp-other-month'} ${isToday ? 'cp-today' : ''}`}>
                                         <div className="cp-day-number">{dayObj.date.getDate()}</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        <div className="cp-events-container">
                                             {dayEvents.map(ev => <EventPill key={ev.id} event={ev} onClick={setSelectedEvent} />)}
                                         </div>
                                     </div>
@@ -256,9 +274,9 @@ export default function ModernCalendarPage() {
                 )}
 
                 {view === 'list' && (
-                    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <div className="cp-list-container">
                         {filteredEvents.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--cp-text-muted)' }}>Nessun evento trovato.</div>
+                            <div className="cp-empty-state">Nessun evento trovato.</div>
                         ) : (
                             filteredEvents.map(ev => (
                                 <div key={ev.id} onClick={() => setSelectedEvent(ev)} className="cp-list-view-item">
@@ -266,25 +284,25 @@ export default function ModernCalendarPage() {
                                         backgroundColor: `var(--cp-cat-${ev.cssVar}-bg)`, 
                                         color: `var(--cp-cat-${ev.cssVar}-text)` 
                                     }}>
-                                        <span className="cp-date-month" style={{ color: `var(--cp-cat-${ev.cssVar}-text)` }}>{MONTH_NAMES[ev.start.getMonth()].substring(0,3)}</span>
-                                        <span className="cp-date-day" style={{ color: `var(--cp-cat-${ev.cssVar}-text)` }}>{ev.start.getDate()}</span>
+                                        <span className="cp-date-month">{MONTH_NAMES[ev.start.getMonth()].substring(0,3)}</span>
+                                        <span className="cp-date-day">{ev.start.getDate()}</span>
                                     </div>
-                                    <div style={{ flex: 1 }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
                                         <div className="cp-meta-row">
                                             <span className="cp-category-badge" style={{ 
                                                 backgroundColor: `var(--cp-cat-${ev.cssVar}-bg)`, 
                                                 color: `var(--cp-cat-${ev.cssVar}-text)` 
                                             }}>{ev.category}</span>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <span className="cp-meta-time">
                                                 <IconClock /> {formatTime(ev.start)}
                                             </span>
                                         </div>
-                                        <h3 style={{ margin: '0.25rem 0', color: 'var(--cp-text-main)' }}>{ev.title}</h3>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--cp-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <h3 className="cp-event-title">{ev.title}</h3>
+                                        <div className="cp-meta-location">
                                             <IconMap /> {ev.location}
                                         </div>
                                     </div>
-                                    <IconChevronRight />
+                                    <div className="cp-list-arrow"><IconChevronRight /></div>
                                 </div>
                             ))
                         )}
@@ -297,10 +315,10 @@ export default function ModernCalendarPage() {
       {selectedEvent && (
         <div className="cp-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="cp-modal-card" onClick={e => e.stopPropagation()}>
+            <div className="cp-mobile-drag-handle-modal"></div>
             <div className="cp-modal-header" style={{ backgroundColor: `var(--cp-cat-${selectedEvent.cssVar}-bg)` }}>
                 <button className="cp-btn-close" onClick={() => setSelectedEvent(null)}><IconX /></button>
-                <span className="cp-category-badge" style={{ 
-                    backgroundColor: 'rgba(255,255,255,0.9)', 
+                <span className="cp-category-badge cp-badge-large" style={{ 
                     color: `var(--cp-cat-${selectedEvent.cssVar}-text)` 
                 }}>
                     {selectedEvent.category}
@@ -308,25 +326,27 @@ export default function ModernCalendarPage() {
             </div>
             <div className="cp-modal-body">
                 <h2 className="cp-modal-title">{selectedEvent.title}</h2>
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box"><IconCalendar /></div>
-                    <div className="cp-detail-content">
-                        <label>Data</label>
-                        <p>{formatDate(selectedEvent.start)}</p>
+                <div className="cp-detail-grid">
+                    <div className="cp-detail-row">
+                        <div className="cp-icon-box"><IconCalendar /></div>
+                        <div className="cp-detail-content">
+                            <label>Data</label>
+                            <p>{formatDate(selectedEvent.start)}</p>
+                        </div>
                     </div>
-                </div>
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box"><IconClock /></div>
-                    <div className="cp-detail-content">
-                        <label>Orario</label>
-                        <p>{formatTime(selectedEvent.start)} - {formatTime(selectedEvent.end)}</p>
+                    <div className="cp-detail-row">
+                        <div className="cp-icon-box"><IconClock /></div>
+                        <div className="cp-detail-content">
+                            <label>Orario</label>
+                            <p>{formatTime(selectedEvent.start)} - {formatTime(selectedEvent.end)}</p>
+                        </div>
                     </div>
-                </div>
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box"><IconMap /></div>
-                    <div className="cp-detail-content">
-                        <label>Luogo</label>
-                        <p>{selectedEvent.location}</p>
+                    <div className="cp-detail-row">
+                        <div className="cp-icon-box"><IconMap /></div>
+                        <div className="cp-detail-content">
+                            <label>Luogo</label>
+                            <p>{selectedEvent.location}</p>
+                        </div>
                     </div>
                 </div>
                 <div className="cp-modal-footer">

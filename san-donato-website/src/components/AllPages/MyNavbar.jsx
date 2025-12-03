@@ -10,8 +10,7 @@ import "../../css/MyNavbar.css";
 
 export default function MyNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  // Stato iniziale calcolato subito per evitare flash di layout
-  const [visibleCount, setVisibleCount] = useState(2); 
+  const [visibleCount, setVisibleCount] = useState(2);
   const dropdownRef = useRef(null);
 
   const allLinks = [
@@ -29,7 +28,7 @@ export default function MyNavbar() {
     { to: "/contributi-pubblici", label: "Contributi", icon: <FaScroll /> },
   ];
 
-  // USARE useLayoutEffect PER EVITARE IL GLITCH VISIVO INIZIALE
+  // Calcolo layout prima del render per evitare sfarfallii
   useLayoutEffect(() => {
     function handleResize() {
       const width = window.innerWidth;
@@ -48,18 +47,16 @@ export default function MyNavbar() {
       } else if (width > 480) {
         setVisibleCount(3); 
       } else {
-        // Mobile stretto: Solo 2 icone (Home + News) + Altro
-        setVisibleCount(2); 
+        setVisibleCount(2); // Mobile: 2 icone + Altro
       }
     }
 
-    // Esegui subito prima del paint
     handleResize(); 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [allLinks.length]);
 
-  // Click Outside
+  // Gestione chiusura click esterno
   useLayoutEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -80,7 +77,7 @@ export default function MyNavbar() {
         
         <nav className="navbar-nav">
           
-          {/* LINK VISIBILI */}
+          {/* LINK VISIBILI (Allineati a sinistra) */}
           {primaryLinks.map((link) => (
             <NavLink
               key={link.to}
@@ -93,7 +90,7 @@ export default function MyNavbar() {
             </NavLink>
           ))}
 
-          {/* PULSANTE "ALTRO" */}
+          {/* PULSANTE "ALTRO" (Spinto tutto a destra via CSS) */}
           {showDropdown && (
             <div className="dropdown" ref={dropdownRef}>
               <button

@@ -23,7 +23,7 @@
   height: var(--nav-height);
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
   
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   position: sticky;
@@ -31,7 +31,7 @@
   z-index: 1000;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   
-  /* PROTEZIONE OVERFLOW: Impedisce scroll orizzontale */
+  /* PROTEZIONE OVERFLOW */
   width: 100%;
   max-width: 100vw;
   overflow-x: clip; 
@@ -44,8 +44,8 @@
   width: 100%;
   max-width: 1400px;
   
-  /* Centratura Desktop */
-  justify-content: center; 
+  /* Layout distribuito */
+  justify-content: space-between; 
   
   padding: 0 1rem;
   margin: 0 auto;
@@ -56,10 +56,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: auto;
-  justify-content: center;
-  /* Evita che i pulsanti vadano a capo rompendo il layout */
-  flex-wrap: nowrap; 
+  
+  /* IMPORTANTE: Occupa tutto lo spazio per permettere il push a destra */
+  width: 100%; 
 }
 
 /* --- PULSANTI (Stile Pillola) --- */
@@ -85,14 +84,12 @@
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* Icone grandi */
 .nav-link svg {
   font-size: 1.3rem; 
   flex-shrink: 0;    
   filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); 
 }
 
-/* Hover */
 .nav-link:hover {
   background: var(--glass-bg);
   border-color: var(--glass-border);
@@ -101,7 +98,6 @@
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* Active */
 .nav-link.active {
   background: linear-gradient(135deg, var(--accent-color), #ff8533);
   color: white;
@@ -113,7 +109,10 @@
 /* --- PULSANTE "ALTRO" --- */
 .dropdown {
   position: relative;
-  flex-shrink: 0; /* Impedisce che il pulsante Altro si schiacci */
+  flex-shrink: 0;
+  
+  /* IL TRUCCO: Spinge questo elemento (e il menu) tutto a destra */
+  margin-left: auto; 
 }
 
 .dropdown-toggle {
@@ -129,12 +128,14 @@
   color: var(--accent-color);
 }
 
-/* --- MENU A TENDINA (Desktop Default) --- */
+/* --- MENU A TENDINA --- */
 .dropdown-menu {
   position: absolute;
   top: 140%;
-  /* Default Desktop: Allineato a destra del pulsante se possibile */
+  
+  /* SEMPRE ancorato a destra del pulsante "Altro" */
   right: 0; 
+  left: auto;
   
   background: #ffffff;
   min-width: 260px;
@@ -148,7 +149,7 @@
   gap: 0.4rem;
   z-index: 1001;
   
-  /* Origine animazione */
+  /* L'animazione parte dall'angolo in alto a destra */
   transform-origin: top right;
 }
 
@@ -203,24 +204,14 @@
 }
 
 /* =========================================
-   MOBILE OPTIMIZATION (< 650px)
+   MOBILE OPTIMIZATION
    ========================================= */
 @media (max-width: 650px) {
-  .navbar {
-    justify-content: flex-start; /* Reset centratura navbar */
-  }
-
   .navbar-container {
-    justify-content: flex-start; /* Reset centratura container */
-    padding: 0 0.8rem; /* Padding ridotto per guadagnare spazio */
+    padding: 0 0.8rem;
   }
   
-  .navbar-nav {
-    justify-content: flex-start; /* Reset centratura nav */
-    width: 100%;
-  }
-
-  /* Pulsanti più compatti */
+  /* Su mobile riduciamo leggermente i testi e i padding per eleganza */
   .nav-link {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;    
@@ -230,21 +221,14 @@
   .nav-link svg {
     font-size: 1.2rem; 
   }
-
-  /* === FIX DROPDOWN MOBILE === 
-     Si ancora a DESTRA del pulsante e si espande verso SINISTRA */
+  
+  /* Sicurezza per schermi piccoli: il menu non deve uscire a sinistra */
   .dropdown-menu {
-      left: auto;
-      right: 0; /* Allineato al bordo destro del pulsante */
-      transform-origin: top right;
-      
-      /* Sicurezza extra per schermi piccolissimi */
       max-width: 90vw; 
       width: 250px;
   }
 }
 
-/* Micro-tuning per schermi molto piccoli (iPhone SE) */
 @media (max-width: 380px) {
   .navbar-container {
     padding: 0 0.5rem;
