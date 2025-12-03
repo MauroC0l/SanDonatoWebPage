@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
-import "../css/NewsList.css";
+import "../../css/NewsList.css";
 
 export default function NewsList({ news }) {
   const [currentPage, setCurrentPage] = useState(1);

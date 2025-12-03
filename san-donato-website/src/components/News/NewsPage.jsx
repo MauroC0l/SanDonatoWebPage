@@ -1,28 +1,37 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
 import DatePicker from "react-datepicker";
-import NewsList from "./NewsList";
-import { getAllPosts } from "../api/API.mjs";
 import "react-datepicker/dist/react-datepicker.css";
-import "../css/NewsPage.css";
+
+import { getAllPosts } from "../../api/API.mjs";
+import NewsList from "../Home/NewsList";
+import "../../css/NewsPage.css";
 
 export default function NewsPage() {
   const [news, setNews] = useState([]);
   const [sportFilter, setSportFilter] = useState([]);
   const [authorFilter, setAuthorFilter] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
+  
+  // ✅ MODIFICA QUI: Impostato su "desc" per avere di default "Dalla più recente"
   const [sortOrder, setSortOrder] = useState("desc");
+  
   const [loading, setLoading] = useState(true);
-  const [showMobileFilters, setShowMobileFilters] = useState(false); // 👈 visibilità filtri mobile
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [startDate, endDate] = dateRange;
 
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
-      const posts = await getAllPosts();
-      setNews(posts);
-      setLoading(false);
+      try {
+        const posts = await getAllPosts();
+        setNews(posts);
+      } catch (error) {
+        console.error("Errore nel recupero delle notizie:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchNews();
   }, []);
@@ -34,6 +43,7 @@ export default function NewsPage() {
     setFilter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }, []);
 
+  // Funzione helper per parsare le date in modo sicuro
   const parseDate = (str) => str ? new Date(str) : new Date(0);
 
   const filteredNews = useMemo(() => {
@@ -46,17 +56,23 @@ export default function NewsPage() {
         const newsDate = parseDate(n.date);
         return (!startDate || newsDate >= startDate) && (!endDate || newsDate <= endDate);
       })
-      .sort((a, b) => sortOrder === "desc"
-        ? parseDate(b.date) - parseDate(a.date)
-        : parseDate(a.date) - parseDate(b.date)
-      );
+      .sort((a, b) => {
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        // ✅ LOGICA DI ORDINAMENTO:
+        // Se "desc": dateB - dateA (La data più recente ha un timestamp più alto, quindi viene prima)
+        // Se "asc": dateA - dateB (La data più vecchia viene prima)
+        return sortOrder === "desc" 
+          ? dateB - dateA 
+          : dateA - dateB;
+      });
   }, [news, sportFilter, authorFilter, startDate, endDate, sortOrder]);
 
   const handleResetFilters = useCallback(() => {
     setSportFilter([]);
     setAuthorFilter([]);
     setDateRange([null, null]);
-    setSortOrder("desc");
+    setSortOrder("desc"); // Reset riporta a discendente
   }, []);
 
   return (
@@ -96,6 +112,7 @@ export default function NewsPage() {
                   className="form-control custom-datepicker"
                   placeholderText="Seleziona intervallo"
                   isClearable
+                  dateFormat="dd/MM/yyyy" // Formato italiano per il DatePicker
                 />
               </Form.Group>
 

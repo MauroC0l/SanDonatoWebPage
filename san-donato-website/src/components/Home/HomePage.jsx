@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Container } from "react-bootstrap";
 import NewsList from "./NewsList";
 import AboutSection from "./AboutSection";
-import { getLatestPostsByCategory } from "../api/API.mjs";
-import "../css/HomePage.css";
+import { getLatestPostsByCategory } from "../../api/API.mjs";
+import "../../css/HomePage.css";
 
 export default function HomePage() {
   const [newsByCategory, setNewsByCategory] = useState({});

@@ -1,19 +1,20 @@
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./components/HomePage";
-import News from "./components/NewsPage";
-import MyNavbar from "./components/MyNavbar";
-import Hero from "./components/Hero";
-import TopHeader from "./components/TopHeader"; 
+import HomePage from "./components/Home/HomePage";
+import News from "./components/News/NewsPage";
+import MyNavbar from "./components/AllPages/MyNavbar";
+import Hero from "./components/AllPages/Hero";
+import TopHeader from "./components/AllPages/TopHeader"; 
 import NewsDetailPage from "./components/NewsDetail";
 import SubscriptionPage from "./components/SubscriptionPage";
 import AboutPage from "./components/AboutPage";
-import SportPage from "./components/SportPage";
+import CalendarPage from "./components/CalendarPage";
 import ContactPage from "./components/ContactPage";
 import PrivacyPage from "./components/PrivacyPage";
 import TutelaDeiMinoriPage from "./components/TutelaDeiMinoriPage";
 import ContributiPage from "./components/ContributiPage";
 import CinquePerMillePage from "./components/CinquePerMillePage";
 import SponsorPage from "./components/SponsorPage";
+import SportPage from "./components/SportPage";
 
 
 
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/iscrizione" element={<SubscriptionPage />} />
           <Route path="/chi-siamo" element={<AboutPage />} />
           <Route path="/sports" element={<SportPage />} />
+          <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/contatti" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/tutela-minori" element={<TutelaDeiMinoriPage />} />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../css/AboutSection.css";
+import "../../css/AboutSection.css";
 
 export default function AboutSection() {
   const aboutImages = [

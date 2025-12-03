@@ -1,14 +1,13 @@
 import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
-import "../css/TopHeader.css";
+import "../../css/TopHeader.css";
 
 import { FiMapPin, FiPhone, FiMail, FiHome } from "react-icons/fi";
 
 
 export default function TopHeader() {
-    const phoneNumber = "+39 123 456 7890";
-    const email = "info@polisportiva.it";
-    const address = "ASD PSD Via Le Chiuse 20/A - 10144 Torino P.Iva 09911610013 - C.F. 97699790016";
+    const email = "info@polisportivasandonato.it";
+    const address = "ASD Polisportiva San Donato Via Le Chiuse 20/A - 10144 Torino P.Iva 09911610013 - C.F. 97699790016";
 
     return (
         <div className="top-header">
@@ -29,9 +28,7 @@ export default function TopHeader() {
                 </div>
                 <div className="contact-info">
                     <span><FiMapPin className="contact-icon" /> {address}</span>
-                    <span><FiPhone className="contact-icon" /> {phoneNumber}</span>
                     <span><FiMail className="contact-icon" /> {email}</span>
-                    <span><FiHome className="contact-icon" /> Torino</span>
                 </div>
             </div>
         </div>

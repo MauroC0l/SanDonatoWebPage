@@ -23,7 +23,6 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden; /* evita scrollbar globale */
-  background: linear-gradient(135deg, #292940, #3a3d56);
   box-sizing: border-box;
 }
 

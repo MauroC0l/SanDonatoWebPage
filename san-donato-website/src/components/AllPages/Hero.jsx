@@ -1,4 +1,4 @@
-import "../css/Hero.css";
+import "../../css/Hero.css";
 
 export default function Hero() {
     const title = "Polisportiva San Donato";
