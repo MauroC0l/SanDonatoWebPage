@@ -1,128 +1,211 @@
-/* ---------------------------------------
-   SPONSOR PAGE - FLUID FADE CAROUSEL
---------------------------------------- */
+/* ============================= */
+/* SponsorPage.css - Modern Light UI */
+/* ============================= */
 
+/* Variabili locali */
+:root {
+  --sp-text-primary: #111827;  /* Grigio molto scuro */
+  --sp-text-secondary: #4b5563; /* Grigio medio */
+  --sp-accent: #4f46e5;        /* Indaco vibrante */
+  --sp-card-bg: #ffffff;
+  --sp-card-border: #e5e7eb;   /* Grigio chiaro per i bordi */
+  --sp-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Animazione Fade In */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Container Principale */
 .sponsor-page {
-  background-color: #fff;
-  min-height: 60vh;
-  padding: clamp(1rem, 3vw, 3rem);
-  font-family: "Inter", "Poppins", sans-serif;
-  color: #111;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* centra titolo e carosello orizzontalmente */
-  justify-content: center; /* centra verticalmente tutto */
-  gap: clamp(1.5rem, 4vw, 4rem); /* spazio dinamico tra titolo e carosello */
+  width: 100%;
+  min-height: 100vh;
+  /* Assicuriamo che il testo base sia scuro per contrastare lo sfondo bianco */
+  color: var(--sp-text-primary); 
+  padding: 60px 20px;
+}
+
+.sponsor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Styling */
+.sponsor-header {
+  text-align: center;
+  margin-bottom: 80px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .page-title {
-  text-align: center;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  margin-top: -100px;
+  font-size: 3rem; /* Grande e leggibile */
   font-weight: 800;
+  color: var(--sp-text-primary); /* Colore scuro esplicito */
+  margin-bottom: 16px;
+  line-height: 1.1;
   letter-spacing: -0.02em;
-  background: linear-gradient(90deg, #0077ff, #00c4b4);
+}
+
+/* Gradiente Text */
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
-/* -------- CAROUSEL -------- */
-.sponsor-carousel {
+.page-subtitle {
+  font-size: 1.25rem;
+  color: var(--sp-text-secondary); /* Grigio medio per gerarchia */
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Griglia */
+.sponsor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* Card Design - Clean & Bordered */
+.sponsor-card {
+  background-color: var(--sp-card-bg);
+  border: 1px solid var(--sp-card-border); /* Bordo sottile elegante */
+  border-radius: 20px;
+  text-decoration: none;
+  overflow: hidden;
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  align-items: center; /* centra verticalmente immagine e frecce */
-  justify-content: center;
-  width: clamp(260px, 60vw, 700px); /* fluido: minimo 260px, max 700px */
-  aspect-ratio: 5 / 2; /* mantiene proporzione immagine */
-}
-
-.sponsor-slide {
-  position: absolute;
+  flex-direction: column;
+  height: 280px;
+  
+  /* Animazione sequenziale */
   opacity: 0;
-  transition: opacity 1s ease-in-out;
+  animation: fadeInUp 0.6s ease-out forwards;
 }
 
-.sponsor-slide.active {
-  opacity: 1;
+.sponsor-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--sp-accent); /* Il bordo si colora all'hover */
+  box-shadow: var(--sp-hover-shadow);
+}
+
+.card-content {
+  padding: 30px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Immagine */
+.image-wrapper {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .sponsor-image {
-  width: clamp(150px, 65%, 500px);
-  height: auto;
+  max-width: 100%;
+  max-height: 140px;
   object-fit: contain;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  margin: 0 auto;
-  display: block;
+  /* Scala di grigi iniziale per eleganza uniforme */
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.4s ease;
 }
 
-.sponsor-image:hover {
-  transform: scale(1.08);
-  filter: brightness(1.05);
+.sponsor-card:hover .sponsor-image {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
 }
 
-/* -------- FRECCE MINIMAL -------- */
+/* Meta Info */
+.sponsor-meta {
+  width: 100%;
+  text-align: center;
+}
+
+.sponsor-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--sp-text-primary);
+  margin: 0 0 8px 0;
+}
+
+/* Link con freccia animata */
+.visit-arrow {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sp-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
 .arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: clamp(1.8rem, 4vw, 4rem);
-  color: #0077ff;
-  cursor: pointer;
-  user-select: none;
-  border: none;
-  background: none;
-  padding: 0;
-  line-height: 1;
-  transition: transform 0.25s ease, color 0.25s ease;
-  outline: none;
+  transition: transform 0.3s ease;
+  display: inline-block;
 }
 
-.arrow:hover {
-  transform: translateY(-50%) scale(1.15);
-  color: #00c4b4;
+.sponsor-card:hover .visit-arrow {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.arrow:focus,
-.arrow:active {
-  color: #00c4b4;
-  filter: drop-shadow(0 0 2px #fff);
+.sponsor-card:hover .arrow {
+  transform: translateX(4px);
 }
 
-/* -------- POSIZIONAMENTO FRECCE -------- */
-.arrow-left {
-  left: clamp(0.5rem, 2vw, 2rem);
-}
-
-.arrow-right {
-  right: clamp(0.5rem, 2vw, 2rem);
-}
-
-/* -------- RESPONSIVE -------- */
+/* Mobile Responsive */
 @media (max-width: 768px) {
-  .sponsor-carousel {
-    width: 85%;
+  .page-title {
+    font-size: 2.2rem;
+  }
+  
+  .sponsor-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonne su tablet/grandi telefoni */
+    gap: 16px;
+  }
+  
+  .sponsor-card {
+    height: 240px;
   }
 
-  .sponsor-image {
-    width: 70%;
+  .card-content {
+    padding: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .sponsor-carousel {
-    width: 90%;
-    aspect-ratio: 4 / 3; /* più alto per telefoni */
+  .sponsor-grid {
+    grid-template-columns: 1fr; /* 1 colonna su piccoli telefoni */
   }
-
+  
+  /* Su mobile niente grayscale per vedere subito i colori */
   .sponsor-image {
-    width: 75%;
+    filter: grayscale(0%);
+    opacity: 1;
   }
-
-  .arrow {
-    font-size: clamp(1.5rem, 6vw, 2.5rem);
-  }
-
-  .page-title {
-    font-size: clamp(1.4rem, 5vw, 1.8rem);
+  
+  .visit-arrow {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
