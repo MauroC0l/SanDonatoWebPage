@@ -23,8 +23,6 @@
   height: var(--nav-height);
   display: flex;
   align-items: center;
-  
-  /* CENTRATURA VERTICALE E ORIZZONTALE GLOBALE */
   justify-content: center; 
   
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -32,7 +30,11 @@
   top: 0;
   z-index: 1000;
   border-bottom: 1px solid rgba(255,255,255,0.05);
+  
+  /* PROTEZIONE OVERFLOW: Impedisce scroll orizzontale */
   width: 100%;
+  max-width: 100vw;
+  overflow-x: clip; 
 }
 
 /* Contenitore interno */
@@ -40,13 +42,13 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1400px; /* Limite larghezza massima per non disperdere troppo su schermi enormi */
+  max-width: 1400px;
   
-  /* CENTRATURA DEI PULSANTI */
+  /* Centratura Desktop */
   justify-content: center; 
   
   padding: 0 1rem;
-  margin: 0 auto; /* Assicura che il container stesso sia al centro */
+  margin: 0 auto;
 }
 
 /* Navigazione */
@@ -54,10 +56,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: auto; /* Lasciamo che si adatti al contenuto */
-  
-  /* CENTRATURA ELEMENTI INTERNI */
+  width: auto;
   justify-content: center;
+  /* Evita che i pulsanti vadano a capo rompendo il layout */
+  flex-wrap: nowrap; 
 }
 
 /* --- PULSANTI (Stile Pillola) --- */
@@ -111,6 +113,7 @@
 /* --- PULSANTE "ALTRO" --- */
 .dropdown {
   position: relative;
+  flex-shrink: 0; /* Impedisce che il pulsante Altro si schiacci */
 }
 
 .dropdown-toggle {
@@ -126,16 +129,15 @@
   color: var(--accent-color);
 }
 
-/* --- MENU A TENDINA --- */
+/* --- MENU A TENDINA (Desktop Default) --- */
 .dropdown-menu {
   position: absolute;
   top: 140%;
+  /* Default Desktop: Allineato a destra del pulsante se possibile */
   right: 0; 
   
-  /* Centriamo il dropdown rispetto al pulsante "Altro" se possibile, o allineato a destra */
-  
   background: #ffffff;
-  min-width: 250px;
+  min-width: 260px;
   
   border-radius: 16px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.25);
@@ -146,6 +148,7 @@
   gap: 0.4rem;
   z-index: 1001;
   
+  /* Origine animazione */
   transform-origin: top right;
 }
 
@@ -200,17 +203,16 @@
 }
 
 /* =========================================
-   MOBILE OPTIMIZATION (< 600px)
-   Qui evitiamo la centratura e torniamo a sinistra
+   MOBILE OPTIMIZATION (< 650px)
    ========================================= */
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .navbar {
     justify-content: flex-start; /* Reset centratura navbar */
   }
 
   .navbar-container {
     justify-content: flex-start; /* Reset centratura container */
-    padding: 0 1rem;
+    padding: 0 0.8rem; /* Padding ridotto per guadagnare spazio */
   }
   
   .navbar-nav {
@@ -218,6 +220,7 @@
     width: 100%;
   }
 
+  /* Pulsanti più compatti */
   .nav-link {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;    
@@ -225,20 +228,26 @@
   }
   
   .nav-link svg {
-    font-size: 1.3rem; 
+    font-size: 1.2rem; 
   }
-  
-  /* Dropdown allineato a sinistra su mobile per coerenza */
+
+  /* === FIX DROPDOWN MOBILE === 
+     Si ancora a DESTRA del pulsante e si espande verso SINISTRA */
   .dropdown-menu {
-      right: auto;
-      left: 0;
-      transform-origin: top left;
+      left: auto;
+      right: 0; /* Allineato al bordo destro del pulsante */
+      transform-origin: top right;
+      
+      /* Sicurezza extra per schermi piccolissimi */
+      max-width: 90vw; 
+      width: 250px;
   }
 }
 
+/* Micro-tuning per schermi molto piccoli (iPhone SE) */
 @media (max-width: 380px) {
   .navbar-container {
-    padding: 0 0.5rem; 
+    padding: 0 0.5rem;
   }
   .nav-link {
     padding: 0.5rem 0.6rem;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome, FaNewspaper, FaUsers,
@@ -10,7 +10,8 @@ import "../../css/MyNavbar.css";
 
 export default function MyNavbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(8);
+  // Stato iniziale calcolato subito per evitare flash di layout
+  const [visibleCount, setVisibleCount] = useState(2); 
   const dropdownRef = useRef(null);
 
   const allLinks = [
@@ -28,35 +29,38 @@ export default function MyNavbar() {
     { to: "/contributi-pubblici", label: "Contributi", icon: <FaScroll /> },
   ];
 
-  // LOGICA DINAMICA
-  useEffect(() => {
+  // USARE useLayoutEffect PER EVITARE IL GLITCH VISIVO INIZIALE
+  useLayoutEffect(() => {
     function handleResize() {
       const width = window.innerWidth;
       
-      if (width > 1400) {
+      // Logica conservativa per evitare overflow
+      if (width > 1450) {
         setVisibleCount(allLinks.length); 
-      } else if (width > 1200) {
+      } else if (width > 1250) {
         setVisibleCount(9); 
-      } else if (width > 1000) {
+      } else if (width > 1050) {
         setVisibleCount(7); 
-      } else if (width > 800) {
+      } else if (width > 850) {
         setVisibleCount(5); 
-      } else if (width > 600) {
+      } else if (width > 650) {
         setVisibleCount(4); 
-      } else if (width > 450) {
+      } else if (width > 480) {
         setVisibleCount(3); 
       } else {
+        // Mobile stretto: Solo 2 icone (Home + News) + Altro
         setVisibleCount(2); 
       }
     }
 
+    // Esegui subito prima del paint
     handleResize(); 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [allLinks.length]);
 
   // Click Outside
-  useEffect(() => {
+  useLayoutEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
