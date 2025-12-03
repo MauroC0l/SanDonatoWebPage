@@ -4,221 +4,243 @@
   --primary-color: #002b5c;
   --accent-color: #ff6600;
   --text-white: #ffffff;
+  
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  
   --nav-height: 70px;
 }
 
 /* Navbar Base */
 .navbar {
   background: var(--primary-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
   color: var(--text-white);
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   height: var(--nav-height);
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  
+  /* CENTRATURA VERTICALE E ORIZZONTALE GLOBALE */
+  justify-content: center; 
+  
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  width: 100%;
 }
 
+/* Contenitore interno */
 .navbar-container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1400px; /* Limite larghezza massima per non disperdere troppo su schermi enormi */
+  
+  /* CENTRATURA DEI PULSANTI */
+  justify-content: center; 
+  
   padding: 0 1rem;
+  margin: 0 auto; /* Assicura che il container stesso sia al centro */
 }
 
-/* Logo */
-.navbar-logo {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-white);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-right: 1rem;
-  white-space: nowrap;
-}
-
-/* Navigazione Principale */
+/* Navigazione */
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  list-style: none;
+  gap: 0.5rem;
+  width: auto; /* Lasciamo che si adatti al contenuto */
+  
+  /* CENTRATURA ELEMENTI INTERNI */
+  justify-content: center;
 }
 
-/* Stile dei Link Standard */
+/* --- PULSANTI (Stile Pillola) --- */
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.8rem;
-  color: rgba(255,255,255,0.85);
+  justify-content: center;
+  gap: 0.6rem; 
+  
+  padding: 0.6rem 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: none;
+  
+  border-radius: 50px;
+  border: 1px solid transparent;
   background: transparent;
+  
+  font-size: 0.95rem; 
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* Icone grandi */
+.nav-link svg {
+  font-size: 1.3rem; 
+  flex-shrink: 0;    
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); 
+}
+
+/* Hover */
 .nav-link:hover {
-  background: rgba(255,255,255,0.1);
-  color: var(--text-white);
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  color: #fff;
   transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
+/* Active */
 .nav-link.active {
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--accent-color);
+  background: linear-gradient(135deg, var(--accent-color), #ff8533);
+  color: white;
   font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+  border-color: transparent;
 }
 
-/* --- Dropdown Styles --- */
+/* --- PULSANTE "ALTRO" --- */
 .dropdown {
   position: relative;
 }
 
 .dropdown-toggle {
-  /* Stile speciale per il bottone "Altro" */
-  background: rgba(0,0,0,0.2);
+  background: rgba(255,255,255,0.05); 
+  padding-right: 0.9rem;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
+.dropdown-toggle:hover,
 .dropdown-toggle.active-toggle {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.15);
+  border-color: var(--accent-color);
   color: var(--accent-color);
 }
 
+/* --- MENU A TENDINA --- */
 .dropdown-menu {
   position: absolute;
-  top: 130%;
-  right: 0;
-  background: white;
-  min-width: 220px;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  padding: 0.5rem;
-  display: none; /* Nascosto di default */
+  top: 140%;
+  right: 0; 
+  
+  /* Centriamo il dropdown rispetto al pulsante "Altro" se possibile, o allineato a destra */
+  
+  background: #ffffff;
+  min-width: 250px;
+  
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  padding: 0.8rem;
+  
+  display: none;
   flex-direction: column;
+  gap: 0.4rem;
   z-index: 1001;
-  /* Piccola freccia in alto al menu (opzionale) */
-}
-
-/* Freccetta decorativa sopra il dropdown */
-.dropdown-menu::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: 20px;
-  width: 12px;
-  height: 12px;
-  background: white;
-  transform: rotate(45deg);
+  
+  transform-origin: top right;
 }
 
 .dropdown-menu.show {
   display: flex;
-  animation: scaleIn 0.2s ease;
+  animation: menuPop 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
 
+/* Elementi Dropdown */
 .dropdown-item {
   padding: 0.8rem 1rem;
   color: #333;
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  border-radius: 8px;
-  transition: background 0.2s;
-  font-size: 0.95rem;
+  gap: 1rem; 
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-size: 1rem;
   font-weight: 500;
 }
 
+.dropdown-item svg {
+  font-size: 1.2rem;
+  color: #888;
+  transition: color 0.2s;
+}
+
 .dropdown-item:hover {
-  background: #f0f0f0;
+  background: #fff0e6; 
+  color: var(--accent-color);
+  transform: translateX(5px);
+}
+
+.dropdown-item:hover svg {
   color: var(--accent-color);
 }
 
 .arrow {
   margin-left: 0.3rem;
-  font-size: 0.7rem;
-  transition: transform 0.3s;
+  font-size: 0.8rem !important; 
+  transition: transform 0.3s ease;
 }
 
 .arrow.rotate {
   transform: rotate(180deg);
 }
 
-/* =========================================
-   MEDIA QUERIES (Gestione Desktop vs Mobile)
-   Breakpoint: 1100px (Sotto i laptop piccoli scatta il mobile)
-   ========================================= */
+@keyframes menuPop {
+  from { opacity: 0; transform: scale(0.9) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
 
-/* Comportamento di default (Mobile-First logic non usata qui per chiarezza):
-   Qui definiamo cosa succede quando lo schermo è GRANDE (> 1100px) */
-@media screen and (min-width: 1101px) {
-  .mobile-only {
-    display: none !important; /* Nasconde il bottone "Altro" */
+/* =========================================
+   MOBILE OPTIMIZATION (< 600px)
+   Qui evitiamo la centratura e torniamo a sinistra
+   ========================================= */
+@media (max-width: 600px) {
+  .navbar {
+    justify-content: flex-start; /* Reset centratura navbar */
+  }
+
+  .navbar-container {
+    justify-content: flex-start; /* Reset centratura container */
+    padding: 0 1rem;
+  }
+  
+  .navbar-nav {
+    justify-content: flex-start; /* Reset centratura nav */
+    width: 100%;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;    
+    gap: 0.5rem;
+  }
+  
+  .nav-link svg {
+    font-size: 1.3rem; 
+  }
+  
+  /* Dropdown allineato a sinistra su mobile per coerenza */
+  .dropdown-menu {
+      right: auto;
+      left: 0;
+      transform-origin: top left;
   }
 }
 
-/* Comportamento quando lo schermo è PICCOLO (< 1100px) */
-@media screen and (max-width: 1100px) {
-  
-  /* 1. Nascondiamo i link secondari dalla barra principale */
-  .desktop-only {
-    display: none !important;
-  }
-
-  /* 2. Mostriamo il bottone "Altro" */
-  .mobile-only {
-    display: block; /* O flex */
-  }
-
-  /* 3. Ottimizzazioni per Mobile */
+@media (max-width: 380px) {
   .navbar-container {
-    padding: 0 0.5rem;
+    padding: 0 0.5rem; 
   }
-
-  .navbar-logo {
-    font-size: 1.2rem; /* Logo più piccolo */
-    margin-right: 0.5rem;
-  }
-
-  /* Rimpiccioliamo leggermente i link visibili (Home, News, Sport) */
   .nav-link {
     padding: 0.5rem 0.6rem;
-    font-size: 0.85rem;
   }
-  
-  /* Su schermi MOLTO piccoli (es. iPhone SE), nascondiamo il testo, lasciamo solo icone */
-  @media (max-width: 400px) {
-    .link-text {
-      display: none;
-    }
-    .nav-link {
-      font-size: 1.2rem; /* Icone più grandi */
-      padding: 0.6rem;
-    }
-    
-    /* Ma nel dropdown il testo serve! */
-    .dropdown-item .link-text {
-      display: inline; 
-    }
-    .dropdown-item {
-      font-size: 1rem;
-    }
-  }
-}
-
-/* Animazione menu */
-@keyframes scaleIn {
-  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
 }

@@ -8,7 +8,7 @@ import NewsDetailPage from "./components/NewsDetail";
 import SubscriptionPage from "./components/SubscriptionPage";
 import AboutPage from "./components/AboutPage";
 import CalendarPage from "./components/CalendarPage";
-import ContactPage from "./components/ContactPage";
+import ContactPage from "./components/Contatti";
 import PrivacyPage from "./components/PrivacyPage";
 import TutelaDeiMinoriPage from "./components/TutelaDeiMinoriPage";
 import ContributiPage from "./components/ContributiPage";

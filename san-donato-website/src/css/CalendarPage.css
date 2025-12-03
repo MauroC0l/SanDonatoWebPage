@@ -1,174 +1,356 @@
-:root {
-  --brand: #002b5c;
-  --accent: #ff6600;
-  --accent-hover: #ff8533;
-  --bg-light: #f5f7fa;
-  --shadow-light: rgba(0, 0, 0, 0.08);
-  --shadow-medium: rgba(0, 0, 0, 0.15);
-  --radius: 16px; /* arrotondamento maggiore */
-  --font-main: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
+/* --- Contatti.css --- */
+
+/* Reset & Layout Base */
+.contacts-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  max-width: 1200px;
+  width: 95%;
+  margin: 2rem auto 5rem;
+  color: #333;
 }
 
-/* ===== CONTAINER PRINCIPALE ===== */
-.sportPageContainer {
-  background: linear-gradient(180deg, #fdfcfb, var(--bg-light));
-  min-height: 100vh;
+.fade-in {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Header */
+.contacts-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.contacts-header h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  color: #002b5c;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.contacts-header p {
+  font-size: 1.2rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Grid System */
+.contacts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.contacts-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* --- Componente Card --- */
+.contact-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.02);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  color: #002b5c;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 700;
+}
+
+.icon-wrapper {
+  color: #ff6600;
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+}
+
+/* Tipografia e Contenuti */
+.address-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: #4b5563;
+  font-style: normal;
+}
+
+/* Mappa Interattiva */
+.map-link-container {
+  display: block;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transform: translateZ(0); /* Hardware acceleration fix */
+}
+
+.map-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.map-link-container:hover .map-image {
+  transform: scale(1.05);
+}
+
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 43, 92, 0.7);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.map-link-container:hover .map-overlay {
+  opacity: 1;
+}
+
+/* Info Row e Segreteria */
+.info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.sub-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #002b5c;
+  margin-bottom: 0.2rem;
+  font-size: 1.1rem;
+}
+
+.info-value.highlight {
+  color: #ff6600;
+  font-weight: 700;
+}
+
+.info-note {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 0.8rem;
+  font-style: italic;
+}
+
+.phone-link {
+  color: #002b5c;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.15rem;
+  transition: color 0.2s;
+}
+.phone-link:hover { color: #ff6600; }
+
+.divider {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 1.5rem 0;
+}
+
+/* Email */
+.email-link {
+  display: block;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.email-link.primary {
+  color: #002b5c;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+.email-link.pec {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.email-link:hover { color: #ff6600; }
+
+/* Fiscal Data Box */
+.fiscal-data {
+  margin-top: 1.5rem;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.fiscal-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 0.95rem;
+  color: #475569;
+  font-family: monospace;
+}
+.fiscal-row .label { font-weight: 700; color: #002b5c; }
+
+/* --- Pagamenti & IBAN --- */
+.payment-card { border-left: 5px solid #002b5c; }
+
+.payment-intro { margin-bottom: 1.5rem; color: #4b5563; }
+
+.iban-box {
+  background: #f1f5f9;
   padding: 1.5rem;
-  font-family: var(--font-main);
+  border-radius: 16px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border: 1px dashed #cbd5e1;
+  position: relative;
+}
+
+.iban-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.iban-code {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #002b5c;
+  font-size: 1.1rem;
+  word-break: break-all;
+  margin-bottom: 1rem;
+}
+
+/* Bottone Copia Moderno */
+.copy-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.copy-btn:hover {
+  background: #002b5c;
+  color: white;
+  border-color: #002b5c;
+  transform: translateY(-1px);
+}
+
+.copy-btn.success {
+  background: #10b981; /* Verde Smeraldo */
+  color: white;
+  border-color: #10b981;
+}
+
+.bank-image-container { text-align: center; }
+.bank-img { max-width: 180px; height: auto; opacity: 0.9; }
+
+/* --- Satispay --- */
+.satispay-card { border-top: 5px solid #ff5a5f; }
+.satispay-card .card-title { display: none; /* Nascondiamo titolo default per usare quello custom */ }
+
+.satispay-custom-header {
+  color: #ff5a5f;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.shop-name {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.qr-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
-/* ===== HEADER ===== */
-.header {
-  text-align: center;
-  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
-  font-weight: 800;
-  color: var(--brand);
-  background: linear-gradient(90deg, rgba(255, 102, 0, 0.15), rgba(0, 43, 92, 0.1));
-  border-radius: var(--radius);
-  padding: 0.8rem 2rem;
-  box-shadow: 0 4px 20px var(--shadow-light);
-  margin-bottom: 2rem;
-  position: relative;
-}
-.header::after {
-  content: "";
-  position: absolute;
-  bottom: -0.4rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
-  border-radius: 2px;
+.qr-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s;
 }
 
-/* ===== CALENDARIO ===== */
-.calendarWrapper {
-  width: 100%;
-  max-width: 1300px;
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 1rem;
-  box-shadow: 0 5px 20px var(--shadow-medium);
-}
+.qr-image:hover { transform: scale(1.05); }
 
-/* ===== TOOLBAR ===== */
-.rbc-toolbar-custom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  background: var(--bg-light);
-  padding: 0.8rem;
-  border-radius: var(--radius);
-  box-shadow: 0 2.5px 10px var(--shadow-light);
-}
-.toolbar-month {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--brand);
-}
-.toolbar-buttons button {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--radius);
-  padding: 0.5rem 1rem;
-  margin: 0 0.15rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.toolbar-buttons button:hover {
-  transform: translateY(-1.5px);
-  background: linear-gradient(135deg, var(--accent-hover), #ffa366);
-}
-.toolbar-buttons .active-view {
-  background: linear-gradient(135deg, #002b5c, #1d3557);
-}
-
-/* ===== TESTO CALENDARIO ===== */
-.rbc-calendar,
-.rbc-month-view,
-.rbc-time-view,
-.rbc-agenda-view {
-  color: var(--brand);
-  font-size: 0.95rem;
-}
-.rbc-header,
-.rbc-time-header,
-.rbc-agenda-table th {
-  color: var(--brand);
-  font-weight: 600;
+.qr-caption {
   font-size: 0.9rem;
-}
-.rbc-date-cell {
-  color: var(--brand);
-  font-weight: 500;
-  font-size: 0.85rem;
-}
-
-/* ===== EVENTI ===== */
-.rbc-event {
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: all 0.2s ease;
-  padding: 0.3rem 0.6rem;
-  margin: 0 0 2px 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  width: 100%;
-}
-.rbc-event:hover {
-  white-space: normal;
-  overflow: visible;
-  z-index: 50;
-}
-.rbc-month-view .rbc-event:hover {
-  transform: scale(1.06);
-  box-shadow: 0 3px 10px var(--shadow-medium), 0 0 5px var(--accent-hover);
-}
-.rbc-time-view:not(.rbc-day-view) .rbc-event:hover {
-  transform: scale(1.01);
-  box-shadow: 0 5px 15px var(--shadow-medium), 0 0 8px rgba(255, 102, 0, 0.3);
-}
-.rbc-day-view .rbc-event:hover {
-  transform: scale(1.01);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 10px rgba(255, 102, 0, 0.35);
-}
-.rbc-event-content {
-  padding-right: 0 !important;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
 }
 
-.rbc-allday-cell {
-  display: none !important;
-}
-
-
-/* ===== TOOLTIP ===== */
-.event-tooltip-click {
-  animation: fadeIn 0.15s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-3px); }
+/* Animazione Globale */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 640px) {
-  .rbc-toolbar-custom {
-    flex-direction: column;
-    gap: 0.8rem;
+/* --- Responsive Mobile --- */
+@media (max-width: 850px) {
+  .contacts-grid {
+    grid-template-columns: 1fr;
   }
-  .toolbar-buttons button {
-    width: 100%;
-    font-size: 0.85rem;
-    padding: 0.45rem 0.8rem;
+  
+  .contacts-header h1 {
+    font-size: 2rem;
+  }
+  
+  .iban-code {
+    font-size: 1rem;
+  }
+
+  .contacts-page {
+    margin-bottom: 2rem;
   }
 }
