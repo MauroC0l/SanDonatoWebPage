@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -27,45 +27,50 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1400px; /* Allargato per far stare più pulsanti */
-  padding: 0 1.5rem;
+  max-width: 1400px;
+  padding: 0 1rem;
 }
 
 /* Logo */
 .navbar-logo {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--text-white);
   text-transform: uppercase;
   letter-spacing: 1px;
-  white-space: nowrap; /* Evita che il logo vada a capo */
+  margin-right: 1rem;
+  white-space: nowrap;
 }
 
-/* Menu Desktop */
+/* Navigazione Principale */
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.3rem; /* Ridotto il gap per far stare tutto */
+  gap: 0.3rem;
   list-style: none;
 }
 
+/* Stile dei Link Standard */
 .nav-link {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.6rem; /* Padding ridotto leggermente */
-  color: rgba(255,255,255,0.9);
+  padding: 0.5rem 0.8rem;
+  color: rgba(255,255,255,0.85);
   text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  font-size: 0.85rem; /* Font leggermente più piccolo per desktop */
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
   font-weight: 500;
-  white-space: nowrap; /* Impedisce al testo dei bottoni di andare a capo */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
   background: rgba(255,255,255,0.1);
-  color: var(--accent-color);
+  color: var(--text-white);
   transform: translateY(-2px);
 }
 
@@ -75,56 +80,145 @@
   font-weight: 700;
 }
 
-/* Icona Hamburger (nascosta su schermi grandi) */
-.mobile-menu-icon {
-  display: none;
-  font-size: 1.8rem;
-  cursor: pointer;
-  color: white;
+/* --- Dropdown Styles --- */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  /* Stile speciale per il bottone "Altro" */
+  background: rgba(0,0,0,0.2);
+}
+
+.dropdown-toggle.active-toggle {
+  background: rgba(255,255,255,0.2);
+  color: var(--accent-color);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 130%;
+  right: 0;
+  background: white;
+  min-width: 220px;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  padding: 0.5rem;
+  display: none; /* Nascosto di default */
+  flex-direction: column;
+  z-index: 1001;
+  /* Piccola freccia in alto al menu (opzionale) */
+}
+
+/* Freccetta decorativa sopra il dropdown */
+.dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg);
+}
+
+.dropdown-menu.show {
+  display: flex;
+  animation: scaleIn 0.2s ease;
+}
+
+.dropdown-item {
+  padding: 0.8rem 1rem;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background: #f0f0f0;
+  color: var(--accent-color);
+}
+
+.arrow {
+  margin-left: 0.3rem;
+  font-size: 0.7rem;
+  transition: transform 0.3s;
+}
+
+.arrow.rotate {
+  transform: rotate(180deg);
 }
 
 /* =========================================
-   RESPONSIVE (Mobile & Tablet)
-   Trigger a 1200px perché ci sono tanti pulsanti
+   MEDIA QUERIES (Gestione Desktop vs Mobile)
+   Breakpoint: 1100px (Sotto i laptop piccoli scatta il mobile)
    ========================================= */
-@media screen and (max-width: 1200px) {
+
+/* Comportamento di default (Mobile-First logic non usata qui per chiarezza):
+   Qui definiamo cosa succede quando lo schermo è GRANDE (> 1100px) */
+@media screen and (min-width: 1101px) {
+  .mobile-only {
+    display: none !important; /* Nasconde il bottone "Altro" */
+  }
+}
+
+/* Comportamento quando lo schermo è PICCOLO (< 1100px) */
+@media screen and (max-width: 1100px) {
   
-  .mobile-menu-icon {
-    display: block;
+  /* 1. Nascondiamo i link secondari dalla barra principale */
+  .desktop-only {
+    display: none !important;
   }
 
-  .navbar-nav {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    position: absolute;
-    top: var(--nav-height);
-    left: -100%; /* Nascosto a sinistra */
-    background: var(--primary-color);
-    padding: 1rem 0 2rem 0;
-    transition: all 0.4s ease-in-out;
-    opacity: 0;
-    height: calc(100vh - var(--nav-height));
-    overflow-y: auto; /* Scrollabile se non ci sta nello schermo */
-    box-shadow: inset 0 10px 10px -10px rgba(0,0,0,0.5);
+  /* 2. Mostriamo il bottone "Altro" */
+  .mobile-only {
+    display: block; /* O flex */
   }
 
-  .navbar-nav.active {
-    left: 0;
-    opacity: 1;
+  /* 3. Ottimizzazioni per Mobile */
+  .navbar-container {
+    padding: 0 0.5rem;
   }
 
+  .navbar-logo {
+    font-size: 1.2rem; /* Logo più piccolo */
+    margin-right: 0.5rem;
+  }
+
+  /* Rimpiccioliamo leggermente i link visibili (Home, News, Sport) */
   .nav-link {
-    width: 100%;
-    padding: 1.2rem 2rem;
-    font-size: 1.1rem; /* Font più grande su mobile per leggibilità */
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    border-radius: 0;
-    transform: none !important; /* Disabilita animazione hover su touch */
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
   }
+  
+  /* Su schermi MOLTO piccoli (es. iPhone SE), nascondiamo il testo, lasciamo solo icone */
+  @media (max-width: 400px) {
+    .link-text {
+      display: none;
+    }
+    .nav-link {
+      font-size: 1.2rem; /* Icone più grandi */
+      padding: 0.6rem;
+    }
+    
+    /* Ma nel dropdown il testo serve! */
+    .dropdown-item .link-text {
+      display: inline; 
+    }
+    .dropdown-item {
+      font-size: 1rem;
+    }
+  }
+}
 
-  .nav-link:hover {
-    background: rgba(255,255,255,0.05);
-  }
+/* Animazione menu */
+@keyframes scaleIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }

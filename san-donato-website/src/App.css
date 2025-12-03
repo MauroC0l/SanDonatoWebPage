@@ -3,22 +3,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 3rem;
+  /* Usiamo min-height invece di margin-top fisso per centrarlo verticalmente nella viewport */
+  min-height: 50vh; 
+  width: 100%;
   gap: 12px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-weight: 500;
   font-size: 1.1rem;
   color: #6b7280;
   user-select: none;
+  padding: 20px; /* Padding di sicurezza per schermi piccolissimi */
 }
 
 .spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #a5b4fc;
+  width: 24px; /* Leggermente più grande per visibilità su mobile */
+  height: 24px;
+  border: 3px solid #e0e7ff; /* Colore base più chiaro */
   border-top: 3px solid #4f46e5;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite; /* Leggermente più veloce */
   flex-shrink: 0;
 }
 
