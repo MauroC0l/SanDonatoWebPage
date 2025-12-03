@@ -119,10 +119,58 @@
 
 .cp-toolbar-title h2 { font-size: 1.75rem; font-weight: 800; margin: 0; text-transform: capitalize; letter-spacing: -0.03em; }
 
-.cp-nav-controls { display: flex; gap: 0.25rem; background: #F1F5F9; padding: 4px; border-radius: 14px; }
-.cp-btn-icon { background: white; border: 1px solid rgba(0,0,0,0.05); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; color: var(--cp-text-muted); transition: all 0.2s; }
-.cp-btn-icon:hover { color: var(--cp-primary-color); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.cp-btn-text { background: transparent; border: none; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; color: var(--cp-text-main); }
+/* NAV CONTROLS & BUTTONS */
+.cp-nav-controls { 
+    display: flex; gap: 6px; 
+    background: #F1F5F9; 
+    padding: 4px; 
+    border-radius: 12px; 
+    align-items: center;
+}
+
+.cp-btn-icon { 
+    background: white; 
+    border: 1px solid rgba(0,0,0,0.05); 
+    width: 32px; height: 32px; 
+    display: flex; align-items: center; justify-content: center; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    color: var(--cp-text-muted); 
+    transition: all 0.2s; 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.cp-btn-icon:hover { 
+    color: var(--cp-primary-color); 
+    transform: translateY(-1px); 
+    border-color: #CBD5E1;
+}
+
+/* STILE BOTTONE OGGI AGGIORNATO */
+.cp-btn-text { 
+    background: white;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 0 1.25rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--cp-text-main);
+    border-radius: 8px; /* Match icon radius */
+    height: 32px; /* Fixed height matching icons */
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.cp-btn-text:hover { 
+    border-color: var(--cp-accent-blue);
+    color: var(--cp-accent-blue);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+}
+.cp-btn-text:active {
+    transform: scale(0.98);
+    box-shadow: none;
+}
 
 .cp-view-controls { background: #F1F5F9; padding: 4px; border-radius: 12px; display: flex; }
 .cp-btn-view { border: none; padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--cp-text-muted); cursor: pointer; background: transparent; transition: all 0.2s; }

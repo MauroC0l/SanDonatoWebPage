@@ -18,7 +18,13 @@ const getFirstDayOfMonth = (year, month) => {
   return day === 0 ? 6 : day - 1;
 };
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+
+// Formatter aggiornati
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+const formatDayHeader = (date) => {
+    const str = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
 
 // CSS Vars Mapping per categorie
@@ -37,9 +43,9 @@ const generateMockEvents = () => {
   const teams = ["Juventus", "Milan", "Inter", "Napoli", "Roma", "Lazio", "Fiorentina", "Atalanta", "Torino", "Real Madrid", "Barcellona"];
   const locations = ["Allianz Stadium", "San Siro", "Stadio Olimpico", "Maradona Stadium"];
 
-  for (let i = 0; i < 25; i++) {
-    const dayOffset = Math.floor(Math.random() * 40) - 10;
-    const hour = 18 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < 40; i++) {
+    const dayOffset = Math.floor(Math.random() * 60) - 15;
+    const hour = 14 + Math.floor(Math.random() * 8);
     const teamA = teams[Math.floor(Math.random() * teams.length)];
     let teamB = teams[Math.floor(Math.random() * teams.length)];
     while(teamA === teamB) teamB = teams[Math.floor(Math.random() * teams.length)];
@@ -120,6 +126,10 @@ export default function ModernCalendarPage() {
     });
   }, [events, activeFilters]);
 
+  const dailyEvents = useMemo(() => {
+    return filteredEvents.filter(ev => isSameDay(ev.start, currentDate));
+  }, [filteredEvents, currentDate]);
+
   const toggleFilter = (key) => {
     setActiveFilters(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
@@ -176,7 +186,6 @@ export default function ModernCalendarPage() {
                 <div className="cp-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         <h3 className="cp-card-title">Calendario Sport</h3>
-                        {/* Chiudi solo su mobile se necessario */}
                         <button className="cp-btn-close-mobile" onClick={() => setIsMobileSidebarOpen(false)}><IconX /></button>
                     </div>
                     <p className="cp-card-subtitle">Stagione 2025/2026</p>
@@ -228,7 +237,12 @@ export default function ModernCalendarPage() {
             <div className="cp-toolbar">
               <div className="cp-toolbar-header-row">
                  <div className="cp-toolbar-title">
-                    <h2>{view === 'month' ? `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}` : 'Agenda'}</h2>
+                    <h2>
+                        {view === 'month' 
+                            ? `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}` 
+                            : formatDayHeader(currentDate)
+                        }
+                    </h2>
                  </div>
                  {/* Mobile Filter Button */}
                  <button className="cp-btn-mobile-filter" onClick={() => setIsMobileSidebarOpen(true)}>
@@ -239,13 +253,13 @@ export default function ModernCalendarPage() {
               <div className="cp-toolbar-actions-row">
                   <div className="cp-nav-controls">
                     <button onClick={() => handleNavigate("PREV")} className="cp-btn-icon"><IconChevronLeft /></button>
-                    <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Oggi</button>
+                    <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Ritorna a oggi</button>
                     <button onClick={() => handleNavigate("NEXT")} className="cp-btn-icon"><IconChevronRight /></button>
                   </div>
 
                   <div className="cp-view-controls">
                     <button onClick={() => setView('month')} className={`cp-btn-view ${view === 'month' ? 'cp-active' : ''}`}>Mese</button>
-                    <button onClick={() => setView('list')} className={`cp-btn-view ${view === 'list' ? 'cp-active' : ''}`}>Lista</button>
+                    <button onClick={() => setView('list')} className={`cp-btn-view ${view === 'list' ? 'cp-active' : ''}`}>Giorno</button>
                   </div>
               </div>
             </div>
@@ -261,7 +275,15 @@ export default function ModernCalendarPage() {
                                 const dayEvents = filteredEvents.filter(ev => isSameDay(ev.start, dayObj.date));
                                 const isToday = isSameDay(new Date(), dayObj.date);
                                 return (
-                                    <div key={idx} className={`cp-day-cell ${dayObj.isCurrentMonth ? 'cp-current-month' : 'cp-other-month'} ${isToday ? 'cp-today' : ''}`}>
+                                    <div 
+                                        key={idx} 
+                                        className={`cp-day-cell ${dayObj.isCurrentMonth ? 'cp-current-month' : 'cp-other-month'} ${isToday ? 'cp-today' : ''}`}
+                                        onClick={() => {
+                                            setCurrentDate(dayObj.date);
+                                            setView('list');
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <div className="cp-day-number">{dayObj.date.getDate()}</div>
                                         <div className="cp-events-container">
                                             {dayEvents.map(ev => <EventPill key={ev.id} event={ev} onClick={setSelectedEvent} />)}
@@ -275,10 +297,13 @@ export default function ModernCalendarPage() {
 
                 {view === 'list' && (
                     <div className="cp-list-container">
-                        {filteredEvents.length === 0 ? (
-                            <div className="cp-empty-state">Nessun evento trovato.</div>
+                        {dailyEvents.length === 0 ? (
+                            <div className="cp-empty-state">
+                                Nessun evento programmato per<br/>
+                                <strong>{formatDayHeader(currentDate)}</strong>
+                            </div>
                         ) : (
-                            filteredEvents.map(ev => (
+                            dailyEvents.map(ev => (
                                 <div key={ev.id} onClick={() => setSelectedEvent(ev)} className="cp-list-view-item">
                                     <div className="cp-date-box" style={{ 
                                         backgroundColor: `var(--cp-cat-${ev.cssVar}-bg)`, 
