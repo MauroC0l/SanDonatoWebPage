@@ -7,7 +7,6 @@ import TopHeader from "./components/AllPages/TopHeader";
 import NewsDetailPage from "./components/NewsDetail";
 import ChiSiamoPage from "./components/ChiSiamoPage";
 import SubscriptionPage from "./components/SubscriptionPage";
-import AboutPage from "./components/AboutPage";
 import CalendarPage from "./components/CalendarPage";
 import ContactPage from "./components/Contatti";
 import PrivacyPage from "./components/PrivacyPage";
@@ -36,10 +35,7 @@ export default function App() {
           <Route path="/news" element={<News />} />
           <Route path="/chi-siamo" element={<ChiSiamoPage />} />
           <Route path="/news/:id" element={<NewsDetailPage />} />
-
-
           <Route path="/iscrizione" element={<SubscriptionPage />} />
-          <Route path="/chi-siamo" element={<AboutPage />} />
           <Route path="/sports" element={<SportPage />} />
           <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/contatti" element={<ContactPage />} />
