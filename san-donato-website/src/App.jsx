@@ -6,6 +6,7 @@ import MyNavbar from "./components/MyNavbar";
 import Hero from "./components/Hero";
 import TopHeader from "./components/TopHeader"; 
 import NewsDetailPage from "./components/NewsDetail";
+import ChiSiamoPage from "./components/ChiSiamoPage";
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/news" element={<News />} />
-          <Route path="/chi-siamo" element={<About />} />
+          <Route path="/chi-siamo" element={<ChiSiamoPage />} />
           <Route path="/news/:id" element={<NewsDetailPage />} />
         </Routes>
       </main>
