@@ -1,0 +1,246 @@
+/* ============================= */
+/* SponsorPage.css - Mobile First & Modern */
+/* ============================= */
+
+/* Variabili locali */
+:root {
+  --sp-text-primary: #111827;
+  --sp-text-secondary: #4b5563;
+  --sp-accent: #4f46e5;
+  --sp-card-bg: #ffffff;
+  --sp-card-border: #e5e7eb;
+  --sp-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Animazione Fade In */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 1. SETUP PAGINA */
+.sponsor-page {
+  width: 100%;
+  min-height: 100vh;
+  color: var(--sp-text-primary);
+  /* Padding ridotto per mobile, aumenterà su desktop via media query */
+  padding: 40px 16px; 
+  /* Safe area per iPhone recenti */
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+.sponsor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 2. HEADER */
+.sponsor-header {
+  text-align: center;
+  margin-bottom: 40px; /* Meno spazio su mobile */
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-title {
+  /* Font size base più piccolo per mobile */
+  font-size: 2rem; 
+  font-weight: 800;
+  color: var(--sp-text-primary);
+  margin-bottom: 12px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.page-subtitle {
+  font-size: 1rem; /* Più leggibile su schermi piccoli */
+  color: var(--sp-text-secondary);
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 0 10px; /* Evita che il testo tocchi i bordi */
+}
+
+/* 3. GRIGLIA */
+.sponsor-grid {
+  display: grid;
+  /* Default Mobile: 1 colonna */
+  grid-template-columns: 1fr; 
+  gap: 20px;
+}
+
+/* 4. CARD STYLING */
+.sponsor-card {
+  background-color: var(--sp-card-bg);
+  border: 1px solid var(--sp-card-border);
+  border-radius: 16px; /* Radius leggermente ridotto per mobile */
+  text-decoration: none;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  
+  display: flex;
+  flex-direction: column;
+  /* Su mobile altezza automatica per adattarsi al contenuto */
+  height: auto; 
+  min-height: 260px;
+  
+  /* Animazione sequenziale */
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+  
+  /* UX Mobile: tocco più facile */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card-content {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+/* Immagine */
+.image-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  /* Altezza fissa per il contenitore logo per allineamento visivo */
+  height: 120px; 
+}
+
+.sponsor-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+  
+  /* SU MOBILE: Colore pieno di default (nessuno fa hover col dito) */
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+/* Meta Info */
+.sponsor-meta {
+  width: 100%;
+  text-align: center;
+  margin-top: auto; /* Spinge verso il basso */
+}
+
+.sponsor-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sp-text-primary);
+  margin: 0 0 12px 0;
+}
+
+/* Link freccia */
+.visit-arrow {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sp-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  
+  /* SU MOBILE: Sempre visibile */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+/* ============================= */
+/* 5. MEDIA QUERIES (Desktop Improvements) */
+/* ============================= */
+
+/* Tablet (min-width: 640px) */
+@media (min-width: 640px) {
+  .sponsor-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonne */
+    gap: 24px;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+  .sponsor-page {
+    padding: 80px 24px;
+  }
+  
+  .sponsor-header {
+    margin-bottom: 80px;
+  }
+
+  .page-title {
+    font-size: 3.5rem;
+  }
+
+  .sponsor-grid {
+    /* 3 o più colonne in base allo spazio */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 32px;
+  }
+  
+  .sponsor-card {
+    height: 320px; /* Altezza fissa elegante per desktop */
+    border-radius: 24px;
+  }
+
+  /* REINTRODUZIONE HOVER EFFECTS SOLO PER DESKTOP (dispositivi con mouse) */
+  @media (hover: hover) {
+    .sponsor-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--sp-accent);
+      box-shadow: var(--sp-hover-shadow);
+    }
+
+    .sponsor-image {
+      filter: grayscale(100%); /* Torna grigio di default */
+      opacity: 0.6;
+    }
+
+    .sponsor-card:hover .sponsor-image {
+      filter: grayscale(0%);
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    .visit-arrow {
+      opacity: 0; /* Nascondi di nuovo */
+      transform: translateY(10px);
+    }
+
+    .sponsor-card:hover .visit-arrow {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .sponsor-card:hover .arrow {
+      transform: translateX(4px);
+    }
+  }
+}

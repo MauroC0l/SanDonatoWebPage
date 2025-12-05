@@ -1,7 +1,8 @@
 /* --- Spaziatura tra sezioni --- */
 .section-spacing {
-    margin-top: clamp(-2rem, -3vw, -1rem); /* sezione notizie molto vicina */
-    margin-bottom: clamp(2rem, 5vw, 5rem);
+  margin-top: clamp(-2rem, -3vw, -1rem);
+  /* sezione notizie molto vicina */
+  margin-bottom: clamp(2rem, 5vw, 5rem);
 }
 
 /* --- Sezione principale --- */
@@ -31,7 +32,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: #ff7b33; 
+  background: #ff7b33;
   border-radius: 2px;
 }
 
@@ -51,7 +52,7 @@
   padding: 1.5rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   position: sticky;
-  top: 2rem;
+  top: clamp(5rem, 7vw, 8rem);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -116,8 +117,10 @@
 /* Contenitore checkbox in linea */
 .custom-checkbox {
   display: flex;
-  align-items: center; /* centra verticalmente */
-  gap: 8px; /* spazio uniforme tra box e testo */
+  align-items: center;
+  /* centra verticalmente */
+  gap: 8px;
+  /* spazio uniforme tra box e testo */
 }
 
 /* Checkbox */
@@ -130,11 +133,13 @@
   background-color: transparent;
   cursor: pointer;
   transition: all 0.3s ease;
-  flex-shrink: 0; /* evita che si deformi */
+  flex-shrink: 0;
+  /* evita che si deformi */
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0; /* elimina margini di default bootstrap */
+  margin: 0;
+  /* elimina margini di default bootstrap */
 }
 
 /* Stato checked */
@@ -155,10 +160,11 @@
 .custom-checkbox .form-check-label {
   cursor: pointer;
   font-size: 0.95rem;
-  margin: 0; /* elimina offset di default */
+  margin: 0;
+  /* elimina offset di default */
 }
 
-.custom-checkbox .form-check-input:checked ~ .form-check-label {
+.custom-checkbox .form-check-input:checked~.form-check-label {
   color: #f1faee;
   font-weight: 600;
 }
@@ -280,6 +286,7 @@
   .news-layout {
     flex-direction: column;
   }
+
   .news-sidebar {
     width: 100%;
     position: static;
@@ -292,6 +299,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -313,15 +321,18 @@
 }
 
 .news-img-wrapper {
-  height: 140px; /* ridotta da 180px */
+  height: 140px;
+  /* ridotta da 180px */
 }
 
 .news-card .card-body {
-  padding: 0.8rem 1rem; /* meno spazio interno */
+  padding: 0.8rem 1rem;
+  /* meno spazio interno */
 }
 
 .news-card .card-title {
-  font-size: 1rem; /* più compatto */
+  font-size: 1rem;
+  /* più compatto */
   margin-bottom: 0.4rem;
 }
 
@@ -378,7 +389,7 @@
   background-color: #f9fafb;
   color: #1d3557;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
@@ -421,7 +432,7 @@
   gap: 0.5rem;
 }
 
-.custom-month-select{
+.custom-month-select {
   padding: 0.4rem 0.6rem;
   border-radius: 8px;
   border: none;
@@ -430,11 +441,12 @@
   color: #1d3557;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .custom-year-select {
-  max-height: calc(6 * 2.4rem); /* 6 voci altezza circa */
+  max-height: calc(6 * 2.4rem);
+  /* 6 voci altezza circa */
   overflow-y: auto;
   background-color: #f1faee;
   border-radius: 8px;
@@ -468,7 +480,7 @@
 .react-datepicker {
   font-family: 'Segoe UI', sans-serif;
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .react-datepicker__header {
@@ -546,8 +558,8 @@
    ================================ */
 .react-datepicker__navigation--previous,
 .react-datepicker__navigation--next {
-    display: none !important;
-    pointer-events: none !important;
+  display: none !important;
+  pointer-events: none !important;
 }
 
 /* ================================
@@ -556,7 +568,8 @@
 
 /* Altezza del menu anno: mostra 5 anni */
 .custom-year-select {
-  max-height: calc(5 * 2.4rem); /* circa 5 voci altezza */
+  max-height: calc(5 * 2.4rem);
+  /* circa 5 voci altezza */
   overflow-y: auto;
   background-color: #f1faee;
   border-radius: 8px;
@@ -570,7 +583,8 @@
 
 /* Hover sul dropdown anno */
 .custom-year-select:hover {
-  background-color: #ff914d; /* colore arancio soft */
+  background-color: #ff914d;
+  /* colore arancio soft */
   color: white;
 }
 
@@ -590,7 +604,8 @@
 
 /* Scrollbar personalizzata per il menu anno */
 .custom-year-select::-webkit-scrollbar {
-  width: 6px; /* sottile */
+  width: 6px;
+  /* sottile */
 }
 
 .custom-year-select::-webkit-scrollbar-thumb {
@@ -606,5 +621,92 @@
 .custom-year-select {
   scrollbar-width: thin;
   scrollbar-color: #ff914d #f1faee;
+}
+
+/* ==============================
+   📱 FILTRI MOBILE RESPONSIVE (FLUID VERSION)
+   ============================== */
+
+/* Contenitore pulsante */
+.mobile-filters-toggle {
+  display: none;
+  justify-content: center;
+  width: 90%;
+  max-width: clamp(280px, 85vw, 420px);
+  margin-inline: auto;
+}
+
+/* Pulsante "Filtri" */
+.filter-toggle-btn {
+  background: #ff7b33;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.8rem;
+  padding: clamp(0.7rem, 2.2vw, 0.9rem) clamp(1rem, 3vw, 1.4rem);
+  width: 100%;
+  max-width: clamp(280px, 85vw, 420px);
+  box-shadow: 0 0.4rem 1rem rgba(255, 123, 51, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.filter-toggle-btn:hover,
+.filter-toggle-btn:focus,
+.filter-toggle-btn:active {
+  background: #ff7b33 !important; /* sempre arancione */
+  color: #fff;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.4rem 1.4rem rgba(255, 123, 51, 0.4);
+  outline: none;
+}
+
+/* Sidebar nascosta su smartphone */
+@media (max-width: 992px) {
+  .mobile-filters-toggle {
+    display: flex;
+    margin-bottom: clamp(0.4rem, 1.5vw, 0.8rem);
+  }
+
+  .news-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .news-sidebar {
+    display: none;
+    width: 90%;
+    max-width: clamp(280px, 90vw, 420px);
+    margin: 0 auto clamp(0.5rem, 2vw, 1rem) auto;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.1);
+    padding: clamp(0.8rem, 2vw, 1.2rem);
+    transform-origin: top center;
+  }
+
+  .news-sidebar.show-mobile {
+    display: block;
+    animation: dropdownPop 0.35s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+
+  .form-group {
+    margin-bottom: clamp(0.6rem, 1.8vw, 0.9rem);
+  }
+}
+
+/* Animazione fluida (fade + slide + scale) */
+@keyframes dropdownPop {
+  from {
+    opacity: 0;
+    transform: translateY(-0.6rem) scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0.2rem) scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 

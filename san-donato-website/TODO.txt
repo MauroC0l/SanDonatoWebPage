@@ -1,0 +1,37 @@
+DA FARE
+> - sistemare la lingua e ordinamento dati nel datapicker
+> --sistemare visualizzazione dei filtri su schermi diversi dal pc fisso
+> sistemare la navbar che nasconde alcune cose su schermi piccoli
+
+> ci metterei dentro le info per l'iscrizione e il link "Iscrizione & Rinnovi"
+> nella home aggiungere calendario partite, classifiche delle squadre, risultati della settimana [guardare file inviati]
+> Aggiornare sezione partite con calendari
+> sistemare gestione immagini
+> Chi siamo… te lo scrivo
+
+
+> far si che le misure della home page scalino insieme e topHeader, heroSection e aboutSection occupino sempre tutta la prima schermata
+> sistemare la lingua e ordinamento dati nel datapicker
+
+gestione amministratore CSM
+Finire home (notizie)
+Finire le altre pagine
+
+FATTE
+- sistemata la view in mobile
+- aggiunto badge "new" alle notizie recenti
+- sistemata route /news 
+- sistemata la lista di news in /news (+ sulla stessa riga, +divisione per pagine)
+- sistemata la scrollbar dell'anno
+- visualizzare singole notizie
+
+- "menu" rinominato in "documenti"
+- messi prima i contatti… che si vedano subito
+- Il menu "sport e attività" ridotto a "sport" e ci metterei le squadre e le classifiche ecc
+- modificata "sport e attivita" in "sport"
+- riscritta la home dividendo le notizie per sport
+- sestemata la rotella per i caricamenti
+- sistemato pulsante filtri dal telefono 
+- "Modulistica&tariffe" e "iscrizioni" le diventato "iscriviti" 
+
+> pagina degli sponsor

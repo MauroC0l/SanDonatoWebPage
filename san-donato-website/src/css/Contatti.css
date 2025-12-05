@@ -1,0 +1,240 @@
+/* --- Contacts.css --- */
+
+.contacts-page {
+  font-family: 'Inter', system-ui, sans-serif;
+  max-width: 1200px;
+  width: 95%;
+  margin: 2rem auto 4rem;
+  color: #333;
+}
+
+/* Animazione Ingresso */
+.fade-in {
+  animation: fadeIn Up 0.6s ease forwards;
+}
+
+/* Header */
+.contacts-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.contacts-header h1 {
+  font-size: 2.5rem;
+  color: #002b5c;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.contacts-header p {
+  font-size: 1.2rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Griglia Layout */
+.contacts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Due colonne uguali */
+  gap: 2rem;
+  align-items: start;
+}
+
+.contacts-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Card Stile Base */
+.contact-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.02);
+  transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+}
+
+.card-title {
+  color: #002b5c;
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.card-title svg {
+  color: #ff6600;
+}
+
+/* Info Testuali */
+.address-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+
+/* Mappa */
+.map-link-container {
+  display: block;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.map-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  transition: filter 0.3s;
+}
+
+.map-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 43, 92, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.map-link-container:hover .map-overlay {
+  opacity: 1;
+}
+
+/* Segreteria & Contatti */
+.info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.info-label {
+  color: #666;
+}
+
+.info-value.highlight {
+  color: #ff6600;
+  font-weight: 700;
+}
+
+.info-note {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.phone-link {
+  color: #002b5c;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 1.5rem 0;
+}
+
+/* Email & Fisco */
+.email-link {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #002b5c;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.email-link.pec {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.fiscal-data {
+  margin-top: 1.5rem;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.fiscal-data .label {
+  font-weight: bold;
+  color: #002b5c;
+  margin-right: 0.5rem;
+}
+
+/* --- Sezione Pagamenti --- */
+.iban-box {
+  background: #eef2f5;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  margin: 1.5rem 0;
+  border: 1px dashed #ccd;
+  position: relative;
+}
+
+.iban-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.iban-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #002b5c;
+  font-size: 1.1rem; /* Ridurre se va a capo su mobile */
+  word-break: break-all;
+}
+
+.copy-btn {
+  margin-top: 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: #002b5c;
+  color: white;
+  border-color: #002b5c;
+}
+
+.bank-image-container {
+  text-align: center;
+}
+.bank-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 80px;
+}
