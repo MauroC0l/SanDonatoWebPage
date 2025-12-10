@@ -1,6 +1,7 @@
 /* --- Hero.css --- */
+
 .hero-section {
-    background: rgba(255, 255, 255, 0.95);
+    /* Stile originale Desktop invariato */
     background: rgba(255, 255, 255, 0.95);
     color: #002b5c;
     padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw;
@@ -88,9 +89,47 @@
 @keyframes fadeLeft { to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-/* --- Responsive --- */
+
+/* --- OTTIMIZZAZIONE MOBILE --- */
 @media (max-width: 768px) {
-    .hero-content { flex-direction: column; text-align: center; }
-    .hero-subtitle { margin-bottom: 1rem; }
-    .hero-logo { width: clamp(120px, 40vw, 220px); margin-top: 1rem; }
+    .hero-section {
+        /* Aggiungo un po' di padding verticale per dare respiro su mobile */
+        padding: 2rem 1rem; 
+    }
+
+    .hero-content { 
+        flex-direction: column; /* Impila testo e logo */
+        text-align: center; 
+        gap: 2rem; /* Spazio uniforme tra testo e logo */
+    }
+
+    .hero-text {
+        /* Assicura che il testo sia centrato */
+        width: 100%;
+    }
+
+    .hero-subtitle { 
+        margin-bottom: 0; /* Rimosso margin extra, gestito dal gap del genitore */
+        margin-top: 0.5rem;
+    }
+
+    /* Modifica specifica per il Logo su Mobile */
+    .hero-logo-container {
+        /* Resetta la trasformazione orizzontale dell'animazione desktop */
+        transform: translateY(20px); 
+        animation: fadeUp 1s ease forwards; /* Cambia animazione per mobile (sale dal basso invece che da sinistra) */
+        animation-delay: 0.6s;
+    }
+
+    .hero-logo { 
+        /* Dimensione fissa ridotta per mobile, per non occupare tutto lo schermo */
+        width: 130px; 
+        max-width: 100%;
+        margin-top: 0;
+    }
+
+    .hero-message {
+        margin-top: 1rem;
+        font-size: 0.95rem; /* Leggermente più piccolo su mobile */
+    }
 }

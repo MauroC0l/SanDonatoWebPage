@@ -2,7 +2,14 @@ import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
 
 // ==========================================
-// 🛠 LOGICA APPLICAZIONE
+// 🛠 CONFIGURAZIONE GOOGLE
+// ==========================================
+// Sostituisci queste stringhe con i tuoi dati reali
+const GOOGLE_API_KEY = "LA_TUA_API_KEY_QUI"; 
+const CALENDAR_ID = "IL_TUO_CALENDAR_ID_QUI@group.calendar.google.com";
+
+// ==========================================
+// 🛠 UTILITIES E COSTANTI
 // ==========================================
 
 const MONTH_NAMES = [
@@ -19,7 +26,7 @@ const getFirstDayOfMonth = (year, month) => {
 };
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
-// Formatter aggiornati
+// Formatter
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 const formatDayHeader = (date) => {
     const str = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
@@ -27,50 +34,28 @@ const formatDayHeader = (date) => {
 }
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
 
-// CSS Vars Mapping per categorie
+// Categorie
 const CATEGORIES = {
   SERIE_A: { id: "Serie A", cssVar: "serie-a" },
   CHAMPIONS: { id: "Champions", cssVar: "champions" },
   COPPA: { id: "Coppa Italia", cssVar: "coppa" },
   AMICHEVOLE: { id: "Amichevole", cssVar: "amichevole" },
+  ALTRO: { id: "Altro", cssVar: "amichevole" } // Fallback
 };
 
-const generateMockEvents = () => {
-  const events = [];
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const teams = ["Juventus", "Milan", "Inter", "Napoli", "Roma", "Lazio", "Fiorentina", "Atalanta", "Torino", "Real Madrid", "Barcellona"];
-  const locations = ["Allianz Stadium", "San Siro", "Stadio Olimpico", "Maradona Stadium"];
-
-  for (let i = 0; i < 40; i++) {
-    const dayOffset = Math.floor(Math.random() * 60) - 15;
-    const hour = 14 + Math.floor(Math.random() * 8);
-    const teamA = teams[Math.floor(Math.random() * teams.length)];
-    let teamB = teams[Math.floor(Math.random() * teams.length)];
-    while(teamA === teamB) teamB = teams[Math.floor(Math.random() * teams.length)];
-    
-    const catKeys = Object.keys(CATEGORIES);
-    const categoryKey = catKeys[Math.floor(Math.random() * catKeys.length)];
-    const category = CATEGORIES[categoryKey];
-    
-    const startDate = new Date(year, month, today.getDate() + dayOffset, hour, 0);
-    const endDate = new Date(startDate.getTime() + (105 * 60000));
-
-    events.push({
-      id: i,
-      title: `${teamA} vs ${teamB}`,
-      start: startDate,
-      end: endDate,
-      location: locations[Math.floor(Math.random() * locations.length)],
-      category: category.id,
-      cssVar: category.cssVar
-    });
-  }
-  return events.sort((a, b) => a.start - b.start);
+// Logica per assegnare colore/categoria basandosi sul titolo dell'evento Google
+const assignCategoryFromTitle = (title = "") => {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes("champions") || lowerTitle.includes("ucl")) return CATEGORIES.CHAMPIONS;
+  if (lowerTitle.includes("coppa") || lowerTitle.includes("tim")) return CATEGORIES.COPPA;
+  if (lowerTitle.includes("amichevole")) return CATEGORIES.AMICHEVOLE;
+  if (lowerTitle.includes("serie a")) return CATEGORIES.SERIE_A;
+  
+  // Default se non trova parole chiave
+  return CATEGORIES.SERIE_A; 
 };
 
-// Icon Components
+// Icon Components (Invariati)
 const IconChevronLeft = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
 const IconChevronRight = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
 const IconCalendar = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
@@ -116,13 +101,63 @@ export default function ModernCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("month");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => { setEvents(generateMockEvents()); }, []);
+  // --- FETCH GOOGLE CALENDAR ---
+  useEffect(() => {
+    const fetchGoogleEvents = async () => {
+      try {
+        setLoading(true);
+        // Costruiamo le date per la query (es. da inizio anno corrente a fine anno prossimo)
+        // Oppure prendiamo un range ampio
+        const timeMin = new Date(new Date().getFullYear(), 0, 1).toISOString(); // Inizio anno
+        
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=200`;
+
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error("Errore nel caricamento del calendario. Verifica API Key e Calendar ID.");
+        }
+
+        const data = await response.json();
+        
+        // Mappiamo i dati di Google nel formato del nostro app
+        const mappedEvents = data.items.map((item, index) => {
+          const startDate = new Date(item.start.dateTime || item.start.date);
+          const endDate = new Date(item.end.dateTime || item.end.date);
+          
+          // Assegna categoria
+          const categoryObj = assignCategoryFromTitle(item.summary);
+
+          return {
+            id: item.id || index,
+            title: item.summary || "Evento senza titolo",
+            start: startDate,
+            end: endDate,
+            location: item.location || "Luogo da definire",
+            category: categoryObj.id,
+            cssVar: categoryObj.cssVar,
+            description: item.description // Opzionale
+          };
+        });
+
+        setEvents(mappedEvents);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      }
+    };
+
+    fetchGoogleEvents();
+  }, []);
 
   const filteredEvents = useMemo(() => {
     return events.filter(ev => {
         const catKey = Object.keys(CATEGORIES).find(key => CATEGORIES[key].id === ev.category);
-        return activeFilters.includes(catKey);
+        return catKey && activeFilters.includes(catKey);
     });
   }, [events, activeFilters]);
 
@@ -173,6 +208,10 @@ export default function ModernCalendarPage() {
     return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
   }, [currentDate]);
 
+  if (error) {
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>Errore: {error}</div>;
+  }
+
   return (
     <div className="cp-dashboard-container">
 
@@ -193,13 +232,11 @@ export default function ModernCalendarPage() {
                     <div className="cp-stat-box">
                     <div className="cp-stat-icon">🏆</div>
                     <div>
-                        <div className="cp-stat-value">{events.length}</div>
+                        <div className="cp-stat-value">{loading ? "..." : events.length}</div>
                         <div className="cp-stat-label">Match Totali</div>
                     </div>
                     </div>
-                    <button className="cp-btn-primary">
-                    <span style={{ fontSize: '1.2rem', lineHeight: 0 }}>+</span> Nuovo Evento
-                    </button>
+                    {/* Rimosso pulsante Nuovo Evento perché ora è gestito da Google */}
                 </div>
 
                 <div className="cp-card" style={{ flex: 1 }}>
@@ -208,7 +245,7 @@ export default function ModernCalendarPage() {
                     <span className="cp-filter-count">{filteredEvents.length}</span>
                     </div>
                     <div>
-                    {Object.entries(CATEGORIES).map(([key, value]) => (
+                    {Object.entries(CATEGORIES).filter(([key]) => key !== 'ALTRO').map(([key, value]) => (
                         <FilterToggle 
                         key={key} 
                         label={value.id} 
@@ -222,11 +259,22 @@ export default function ModernCalendarPage() {
                 
                 <div className="cp-info-box">
                     <div className="cp-info-label">Prossimo Match</div>
-                    {events.length > 0 && (
-                        <>
-                            <div className="cp-info-match">{events[0].title}</div>
-                            <div className="cp-info-date">{formatDate(events[0].start)}</div>
-                        </>
+                    {loading ? (
+                       <div>Caricamento...</div>
+                    ) : events.length > 0 ? (
+                        // Cerca il primo evento futuro
+                        (() => {
+                            const futureEvents = events.filter(e => e.start >= new Date());
+                            const nextEvent = futureEvents.length > 0 ? futureEvents[0] : events[events.length -1];
+                            return (
+                                <>
+                                    <div className="cp-info-match">{nextEvent.title}</div>
+                                    <div className="cp-info-date">{formatDate(nextEvent.start)}</div>
+                                </>
+                            )
+                        })()
+                    ) : (
+                        <div>Nessun evento</div>
                     )}
                 </div>
             </aside>
@@ -265,7 +313,9 @@ export default function ModernCalendarPage() {
             </div>
 
             <div className="cp-calendar-content">
-                {view === 'month' && (
+                {loading && <div style={{padding: 20, textAlign:'center'}}>Caricamento eventi da Google...</div>}
+                
+                {!loading && view === 'month' && (
                     <>
                         <div className="cp-week-header">
                             {DAY_NAMES.map(day => <div key={day} className="cp-day-name">{day}</div>)}
@@ -295,7 +345,7 @@ export default function ModernCalendarPage() {
                     </>
                 )}
 
-                {view === 'list' && (
+                {!loading && view === 'list' && (
                     <div className="cp-list-container">
                         {dailyEvents.length === 0 ? (
                             <div className="cp-empty-state">
@@ -373,9 +423,21 @@ export default function ModernCalendarPage() {
                             <p>{selectedEvent.location}</p>
                         </div>
                     </div>
+                    {/* Se c'è una descrizione su Google, mostriamola */}
+                    {selectedEvent.description && (
+                         <div className="cp-detail-row">
+                            <div className="cp-detail-content" style={{marginTop: 10}}>
+                                <label>Info Extra</label>
+                                <p style={{fontSize: '0.9rem', fontWeight: 400}}>{selectedEvent.description}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="cp-modal-footer">
-                    <button className="cp-btn-primary">Modifica</button>
+                    {/* Pulsante per aprire su Google Calendar */}
+                    <button className="cp-btn-primary" onClick={() => window.open(`https://calendar.google.com/calendar/u/0/r/eventedit/copy/${selectedEvent.id}`, '_blank')}>
+                        Aggiungi al mio calendario
+                    </button>
                     <button className="cp-btn-outline" onClick={() => setSelectedEvent(null)}>Chiudi</button>
                 </div>
             </div>
