@@ -1,5 +1,5 @@
 /* =========================================
-   HOME PAGE STYLES - Grid Areas & Mobile Carousel
+   HOME PAGE AVANT-GARDE STYLES
    Scoped: hp-, lcs-, ev-, nic-
    ========================================= */
 
@@ -30,31 +30,14 @@
   padding: 0 1.5rem;
 }
 
-/* --- GRID SYSTEM: MOBILE FIRST --- */
-/* Su mobile è una colonna unica (flex column) */
+/* --- GRID LAYOUT DESKTOP (3 Colonne) --- */
 .hp-grid-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  margin-top: 2rem;
-}
-
-/* Assegnazione Aree (Serve per il Desktop) */
-.hp-col-live { grid-area: live; }
-.hp-col-news { grid-area: news; }
-.hp-col-calendar { grid-area: calendar; }
-
-/* --- GRID SYSTEM: DESKTOP (> 992px) --- */
-@media (min-width: 992px) {
-  .hp-grid-layout {
-    display: grid;
-    /* Definisco le 3 colonne: Live (25%), News (40%), Calendar (35%) */
-    grid-template-columns: 3fr 5fr 4fr;
-    /* Definisco l'ordine visivo: SX | CENTRO | DX */
-    grid-template-areas: "live news calendar";
-    gap: 2.5rem;
-    align-items: start;
-  }
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+  /* LIVE (25%) - CALENDARIO (35%) - NEWS (40%) */
+  grid-template-columns: 3fr 4fr 5fr; 
+  align-items: start;
 }
 
 /* --- HEADER COLONNE --- */
@@ -79,7 +62,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Frecce Mobile (Nascoste di default su desktop) */
+/* Frecce Mobile (Nascoste su Desktop) */
 .mobile-arrows { display: none; gap: 8px; }
 .mobile-arrows button {
   background: white; border: 1px solid var(--hp-border); border-radius: 50%;
@@ -88,25 +71,26 @@
 }
 .mobile-arrows button:active { background: #f1f5f9; }
 
-/* --- WRAPPER SCROLLABILE (Desktop Verticale / Mobile Orizzontale) --- */
+/* --- CONTAINER PER GLI ELEMENTI (Wrapper) --- */
 .scroll-wrapper {
   display: flex;
-  flex-direction: column; /* Default Desktop: Verticale */
+  flex-direction: column; /* Desktop: Verticale */
   gap: 1rem;
 }
 
 /* =========================================
-   1. LIVE MATCHES (lcs-)
+   1. LIVE MATCHES (Card)
    ========================================= */
-.live-pulse-icon { font-size: 0.5em; color: var(--hp-danger); animation: pulse 1.5s infinite; }
+.live-pulse-icon {
+  font-size: 0.5em; color: var(--hp-danger); animation: pulse 1.5s infinite;
+}
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
 .live-card-simple {
   background: var(--hp-white); border-radius: var(--hp-radius); padding: 1.2rem;
   box-shadow: var(--hp-shadow); border: 1px solid transparent;
   transition: transform 0.2s; position: relative; overflow: hidden;
-  /* Larghezza minima per evitare schiacciamento su mobile */
-  min-width: 280px; 
+  min-width: 260px; 
 }
 .live-card-simple:hover { transform: translateY(-3px); border-color: var(--hp-accent); }
 
@@ -130,14 +114,14 @@
 }
 
 /* =========================================
-   2. CALENDARIO (ev-)
+   2. CALENDARIO (Card Evento)
    ========================================= */
 .event-card {
   background: var(--hp-white); border-radius: var(--hp-radius); padding: 1rem;
   display: flex; align-items: center; gap: 1rem;
   box-shadow: var(--hp-shadow); border: 1px solid transparent;
   transition: transform 0.2s;
-  min-width: 280px; /* Per slider mobile */
+  min-width: 280px;
 }
 .event-card:hover { border-color: var(--hp-accent); transform: translateX(5px); }
 
@@ -161,7 +145,7 @@
 .ev-meta-row span { display: flex; align-items: center; gap: 4px; }
 
 /* =========================================
-   3. NOTIZIE (nic-)
+   3. NOTIZIE (Lista Compatta)
    ========================================= */
 .news-vertical-list { display: flex; flex-direction: column; gap: 1rem; }
 
@@ -169,9 +153,8 @@
   display: flex; gap: 1rem; align-items: center;
   background: var(--hp-white); padding: 0.8rem; border-radius: var(--hp-radius);
   box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: background 0.2s;
-  border: 1px solid transparent;
 }
-.news-item-compact:hover { background: #f8fafc; border-color: var(--hp-border); }
+.news-item-compact:hover { background: #f8fafc; }
 
 .nic-image {
   width: 80px; height: 80px; border-radius: 10px;
@@ -179,48 +162,57 @@
 }
 .nic-content { flex-grow: 1; min-width: 0; }
 .nic-date { font-size: 0.75rem; color: var(--hp-accent); font-weight: 600; display: block; margin-bottom: 4px; }
-.nic-title { 
-    font-size: 1rem; font-weight: 700; margin: 0; line-height: 1.3; color: var(--hp-primary);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
+.nic-title { font-size: 1rem; font-weight: 700; margin: 0; line-height: 1.3; color: var(--hp-primary); }
 
-.view-all-wrapper { text-align: center; margin-top: 1rem; }
 .loader { border: 3px solid #eee; border-top: 3px solid var(--hp-accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s infinite; margin: 2rem auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* =========================================
-   📱 MOBILE TRANSFORMATION (< 992px)
+   📱 MOBILE TRANSFORMATION (Centratura & Carosello)
    ========================================= */
 @media (max-width: 991px) {
   
   .hp-main-container { padding: 0; }
   
-  .column-header { padding: 0 1.5rem; border: none; margin-bottom: 1rem; }
+  .hp-grid-layout {
+    display: flex; flex-direction: column; gap: 2.5rem; margin-top: 1rem;
+  }
 
-  /* Mostra le frecce per Live e Calendario */
+  .column-header {
+    padding: 0 1.5rem; margin-bottom: 1rem; border: none;
+  }
+
   .mobile-arrows { display: flex; }
 
-  /* Trasforma le liste Live e Calendario in CAROSELLI */
+  /* --- CAROSELLI ORIZZONTALI --- */
   .hp-col-live .scroll-wrapper,
   .hp-col-calendar .scroll-wrapper {
     flex-direction: row; /* Orizzontale */
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x mandatory; /* Scatto magnetico */
     gap: 1rem;
-    padding: 0.5rem 1.5rem 1.5rem 1.5rem; /* Spazio laterale per scroll */
+    
+    /* Padding strategico: permette di vedere la card centrata con un po' di spazio ai lati */
+    padding: 0.5rem calc(50vw - 42.5vw); /* Centratura matematica basata sulla width della card */
+    
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; 
   }
   .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-  /* Snap delle card */
+  /* --- CARD CENTRATE --- */
   .live-card-simple, .event-card {
-    scroll-snap-align: start;
-    min-width: 85vw; /* Card quasi full-width */
+    /* Fondamentale per la centratura */
+    scroll-snap-align: center;
+    
+    /* Larghezza fissa relativa alla viewport (85% dello schermo) */
+    min-width: 85vw; 
+    
     border: 1px solid rgba(0,0,0,0.06);
+    margin: 0; /* Rimuovi margini che potrebbero disturbare */
   }
 
-  /* Notizie restano verticali ma con padding */
+  /* Notizie */
   .hp-col-news { padding: 0 1.5rem; }
   .news-item-compact { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 }
