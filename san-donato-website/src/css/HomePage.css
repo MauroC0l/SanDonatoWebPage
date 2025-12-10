@@ -12,7 +12,7 @@
   --hp-text: #334155;
   --hp-border: #e2e8f0;
   --hp-radius: 16px;
-  --hp-shadow: 0 4px 20px -5px rgba(0,0,0,0.08);
+  --hp-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08);
 }
 
 .hp-root {
@@ -40,9 +40,17 @@
 }
 
 /* Assegnazione Aree (Serve per il Desktop) */
-.hp-col-live { grid-area: live; }
-.hp-col-news { grid-area: news; }
-.hp-col-calendar { grid-area: calendar; }
+.hp-col-live {
+  grid-area: live;
+}
+
+.hp-col-news {
+  grid-area: news;
+}
+
+.hp-col-calendar {
+  grid-area: calendar;
+}
 
 /* --- GRID SYSTEM: DESKTOP (> 992px) --- */
 @media (min-width: 992px) {
@@ -80,148 +88,412 @@
 }
 
 /* Frecce Mobile (Nascoste di default su desktop) */
-.mobile-arrows { display: none; gap: 8px; }
-.mobile-arrows button {
-  background: white; border: 1px solid var(--hp-border); border-radius: 50%;
-  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-  color: var(--hp-primary); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background 0.2s;
+.mobile-arrows {
+  display: none;
+  gap: 8px;
 }
-.mobile-arrows button:active { background: #f1f5f9; }
+
+.mobile-arrows button {
+  background: white;
+  border: 1px solid var(--hp-border);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hp-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: background 0.2s;
+}
+
+.mobile-arrows button:active {
+  background: #f1f5f9;
+}
 
 /* --- WRAPPER SCROLLABILE (Desktop Verticale / Mobile Orizzontale) --- */
 .scroll-wrapper {
   display: flex;
-  flex-direction: column; /* Default Desktop: Verticale */
+  flex-direction: column;
+  /* Default Desktop: Verticale */
   gap: 1rem;
-  margin-left: 3.5rem;
 }
 
 /* =========================================
    1. LIVE MATCHES (lcs-)
    ========================================= */
-.live-pulse-icon { font-size: 0.5em; color: var(--hp-danger); animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+.live-pulse-icon {
+  font-size: 0.5em;
+  color: var(--hp-danger);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
 
 .live-card-simple {
-  background: var(--hp-white); border-radius: var(--hp-radius); padding: 1.2rem;
-  box-shadow: var(--hp-shadow); border: 1px solid transparent;
-  transition: transform 0.2s; position: relative; overflow: hidden;
+  background: var(--hp-white);
+  border-radius: var(--hp-radius);
+  padding: 1.2rem;
+  box-shadow: var(--hp-shadow);
+  border: 1px solid transparent;
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
   /* Larghezza minima per evitare schiacciamento su mobile */
-  min-width: 280px; 
+  min-width: 280px;
 }
-.live-card-simple:hover { transform: translateY(-3px); border-color: var(--hp-accent); }
 
-.lcs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.hp-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; color: white; }
-.badge-danger { background: var(--hp-danger); }
-.badge-secondary { background: #64748b; }
-.yt-icon { color: #ff0000; font-size: 1.4rem; }
+.live-card-simple:hover {
+  transform: translateY(-3px);
+  border-color: var(--hp-accent);
+}
 
-.lcs-match-info { text-align: center; margin-bottom: 1rem; }
-.lcs-teams { font-weight: 800; color: var(--hp-primary); display: flex; flex-direction: column; gap: 4px; font-size: 1.1rem; }
-.lcs-teams .vs { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
+.lcs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
 
-.hp-btn { display: block; text-align: center; padding: 0.6rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: all 0.2s; }
-.btn-danger { background: var(--hp-danger); color: white; }
-.btn-outline { border: 1px solid var(--hp-border); color: var(--hp-text); }
-.btn-link { background: none; border: none; color: var(--hp-primary); text-decoration: underline; width: auto; margin: 0 auto; cursor: pointer; }
+.hp-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+}
+
+.badge-danger {
+  background: var(--hp-danger);
+}
+
+.badge-secondary {
+  background: #64748b;
+}
+
+.yt-icon {
+  color: #ff0000;
+  font-size: 1.4rem;
+}
+
+.lcs-match-info {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.lcs-teams {
+  font-weight: 800;
+  color: var(--hp-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 1.1rem;
+}
+
+.lcs-teams .vs {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.hp-btn {
+  display: block;
+  text-align: center;
+  padding: 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-danger {
+  background: var(--hp-danger);
+  color: white;
+}
+
+.btn-outline {
+  border: 1px solid var(--hp-border);
+  color: var(--hp-text);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--hp-primary);
+  text-decoration: underline;
+  width: auto;
+  margin: 0 auto;
+  cursor: pointer;
+}
 
 .empty-state-box {
-    text-align: center; padding: 2rem; color: #94a3b8; font-style: italic; background: white; border-radius: var(--hp-radius); border: 1px dashed var(--hp-border);
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+  font-style: italic;
+  background: white;
+  border-radius: var(--hp-radius);
+  border: 1px dashed var(--hp-border);
 }
 
 /* =========================================
    2. CALENDARIO (ev-)
    ========================================= */
 .event-card {
-  background: var(--hp-white); border-radius: var(--hp-radius); padding: 1rem;
-  display: flex; align-items: center; gap: 1rem;
-  box-shadow: var(--hp-shadow); border: 1px solid transparent;
+  background: var(--hp-white);
+  border-radius: var(--hp-radius);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--hp-shadow);
+  border: 1px solid transparent;
   transition: transform 0.2s;
-  min-width: 280px; /* Per slider mobile */
+  min-width: 280px;
+  /* Per slider mobile */
 }
-.event-card:hover { border-color: var(--hp-accent); transform: translateX(5px); }
+
+.event-card:hover {
+  border-color: var(--hp-accent);
+  transform: translateX(5px);
+}
 
 .event-date-badge {
-  background: #f1f5f9; border-radius: 12px; width: 60px; height: 60px;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  flex-shrink: 0; color: var(--hp-primary);
+  background: #f1f5f9;
+  border-radius: 12px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--hp-primary);
 }
-.ed-day { font-size: 0.7rem; font-weight: 700; opacity: 0.7; }
-.ed-date { font-size: 1.1rem; font-weight: 800; }
 
-.event-info { flex-grow: 1; overflow: hidden; }
-.ev-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
-.tag-calcio { background: #e0f2fe; color: #0284c7; }
-.tag-volley { background: #ffedd5; color: #ea580c; }
-.tag-basket { background: #fce7f3; color: #db2777; }
-.tag-evento { background: #f3e8ff; color: #9333ea; }
+.ed-day {
+  font-size: 0.7rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
 
-.ev-title { font-size: 1rem; font-weight: 700; margin: 0 0 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ev-meta-row { display: flex; gap: 12px; font-size: 0.8rem; color: #64748b; }
-.ev-meta-row span { display: flex; align-items: center; gap: 4px; }
+.ed-date {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.event-info {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.ev-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.tag-calcio {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.tag-volley {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.tag-basket {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.tag-evento {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+.ev-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ev-meta-row {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.ev-meta-row span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 /* =========================================
    3. NOTIZIE (nic-)
    ========================================= */
-.news-vertical-list { display: flex; flex-direction: column; gap: 1rem; }
+.news-vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
 .news-item-compact {
-  display: flex; gap: 1rem; align-items: center;
-  background: var(--hp-white); padding: 0.8rem; border-radius: var(--hp-radius);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.03); cursor: pointer; transition: background 0.2s;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: var(--hp-white);
+  padding: 0.8rem;
+  border-radius: var(--hp-radius);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: background 0.2s;
   border: 1px solid transparent;
 }
-.news-item-compact:hover { background: #f8fafc; border-color: var(--hp-border); }
+
+.news-item-compact:hover {
+  background: #f8fafc;
+  border-color: var(--hp-border);
+}
 
 .nic-image {
-  width: 80px; height: 80px; border-radius: 10px;
-  background-size: cover; background-position: center; flex-shrink: 0;
-}
-.nic-content { flex-grow: 1; min-width: 0; }
-.nic-date { font-size: 0.75rem; color: var(--hp-accent); font-weight: 600; display: block; margin-bottom: 4px; }
-.nic-title { 
-    font-size: 1rem; font-weight: 700; margin: 0; line-height: 1.3; color: var(--hp-primary);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
 }
 
-.view-all-wrapper { text-align: center; margin-top: 1rem; }
-.loader { border: 3px solid #eee; border-top: 3px solid var(--hp-accent); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s infinite; margin: 2rem auto; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.nic-content {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.nic-date {
+  font-size: 0.75rem;
+  color: var(--hp-accent);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.nic-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  color: var(--hp-primary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.view-all-wrapper {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.loader {
+  border: 3px solid #eee;
+  border-top: 3px solid var(--hp-accent);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* =========================================
    📱 MOBILE TRANSFORMATION (< 992px)
    ========================================= */
 @media (max-width: 991px) {
-  
-  .hp-main-container { padding: 0; }
-  
-  .column-header { padding: 0 1.5rem; border: none; margin-bottom: 1rem; }
+
+  .hp-main-container {
+    padding: 0;
+  }
+
+  .column-header {
+    padding: 0 1.5rem;
+    border: none;
+    margin-bottom: 1rem;
+  }
 
   /* Mostra le frecce per Live e Calendario */
-  .mobile-arrows { display: flex; }
+  .mobile-arrows {
+    display: flex;
+  }
 
   /* Trasforma le liste Live e Calendario in CAROSELLI */
   .hp-col-live .scroll-wrapper,
   .hp-col-calendar .scroll-wrapper {
-    flex-direction: row; /* Orizzontale */
+    flex-direction: row;
+    /* Orizzontale */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1rem;
-    padding: 0.5rem 1.5rem 1.5rem 1.5rem; /* Spazio laterale per scroll */
+    /*     ** MODIFICA QUI: Aggiunto spazio a sinistra e ridotto a destra per centratura apparente.
+    ** Imposto il padding-left a 3rem (il doppio del padding laterale di base 1.5rem)
+    */
+    padding: 0.5rem 1.5rem 1.5rem 3rem;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; 
+    scrollbar-width: none;
+
+    /* Aggiungiamo scroll-padding-left per centrare meglio lo snap */
+    scroll-padding-left: 1.5rem;
+    /* Aggancia la card 1.5rem a destra rispetto al bordo */
   }
-  .scroll-wrapper::-webkit-scrollbar { display: none; }
+
+  .scroll-wrapper::-webkit-scrollbar {
+    display: none;
+  }
 
   /* Snap delle card */
-  .live-card-simple, .event-card {
+  .live-card-simple,
+  .event-card {
     scroll-snap-align: start;
-    min-width: 85vw; /* Card quasi full-width */
-    border: 1px solid rgba(0,0,0,0.06);
+    /* Card leggermente più stretta per mostrare un po' di quella successiva */
+    min-width: 80vw;
+    border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   /* Notizie restano verticali ma con padding */
-  .hp-col-news { padding: 0 1.5rem; }
-  .news-item-compact { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+  .hp-col-news {
+    padding: 0 1.5rem;
+  }
+
+  .news-item-compact {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
 }
