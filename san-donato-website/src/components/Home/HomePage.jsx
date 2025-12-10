@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
 import { getLatestPostsByCategory } from "../../api/API.mjs";
-import { FaCalendarAlt, FaMapMarkerAlt, FaClock, FaArrowRight, FaYoutube, FaCircle, FaNewspaper } from "react-icons/fa";
+import { FaCalendarAlt, FaClock, FaArrowRight, FaYoutube, FaCircle, FaNewspaper, FaChevronLeft, FaChevronRight, FaMapMarkerAlt } from "react-icons/fa";
 import "../../css/HomePage.css";
 
 export default function HomePage() {
@@ -10,66 +10,67 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // --- DATI SIMULATI: CALENDARIO ---
-  const upcomingEvents = [
-    { id: 1, day: "24", month: "SET", title: "Open Day Minivolley", time: "17:00", location: "Palestra Cartiera", category: "Volley" },
-    { id: 2, day: "28", month: "SET", title: "Prima Squadra Calcio vs Real Torino", time: "20:30", location: "Campo Borgo Vittoria", category: "Calcio" },
-    { id: 3, day: "02", month: "OTT", title: "Basket U19 - Amichevole", time: "18:30", location: "Palestra Cartiera", category: "Basket" },
-    { id: 4, day: "15", month: "OTT", title: "Festa di Inizio Stagione", time: "19:00", location: "Sede PSD", category: "Evento" },
-  ];
+  // Refs per lo scroll orizzontale su mobile
+  const liveListRef = useRef(null);
+  const calendarListRef = useRef(null);
 
-  // Helper per creare date di test relative a "oggi" (solo per demo)
+  // --- HELPER DATE (Simulazione dati dinamici) ---
   const today = new Date();
-  const getTestDate = (hoursOffset) => {
+  
+  // Genera una data ISO relativa a "adesso"
+  const getTestDate = (daysOffset, hoursOffset = 0) => {
     const d = new Date(today);
+    d.setDate(today.getDate() + daysOffset);
     d.setHours(today.getHours() + hoursOffset); 
-    return d.toISOString(); // Formato ISO per simulare DB
+    return d.toISOString();
   };
 
-  // --- DATI SIMULATI: DIRETTE (Con Date ISO Reali) ---
-  const liveMatches = [
-    { 
-      id: 101, 
-      teamA: "PSD Volley", 
-      teamB: "Lasalliano", 
-      matchDate: getTestDate(0), // Inizia ORA (quindi LIVE)
-    },
-    { 
-      id: 102, 
-      teamA: "PSD Calcio", 
-      teamB: "Real Torino", 
-      matchDate: getTestDate(2), // Tra 2 ore (UPCOMING)
-    },
+  // Genera giorno della settimana (es. "LUN")
+  const getDayName = (dateISO) => {
+    const d = new Date(dateISO);
+    return d.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+  };
+
+  // Genera data breve (es. "25/09")
+  const getShortDate = (dateISO) => {
+    const d = new Date(dateISO);
+    return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+  };
+
+  // --- DATI SIMULATI ---
+  
+  // 1. CALENDARIO: Genero eventi per i prossimi giorni (Settimana corrente)
+  const weeklyEvents = [
+    { id: 1, dateISO: getTestDate(0, 2), title: "Allenamento U19", location: "Palestra Cartiera", category: "Basket" },
+    { id: 2, dateISO: getTestDate(1, -2), title: "Gara U14 vs Kolbe", location: "Sede PSD", category: "Volley" },
+    { id: 3, dateISO: getTestDate(2, 4), title: "Partita 1^ Squadra", location: "Campo Borgo", category: "Calcio" },
+    { id: 4, dateISO: getTestDate(3, 0), title: "Festa Inizio Anno", location: "Oratorio", category: "Evento" },
   ];
 
-  // --- LOGICA STATUS PARTITA ---
-  // Ritorna: "LIVE", "UPCOMING", "ENDED"
-  const getMatchStatus = (matchDateISO) => {
-    const now = new Date();
-    const matchTime = new Date(matchDateISO);
-    
-    // Differenza in minuti
-    const diffMs = matchTime - now;
-    const diffMinutes = Math.floor(diffMs / 1000 / 60);
+  // 2. PARTITE LIVE: Genero partite vicine (tra -2h e +12h)
+  const allMatches = [
+    { id: 101, teamA: "PSD Volley", teamB: "Lasalliano", matchDate: getTestDate(0, 0) }, // Inizia ORA
+    { id: 102, teamA: "PSD Calcio", teamB: "Real Torino", matchDate: getTestDate(0, 3) }, // Tra 3 ore
+    { id: 103, teamA: "Basket U19", teamB: "Crock", matchDate: getTestDate(1, 0) }, // Tra 24 ore (NON deve apparire)
+  ];
 
-    // Regola: 
-    // - Se manca meno di 30 min all'inizio (diffMinutes <= 30) E non è finita da troppo (es. -120 min), è LIVE.
-    // - Nota: Se diffMinutes è negativo, la partita è già iniziata.
-    
-    if (diffMinutes <= 30 && diffMinutes > -150) { 
-        return "LIVE"; // Da 30 min prima a 2.5 ore dopo l'inizio
-    } else if (diffMinutes > 30) {
-        return "UPCOMING";
-    } else {
-        return "ENDED";
-    }
+  // Filtro: Solo partite da 2 ore fa a 12 ore nel futuro
+  const displayedMatches = allMatches.filter(match => {
+    const matchTime = new Date(match.matchDate);
+    const diffHours = (matchTime - today) / (1000 * 60 * 60);
+    return diffHours >= -2 && diffHours <= 12; 
+  });
+
+  // --- LOGICA STATUS & FORMATTING ---
+  const getMatchStatus = (isoDate) => {
+    const diffMs = new Date(isoDate) - new Date();
+    const diffMin = Math.floor(diffMs / 60000); // minuti
+    // Live se iniziata da meno di 2.5h (-150m) o inizia tra meno di 15m
+    if (diffMin <= 15 && diffMin > -150) return "LIVE";
+    return "UPCOMING";
   };
 
-  // Helper per formattare l'orario (es. 20:30)
-  const formatTime = (isoString) => {
-    const date = new Date(isoString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   // --- FETCH NEWS ---
   useEffect(() => {
@@ -78,33 +79,29 @@ export default function HomePage() {
       try {
         const grouped = await getLatestPostsByCategory();
         let allNews = [];
-        
         if (grouped) {
-            Object.values(grouped).forEach(categoryNews => {
-                if (Array.isArray(categoryNews)) {
-                    allNews = [...allNews, ...categoryNews];
-                }
-            });
+            Object.values(grouped).forEach(cat => { if (Array.isArray(cat)) allNews.push(...cat); });
         }
-
-        // Ordina per ID decrescente
+        // Ordina per ID desc (assumendo ID più alto = più recente)
         allNews.sort((a, b) => b.id - a.id);
-
-        // Prendi le prime 5
-        const top5News = allNews.slice(0, 5); 
-
-        if (mounted) {
-          setLatestNews(top5News);
-          setLoading(false);
+        
+        if (mounted) { 
+          setLatestNews(allNews.slice(0, 5)); // Prendi le prime 5
+          setLoading(false); 
         }
-      } catch (err) {
-        console.error("Errore fetch news:", err);
-        if (mounted) setLoading(false);
-      }
+      } catch (err) { console.error(err); if(mounted) setLoading(false); }
     }
     fetchNews();
     return () => { mounted = false; };
   }, []);
+
+  // --- CAROUSEL SCROLL (Mobile) ---
+  const scrollContainer = (ref, direction) => {
+    if(ref.current) {
+      const scrollAmount = 280; // Larghezza card approssimativa
+      ref.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="hp-root">
@@ -112,33 +109,31 @@ export default function HomePage() {
 
       <div className="hp-main-container">
         
+        {/* GRIGLIA LAYOUT (Mobile: Flex Column / Desktop: Grid Areas) */}
         <div className="hp-grid-layout">
             
-            {/* 🔴 COLONNA 1: LIVE MATCHES */}
+            {/* 1. LIVE MATCHES (Area: live) */}
             <aside className="hp-col hp-col-live">
               <div className="column-header">
-                <h3 className="col-title text-danger">
-                  <FaCircle className="live-pulse-icon" /> Dirette
-                </h3>
+                <h3 className="col-title text-danger"><FaCircle className="live-pulse-icon" /> Live Center</h3>
+                <div className="mobile-arrows">
+                  <button onClick={() => scrollContainer(liveListRef, 'left')}><FaChevronLeft/></button>
+                  <button onClick={() => scrollContainer(liveListRef, 'right')}><FaChevronRight/></button>
+                </div>
               </div>
               
-              <div className="live-list">
-                {liveMatches.map((match) => {
+              <div className="scroll-wrapper" ref={liveListRef}>
+                {displayedMatches.length > 0 ? displayedMatches.map((match) => {
                   const status = getMatchStatus(match.matchDate);
-                  // Se la partita è finita, potremmo decidere di non mostrarla o mostrarla diversamente.
-                  // Qui la mostriamo comunque per demo.
-                  
                   return (
                     <div key={match.id} className="live-card-simple">
                       <div className="lcs-header">
-                        {status === "LIVE" ? (
-                          <span className="hp-badge badge-danger">IN ONDA</span>
-                        ) : (
+                        {status === "LIVE" ? 
+                          <span className="hp-badge badge-danger">IN ONDA</span> : 
                           <span className="hp-badge badge-secondary">OGGI {formatTime(match.matchDate)}</span>
-                        )}
+                        }
                         <FaYoutube className="yt-icon" />
                       </div>
-                      
                       <div className="lcs-match-info">
                         <div className="lcs-teams">
                           <span className="team">{match.teamA}</span>
@@ -146,83 +141,74 @@ export default function HomePage() {
                           <span className="team">{match.teamB}</span>
                         </div>
                       </div>
-
-                      <a 
-                        href="https://youtube.com/@PolisportivaSanDonato" 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className={`hp-btn ${status === "LIVE" ? "btn-danger" : "btn-outline"}`}
-                      >
-                        Guarda ora
+                      <a href="https://youtube.com/@PolisportivaSanDonato" target="_blank" rel="noreferrer" className={`hp-btn ${status === "LIVE" ? "btn-danger" : "btn-outline"}`}>
+                        {status === "LIVE" ? "Guarda" : "Vai al canale"}
                       </a>
                     </div>
                   );
-                })}
+                }) : (
+                  <div className="empty-state-box">
+                    Nessuna diretta nelle prossime 12h
+                  </div>
+                )}
               </div>
             </aside>
 
-            {/* 📰 COLONNA 2: NEWS FEED */}
-            <main className="hp-col hp-col-news">
-              <div className="column-header">
-                <h3 className="col-title"><FaNewspaper /> Ultime Notizie</h3>
-              </div>
-
-              {loading ? (
-                <div className="loader-container"><div className="loader"></div></div>
-              ) : (
-                <div className="news-feed-list">
-                  {latestNews.map((news) => (
-                    <div 
-                      key={news.id} 
-                      className="news-feed-card" 
-                      onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}
-                    >
-                      <div 
-                        className="nfc-image" 
-                        style={{ backgroundImage: `url(${news.image || "/placeholder.jpg"})` }}
-                      ></div>
-                      <div className="nfc-content">
-                        <span className="nfc-meta">{news.date} • {news.category}</span>
-                        <h4 className="nfc-title">{news.title}</h4>
-                        <span className="nfc-link">Leggi <FaArrowRight /></span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              <div className="view-all-wrapper">
-                 <button className="hp-btn btn-link" onClick={() => navigate('/news')}>
-                   Vedi tutte le notizie
-                 </button>
-              </div>
-            </main>
-
-            {/* 📅 COLONNA 3: CALENDARIO */}
+            {/* 2. CALENDARIO (Area: calendar) */}
+            {/* Su Mobile questo blocco appare per secondo come scritto qui. Su Desktop lo sposteremo a destra col CSS */}
             <aside className="hp-col hp-col-calendar">
               <div className="column-header">
-                <h3 className="col-title"><FaCalendarAlt /> Calendario</h3>
+                <h3 className="col-title"><FaCalendarAlt /> Questa Settimana</h3>
+                <div className="mobile-arrows">
+                  <button onClick={() => scrollContainer(calendarListRef, 'left')}><FaChevronLeft/></button>
+                  <button onClick={() => scrollContainer(calendarListRef, 'right')}><FaChevronRight/></button>
+                </div>
               </div>
 
-              <div className="events-list">
-                {upcomingEvents.map((event) => (
-                  <div key={event.id} className="event-row">
-                    <div className="event-date-box">
-                      <span className="ev-day">{event.day}</span>
-                      <span className="ev-month">{event.month}</span>
+              <div className="scroll-wrapper" ref={calendarListRef}>
+                {weeklyEvents.map((event) => (
+                  <div key={event.id} className="event-card">
+                    <div className="event-date-badge">
+                      <span className="ed-day">{getDayName(event.dateISO)}</span>
+                      <span className="ed-date">{getShortDate(event.dateISO)}</span>
                     </div>
-                    <div className="event-details">
-                      <div className="ev-meta">
-                        <span className={`ev-tag tag-${event.category.toLowerCase()}`}>{event.category}</span>
-                        <span className="ev-time"><FaClock /> {event.time}</span>
-                      </div>
+                    <div className="event-info">
+                      <span className={`ev-tag tag-${event.category.toLowerCase()}`}>{event.category}</span>
                       <h4 className="ev-title">{event.title}</h4>
-                      <p className="ev-location"><FaMapMarkerAlt /> {event.location}</p>
+                      <div className="ev-meta-row">
+                        <span><FaClock/> {formatTime(event.dateISO)}</span>
+                        <span><FaMapMarkerAlt/> {event.location}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </aside>
+
+            {/* 3. NEWS (Area: news) */}
+            {/* Su Mobile appare per ultimo. Su Desktop lo metteremo al CENTRO col CSS */}
+            <main className="hp-col hp-col-news">
+              <div className="column-header">
+                <h3 className="col-title"><FaNewspaper /> Ultime Notizie</h3>
+              </div>
+
+              {loading ? <div className="loader"></div> : (
+                <div className="news-vertical-list">
+                  {latestNews.map((news) => (
+                    <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
+                      <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/placeholder.jpg"})` }}></div>
+                      <div className="nic-content">
+                        <span className="nic-date">{news.date}</span>
+                        <h4 className="nic-title">{news.title}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="view-all-wrapper">
+                <button className="hp-btn btn-link" onClick={() => navigate('/news')}>Vedi tutte</button>
+              </div>
+            </main>
 
         </div>
       </div>
