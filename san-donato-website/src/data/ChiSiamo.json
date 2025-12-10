@@ -1,0 +1,103 @@
+{
+  "hero": {
+    "badgeText": "Dal 2008 Insieme",
+    "titlePrefix": "Sport al",
+    "titleHighlight": "Futuro Presente.",
+    "subtitle": "Nati il 29 febbraio 2008 per educare attraverso lo sport. Oggi siamo 350 tesserati uniti da valori di condivisione e libertà."
+  },
+  "manifesto": [
+    { 
+      "iconKey": "balance", 
+      "title": "Uguaglianza", 
+      "text": "Uguali nel diritto a divertirsi, diversi nelle capacità." 
+    },
+    { 
+      "iconKey": "heart", 
+      "title": "Serenità", 
+      "text": "Un clima senza pressioni: conta l'applicazione, non la performance." 
+    },
+    { 
+      "iconKey": "handshake", 
+      "title": "Fair Play", 
+      "text": "Rispetto dell'avversario. Rifiuto netto della violenza." 
+    },
+    { 
+      "iconKey": "group", 
+      "title": "Squadra", 
+      "text": "Vittoria e sconfitta sono sempre condivise. Nessuno è solo." 
+    },
+    { 
+      "iconKey": "child", 
+      "title": "Educazione", 
+      "text": "L'allenatore non addestra ma educa alla felicità del ragazzo." 
+    },
+    { 
+      "iconKey": "map", 
+      "title": "Territorio", 
+      "text": "Un punto di riferimento per il quartiere San Donato e la Cartiera." 
+    }
+  ],
+  "organigramma": [
+    { 
+      "role": "Presidente", 
+      "iconKey": "tie", 
+      "desc": "Garante della visione educativa e dei progetti associativi." 
+    },
+    { 
+      "role": "Consiglio Direttivo", 
+      "iconKey": "business", 
+      "desc": "Organo esecutivo: decide le iniziative e la politica associativa." 
+    },
+    { 
+      "role": "Tesoriere", 
+      "iconKey": "wallet", 
+      "desc": "Gestione conti, bilanci e rendicontazione economica." 
+    },
+    { 
+      "role": "Segreteria", 
+      "iconKey": "signature", 
+      "desc": "Cuore operativo: iscrizioni, quote e certificati medici." 
+    },
+    { 
+      "role": "Resp. di Settore", 
+      "iconKey": "gears", 
+      "desc": "Coordinamento tecnico, rapporti con Federazioni e gare." 
+    },
+    { 
+      "role": "Allenatori", 
+      "iconKey": "tie", 
+      "desc": "Educatori formati, esempio di comportamento in campo." 
+    },
+    { 
+      "role": "Aiuto Allenatori", 
+      "iconKey": "gradcap", 
+      "desc": "Giovani (16-18 anni) in formazione affiancati ai coach." 
+    }
+  ],
+  "kits": [
+    { 
+      "name": "Smile", 
+      "price": "15", 
+      "isPopular": false,
+      "features": ["Maglietta PSD", "Sacca Sport"] 
+    },
+    { 
+      "name": "Smart", 
+      "price": "30", 
+      "isPopular": true,
+      "features": ["Maglietta PSD", "Felpa Ufficiale", "Tessera Socio"] 
+    },
+    { 
+      "name": "Dream", 
+      "price": "50", 
+      "isPopular": false,
+      "features": ["Maglietta PSD", "Felpa Ufficiale", "Tessera Socio", "Sacca Sport"] 
+    }
+  ],
+  "impact": {
+    "affiliazioni": "CSI • UISP • FIGC • US Acli",
+    "numeri": "150 Volley • 134 Calcio • 16 Basket",
+    "cf": "97699790016"
+  },
+  "footer": "Progetto Educativo 2023 - 2026 \"Sport al Futuro Presente\""
+}

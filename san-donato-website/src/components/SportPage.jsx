@@ -15,6 +15,9 @@ import "../css/SportPage.css";
 // Assicurati che il percorso sia corretto rispetto a dove hai salvato il file json
 import sportsData from "../data/SportPage.json"; 
 
+import dynamicData from "../data/Data.json";
+
+
 // MAPPA DELLE ICONE
 // Il JSON contiene stringhe (es: "basket"), noi le associamo ai componenti React qui
 const ICON_MAP = {
@@ -36,7 +39,7 @@ export default function SportPage() {
       {/* HEADER */}
       <header className="sp-header">
         <h1 className="sp-main-title">
-          Stagione <span className="sp-highlight">2025/2026</span>
+          Stagione <span className="sp-highlight">{dynamicData.anno}</span>
         </h1>
         <p className="sp-subtitle">
           Scegli il tuo sport, trova la tua squadra, scendi in campo.

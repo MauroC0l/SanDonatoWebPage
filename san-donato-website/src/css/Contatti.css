@@ -1,33 +1,41 @@
-/* --- Contatti.css --- */
+/* ============================= */
+/* Contatti.css - Scoped: cnt- */
+/* ============================= */
 
-/* RESET COMPLETO */
-*, *::before, *::after {
+/* RESET (Scoped to contacts page if possible, but safe here) */
+.contacts-page *, .contacts-page *::before, .contacts-page *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 :root {
-  --c-primary: #002b5c;
-  --c-accent: #ff6600;
-  --c-bg: #f4f7f9;
-  --c-card-bg: #ffffff;
-  --c-text-main: #333333;
-  --c-text-light: #555555;
+  --cnt-primary: #002b5c;
+  --cnt-accent: #ff6600;
+  --cnt-bg: #f4f7f9;
+  --cnt-card-bg: #ffffff;
+  --cnt-text-main: #333333;
+  --cnt-text-light: #555555;
   
   --radius-card: 20px;
   --shadow-card: 0 8px 30px rgba(0, 43, 92, 0.08);
 }
 
+/* Unique Animation for Contacts Page */
+@keyframes cntFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .contacts-page {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--c-bg);
+  background: var(--cnt-bg);
   min-height: 100vh;
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
   padding: 1.5rem 1rem 4rem;
-  color: var(--c-text-main);
+  color: var(--cnt-text-main);
+  
+  /* Apply animation here */
+  animation: cntFadeIn 0.6s ease-out forwards;
+  opacity: 0; 
 }
 
 /* --- HEADER PAGINA --- */
@@ -39,21 +47,25 @@
 
 .contacts-header h1 {
   font-size: clamp(1.8rem, 5vw, 2.5rem);
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   font-weight: 800;
   margin-bottom: 0.5rem;
   line-height: 1.2;
 }
 
+.highlight-text {
+  color: var(--cnt-primary); /* Or accent if you prefer */
+}
+
 .subtitle {
   font-size: 1rem;
-  color: var(--c-text-light);
+  color: var(--cnt-text-light);
 }
 
 .header-decoration {
   width: 50px;
   height: 4px;
-  background: var(--c-accent);
+  background: var(--cnt-accent);
   margin: 1rem auto 0;
   border-radius: 2px;
 }
@@ -68,7 +80,7 @@
   margin: 0 auto;
 }
 
-/* Desktop: 2 colonne */
+/* Desktop: 2 columns */
 @media (min-width: 900px) {
   .contacts-container {
     grid-template-columns: 1.2fr 1fr;
@@ -86,25 +98,23 @@
 
 /* --- CARD GENERICA --- */
 .contact-card {
-  background: var(--c-card-bg);
+  background: var(--cnt-card-bg);
   border-radius: var(--radius-card);
   padding: 1.5rem;
   box-shadow: var(--shadow-card);
   width: 100%;
-  
-  /* Layout a colonna per separare Header e Body */
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra orizzontalmente i figli */
+  align-items: center;
   gap: 1rem;
 }
 
-/* --- RIGA HEADER (Icona + Titolo) --- */
+/* --- RIGA HEADER (Icon + Title) --- */
 .card-header-row {
   display: flex;
   flex-direction: row;
-  align-items: center; /* Allinea verticalmente icona e testo */
-  justify-content: center; /* Centra il blocco nella card */
+  align-items: center;
+  justify-content: center;
   gap: 0.8rem;
   width: 100%;
   margin-bottom: 0.5rem;
@@ -115,7 +125,7 @@
   height: 44px;
   background: rgba(0, 43, 92, 0.08);
   border-radius: 12px;
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,36 +138,35 @@
 .card-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   margin: 0;
   line-height: 1.2;
 }
 
-/* --- BODY CARD (Il resto del contenuto) --- */
+/* --- BODY CARD --- */
 .card-body {
   width: 100%;
-  text-align: center; /* Centra tutto il testo */
+  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra gli elementi non-testo (bottoni, mappe) */
+  align-items: center;
   gap: 0.8rem;
 }
 
-/* --- ELEMENTI SPECIFICI --- */
+/* --- SPECIFIC ELEMENTS --- */
 .address-text {
   font-size: 1rem;
   line-height: 1.6;
-  color: var(--c-text-light);
+  color: var(--cnt-text-light);
 }
 
-/* MAPPA: Fix per non strabordare */
+/* MAP */
 .map-link-container {
   display: block;
-  width: 100%; /* Occupa tutto lo spazio disponibile */
-  max-width: 100%; 
+  width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 16/9; /* Forma rettangolare fissa */
+  aspect-ratio: 16/9;
   background: #eee;
   margin-top: 0.5rem;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -171,7 +180,22 @@
   display: block;
 }
 
-/* ORARI E INFO */
+.map-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 43, 92, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.map-link-container:hover .map-overlay { opacity: 1; }
+.map-overlay span {
+  color: white; font-weight: bold; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px;
+}
+
+/* HOURS & INFO */
 .info-group {
   font-size: 1rem;
   display: flex;
@@ -181,7 +205,7 @@
 }
 
 .highlight {
-  color: var(--c-accent);
+  color: var(--cnt-accent);
   font-weight: 700;
   background: rgba(255, 102, 0, 0.1);
   padding: 0.2rem 0.6rem;
@@ -189,14 +213,14 @@
 }
 
 .divider {
-  width: 80%; /* Linea più corta ed elegante */
+  width: 80%;
   height: 1px;
   background: #eee;
   border: none;
   margin: 0.5rem auto;
 }
 
-/* Sezione Mobile Contatti */
+/* Mobile Contact Section */
 .mobile-contact-section {
   display: flex;
   flex-direction: column;
@@ -206,7 +230,7 @@
 
 .sub-title {
   font-size: 1rem;
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -220,16 +244,16 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  background: var(--c-primary);
+  background: var(--cnt-primary);
   color: white;
   text-decoration: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 50px; /* Pillola */
+  border-radius: 50px;
   font-weight: 600;
   font-size: 1rem;
   transition: transform 0.2s;
   width: 100%;
-  max-width: 300px; /* Non diventa troppo largo su desktop */
+  max-width: 300px;
 }
 
 /* EMAIL */
@@ -241,14 +265,14 @@
 }
 
 .email-link {
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   text-decoration: none;
   font-size: 0.95rem;
-  word-break: break-word; /* Spezza le email lunghe */
+  word-break: break-word;
 }
 .email-link.primary { font-weight: 600; font-size: 1rem; }
 
-/* DATI FISCALI */
+/* FISCAL DATA */
 .fiscal-data-box {
   background: #f8f9fa;
   padding: 1rem;
@@ -279,7 +303,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden; /* Sicurezza */
+  overflow: hidden;
 }
 
 .iban-label {
@@ -293,10 +317,10 @@
 .iban-code {
   font-family: monospace;
   font-size: clamp(0.9rem, 4vw, 1.1rem);
-  color: var(--c-primary);
+  color: var(--cnt-primary);
   font-weight: 700;
   text-align: center;
-  word-break: break-all; /* Spezza IBAN lungo */
+  word-break: break-all;
   line-height: 1.4;
   margin-bottom: 1rem;
 }
@@ -346,7 +370,7 @@
   display: inline-block;
 }
 
-/* MEDIA QUERY MOBILE */
+/* MOBILE MEDIA QUERY */
 @media (max-width: 480px) {
   .contacts-page { padding: 1rem 0.8rem 4rem; }
   .contact-card { padding: 1.25rem; }

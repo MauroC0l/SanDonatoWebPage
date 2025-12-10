@@ -1,6 +1,7 @@
 {
   "header": {
-    "title": "Contatti & Sede",
+    "titlePrefix": "Contatti &",
+    "titleHighlight": "Sede",
     "subtitle": "A.S.D. Polisportiva San Donato"
   },
   "sede": {
@@ -8,7 +9,7 @@
     "address": "Via Le Chiuse 20/A",
     "city": "10144 TORINO",
     "mapImage": "/immaginiContatti/mappaSede.png",
-    "googleMapLink": "https://maps.google.com/?q=Via+Le+Chiuse+20/A,+Torino"
+    "googleMapLink": "https://goo.gl/maps/PLACEHOLDER"
   },
   "segreteria": {
     "title": "Segreteria",
@@ -16,11 +17,11 @@
     "orariValue": "Giovedì 18:30 – 19:30",
     "mobileTitle": "Contatti Rapidi",
     "mobileNote": "Per urgenze e comunicazioni",
-    "phone": "349.8164034",
-    "contactName": "Marco",
-    "phoneLink": "+393498164034"
+    "phoneDisplay": "349.8164034",
+    "phoneLink": "+393498164034",
+    "contactName": "Marco"
   },
-  "dati": {
+  "recapiti": {
     "title": "Recapiti & Dati",
     "email": "info@polisportivasandonato.it",
     "pec": "polisportivasandonato@legalmail.it",
@@ -30,7 +31,7 @@
   "pagamenti": {
     "bancaTitle": "Bonifico Bancario",
     "intro": "Coordinate per i pagamenti:",
-    "iban": "IT 56 R 05018 01000 000017122862",
+    "ibanDisplay": "IT 56 R 05018 01000 000017122862",
     "ibanClean": "IT56R0501801000000017122862",
     "logoBanca": "/immaginiContatti/logoBanca.png",
     "satispayTitle": "Paga con Satispay",

@@ -1,4 +1,3 @@
-import React from "react";
 import { 
   FaUserGroup, 
   FaHandshake, 
@@ -15,85 +14,60 @@ import {
 } from "react-icons/fa6";
 import { IoRibbon, IoBusiness } from "react-icons/io5";
 import "../css/ChiSiamoPage.css"; 
+import chiSiamoData from "../data/ChiSiamo.json";
+import dynamicData from "../data/Data.json";
 
-// Dati dal PDF
-const MANIFESTO_VALUES = [
-  { icon: <FaScaleBalanced />, title: "Uguaglianza", text: "Uguali nel diritto a divertirsi, diversi nelle capacità." },
-  { icon: <FaHeartPulse />, title: "Serenità", text: "Un clima senza pressioni: conta l'applicazione, non la performance." },
-  { icon: <FaHandshake />, title: "Fair Play", text: "Rispetto dell'avversario. Rifiuto netto della violenza." },
-  { icon: <FaUserGroup />, title: "Squadra", text: "Vittoria e sconfitta sono sempre condivise. Nessuno è solo." },
-  { icon: <FaChildren />, title: "Educazione", text: "L'allenatore non addestra ma educa alla felicità del ragazzo." },
-  { icon: <FaMapLocationDot />, title: "Territorio", text: "Un punto di riferimento per il quartiere San Donato e la Cartiera." }
-];
-
-const ORG_STRUCTURE = [
-  { role: "Presidente", icon: <FaUserTie />, desc: "Garante della visione educativa e dei progetti associativi." },
-  { role: "Consiglio Direttivo", icon: <IoBusiness />, desc: "Organo esecutivo: decide le iniziative e la politica associativa." },
-  { role: "Tesoriere", icon: <FaWallet />, desc: "Gestione conti, bilanci e rendicontazione economica." },
-  { role: "Segreteria", icon: <FaFileSignature />, desc: "Cuore operativo: iscrizioni, quote e certificati medici." },
-  { role: "Resp. di Settore", icon: <FaUsersGear />, desc: "Coordinamento tecnico, rapporti con Federazioni e gare." },
-  { role: "Allenatori", icon: <FaUserTie />, desc: "Educatori formati, esempio di comportamento in campo." },
-  { role: "Aiuto Allenatori", icon: <FaGraduationCap />, desc: "Giovani (16-18 anni) in formazione affiancati ai coach." }
-];
-
-const KITS = [
-  { 
-    name: "Smile", 
-    price: "15", 
-    color: "var(--c-blue)",
-    features: ["Maglietta PSD", "Sacca Sport"] 
-  },
-  { 
-    name: "Smart", 
-    price: "30", 
-    color: "var(--c-accent)",
-    isPopular: true,
-    features: ["Maglietta PSD", "Felpa Ufficiale", "Tessera Socio"] 
-  },
-  { 
-    name: "Dream", 
-    price: "50", 
-    color: "var(--c-dark)",
-    features: ["Maglietta PSD", "Felpa Ufficiale", "Tessera Socio", "Sacca Sport"] 
-  }
-];
+// MAPPA ICONE: Stringa JSON -> Componente React
+const ICON_MAP = {
+  balance: <FaScaleBalanced />,
+  heart: <FaHeartPulse />,
+  handshake: <FaHandshake />,
+  group: <FaUserGroup />,
+  child: <FaChildren />,
+  map: <FaMapLocationDot />,
+  tie: <FaUserTie />,
+  business: <IoBusiness />,
+  wallet: <FaWallet />,
+  signature: <FaFileSignature />,
+  gears: <FaUsersGear />,
+  gradcap: <FaGraduationCap />
+};
 
 export default function ChiSiamoPage() {
+  const { hero, manifesto, organigramma, kits, impact, footer } = chiSiamoData;
+
   return (
-    <div className="csp-avant-garde-wrapper">
+    // Aggiunto "csp-fade-in" per animazione d'ingresso
+    <div className="csp-avant-garde-wrapper csp-fade-in">
       
       {/* 1. HERO SECTION */}
       <section className="csp-hero-block">
         <div className="csp-hero-content">
           
-          {/* Nuovo Stile Badge */}
           <div className="csp-history-badge-container">
             <div className="csp-history-badge-ring">
-              <span className="csp-history-badge-text">Dal 2008 Insieme</span>
+              <span className="csp-history-badge-text">{hero.badgeText}</span>
             </div>
           </div>
 
           <h1 className="csp-hero-title">
-            Sport al<br />
-            <span className="csp-text-gradient">Futuro Presente.</span>
+            {hero.titlePrefix}<br />
+            <span className="csp-text-gradient">{hero.titleHighlight}</span>
           </h1>
-          <p className="csp-hero-subtitle">
-            Nati il 29 febbraio 2008 per educare attraverso lo sport. 
-            Oggi siamo <strong>350 tesserati</strong> uniti da valori di condivisione e libertà.
-          </p>
+          <p className="csp-hero-subtitle" dangerouslySetInnerHTML={{ __html: hero.subtitle }} />
         </div>
       </section>
 
-      {/* 2. MANIFESTO (Grid Diretta) */}
+      {/* 2. MANIFESTO */}
       <section className="csp-manifesto-section">
         <div className="csp-section-header">
           <h2>Il Manifesto</h2>
           <div className="csp-header-line"></div>
         </div>
         <div className="csp-values-grid">
-          {MANIFESTO_VALUES.map((val, idx) => (
+          {manifesto.map((val, idx) => (
             <div className="csp-value-item" key={idx}>
-              <div className="csp-val-icon">{val.icon}</div>
+              <div className="csp-val-icon">{ICON_MAP[val.iconKey]}</div>
               <h4>{val.title}</h4>
               <p>{val.text}</p>
             </div>
@@ -101,7 +75,7 @@ export default function ChiSiamoPage() {
         </div>
       </section>
 
-      {/* 3. ORGANIGRAMMA (Nuovo Stile Scuro/Contrasto) */}
+      {/* 3. ORGANIGRAMMA */}
       <section className="csp-org-section-dark">
         <div className="csp-org-container">
           <div className="csp-org-header">
@@ -110,9 +84,9 @@ export default function ChiSiamoPage() {
           </div>
           
           <div className="csp-org-grid-modern">
-            {ORG_STRUCTURE.map((item, idx) => (
+            {organigramma.map((item, idx) => (
               <div className="csp-org-card-glass" key={idx}>
-                <div className="csp-org-icon-floating">{item.icon}</div>
+                <div className="csp-org-icon-floating">{ICON_MAP[item.iconKey]}</div>
                 <h3>{item.role}</h3>
                 <div className="csp-divider-small"></div>
                 <p>{item.desc}</p>
@@ -122,16 +96,16 @@ export default function ChiSiamoPage() {
         </div>
       </section>
 
-      {/* 4. MEMBERSHIP & IMPACT (Layout Espanso) */}
+      {/* 4. MEMBERSHIP & IMPACT */}
       <section className="csp-membership-section">
         <div className="csp-section-header csp-center">
-          <h2>Membership 2023/24</h2>
+          <h2>Membership {dynamicData.anno}</h2>
           <p>Partecipa al progetto e al nuovo Murales.</p>
         </div>
 
         {/* Pricing Cards */}
         <div className="csp-pricing-grid">
-          {KITS.map((kit, i) => (
+          {kits.map((kit, i) => (
             <div className={`csp-pricing-card ${kit.isPopular ? 'csp-popular' : ''}`} key={i}>
               {kit.isPopular && <div className="csp-pop-badge">Consigliato</div>}
               <h3 className="csp-kit-name">Kit {kit.name}</h3>
@@ -147,26 +121,26 @@ export default function ChiSiamoPage() {
           ))}
         </div>
 
-        {/* Impact Bar (Sotto le card) */}
+        {/* Impact Bar */}
         <div className="csp-impact-bar">
           <div className="csp-impact-stat">
             <IoRibbon className="csp-i-icon"/>
             <div>
               <strong>Affiliazioni</strong>
-              <span>CSI • UISP • FIGC • US Acli</span>
+              <span>{impact.affiliazioni}</span>
             </div>
           </div>
           <div className="csp-impact-stat">
             <FaUserGroup className="csp-i-icon"/>
             <div>
               <strong>Numeri</strong>
-              <span>150 Volley • 134 Calcio • 16 Basket</span>
+              <span>{impact.numeri}</span>
             </div>
           </div>
           <div className="csp-impact-stat csp-highlight">
              <div>
                <strong>5x1000</strong>
-               <code className="csp-fiscal-code">97699790016</code>
+               <code className="csp-fiscal-code">{impact.cf}</code>
              </div>
           </div>
         </div>
@@ -174,7 +148,7 @@ export default function ChiSiamoPage() {
       </section>
 
       <footer className="csp-page-footer">
-        <p>Progetto Educativo 2023 - 2026 "Sport al Futuro Presente"</p>
+        <p>{footer}</p>
       </footer>
 
     </div>

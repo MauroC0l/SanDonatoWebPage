@@ -1,62 +1,55 @@
 import React from 'react';
-import { FaArrowRight } from "react-icons/fa";
 import "../css/SponsorPage.css";
-
-// IMPORT DATI JSON
 import sponsorsData from "../data/Sponsor.json";
 
 export default function SponsorPage() {
-  const { header, list } = sponsorsData;
+  // Destrutturiamo i dati dal JSON
+  const { header, sponsors } = sponsorsData;
 
   return (
-    // Usa 'spn-fade-in' per un'animazione specifica che non confligge
-    <div className="spn-page-wrapper spn-fade-in">
-      <div className="spn-container">
+    // Usa 'spn-fade-in' per evitare conflitti di animazione
+    <div className="sponsor-page spn-fade-in">
+      <div className="sponsor-container">
         
-        {/* HEADER */}
-        <header className="spn-header">
-          <h1 className="spn-title">
-            {header.titlePrefix} <span className="spn-text-gradient">{header.titleHighlight}</span>
+        <header className="sponsor-header">
+          <h1 className="page-title">
+            {header.titlePrefix} <span className="text-gradient">{header.titleHighlight}</span>
           </h1>
-          <p className="spn-subtitle">
+          <p className="page-subtitle">
             {header.subtitle}
           </p>
-          <div className="spn-divider"></div>
         </header>
 
-        {/* GRIGLIA SPONSOR */}
-        <div className="spn-grid">
-          {list.map((sponsor, index) => (
+        <div className="sponsor-grid">
+          {sponsors.map((sponsor, index) => (
             <a 
               key={index} 
               href={sponsor.link} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="spn-card"
-              // Staggered animation: appaiono in sequenza
+              className="sponsor-card"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="spn-card-content">
-                <div className="spn-image-wrapper">
+              <div className="card-content">
+                <div className="image-wrapper">
                   <img
                     src={sponsor.image}
                     alt={`Logo ${sponsor.name}`}
-                    className="spn-image"
+                    className="sponsor-image"
                     loading="lazy"
                   />
                 </div>
-                
-                <div className="spn-meta">
-                  <h3 className="spn-name">{sponsor.name}</h3>
-                  <div className="spn-visit-link">
-                    Visita Sito <FaArrowRight className="spn-icon-arrow" />
+                <div className="sponsor-meta">
+                  <h3 className="sponsor-name">{sponsor.name}</h3>
+                  <div className="visit-arrow">
+                    Visita <span className="arrow">→</span>
                   </div>
                 </div>
               </div>
             </a>
           ))}
         </div>
-
+        
       </div>
     </div>
   );

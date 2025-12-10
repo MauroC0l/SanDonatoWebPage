@@ -5,55 +5,60 @@ import {
 } from "react-icons/fa";
 import { FaRegCopy } from "react-icons/fa6";
 import "../css/Contatti.css";
+import contactsData from "../data/Contatti.json";
 
 export default function Contacts() {
   const [copied, setCopied] = useState(false);
+  
+  // Destructure data for easier access
+  const { header, sede, segreteria, recapiti, pagamenti } = contactsData;
 
   const handleCopyIBAN = () => {
-    navigator.clipboard.writeText("IT56R0501801000000017122862");
+    navigator.clipboard.writeText(pagamenti.ibanClean);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="contacts-page fade-in">
+    // Unique animation class 'cnt-fade-in' to avoid conflicts
+    <div className="contacts-page cnt-fade-in">
       
       <header className="contacts-header">
         <div className="header-content">
-          <h1>Contatti & Sede VERSIONE 2</h1>
-          <p className="subtitle">A.S.D. Polisportiva San Donato</p>
+          <h1>
+            {header.titlePrefix} AAAA <span className="highlight-text">{header.titleHighlight}</span>
+          </h1>
+          <p className="subtitle">{header.subtitle}</p>
           <div className="header-decoration"></div>
         </div>
       </header>
 
       <div className="contacts-container">
         
-        {/* --- COLONNA SINISTRA --- */}
+        {/* --- LEFT COLUMN --- */}
         <div className="contacts-column left-col">
           
           {/* Card Sede */}
           <section className="contact-card">
-            {/* Header: Icona + Titolo sulla stessa linea */}
             <div className="card-header-row">
               <div className="card-icon-wrapper"><FaMapMarkerAlt /></div>
-              <h3 className="card-title">La Nostra Sede</h3>
+              <h3 className="card-title">{sede.title}</h3>
             </div>
             
-            {/* Body: Tutto il resto sotto e centrato */}
             <div className="card-body">
               <p className="address-text">
-                Via Le Chiuse 20/A <br />
-                <strong>10144 TORINO</strong>
+                {sede.address} <br />
+                <strong>{sede.city}</strong>
               </p>
               
               <a 
-                href="https://goo.gl/maps/..." 
+                href={sede.googleMapLink} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="map-link-container"
               >
                 <img 
-                  src="/immaginiContatti/mappaSede.png" 
+                  src={sede.mapImage} 
                   alt="Mappa Sede Polisportiva" 
                   className="map-image" 
                   loading="lazy"
@@ -69,22 +74,22 @@ export default function Contacts() {
           <section className="contact-card">
             <div className="card-header-row">
               <div className="card-icon-wrapper"><FaClock /></div>
-              <h3 className="card-title">Segreteria</h3>
+              <h3 className="card-title">{segreteria.title}</h3>
             </div>
 
             <div className="card-body">
               <div className="info-group">
-                <span className="info-label">Orari apertura:</span>
-                <span className="info-value highlight">Giovedì 18:30 – 19:30</span>
+                <span className="info-label">{segreteria.orariLabel}</span>
+                <span className="info-value highlight">{segreteria.orariValue}</span>
               </div>
               
               <hr className="divider" />
               
               <div className="mobile-contact-section">
-                <h4 className="sub-title"><FaMobileAlt /> Contatti Rapidi</h4>
-                <p className="info-note">Per urgenze e comunicazioni</p>
-                <a href="tel:+393498164034" className="phone-btn">
-                  <FaPhone /> 349.8164034 <span className="name-tag">Marco</span>
+                <h4 className="sub-title"><FaMobileAlt /> {segreteria.mobileTitle}</h4>
+                <p className="info-note">{segreteria.mobileNote}</p>
+                <a href={`tel:${segreteria.phoneLink}`} className="phone-btn">
+                  <FaPhone /> {segreteria.phoneDisplay} <span className="name-tag">{segreteria.contactName}</span>
                 </a> 
               </div>
             </div>
@@ -94,54 +99,55 @@ export default function Contacts() {
           <section className="contact-card">
             <div className="card-header-row">
               <div className="card-icon-wrapper"><FaEnvelope /></div>
-              <h3 className="card-title">Recapiti & Dati</h3>
+              <h3 className="card-title">{recapiti.title}</h3>
             </div>
 
             <div className="card-body">
               <div className="email-stack">
-                <a href="mailto:info@polisportivasandonato.it" className="email-link primary">
-                  info@polisportivasandonato.it
+                <a href={`mailto:${recapiti.email}`} className="email-link primary">
+                  {recapiti.email}
                 </a>
-                <a href="mailto:polisportivasandonato@legalmail.it" className="email-link pec">
-                  PEC: polisportivasandonato@legalmail.it
+                <a href={`mailto:${recapiti.pec}`} className="email-link pec">
+                  PEC: {recapiti.pec}
                 </a>
               </div>
 
               <div className="fiscal-data-box">
-                <div className="fiscal-row"><span>C.F.</span> 97699790016</div>
-                <div className="fiscal-row"><span>P.IVA</span> 09911610013</div>
+                <div className="fiscal-row"><span>C.F.</span> {recapiti.cf}</div>
+                <div className="fiscal-row"><span>P.IVA</span> {recapiti.piva}</div>
               </div>
             </div>
           </section>
 
         </div>
 
-        {/* --- COLONNA DESTRA --- */}
+        {/* --- RIGHT COLUMN --- */}
         <div className="contacts-column right-col">
           
           {/* Card Bonifico */}
           <section className="contact-card payment-highlight">
             <div className="card-header-row">
               <div className="card-icon-wrapper bank"><FaUniversity /></div>
-              <h3 className="card-title">Bonifico Bancario</h3>
+              <h3 className="card-title">{pagamenti.bancaTitle}</h3>
             </div>
             
             <div className="card-body">
-              <p className="payment-intro">Coordinate per i pagamenti:</p>
+              <p className="payment-intro">{pagamenti.intro}</p>
               
               <div className="iban-wrapper">
                 <span className="iban-label">IBAN</span>
-                <code className="iban-code">IT 56 R 05018 01000 000017122862</code>
+                <code className="iban-code">{pagamenti.ibanDisplay}</code>
                 <button 
                   className={`copy-btn ${copied ? 'copied' : ''}`} 
                   onClick={handleCopyIBAN}
+                  aria-label="Copia IBAN"
                 >
                   {copied ? <><FaCheck /> Copiato!</> : <><FaRegCopy /> Copia</>}
                 </button>
               </div>
 
               <div className="bank-logo-wrapper">
-                <img src="/immaginiContatti/logoBanca.png" alt="Banca" className="bank-img" loading="lazy" />
+                <img src={pagamenti.logoBanca} alt="Banca" className="bank-img" loading="lazy" />
               </div>
             </div>
           </section>
@@ -149,12 +155,12 @@ export default function Contacts() {
           {/* Card Satispay */}
           <section className="contact-card satispay-card">
             <div className="satispay-content">
-              <h3 className="satispay-title">Paga con Satispay</h3>
-              <p className="shop-name">POLISPORTIVA SAN DONATO – TORINO</p>
+              <h3 className="satispay-title">{pagamenti.satispayTitle}</h3>
+              <p className="shop-name">{pagamenti.shopName}</p>
               
               <div className="qr-frame">
                 <img 
-                  src="/immaginiContatti/qrSatispay.png" 
+                  src={pagamenti.qrImage} 
                   alt="QR Code Satispay" 
                   className="qr-image" 
                   loading="lazy"
