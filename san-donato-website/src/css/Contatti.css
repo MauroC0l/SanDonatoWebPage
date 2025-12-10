@@ -1,43 +1,85 @@
-/* --- Contacts.css --- */
+:root {
+  --c-primary: #002b5c;
+  --c-accent: #ff6600;
+  --c-bg: #f4f7f9;
+  --c-card-bg: #ffffff;
+  --c-text-main: #333333;
+  --c-text-light: #666666;
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 43, 92, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 43, 92, 0.1);
+  --radius-card: 24px;
+  --radius-btn: 12px;
+}
 
 .contacts-page {
-  font-family: 'Inter', system-ui, sans-serif;
-  max-width: 1200px;
-  width: 95%;
-  margin: 2rem auto 4rem;
-  color: #333;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--c-text-main);
+  padding: 2rem 1rem 4rem;
+  background: var(--c-bg); /* Sfondo pagina leggero */
+  min-height: 100vh;
 }
 
-/* Animazione Ingresso */
+/* Animazione fluida */
 .fade-in {
-  animation: fadeIn Up 0.6s ease forwards;
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
 }
 
-/* Header */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- HEADER --- */
 .contacts-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
+  padding: 0 1rem;
 }
 
 .contacts-header h1 {
-  font-size: 2.5rem;
-  color: #002b5c;
-  margin-bottom: 0.5rem;
+  /* Clamp scala il font: min 2rem, ideal 5vw, max 3.5rem */
+  font-size: clamp(2rem, 5vw, 3.5rem); 
   font-weight: 800;
+  color: var(--c-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
-.contacts-header p {
-  font-size: 1.2rem;
-  color: #666;
+.subtitle {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--c-text-light);
+  margin-top: 0.5rem;
   font-weight: 500;
 }
 
-/* Griglia Layout */
-.contacts-grid {
+.header-decoration {
+  width: 60px;
+  height: 4px;
+  background: var(--c-accent);
+  margin: 1.5rem auto 0;
+  border-radius: 2px;
+}
+
+/* --- LAYOUT GRID RESPONSIVE --- */
+.contacts-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Due colonne uguali */
+  /* Mobile First: 1 colonna */
+  grid-template-columns: 1fr;
   gap: 2rem;
-  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Tablet e Desktop: 2 colonne */
+@media (min-width: 900px) {
+  .contacts-container {
+    grid-template-columns: 1.2fr 1fr; /* Sinistra un po' più larga */
+    gap: 3rem;
+    align-items: start;
+  }
 }
 
 .contacts-column {
@@ -46,195 +88,266 @@
   gap: 2rem;
 }
 
-/* Card Stile Base */
+/* --- CARDS STILE --- */
 .contact-card {
-  background: white;
-  border-radius: 20px;
+  background: var(--c-card-bg);
+  border-radius: var(--radius-card);
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.02);
-  transition: transform 0.3s ease;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden; /* Per l'overlay della mappa */
 }
 
 .contact-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Icona flottante nell'angolo o a lato */
+.card-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 43, 92, 0.05);
+  border-radius: 12px;
+  color: var(--c-primary);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
 }
 
 .card-title {
-  color: #002b5c;
-  font-size: 1.4rem;
-  margin-bottom: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
+  font-size: 1.5rem;
+  color: var(--c-primary);
+  margin: 0 0 1rem 0;
+  font-weight: 700;
 }
 
-.card-title svg {
-  color: #ff6600;
-}
-
-/* Info Testuali */
-.address-text {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  color: #444;
-}
-
-/* Mappa */
+/* --- MAPPA --- */
 .map-link-container {
   display: block;
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  aspect-ratio: 16/9; /* Mantiene proporzioni su mobile */
 }
 
 .map-image {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
-  display: block;
-  transition: filter 0.3s;
+  transition: transform 0.5s ease;
 }
 
 .map-overlay {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 43, 92, 0.6);
+  inset: 0;
+  background: rgba(0, 43, 92, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-weight: 700;
+  font-weight: 600;
   opacity: 0;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
-.map-link-container:hover .map-overlay {
-  opacity: 1;
-}
+.map-link-container:hover .map-overlay { opacity: 1; }
+.map-link-container:hover .map-image { transform: scale(1.05); }
 
-/* Segreteria & Contatti */
-.info-row {
+/* --- ORARI E TELEFONO --- */
+.info-group {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 1.05rem;
-}
-
-.info-label {
-  color: #666;
-}
-
-.info-value.highlight {
-  color: #ff6600;
-  font-weight: 700;
-}
-
-.info-note {
-  font-size: 0.9rem;
-  color: #888;
-  margin-bottom: 0.5rem;
-  font-style: italic;
-}
-
-.phone-link {
-  color: #002b5c;
-  font-weight: 700;
-  text-decoration: none;
   font-size: 1.1rem;
+}
+
+.highlight {
+  color: var(--c-accent);
+  font-weight: 700;
+  background: rgba(255, 102, 0, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
 }
 
 .divider {
   border: 0;
-  border-top: 1px solid #eee;
+  height: 1px;
+  background: #eee;
   margin: 1.5rem 0;
 }
 
-/* Email & Fisco */
+.sub-title {
+  margin: 0 0 0.5rem 0;
+  color: var(--c-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Pulsante Telefono Mobile-Style */
+.phone-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  background: var(--c-primary);
+  color: white;
+  text-decoration: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+  width: fit-content;
+}
+
+.phone-btn:hover { background: #004085; }
+.name-tag { font-weight: 400; opacity: 0.8; font-size: 0.9rem; }
+
+/* --- EMAIL E DATI --- */
 .email-link {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #002b5c;
+  color: var(--c-primary);
   text-decoration: none;
-  font-weight: 500;
+  padding: 0.3rem 0;
+  transition: color 0.2s;
 }
+.email-link.primary { font-weight: 600; font-size: 1.1rem; }
+.email-link:hover { color: var(--c-accent); }
 
-.email-link.pec {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.fiscal-data {
+.fiscal-data-box {
   margin-top: 1.5rem;
-  background: #f8f9fa;
+  background: #f1f3f5;
   padding: 1rem;
-  border-radius: 10px;
+  border-radius: 12px;
   font-family: monospace;
   font-size: 0.95rem;
-  color: #555;
 }
 
-.fiscal-data .label {
-  font-weight: bold;
-  color: #002b5c;
-  margin-right: 0.5rem;
+.fiscal-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+.fiscal-row span { font-weight: bold; color: var(--c-text-light); }
+
+/* --- SEZIONE PAGAMENTI (Destra) --- */
+.payment-highlight {
+  border: 2px solid rgba(0, 43, 92, 0.05);
 }
 
-/* --- Sezione Pagamenti --- */
-.iban-box {
-  background: #eef2f5;
+.card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.card-header-row .card-title { margin: 0; }
+.card-icon-wrapper.bank { margin: 0; background: #eef2f5; }
+
+.iban-wrapper {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
   padding: 1.5rem;
-  border-radius: 12px;
   text-align: center;
   margin: 1.5rem 0;
-  border: 1px dashed #ccd;
-  position: relative;
 }
 
 .iban-label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
+  color: #94a3b8;
   letter-spacing: 1px;
-  color: #666;
   margin-bottom: 0.5rem;
 }
 
 .iban-code {
-  font-family: 'Courier New', monospace;
+  display: block;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #002b5c;
-  font-size: 1.1rem; /* Ridurre se va a capo su mobile */
-  word-break: break-all;
+  color: var(--c-primary);
+  word-break: break-all; /* Fondamentale per mobile */
+  line-height: 1.4;
+  margin-bottom: 1rem;
 }
 
 .copy-btn {
-  margin-top: 1rem;
   background: white;
   border: 1px solid #ddd;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 30px;
   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: all 0.2s;
+  color: var(--c-text-main);
 }
 
-.copy-btn:hover {
-  background: #002b5c;
+.copy-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
+.copy-btn.copied { background: #d1fae5; border-color: #10b981; color: #047857; }
+
+.bank-logo-wrapper { text-align: center; }
+.bank-img { max-height: 50px; opacity: 0.8; }
+
+/* --- SATISPAY --- */
+.satispay-card {
+  background: linear-gradient(145deg, #ff4b4b, #e63e3e);
   color: white;
-  border-color: #002b5c;
-}
-
-.bank-image-container {
+  border: none;
   text-align: center;
 }
-.bank-img {
-  max-width: 100%;
-  height: auto;
-  max-height: 80px;
+
+.satispay-title, .shop-name { color: white; }
+.satispay-title { margin-bottom: 0.2rem; }
+.shop-name { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1.5rem; }
+
+.qr-frame {
+  background: white;
+  padding: 1rem;
+  border-radius: 16px;
+  display: inline-block;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.qr-image {
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+.scan-me-badge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--c-text-main);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* --- MEDIA QUERY AGGIUNTIVE PER MOBILE VERY SMALL --- */
+@media (max-width: 480px) {
+  .contacts-page { padding: 1rem; }
+  .contact-card { padding: 1.5rem; }
+  .phone-btn { width: 100%; } /* Bottone full width su mobile */
+  .iban-code { font-size: 1rem; }
 }

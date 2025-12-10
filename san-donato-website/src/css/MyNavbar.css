@@ -44,21 +44,21 @@
   width: 100%;
   max-width: 1400px;
   
-  /* Layout distribuito */
-  justify-content: space-between; 
+  /* MODIFICA QUI: Centra il contenuto invece di distribuirlo */
+  justify-content: center; 
   
   padding: 0 1rem;
   margin: 0 auto;
 }
 
-/* Navigazione */
 .navbar-nav {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   
-  /* IMPORTANTE: Occupa tutto lo spazio per permettere il push a destra */
-  width: 100%; 
+  /* MODIFICA QUI: Rimuovi width: 100% o usa fit-content */
+  width: fit-content; 
+  justify-content: center;
 }
 
 /* --- PULSANTI (Stile Pillola) --- */
@@ -111,8 +111,8 @@
   position: relative;
   flex-shrink: 0;
   
-  /* IL TRUCCO: Spinge questo elemento (e il menu) tutto a destra */
-  margin-left: auto; 
+  /* MODIFICA QUI: Rimuovi margin-left: auto */
+  margin-left: 0; 
 }
 
 .dropdown-toggle {
