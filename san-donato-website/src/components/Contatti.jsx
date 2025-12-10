@@ -3,7 +3,7 @@ import {
   FaMapMarkerAlt, FaPhone, FaEnvelope, 
   FaClock, FaUniversity, FaMobileAlt, FaCheck 
 } from "react-icons/fa";
-import { FaRegCopy } from "react-icons/fa6"; // Icona copia più moderna
+import { FaRegCopy } from "react-icons/fa6";
 import "../css/Contatti.css";
 
 export default function Contacts() {
@@ -12,16 +12,15 @@ export default function Contacts() {
   const handleCopyIBAN = () => {
     navigator.clipboard.writeText("IT56R0501801000000017122862");
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000); // Reset dopo 2 secondi
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="contacts-page fade-in">
       
-      {/* Intestazione con tipografia moderna */}
       <header className="contacts-header">
         <div className="header-content">
-          <h1>Contatti & Sede PROVA 1</h1>
+          <h1>Contatti & Sede VERSIONE 2</h1>
           <p className="subtitle">A.S.D. Polisportiva San Donato</p>
           <div className="header-decoration"></div>
         </div>
@@ -29,21 +28,26 @@ export default function Contacts() {
 
       <div className="contacts-container">
         
-        {/* --- COLONNA SINISTRA: INFO E ORARI --- */}
+        {/* --- COLONNA SINISTRA --- */}
         <div className="contacts-column left-col">
           
           {/* Card Sede */}
           <section className="contact-card">
-            <div className="card-icon-wrapper"><FaMapMarkerAlt /></div>
-            <div className="card-content">
+            {/* Header: Icona + Titolo sulla stessa linea */}
+            <div className="card-header-row">
+              <div className="card-icon-wrapper"><FaMapMarkerAlt /></div>
               <h3 className="card-title">La Nostra Sede</h3>
+            </div>
+            
+            {/* Body: Tutto il resto sotto e centrato */}
+            <div className="card-body">
               <p className="address-text">
                 Via Le Chiuse 20/A <br />
                 <strong>10144 TORINO</strong>
               </p>
               
               <a 
-                href="https://maps.google.com/?q=Via+Le+Chiuse+20/A,+Torino" 
+                href="https://goo.gl/maps/..." 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="map-link-container"
@@ -61,11 +65,14 @@ export default function Contacts() {
             </div>
           </section>
 
-          {/* Card Segreteria & Contatti */}
+          {/* Card Segreteria */}
           <section className="contact-card">
-            <div className="card-icon-wrapper"><FaClock /></div>
-            <div className="card-content">
+            <div className="card-header-row">
+              <div className="card-icon-wrapper"><FaClock /></div>
               <h3 className="card-title">Segreteria</h3>
+            </div>
+
+            <div className="card-body">
               <div className="info-group">
                 <span className="info-label">Orari apertura:</span>
                 <span className="info-value highlight">Giovedì 18:30 – 19:30</span>
@@ -83,12 +90,14 @@ export default function Contacts() {
             </div>
           </section>
 
-          {/* Card Dati Fiscali */}
-          <section className="contact-card compact">
-            <div className="card-icon-wrapper"><FaEnvelope /></div>
-            <div className="card-content">
+          {/* Card Recapiti */}
+          <section className="contact-card">
+            <div className="card-header-row">
+              <div className="card-icon-wrapper"><FaEnvelope /></div>
               <h3 className="card-title">Recapiti & Dati</h3>
-              
+            </div>
+
+            <div className="card-body">
               <div className="email-stack">
                 <a href="mailto:info@polisportivasandonato.it" className="email-link primary">
                   info@polisportivasandonato.it
@@ -107,32 +116,33 @@ export default function Contacts() {
 
         </div>
 
-        {/* --- COLONNA DESTRA: PAGAMENTI --- */}
+        {/* --- COLONNA DESTRA --- */}
         <div className="contacts-column right-col">
           
-          {/* Card Banca */}
+          {/* Card Bonifico */}
           <section className="contact-card payment-highlight">
             <div className="card-header-row">
               <div className="card-icon-wrapper bank"><FaUniversity /></div>
               <h3 className="card-title">Bonifico Bancario</h3>
             </div>
             
-            <p className="payment-intro">Coordinate per i pagamenti:</p>
-            
-            <div className="iban-wrapper">
-              <span className="iban-label">IBAN</span>
-              <code className="iban-code">IT 56 R 05018 01000 000017122862</code>
-              <button 
-                className={`copy-btn ${copied ? 'copied' : ''}`} 
-                onClick={handleCopyIBAN}
-                aria-label="Copia IBAN"
-              >
-                {copied ? <><FaCheck /> Copiato!</> : <><FaRegCopy /> Copia</>}
-              </button>
-            </div>
+            <div className="card-body">
+              <p className="payment-intro">Coordinate per i pagamenti:</p>
+              
+              <div className="iban-wrapper">
+                <span className="iban-label">IBAN</span>
+                <code className="iban-code">IT 56 R 05018 01000 000017122862</code>
+                <button 
+                  className={`copy-btn ${copied ? 'copied' : ''}`} 
+                  onClick={handleCopyIBAN}
+                >
+                  {copied ? <><FaCheck /> Copiato!</> : <><FaRegCopy /> Copia</>}
+                </button>
+              </div>
 
-            <div className="bank-logo-wrapper">
-              <img src="/immaginiContatti/logoBanca.png" alt="Banca" className="bank-img" loading="lazy" />
+              <div className="bank-logo-wrapper">
+                <img src="/immaginiContatti/logoBanca.png" alt="Banca" className="bank-img" loading="lazy" />
+              </div>
             </div>
           </section>
 

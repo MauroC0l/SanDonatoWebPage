@@ -1,8 +1,10 @@
 /* --- Contatti.css --- */
 
-/* 1. RESET FONDAMENTALE (Evita che padding e bordi aumentino la larghezza) */
+/* RESET COMPLETO */
 *, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -13,31 +15,30 @@
   --c-text-main: #333333;
   --c-text-light: #555555;
   
-  --radius-card: 16px;
-  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --radius-card: 20px;
+  --shadow-card: 0 8px 30px rgba(0, 43, 92, 0.08);
 }
 
-/* 2. CONTENITORE PRINCIPALE SICURO */
 .contacts-page {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--c-bg);
   min-height: 100vh;
   width: 100%;
-  max-width: 100vw; /* Impedisce che la pagina superi la finestra */
-  overflow-x: hidden; /* Taglia via eventuali sbavature */
+  max-width: 100vw;
+  overflow-x: hidden;
   padding: 1.5rem 1rem 4rem;
   color: var(--c-text-main);
 }
 
-/* --- HEADER --- */
+/* --- HEADER PAGINA --- */
 .contacts-header {
   text-align: center;
   margin-bottom: 2rem;
-  padding: 0 0.5rem; /* Margine di sicurezza */
+  padding: 0 1rem;
 }
 
 .contacts-header h1 {
-  font-size: clamp(1.5rem, 5vw, 2.5rem); /* Testo che scala fluidamente */
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
   color: var(--c-primary);
   font-weight: 800;
   margin-bottom: 0.5rem;
@@ -57,7 +58,7 @@
   border-radius: 2px;
 }
 
-/* --- GRIGLIA --- */
+/* --- GRIGLIA CARDS --- */
 .contacts-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -80,10 +81,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  width: 100%; /* Forza la colonna a stare nei bordi */
+  width: 100%;
 }
 
-/* --- CARD: IL CUORE DEL FIX --- */
+/* --- CARD GENERICA --- */
 .contact-card {
   background: var(--c-card-bg);
   border-radius: var(--radius-card);
@@ -91,77 +92,76 @@
   box-shadow: var(--shadow-card);
   width: 100%;
   
-  /* Flexbox per affiancare Icona e Testo */
+  /* Layout a colonna per separare Header e Body */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra orizzontalmente i figli */
+  gap: 1rem;
+}
+
+/* --- RIGA HEADER (Icona + Titolo) --- */
+.card-header-row {
   display: flex;
   flex-direction: row;
-  
-  /* CENTRATURA VERTICALE: Allinea l'icona al centro del blocco testo */
-  align-items: center; 
-  
-  gap: 1.2rem;
-  position: relative;
-  overflow: hidden; /* Protezione extra contro sbordamenti */
+  align-items: center; /* Allinea verticalmente icona e testo */
+  justify-content: center; /* Centra il blocco nella card */
+  gap: 0.8rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
 }
 
-/* Card Pagamenti e Mappa necessitano di allineamento diverso (in alto) */
-.contact-card:has(.map-link-container),
-.contact-card:has(.iban-wrapper) {
-  align-items: flex-start; /* Qui l'icona sta in alto perché il contenuto è lungo */
-}
-
-/* --- ICONA --- */
 .card-icon-wrapper {
-  flex-shrink: 0; /* Impedisce all'icona di schiacciarsi */
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: rgba(0, 43, 92, 0.08);
   border-radius: 12px;
   color: var(--c-primary);
-  
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .card-icon-wrapper.bank { background: #eef2f5; }
 
-/* --- CONTENUTO TESTUALE --- */
-.card-content {
-  flex: 1; /* Prende tutto lo spazio rimanente */
-  min-width: 0; /* TRUCCO FONDAMENTALE: permette al testo di andare a capo nei flex item */
-  
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Centra verticalmente il contenuto nel suo spazio */
-  gap: 0.3rem;
-}
-
 .card-title {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--c-primary);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
-/* Testo indirizzo */
+/* --- BODY CARD (Il resto del contenuto) --- */
+.card-body {
+  width: 100%;
+  text-align: center; /* Centra tutto il testo */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra gli elementi non-testo (bottoni, mappe) */
+  gap: 0.8rem;
+}
+
+/* --- ELEMENTI SPECIFICI --- */
 .address-text {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--c-text-light);
-  line-height: 1.5;
 }
 
-/* --- MAPPA --- */
+/* MAPPA: Fix per non strabordare */
 .map-link-container {
   display: block;
-  width: 100%;
-  margin-top: 1rem;
-  border-radius: 12px;
+  width: 100%; /* Occupa tutto lo spazio disponibile */
+  max-width: 100%; 
+  border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 16/9; /* Mantiene la forma rettangolare */
+  aspect-ratio: 16/9; /* Forma rettangolare fissa */
   background: #eee;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .map-image {
@@ -171,48 +171,49 @@
   display: block;
 }
 
-/* --- INFO E ORARI --- */
+/* ORARI E INFO */
 .info-group {
-  font-size: 0.95rem;
-  margin-top: 0.2rem;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: center;
 }
 
 .highlight {
-  display: inline-block;
   color: var(--c-accent);
   font-weight: 700;
   background: rgba(255, 102, 0, 0.1);
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 6px;
 }
 
 .divider {
-  border: 0;
+  width: 80%; /* Linea più corta ed elegante */
   height: 1px;
   background: #eee;
-  margin: 1rem 0;
+  border: none;
+  margin: 0.5rem auto;
+}
+
+/* Sezione Mobile Contatti */
+.mobile-contact-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
 }
 
-/* Sezione Mobile Rapida */
-.mobile-contact-section {
-  margin-top: 0.5rem;
-}
-
 .sub-title {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--c-primary);
-  margin-bottom: 0.3rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
-.info-note {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 0.5rem;
-}
+.info-note { font-size: 0.85rem; color: #888; margin-bottom: 0.5rem; }
 
 .phone-btn {
   display: inline-flex;
@@ -222,70 +223,63 @@
   background: var(--c-primary);
   color: white;
   text-decoration: none;
-  padding: 0.8rem 1.2rem;
-  border-radius: 10px;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px; /* Pillola */
   font-weight: 600;
   font-size: 1rem;
+  transition: transform 0.2s;
   width: 100%;
-  transition: background 0.2s;
+  max-width: 300px; /* Non diventa troppo largo su desktop */
 }
 
-/* --- EMAIL E DATI --- */
+/* EMAIL */
+.email-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
 .email-link {
-  display: block;
   color: var(--c-primary);
   text-decoration: none;
-  padding: 0.2rem 0;
   font-size: 0.95rem;
-  
-  /* FIX SBORDAMENTO EMAIL */
-  word-wrap: break-word;
-  overflow-wrap: anywhere; 
+  word-break: break-word; /* Spezza le email lunghe */
 }
+.email-link.primary { font-weight: 600; font-size: 1rem; }
 
-.email-link.primary { font-weight: 600; }
-
+/* DATI FISCALI */
 .fiscal-data-box {
-  margin-top: 1rem;
   background: #f8f9fa;
-  padding: 0.8rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-family: monospace;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  width: 100%;
 }
 
 .fiscal-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.3rem;
-  flex-wrap: wrap; /* Manda a capo se non c'è spazio */
+  padding-bottom: 0.3rem;
+  border-bottom: 1px dashed #eee;
 }
+.fiscal-row:last-child { border-bottom: none; margin-bottom: 0; }
 .fiscal-row span { font-weight: bold; color: #666; }
 
-/* --- SEZIONE PAGAMENTI --- */
-.card-header-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.payment-intro {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.8rem;
-}
+/* IBAN */
+.payment-intro { font-size: 0.95rem; color: #666; }
 
 .iban-wrapper {
   background: #f1f5f9;
   border: 1px dashed #cbd5e1;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 1rem;
-  text-align: center;
-  
-  /* FIX SBORDAMENTO IBAN */
   width: 100%;
-  overflow-wrap: break-word; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden; /* Sicurezza */
 }
 
 .iban-label {
@@ -293,28 +287,26 @@
   text-transform: uppercase;
   color: #888;
   letter-spacing: 1px;
-  display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
 .iban-code {
   font-family: monospace;
-  font-size: clamp(0.9rem, 4vw, 1.1rem); /* Scala in base allo schermo */
+  font-size: clamp(0.9rem, 4vw, 1.1rem);
   color: var(--c-primary);
   font-weight: 700;
-  display: block;
+  text-align: center;
+  word-break: break-all; /* Spezza IBAN lungo */
   line-height: 1.4;
   margin-bottom: 1rem;
-  
-  word-break: break-all; /* Spezza l'IBAN in qualsiasi punto se necessario */
 }
 
 .copy-btn {
   background: #fff;
   border: 1px solid #ddd;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1.2rem;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -322,39 +314,26 @@
 }
 .copy-btn.copied { background: #d1fae5; border-color: #10b981; color: #065f46; }
 
-.bank-logo-wrapper { margin-top: 1rem; text-align: center; }
+.bank-logo-wrapper { margin-top: 1rem; }
 .bank-img { max-height: 35px; opacity: 0.8; }
 
-/* --- SATISPAY --- */
-/* Questa card è volutamente diversa (blocco unico centrato) */
+/* SATISPAY */
 .satispay-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   background: linear-gradient(135deg, #ff5e5e, #e03a3a);
   color: white;
   padding: 2rem 1.5rem;
+  border: none;
 }
-
-.satispay-content { width: 100%; }
-
-.satispay-title { font-size: 1.5rem; margin-bottom: 0.3rem; color: white;}
-.shop-name { font-size: 0.85rem; opacity: 0.9; margin-bottom: 1.5rem; }
-
+.satispay-title { color: white; margin-bottom: 0.2rem; }
+.shop-name { color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 1rem; }
 .qr-frame {
   background: white;
   padding: 1rem;
   border-radius: 16px;
   display: inline-block;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
-
 .qr-image { width: 140px; height: 140px; display: block; }
-
 .scan-me-badge {
-  display: inline-block;
   background: #333;
   color: white;
   padding: 0.3rem 0.8rem;
@@ -364,4 +343,13 @@
   margin-top: -10px;
   position: relative;
   z-index: 2;
+  display: inline-block;
+}
+
+/* MEDIA QUERY MOBILE */
+@media (max-width: 480px) {
+  .contacts-page { padding: 1rem 0.8rem 4rem; }
+  .contact-card { padding: 1.25rem; }
+  .card-title { font-size: 1.2rem; }
+  .card-icon-wrapper { width: 38px; height: 38px; font-size: 1rem; }
 }

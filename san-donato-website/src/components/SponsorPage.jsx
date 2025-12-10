@@ -1,58 +1,62 @@
 import React from 'react';
+import { FaArrowRight } from "react-icons/fa";
 import "../css/SponsorPage.css";
 
+// IMPORT DATI JSON
+import sponsorsData from "../data/Sponsor.json";
+
 export default function SponsorPage() {
-  const sponsors = [
-    { name: "Arcobaleno", image: "/immaginiSponsor/ARCOBALENO.jpg", link: "https://cooparcobaleno.net/" },
-    { name: "Brillo", image: "/immaginiSponsor/BRILLO.png", link: "https://brillodetergenza.it/" },
-    { name: "Da Michi", image: "/immaginiSponsor/DA MICHI.png", link: "https://ristorantepizzeriadamichi.it/" },
-    { name: "Disgelo", image: "/immaginiSponsor/DISGELO.png", link: "https://www.ildisgelo.it/" },
-    { name: "GMT", image: "/immaginiSponsor/GMT.png", link: "https://www.ingrossobiancheriagmt.com/" },
-    { name: "La Tosca", image: "/immaginiSponsor/LA TOSCA.png", link: "https://www.gelaterialatosca.it/" },
-    { name: "Tecnorete", image: "/immaginiSponsor/tecnorete.png", link: "https://www.tecnorete.it/" },
-    { name: "Zoe Home Studio", image: "/immaginiSponsor/zhs.png", link: "https://www.zoehomestudio.it/" },
-  ];
+  const { header, list } = sponsorsData;
 
   return (
-    <div className="sponsor-page fade-in">
-      <div className="sponsor-container">
-        <header className="sponsor-header">
-          <h1 className="page-title">
-            I Nostri <span className="text-gradient">Partner</span>
+    // Usa 'spn-fade-in' per un'animazione specifica che non confligge
+    <div className="spn-page-wrapper spn-fade-in">
+      <div className="spn-container">
+        
+        {/* HEADER */}
+        <header className="spn-header">
+          <h1 className="spn-title">
+            {header.titlePrefix} <span className="spn-text-gradient">{header.titleHighlight}</span>
           </h1>
-          <p className="page-subtitle">
-            Realtà d'eccellenza che sostengono il nostro progetto.
+          <p className="spn-subtitle">
+            {header.subtitle}
           </p>
+          <div className="spn-divider"></div>
         </header>
 
-        <div className="sponsor-grid">
-          {sponsors.map((sponsor, index) => (
+        {/* GRIGLIA SPONSOR */}
+        <div className="spn-grid">
+          {list.map((sponsor, index) => (
             <a 
               key={index} 
               href={sponsor.link} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="sponsor-card"
+              className="spn-card"
+              // Staggered animation: appaiono in sequenza
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="card-content">
-                <div className="image-wrapper">
+              <div className="spn-card-content">
+                <div className="spn-image-wrapper">
                   <img
                     src={sponsor.image}
                     alt={`Logo ${sponsor.name}`}
-                    className="sponsor-image"
+                    className="spn-image"
+                    loading="lazy"
                   />
                 </div>
-                <div className="sponsor-meta">
-                  <h3 className="sponsor-name">{sponsor.name}</h3>
-                  <div className="visit-arrow">
-                    Visita <span className="arrow">→</span>
+                
+                <div className="spn-meta">
+                  <h3 className="spn-name">{sponsor.name}</h3>
+                  <div className="spn-visit-link">
+                    Visita Sito <FaArrowRight className="spn-icon-arrow" />
                   </div>
                 </div>
               </div>
             </a>
           ))}
         </div>
+
       </div>
     </div>
   );

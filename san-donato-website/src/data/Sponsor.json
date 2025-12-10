@@ -1,0 +1,49 @@
+{
+  "header": {
+    "titlePrefix": "I Nostri",
+    "titleHighlight": "Partner",
+    "subtitle": "Realtà d'eccellenza che sostengono il nostro progetto."
+  },
+  "list": [
+    { 
+      "name": "Arcobaleno", 
+      "image": "/immaginiSponsor/ARCOBALENO.jpg", 
+      "link": "https://cooparcobaleno.net/" 
+    },
+    { 
+      "name": "Brillo", 
+      "image": "/immaginiSponsor/BRILLO.png", 
+      "link": "https://brillodetergenza.it/" 
+    },
+    { 
+      "name": "Da Michi", 
+      "image": "/immaginiSponsor/DA MICHI.png", 
+      "link": "https://ristorantepizzeriadamichi.it/" 
+    },
+    { 
+      "name": "Disgelo", 
+      "image": "/immaginiSponsor/DISGELO.png", 
+      "link": "https://www.ildisgelo.it/" 
+    },
+    { 
+      "name": "GMT", 
+      "image": "/immaginiSponsor/GMT.png", 
+      "link": "https://www.ingrossobiancheriagmt.com/" 
+    },
+    { 
+      "name": "La Tosca", 
+      "image": "/immaginiSponsor/LA TOSCA.png", 
+      "link": "https://www.gelaterialatosca.it/" 
+    },
+    { 
+      "name": "Tecnorete", 
+      "image": "/immaginiSponsor/tecnorete.png", 
+      "link": "https://www.tecnorete.it/" 
+    },
+    { 
+      "name": "Zoe Home Studio", 
+      "image": "/immaginiSponsor/zhs.png", 
+      "link": "https://www.zoehomestudio.it/" 
+    }
+  ]
+}
