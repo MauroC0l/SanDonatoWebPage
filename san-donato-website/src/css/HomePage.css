@@ -1,483 +1,367 @@
 /* =========================================
-   HOME PAGE STYLES (Scoped: hp-, ncm-, lcs-, ev-)
+   HOME PAGE STYLES (No Bootstrap)
    ========================================= */
 
+/* Variabili Scoped */
 :root {
-  --hp-bg: #f8f9fa;          /* Sfondo generale grigio chiarissimo */
-  --hp-section-bg: #ffffff;  /* Sfondo sezioni bianche */
-  --hp-primary: #002b5c;     /* Blu Istituzionale PSD */
-  --hp-accent: #ff6600;      /* Arancio Istituzionale PSD */
-  --hp-danger: #dc3545;      /* Rosso per Live/YouTube */
-  --hp-text: #333333;
+  --hp-bg: #f8f9fa;
+  --hp-white: #ffffff;
+  --hp-primary: #002b5c;
+  --hp-accent: #ff6600;
+  --hp-danger: #dc3545;
+  --hp-text: #333;
   --hp-text-muted: #6c757d;
   --hp-border: #e9ecef;
-  
   --hp-radius: 12px;
-  --hp-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  --hp-shadow-hover: 0 15px 40px rgba(0, 43, 92, 0.12);
+  --hp-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* --- LAYOUT GENERALE --- */
 .hp-root {
   background-color: var(--hp-bg);
   min-height: 100vh;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: var(--hp-text);
   padding-bottom: 4rem;
 }
 
 .hp-main-container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
-/* Spaziatura Sezioni */
-.hp-section {
-  padding: 4rem 0;
+/* --- GRID SYSTEM (Cuore del Layout) --- */
+.hp-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 colonna (Stacked) */
+  gap: 2rem;
+  margin-top: 3rem;
 }
 
-.hp-section.news-section {
-  background-color: transparent;
+/* Desktop: 3 Colonne */
+@media (min-width: 992px) {
+  .hp-grid-layout {
+    /* Live (25%) - News (42%) - Calendar (33%) approx */
+    grid-template-columns: 3fr 5fr 4fr; 
+    align-items: start; /* Allinea le colonne in alto */
+  }
 }
 
-.hp-section.split-section {
-  background-color: var(--hp-section-bg);
-  border-top: 1px solid var(--hp-border);
-  margin-top: 2rem;
-  padding-top: 3rem;
-  border-radius: 20px 20px 0 0;
+/* --- COLUMN STYLES --- */
+.column-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--hp-border);
+  padding-bottom: 0.8rem;
 }
 
-/* Headers Sezioni */
-.section-header {
-  margin-bottom: 2.5rem;
-}
-
-.section-title {
-  font-size: clamp(2rem, 4vw, 2.5rem);
+.col-title {
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--hp-primary);
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
-}
-
-.section-subtitle {
-  color: var(--hp-text-muted);
-  font-size: 1.1rem;
-}
-
-/* =========================================
-   1. SEZIONE NEWS (News Card Modern: ncm-)
-   ========================================= */
-
-.latest-news-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.news-card-modern {
-  background: white;
-  border-radius: var(--hp-radius);
-  overflow: hidden;
-  box-shadow: var(--hp-shadow);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  border: 1px solid rgba(0,0,0,0.02);
-}
-
-.news-card-modern:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--hp-shadow-hover);
-}
-
-/* Immagine News */
-.ncm-image-wrapper {
-  height: 200px;
-  overflow: hidden;
-  position: relative;
-}
-
-.ncm-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.news-card-modern:hover .ncm-image-wrapper img {
-  transform: scale(1.05);
-}
-
-.ncm-category-badge {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  background: var(--hp-accent);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* Contenuto News */
-.ncm-content {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.ncm-date {
-  font-size: 0.85rem;
-  color: #999;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.ncm-title {
-  font-size: 1.25rem;
-  color: var(--hp-primary);
-  font-weight: 700;
-  margin-bottom: 0.8rem;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.ncm-excerpt {
-  font-size: 0.95rem;
-  color: var(--hp-text-muted);
-  margin-bottom: 1.5rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.ncm-link {
-  margin-top: auto;
-  color: var(--hp-accent);
-  font-weight: 600;
-  font-size: 0.9rem;
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: gap 0.2s;
-}
-
-.news-card-modern:hover .ncm-link {
   gap: 10px;
 }
 
-.btn-view-all {
-  border-radius: 30px;
-  padding: 10px 30px;
+.text-danger { color: var(--hp-danger); }
+
+/* =========================================
+   ELEMENTI UI COMUNI (Bottoni, Badge)
+   ========================================= */
+
+/* Bottoni personalizzati */
+.hp-btn {
+  display: inline-block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  border-color: var(--hp-primary);
-  color: var(--hp-primary);
-  background: transparent;
-  transition: all 0.2s;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
-.btn-view-all:hover {
-  background-color: var(--hp-primary);
+
+.btn-danger {
+  background-color: var(--hp-danger);
+  color: white;
+}
+.btn-danger:hover { background-color: #bb2d3b; }
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--hp-text);
+  color: var(--hp-text);
+}
+.btn-outline:hover {
+  background-color: var(--hp-text);
   color: white;
 }
 
-/* =========================================
-   2. SEZIONE LIVE (Live Card Simple: lcs-)
-   ========================================= */
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--hp-primary);
+  text-decoration: underline;
+  width: auto;
+}
 
+.view-all-wrapper { text-align: center; margin-top: 1.5rem; }
+
+/* Badge */
+.hp-badge {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+.badge-danger { background-color: var(--hp-danger); }
+.badge-secondary { background-color: var(--hp-text-muted); }
+
+/* =========================================
+   COLONNA 1: LIVE (lcs-)
+   ========================================= */
 .live-pulse-icon {
-  font-size: 0.5em;
-  vertical-align: middle;
-  margin-right: 10px;
+  font-size: 0.6em;
   color: var(--hp-danger);
   animation: pulseRed 1.5s infinite;
 }
-
 @keyframes pulseRed {
   0% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.2); }
   100% { opacity: 1; transform: scale(1); }
 }
 
-/* Card Live */
 .live-card-simple {
-  background: white;
+  background: var(--hp-white);
   border: 1px solid var(--hp-border);
   border-radius: var(--hp-radius);
   padding: 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.live-card-simple::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 4px;
-  background: var(--hp-border);
-  transition: background 0.3s;
-}
-
-.live-card-simple:hover {
-  transform: translateY(-3px);
-  border-color: var(--hp-accent);
-}
-.live-card-simple:hover::before {
-  background: var(--hp-accent);
-}
-
-/* Header della Card */
-.lcs-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.2rem;
+  box-shadow: var(--hp-shadow);
+  transition: transform 0.2s;
+}
+.live-card-simple:hover { 
+  transform: translateY(-3px); 
+  border-color: var(--hp-accent); 
 }
 
-.live-badge {
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  padding: 0.4em 0.8em;
+.lcs-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1rem; 
 }
-.upcoming-badge {
-  background-color: var(--hp-text-muted) !important;
+.yt-icon { color: #ff0000; font-size: 1.6rem; }
+
+.lcs-match-info { text-align: center; margin-bottom: 1.2rem; }
+.lcs-teams { 
+  font-weight: 700; 
+  color: var(--hp-primary); 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.3rem; 
+  font-size: 1.1rem;
+}
+.lcs-teams .vs { 
+  font-size: 0.85rem; 
+  color: var(--hp-text-muted); 
+  font-weight: 400; 
+  text-transform: uppercase; 
 }
 
-.yt-icon {
-  color: #ff0000;
-  font-size: 1.6rem;
-}
-
-/* Info Partita (NO Punteggio) */
-.lcs-match-info {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.lcs-teams {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--hp-primary);
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  line-height: 1.2;
-}
-
-.lcs-teams .vs {
-  font-size: 0.8rem;
-  color: var(--hp-text-muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  margin: 4px 0;
-}
-
-.btn-watch-live {
-  width: 100%;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Box Promo Canale */
 .channel-promo-box {
-  background: #f1f3f5;
-  border-radius: var(--hp-radius);
-  padding: 1.2rem;
-  text-align: center;
-  font-size: 0.95rem;
-  color: var(--hp-text-muted);
-  border: 1px dashed #ced4da;
-  margin-top: 2rem;
+  background: #f1f3f5; 
+  border-radius: 8px; 
+  padding: 1rem; 
+  text-align: center; 
+  font-size: 0.9rem;
+  border: 1px dashed #ced4da; 
+  margin-top: 1.5rem;
 }
-
-.channel-promo-box a {
-  display: block;
-  margin-top: 5px;
-  color: var(--hp-primary);
-  font-weight: 700;
-  text-decoration: none;
+.channel-promo-box a { 
+  color: var(--hp-primary); 
+  font-weight: 700; 
+  text-decoration: none; 
 }
-.channel-promo-box a:hover {
-  text-decoration: underline;
-  color: var(--hp-accent);
-}
+.channel-promo-box a:hover { text-decoration: underline; }
 
 /* =========================================
-   3. SEZIONE CALENDARIO (Event Row: ev-)
+   COLONNA 2: NEWS FEED (nfc-)
    ========================================= */
-
-.events-list {
+.news-feed-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.event-row {
-  background: white;
-  border: 1px solid var(--hp-border);
-  border-radius: var(--hp-radius);
-  padding: 1rem;
-  display: flex;
-  align-items: center;
   gap: 1.5rem;
-  transition: all 0.2s ease;
 }
 
-.event-row:hover {
-  border-color: var(--hp-accent);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+.news-feed-card {
+  background: var(--hp-white);
+  border-radius: var(--hp-radius);
+  overflow: hidden;
+  box-shadow: var(--hp-shadow);
+  display: flex; /* Layout orizzontale */
+  height: 130px; 
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(0,0,0,0.02);
 }
 
-.event-date-box {
-  background: #eef2f5;
-  width: 65px;
-  height: 65px;
-  border-radius: 12px;
+.news-feed-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.nfc-image {
+  width: 150px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.nfc-content {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  color: var(--hp-primary);
-  border: 1px solid rgba(0,0,0,0.05);
-}
-
-.ev-day {
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.ev-month {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--hp-accent);
-  margin-top: 2px;
-}
-
-.event-details {
   flex-grow: 1;
+}
+
+.nfc-meta { 
+  font-size: 0.75rem; 
+  color: var(--hp-text-muted); 
+  margin-bottom: 0.4rem; 
+  text-transform: uppercase; 
+  font-weight: 600; 
+}
+.nfc-title { 
+  font-size: 1.05rem; 
+  color: var(--hp-primary); 
+  font-weight: 700; 
+  margin: 0 0 0.5rem 0; 
+  line-height: 1.25;
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical; 
   overflow: hidden;
 }
+.nfc-link { 
+  font-size: 0.85rem; 
+  color: var(--hp-accent); 
+  font-weight: 600; 
+  display: flex; 
+  align-items: center; 
+  gap: 5px; 
+  margin-top: auto; 
+}
 
-.ev-meta {
-  display: flex;
+/* =========================================
+   COLONNA 3: CALENDARIO (ev-)
+   ========================================= */
+.events-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1rem; 
+}
+
+.event-row {
+  background: var(--hp-white); 
+  border: 1px solid var(--hp-border); 
+  border-radius: var(--hp-radius);
+  padding: 0.9rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  transition: all 0.2s;
+}
+.event-row:hover { border-color: var(--hp-accent); }
+
+.event-date-box {
+  background: #eef2f5; 
+  width: 55px; 
+  height: 55px; 
+  border-radius: 10px;
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
-  font-size: 0.85rem;
+  flex-shrink: 0; 
+  color: var(--hp-primary);
 }
+.ev-day { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+.ev-month { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--hp-accent); }
 
-.ev-tag {
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  letter-spacing: 0.5px;
+.event-details { flex-grow: 1; overflow: hidden; }
+
+.ev-meta { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  margin-bottom: 3px; 
+  font-size: 0.75rem; 
 }
+.ev-tag { padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; }
+/* Tag Colors */
 .tag-calcio { background: #e3f2fd; color: #1565c0; }
 .tag-volley { background: #fff3e0; color: #ef6c00; }
 .tag-basket { background: #fbe9e7; color: #d84315; }
 .tag-evento { background: #f3e5f5; color: #8e24aa; }
 
-.ev-time {
-  color: var(--hp-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 500;
+.ev-title { 
+  margin: 0; 
+  font-size: 0.95rem; 
+  font-weight: 700; 
+  color: var(--hp-text); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
 }
-
-.ev-title {
-  margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--hp-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ev-location {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--hp-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.ev-location { 
+  margin: 0; 
+  font-size: 0.8rem; 
+  color: var(--hp-text-muted); 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
 }
 
 /* =========================================
-   4. LOADER & RESPONSIVE
+   UTILITY & RESPONSIVE
    ========================================= */
-
 .loader-container {
-  display: flex;
-  justify-content: center;
-  padding: 4rem;
+  display: flex; 
+  justify-content: center; 
+  padding: 3rem;
 }
 .loader {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--hp-accent);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  border: 4px solid #f3f3f3; 
+  border-top: 4px solid var(--hp-accent); 
+  border-radius: 50%; 
+  width: 40px; 
+  height: 40px; 
   animation: spin 1s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* --- RESPONSIVITÀ --- */
-
-@media (max-width: 991px) {
-  .live-column {
-    margin-bottom: 3rem; /* Spazio tra Live (che sta sopra) e Calendario */
+/* Mobile e Tablet: News Card diventa verticale se c'è poco spazio */
+@media (max-width: 500px) {
+  .news-feed-card {
+    height: auto;
+    flex-direction: column;
   }
-
-  .section-header.text-start {
-    text-align: center !important;
-  }
-}
-
-@media (max-width: 576px) {
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .event-row {
-    gap: 1rem;
-    padding: 0.8rem;
-  }
-  
-  .event-date-box {
-    width: 55px;
-    height: 55px;
-  }
-  .ev-day { font-size: 1.3rem; }
-  
-  .ev-title {
-    white-space: normal;
+  .nfc-image {
+    width: 100%;
+    height: 160px;
   }
 }
