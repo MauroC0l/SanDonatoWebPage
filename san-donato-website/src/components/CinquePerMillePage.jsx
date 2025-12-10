@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../CSS/CinquePerMillePage.css'; 
+import '../css/CinquePerMillePage.css'; 
 // Importa il file JSON. Assicurati che il percorso sia corretto rispetto a dove salvi il file.
 import pageData from '../data/CinquePerMille.json'; 
 
