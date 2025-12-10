@@ -219,7 +219,6 @@
     scroll-snap-align: start;
     min-width: 85vw; /* Card quasi full-width */
     border: 1px solid rgba(0,0,0,0.06);
-    margin-left: 2rem;
   }
 
   /* Notizie restano verticali ma con padding */
