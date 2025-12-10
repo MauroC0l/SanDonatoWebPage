@@ -1,0 +1,205 @@
+{
+  "basket": {
+    "title": "Basket",
+    "color": "#ff6600",
+    "iconKey": "basket",
+    "description": "Passione, tecnica e gioco di squadra. Dalla formazione Under 19 agli Open.",
+    "groups": [
+      {
+        "name": "Open Maschile",
+        "years": "Adulti",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "20:30 - 22:30" },
+          { "day": "Venerdì", "hours": "20:30 - 22:30" }
+        ]
+      },
+      {
+        "name": "U19 Maschile",
+        "years": "Under 19",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "19:00 - 22:00" },
+          { "day": "Venerdì", "hours": "17:00 - 18:30" }
+        ]
+      }
+    ]
+  },
+  "calcio": {
+    "title": "Calcio",
+    "color": "#0056d6",
+    "iconKey": "calcio",
+    "description": "Dai primi calci alla Prima Squadra. Tre sedi dedicate per ogni fascia d'età.",
+    "groups": [
+      {
+        "name": "Prima Squadra",
+        "years": "Adulti",
+        "location": "Campo Borgo Vittoria",
+        "address": "Via Paolo Veronese 173/A, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "21:00 - 23:00" },
+          { "day": "Giovedì", "hours": "21:00 - 23:00" }
+        ]
+      },
+      {
+        "name": "Over 18 CSI",
+        "years": "Adulti",
+        "location": "Campo Borgo Vittoria",
+        "address": "Via Paolo Veronese 173/A, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "20:00 - 22:00" },
+          { "day": "Mercoledì", "hours": "20:00 - 22:00" }
+        ]
+      },
+      {
+        "name": "Annate 2007-2009",
+        "years": "Giovani",
+        "location": "Campo Borgo Vittoria",
+        "address": "Via Paolo Veronese 173/A, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "18:30 - 20:30" },
+          { "day": "Giovedì", "hours": "18:30 - 20:30" }
+        ]
+      },
+      {
+        "name": "Annate 2010-2011",
+        "years": "Calcio a 11",
+        "location": "Campo Borgo Vittoria",
+        "address": "Via Paolo Veronese 173/A, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "17:00 - 19:00" },
+          { "day": "Giovedì", "hours": "17:00 - 19:00" }
+        ]
+      },
+      {
+        "name": "Annate 2012-2013",
+        "years": "Calcio a 11 / Esordienti",
+        "location": "Campo Borgo Vittoria",
+        "address": "Via Paolo Veronese 173/A, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "17:00 - 19:00" },
+          { "day": "Giovedì", "hours": "17:00 - 19:00" }
+        ]
+      },
+      {
+        "name": "Annate 2013-2014",
+        "years": "Calcio a 7",
+        "location": "Campo Sant'Alfonso",
+        "address": "Via Netro 3, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "19:15 - 21:15" },
+          { "day": "Giovedì", "hours": "19:15 - 21:15" }
+        ]
+      },
+      {
+        "name": "Annate 2015-2016",
+        "years": "Calcio a 7",
+        "location": "Campo Sant'Alfonso",
+        "address": "Via Netro 3, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "16:45 - 18:45" },
+          { "day": "Giovedì", "hours": "16:45 - 18:45" }
+        ]
+      },
+      {
+        "name": "Annate 2017-2018",
+        "years": "Scuola Calcio PRO",
+        "location": "Campo Sant'Alfonso",
+        "address": "Via Netro 3, Torino",
+        "times": [
+          { "day": "Mercoledì", "hours": "17:15 - 19:15" }
+        ]
+      },
+      {
+        "name": "Annate 2018-2019",
+        "years": "Scuola Calcio START",
+        "location": "Sede Oratorio S. Donato",
+        "address": "Via Le Chiuse 20/A, Torino",
+        "times": [
+          { "day": "Mercoledì", "hours": "17:15 - 19:15" }
+        ]
+      }
+    ]
+  },
+  "volley": {
+    "title": "Volley",
+    "color": "#ff6600",
+    "iconKey": "volley",
+    "description": "Dal Minivolley alle Eccellenze. Unisciti a noi per la stagione 2025-2026.",
+    "extraInfo": "Ricerca atlete per rinforzare organici 2025/26. Contattare Davide: 328-3922664",
+    "groups": [
+      {
+        "name": "Misto Adulti (UISP/League)",
+        "years": "Adulti",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "21:00 - 23:00" },
+          { "day": "Giovedì", "hours": "21:00 - 23:00" }
+        ]
+      },
+      {
+        "name": "Eccellenza \"A\"",
+        "years": "Femminile",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "20:00 - 22:00" },
+          { "day": "Giovedì", "hours": "20:00 - 22:00" }
+        ]
+      },
+      {
+        "name": "Eccellenza \"B\"",
+        "years": "Femminile",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Mercoledì", "hours": "21:00 - 23:00" },
+          { "day": "Venerdì", "hours": "21:00 - 23:00" }
+        ]
+      },
+      {
+        "name": "U18 Femminile",
+        "years": "Nate 2008/09/10",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Mercoledì", "hours": "19:00 - 21:00" },
+          { "day": "Venerdì", "hours": "18:30 - 20:30" }
+        ]
+      },
+      {
+        "name": "U17 Femminile",
+        "years": "Nate 2009/10",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Martedì", "hours": "18:00 - 20:00" },
+          { "day": "Giovedì", "hours": "18:00 - 20:00" }
+        ]
+      },
+      {
+        "name": "U15 Femminile",
+        "years": "Nate 2011/12",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "18:00 - 20:00" },
+          { "day": "Giovedì", "hours": "18:00 - 20:00" }
+        ]
+      },
+      {
+        "name": "U14 Femminile",
+        "years": "Nate 2012/13",
+        "location": "Palestra Cartiera",
+        "address": "Via Fossano 8, Torino",
+        "times": [
+          { "day": "Lunedì", "hours": "17:00 - 19:00" },
+          { "day": "Mercoledì", "hours": "17:00 - 19:00" }
+        ]
+      }
+    ]
+  }
+}

@@ -21,7 +21,7 @@ export default function Contacts() {
       {/* Intestazione con tipografia moderna */}
       <header className="contacts-header">
         <div className="header-content">
-          <h1>Contatti & Sede</h1>
+          <h1>Contatti & Sede PROVA 1</h1>
           <p className="subtitle">A.S.D. Polisportiva San Donato</p>
           <div className="header-decoration"></div>
         </div>
