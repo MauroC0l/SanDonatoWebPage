@@ -58,7 +58,7 @@ const KITS = [
   }
 ];
 
-export default function AboutPage() {
+export default function ChiSiamoPage() {
   return (
     <div className="csp-avant-garde-wrapper">
       

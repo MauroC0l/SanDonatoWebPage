@@ -351,3 +351,94 @@
   .phone-btn { width: 100%; } /* Bottone full width su mobile */
   .iban-code { font-size: 1rem; }
 }
+
+
+/* --- AGGIUNTE E CORREZIONI PER MOBILE --- */
+
+/* 1. Gestione Email lunghe (spesso causa di overflow) */
+.email-link {
+  display: block;
+  color: var(--c-primary);
+  text-decoration: none;
+  padding: 0.3rem 0;
+  transition: color 0.2s;
+  
+  /* FIX: Forza l'a capo se l'email è troppo lunga */
+  word-break: break-word; 
+  overflow-wrap: anywhere; 
+  hyphens: auto;
+}
+
+/* 2. Gestione Dati Fiscali (CF e P.IVA) */
+.fiscal-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+  
+  /* FIX: Se lo schermo è stretto, manda il valore a capo */
+  flex-wrap: wrap; 
+  gap: 0.5rem;
+}
+
+/* 3. Ottimizzazione specifica per schermi piccoli (< 550px) */
+@media (max-width: 550px) {
+  
+  /* Riduciamo il padding della pagina esterna */
+  .contacts-page {
+    padding: 1rem 0.8rem 3rem; 
+  }
+
+  /* Riduciamo drasticamente il padding interno delle card */
+  .contact-card {
+    padding: 1.25rem; 
+    border-radius: 16px; /* Raggio leggermente ridotto */
+  }
+
+  /* Titoli leggermente più piccoli per evitare wrapping brutti */
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  /* IBAN: Riduciamo padding e font per farlo stare tutto */
+  .iban-wrapper {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .iban-code {
+    font-size: 0.95rem; /* Un po' più piccolo su mobile */
+    word-break: break-all; /* Spezza ovunque necessario */
+  }
+
+  /* Bottone Telefono al 100% larghezza */
+  .phone-btn {
+    width: 100%;
+    box-sizing: border-box; /* Assicura che il padding non aumenti la larghezza */
+  }
+
+  /* Allineamento dati fiscali a sinistra su mobile per leggibilità */
+  .fiscal-row {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  
+  /* Riduce dimensione icona nelle card per guadagnare spazio */
+  .card-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+}
+
+/* 4. Fix specifico per la card Satispay */
+.satispay-content {
+  /* Assicura che il contenuto non sbordi */
+  width: 100%;
+  overflow: hidden; 
+}
+
+.qr-frame {
+  max-width: 100%;
+  box-sizing: border-box;
+}
