@@ -267,3 +267,131 @@
   .tml-header { margin-bottom: 3rem; }
   .tml-title { font-size: 2.2rem; }
 }
+
+
+/* SAFEGUARDING BLOCK */
+.tml-safeguarding-block {
+  background: #0f172a;
+  color: white;
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+  /* Fondamentale per evitare overflow su mobile */
+  max-width: 100%; 
+  box-sizing: border-box;
+}
+
+.tml-safeguarding-block::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  pointer-events: none; /* Evita interazioni indesiderate */
+}
+
+.tml-sg-icon {
+  font-size: 3rem;
+  color: var(--tml-accent);
+  background: rgba(255,255,255,0.1);
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tml-sg-content {
+  flex: 1; /* Occupa tutto lo spazio rimanente */
+  min-width: 0; /* Trucco CSS per forzare il wrap del testo in flexbox */
+}
+
+.tml-sg-content h3 {
+  font-size: clamp(1.4rem, 4vw, 1.6rem); /* Font fluido */
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.tml-sg-content p {
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.tml-officer-box {
+  background: rgba(255,255,255,0.1);
+  padding: 1.2rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%; /* Si adatta alla larghezza disponibile */
+}
+
+.tml-officer-role {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.6);
+}
+
+.tml-officer-email {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: clamp(0.9rem, 4vw, 1.1rem); /* Font fluido per l'email */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+  
+  /* Gestione testo lungo su mobile */
+  word-break: break-word; 
+  overflow-wrap: break-word;
+}
+
+.tml-officer-email:hover {
+  color: var(--tml-accent);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .tml-page-wrapper {
+    padding: 2rem 1rem 4rem; /* Meno padding laterale su mobile */
+  }
+
+  .tml-safeguarding-block {
+    flex-direction: column;
+    align-items: center; /* Centra tutto */
+    text-align: center;
+    padding: 2rem 1.5rem; /* Padding ridotto */
+    gap: 1.5rem;
+  }
+  
+  .tml-sg-icon {
+    margin: 0; /* Reset margine */
+    width: 70px;
+    height: 70px;
+    font-size: 2.5rem;
+  }
+  
+  .tml-officer-box {
+    align-items: center; /* Centra il contenuto del box */
+  }
+  
+  .tml-officer-email {
+    justify-content: center; /* Centra l'email e l'icona */
+    flex-wrap: wrap; /* Permette all'icona di andare a capo se l'email è lunghissima */
+  }
+
+  .tml-header { margin-bottom: 2.5rem; }
+  .tml-title { font-size: 1.8rem; }
+}
