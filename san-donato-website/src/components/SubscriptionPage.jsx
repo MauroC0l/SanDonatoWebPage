@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function SubscriptionPage() {
   return (
     <div className="container mt-4">

@@ -1,0 +1,275 @@
+/* =========================================
+   MODERN SYSTEM 2.0 (Scoped: csp-)
+   ========================================= */
+
+.csp-avant-garde-wrapper {
+  --c-bg: #ffffff;
+  --c-surface: #f1f5f9;
+  --c-dark: #0f172a;       /* Blu scuro profondo (PSD istituzionale) */
+  --c-accent: #ff6600;     /* Arancio PSD */
+  --c-blue: #0056d6;       /* Blu elettrico per dettagli */
+  --c-text-main: #1e293b;
+  --c-text-muted: #64748b;
+  --c-border: #e2e8f0;
+  
+  font-family: 'Inter', sans-serif;
+  color: var(--c-text-main);
+  width: 100%;
+  background: var(--c-bg);
+}
+
+/* --- 1. HERO & BADGE --- */
+.csp-hero-block {
+  padding: 6rem 2rem 4rem;
+  text-align: left;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.csp-hero-content {
+  /* Container interno se necessario, altrimenti eredita dal blocco */
+}
+
+/* Nuovo Stile Badge "Dal 2008" */
+.csp-history-badge-container {
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.csp-history-badge-ring {
+  background: rgba(255, 102, 0, 0.1);
+  border: 1px solid rgba(255, 102, 0, 0.3);
+  padding: 4px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+}
+
+.csp-history-badge-text {
+  background: linear-gradient(90deg, #ff6600, #ff8533);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+}
+
+.csp-hero-title {
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1;
+  margin: 0 0 1.5rem 0;
+  color: var(--c-dark);
+}
+
+.csp-text-gradient {
+  background: linear-gradient(90deg, var(--c-blue), var(--c-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.csp-hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 650px;
+  color: var(--c-text-muted);
+  line-height: 1.6;
+}
+
+/* --- 2. MANIFESTO (Clean Grid) --- */
+.csp-manifesto-section {
+  padding: 4rem 2rem;
+  background: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.csp-section-header { margin-bottom: 3rem; }
+.csp-section-header h2 { font-size: 2.5rem; font-weight: 800; margin: 0; color: var(--c-dark); }
+.csp-header-line { width: 80px; height: 6px; background: var(--c-accent); margin-top: 10px; border-radius: 3px; }
+
+.csp-section-header.csp-center { text-align: center; }
+.csp-section-header.csp-center .csp-header-line { margin: 10px auto; }
+
+.csp-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.csp-value-item {
+  padding: 2rem;
+  background: var(--c-surface);
+  border-radius: 20px;
+  transition: transform 0.3s;
+}
+.csp-value-item:hover { transform: translateY(-5px); background: #eef2ff; }
+
+.csp-val-icon { font-size: 2rem; color: var(--c-blue); margin-bottom: 1rem; }
+.csp-value-item h4 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
+.csp-value-item p { margin: 0; color: var(--c-text-muted); line-height: 1.5; }
+
+/* --- 3. ORGANIGRAMMA (Dark Section) --- */
+.csp-org-section-dark {
+  background: var(--c-dark); /* Sfondo scuro totale */
+  padding: 6rem 2rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Elemento decorativo di sfondo */
+.csp-org-section-dark::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,102,0,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.csp-org-container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+
+.csp-org-header { margin-bottom: 4rem; text-align: center; }
+.csp-org-header h2 { font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; }
+.csp-org-header p { color: rgba(255,255,255,0.6); font-size: 1.1rem; }
+
+.csp-org-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.csp-org-card-glass {
+  background: rgba(255, 255, 255, 0.05); /* Effetto vetro su scuro */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.csp-org-card-glass:hover {
+  background: #fff;
+  transform: translateY(-10px);
+}
+
+/* Cambio colore testo in hover per contrasto su bianco */
+.csp-org-card-glass:hover h3 { color: var(--c-dark); }
+.csp-org-card-glass:hover p { color: var(--c-text-muted); }
+.csp-org-card-glass:hover .csp-divider-small { background: var(--c-accent); }
+
+.csp-org-icon-floating {
+  width: 50px; height: 50px;
+  background: var(--c-accent);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: #fff;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.csp-org-card-glass h3 { font-size: 1.2rem; margin: 0 0 1rem 0; font-weight: 700; color: #fff; }
+.csp-divider-small { width: 40px; height: 3px; background: rgba(255,255,255,0.2); margin-bottom: 1rem; }
+.csp-org-card-glass p { font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.7); margin: 0; }
+
+/* --- 4. MEMBERSHIP (Expanded Layout) --- */
+.csp-membership-section {
+  padding: 6rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.csp-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+  align-items: center; /* Per centrare la card 'popular' se è più alta */
+}
+
+.csp-pricing-card {
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  position: relative;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.csp-pricing-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.csp-pricing-card.csp-popular {
+  border: 2px solid var(--c-accent);
+  background: #fffaf5; /* Arancio chiarissimo */
+  transform: scale(1.05);
+  z-index: 2;
+  box-shadow: 0 25px 50px rgba(255, 102, 0, 0.15);
+}
+.csp-pricing-card.csp-popular:hover { transform: scale(1.05) translateY(-10px); }
+
+.csp-pop-badge {
+  position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+  background: var(--c-accent); color: #fff; padding: 5px 15px;
+  border-radius: 20px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;
+}
+
+.csp-kit-name { font-size: 1.5rem; font-weight: 800; color: var(--c-dark); margin-bottom: 0.5rem; }
+.csp-kit-price { font-size: 3rem; font-weight: 900; color: var(--c-dark); margin-bottom: 2rem; }
+.csp-currency { font-size: 1.5rem; vertical-align: super; opacity: 0.7; }
+
+.csp-kit-features { list-style: none; padding: 0; margin: 0; text-align: left; }
+.csp-kit-features li { 
+  padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); 
+  color: var(--c-text-muted); font-size: 0.95rem; display: flex; align-items: center; gap: 10px;
+}
+.csp-check-icon { color: var(--c-accent); font-size: 0.9rem; }
+
+/* Impact Bar */
+.csp-impact-bar {
+  margin-top: 5rem;
+  background: var(--c-surface);
+  border-radius: 20px;
+  padding: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  gap: 2rem;
+}
+
+.csp-impact-stat { display: flex; align-items: center; gap: 15px; }
+.csp-i-icon { font-size: 2.5rem; color: var(--c-dark); opacity: 0.2; }
+
+.csp-impact-stat strong { display: block; font-size: 1.1rem; color: var(--c-dark); }
+.csp-impact-stat span { display: block; font-size: 0.9rem; color: var(--c-text-muted); }
+
+.csp-impact-stat.csp-highlight {
+  background: #fff;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: 1px dashed var(--c-accent);
+}
+.csp-fiscal-code {
+  font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--c-dark);
+  display: block; margin-top: 5px;
+}
+
+/* --- FOOTER --- */
+.csp-page-footer {
+  text-align: center; padding: 3rem; background: var(--c-dark); color: rgba(255,255,255,0.5); font-size: 0.9rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .csp-hero-title { font-size: 3rem; }
+  .csp-org-grid-modern { grid-template-columns: 1fr; }
+  .csp-impact-bar { flex-direction: column; text-align: center; }
+  .csp-pricing-card.csp-popular { transform: scale(1); }
+}
