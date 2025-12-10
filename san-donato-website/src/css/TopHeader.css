@@ -40,7 +40,7 @@
 
 /* Icone */
 .contact-icon {
-    color: #ff6600bd; 
+    color: #ff6600bd;
     width: clamp(1rem, 1.5vw, 1.2rem);
     height: auto;
 }
@@ -52,7 +52,7 @@
 }
 
 .social-icons a {
-    font-size: clamp(0.9rem, 1.2vw, 1.2rem);  
+    font-size: clamp(0.9rem, 1.2vw, 1.2rem);
     padding: 0.4rem;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.08);
@@ -69,8 +69,15 @@
 
 /* Animation */
 @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* --- Responsive --- */
@@ -86,6 +93,7 @@
     .social-icons {
         gap: 0.6rem;
     }
+
     .contact-info {
         font-size: 0.75rem;
         flex-direction: column;
@@ -93,33 +101,22 @@
     }
 }
 
-Certamente. La soluzione più pulita ed efficiente per ottenere questo risultato è agire direttamente sul CSS utilizzando le Media Queries.
-
-Non c'è bisogno di toccare la logica React o il file JSON. Nasconderemo l'indirizzo fisico solo su dispositivi mobili (display: none), lasciando visibili le icone social e l'email.
-
-Modifica al file TopHeader.css
-Sostituisci la parte finale del tuo file CSS (quella relativa alle media queries) con questo codice aggiornato. Ho aggiunto una classe specifica per nascondere l'indirizzo e ottimizzato il layout per mobile.
-
-CSS
-
-/* --- TopHeader.css --- */
-
-/* ... (tutto il CSS precedente resta uguale fino a qui) ... */
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
     .top-header-container {
         /* Mantiene gli elementi sulla stessa riga su tablet/mobile largo */
-        flex-direction: row; 
+        flex-direction: row;
         justify-content: space-between;
         padding: 0.5rem 1rem;
     }
 }
 
 @media (max-width: 600px) {
+
     /* Su smartphone, nascondiamo l'indirizzo fisico */
-    .contact-info span:first-child { 
-        display: none; 
+    .contact-info span:first-child {
+        display: none;
     }
 
     .top-header-container {
@@ -131,13 +128,13 @@ CSS
     .contact-info {
         font-size: 0.85rem;
         /* Rimuoviamo gap eccessivi */
-        gap: 0; 
+        gap: 0;
     }
-    
+
     /* Rendiamo l'email cliccabile più facile da toccare */
     .contact-info span {
         padding: 0.2rem 0.5rem;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 4px;
     }
 }
