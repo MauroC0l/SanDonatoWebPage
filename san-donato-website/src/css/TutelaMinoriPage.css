@@ -1,0 +1,269 @@
+/* =========================================
+   TUTELA MINORI SYSTEM (Scoped: tml-)
+   ========================================= */
+
+:root {
+  --tml-bg: #f8fafc;
+  --tml-card-bg: #ffffff;
+  --tml-primary: #0f172a;    /* Blu scuro istituzionale */
+  --tml-accent: #0ea5e9;     /* Azzurro sereno/sicurezza */
+  --tml-text-main: #334155;
+  --tml-text-light: #64748b;
+  --tml-border: #e2e8f0;
+  --tml-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --tml-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Animazione Ingresso */
+@keyframes tmlFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tml-fade-in {
+  animation: tmlFadeUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* LAYOUT PAGE */
+.tml-page-wrapper {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--tml-bg);
+  min-height: 100vh;
+  padding: 3rem 1.5rem 5rem;
+  color: var(--tml-text-main);
+}
+
+.tml-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* HEADER HERO */
+.tml-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.tml-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: #0284c7;
+  border-radius: 50%;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.tml-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  color: var(--tml-primary);
+  margin-bottom: 0.8rem;
+  line-height: 1.1;
+}
+
+.tml-subtitle {
+  font-size: 1.15rem;
+  color: var(--tml-text-light);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* INTRO CARD */
+.tml-intro-card {
+  background: var(--tml-card-bg);
+  padding: 2.5rem;
+  border-radius: 20px;
+  border-left: 5px solid var(--tml-accent);
+  box-shadow: var(--tml-shadow);
+  margin-bottom: 3rem;
+}
+
+.tml-intro-card h2 {
+  font-size: 1.5rem;
+  color: var(--tml-primary);
+  margin-bottom: 1rem;
+}
+
+.tml-intro-card p {
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+/* DOCUMENTI SECTION */
+.tml-docs-section {
+  margin-bottom: 4rem;
+}
+
+.tml-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tml-primary);
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+}
+
+.tml-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.tml-doc-card {
+  background: var(--tml-card-bg);
+  border: 1px solid var(--tml-border);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.tml-doc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--tml-shadow-hover);
+  border-color: var(--tml-accent);
+}
+
+.tml-doc-icon {
+  font-size: 2rem;
+  color: var(--tml-text-light);
+  margin-bottom: 1rem;
+}
+
+.tml-doc-content h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--tml-primary);
+  margin-bottom: 0.8rem;
+}
+
+.tml-doc-content p {
+  font-size: 0.95rem;
+  color: var(--tml-text-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+  flex-grow: 1; /* Spinge il bottone in basso */
+}
+
+.tml-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--tml-accent);
+  border: 1px solid var(--tml-accent);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.tml-download-btn:hover {
+  background: var(--tml-accent);
+  color: white;
+}
+
+/* SAFEGUARDING BLOCK */
+.tml-safeguarding-block {
+  background: #0f172a; /* Scuro */
+  color: white;
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.tml-safeguarding-block::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+
+.tml-sg-icon {
+  font-size: 3rem;
+  color: var(--tml-accent);
+  background: rgba(255,255,255,0.1);
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tml-sg-content h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.tml-sg-content p {
+  color: rgba(255,255,255,0.8);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.tml-officer-box {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tml-officer-role {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.6);
+}
+
+.tml-officer-email {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.tml-officer-email:hover {
+  color: var(--tml-accent);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .tml-safeguarding-block {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .tml-sg-icon {
+    margin: 0 auto 1rem;
+  }
+  
+  .tml-officer-box {
+    align-items: center;
+  }
+  
+  .tml-header { margin-bottom: 3rem; }
+  .tml-title { font-size: 2.2rem; }
+}

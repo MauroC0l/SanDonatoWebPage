@@ -36,14 +36,24 @@
       "link": "https://www.gelaterialatosca.it/" 
     },
     { 
-      "name": "Tecnorete", 
-      "image": "/immaginiSponsor/tecnorete.png", 
-      "link": "https://www.tecnorete.it/" 
+      "name": "Cartiera", 
+      "image": "/immaginiSponsor/cartiera.png", 
+      "link": "" 
     },
     { 
-      "name": "Zoe Home Studio", 
-      "image": "/immaginiSponsor/zhs.png", 
-      "link": "https://www.zoehomestudio.it/" 
+      "name": "Giandujot", 
+      "image": "/immaginiSponsor/giandujot.png", 
+      "link": "https://giandujot.it/" 
+    },
+    { 
+      "name": "Terzo Tempo", 
+      "image": "/immaginiSponsor/TERZO TEMPO.png", 
+      "link": "" 
+    },
+    { 
+      "name": "Torino Nord", 
+      "image": "/immaginiSponsor/torinonord.png", 
+      "link": "" 
     }
   ]
 }

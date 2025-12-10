@@ -1,0 +1,54 @@
+{
+  "fiscalCode": "97517860010",
+  "hero": {
+    "tag": "Sostienici Gratuitamente",
+    "titleLine1": "Il tuo 5x1000",
+    "titleLine2": "alla Polisportiva",
+    "subtitle": "Non ti costa nulla, ma per noi vale tantissimo. Aiutaci a promuovere lo sport per tutti."
+  },
+  "codeSection": {
+    "title": "Il nostro Codice Fiscale",
+    "btnDefault": "Copia Codice",
+    "btnCopied": "Copiato!",
+    "description": "Inserisci questo codice nella tua dichiarazione dei redditi per destinare il 5x1000 alla"
+  },
+  "facsimile": {
+    "sectionTitle": "Come compilare il modulo",
+    "subtitle": "Cerca il riquadro \"Sostegno alle associazioni sportive dilettantistiche...\"",
+    "moduleHeader": "Scelta per la destinazione del cinque per mille dell'Irpef",
+    "moduleBody": "SOSTEGNO ALLE ASSOCIAZIONI SPORTIVE DILETTANTISTICHE RICONOSCIUTE AI FINI SPORTIVI DAL CONI A NORMA DI LEGGE CHE SVOLGONO UNA RILEVANTE ATTIVITA' DI INTERESSE SOCIALE",
+    "labelSignature": "FIRMA",
+    "placeholderSignature": "La Tua Firma",
+    "labelCode": "CODICE FISCALE DEL BENEFICIARIO"
+  },
+  "deadlines": {
+    "title": "Le Scadenze da Ricordare",
+    "items": [
+      {
+        "id": 1,
+        "date": "30 Set",
+        "model": "Modello 730",
+        "desc": "Scadenza per la presentazione del Modello 730 ordinario o precompilato."
+      },
+      {
+        "id": 2,
+        "date": "30 Nov",
+        "model": "Modello Redditi",
+        "desc": "Termine ultimo per la presentazione del Modello Redditi (ex Unico)."
+      },
+      {
+        "id": 3,
+        "date": "30 Giu",
+        "model": "Cartaceo",
+        "desc": "Presentazione presso Uffici Postali per chi non invia telematicamente."
+      }
+    ]
+  },
+  "whySection": {
+    "title": "Perché donare a noi?",
+    "paragraphs": [
+      "<strong>Polisportiva San Donato</strong> è sinonimo di sport per tutti. Da anni ci impegniamo a portare i valori dell'inclusione, della lealtà e della crescita personale attraverso l'attività sportiva nel nostro territorio.",
+      "Il tuo 5x1000 si trasforma concretamente in attrezzature, spazi sicuri per i giovani, e progetti sociali che rendono lo sport accessibile a chiunque, indipendentemente dalle possibilità economiche."
+    ]
+  }
+}

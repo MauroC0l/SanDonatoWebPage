@@ -10,7 +10,7 @@ import SubscriptionPage from "./components/SubscriptionPage";
 import CalendarPage from "./components/CalendarPage";
 import ContactPage from "./components/Contatti";
 import PrivacyPage from "./components/PrivacyPage";
-import TutelaDeiMinoriPage from "./components/TutelaDeiMinoriPage";
+import TutelaMinoriPage from "./components/TutelaMinoriPage";
 import ContributiPage from "./components/ContributiPage";
 import CinquePerMillePage from "./components/CinquePerMillePage";
 import SponsorPage from "./components/SponsorPage";
@@ -40,7 +40,7 @@ export default function App() {
           <Route path="/calendario" element={<CalendarPage />} />
           <Route path="/contatti" element={<ContactPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/tutela-minori" element={<TutelaDeiMinoriPage />} />
+          <Route path="/tutela-minori" element={<TutelaMinoriPage />} />
           <Route path="/contributi-pubblici" element={<ContributiPage />} />
           <Route path="/cinquepermille" element={<CinquePerMillePage />} />
           <Route path="/sponsor" element={<SponsorPage />} />

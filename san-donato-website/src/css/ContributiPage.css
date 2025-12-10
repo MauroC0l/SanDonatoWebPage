@@ -1,0 +1,259 @@
+/* =========================================
+   CONTRIBUTI PUBBLICI STYLE (Scoped: cpub-)
+   Homogeneous with Modern System 2.0
+   ========================================= */
+
+.cpub-wrapper {
+  --c-bg: #ffffff;
+  --c-surface: #f8fafc;
+  --c-dark: #0f172a;       
+  --c-accent: #ff6600;     
+  --c-blue: #0056d6;       
+  --c-text-main: #1e293b;
+  --c-text-muted: #64748b;
+  --c-border: #e2e8f0;
+  
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--c-text-main);
+  background: var(--c-bg);
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* --- ANIMAZIONI --- */
+@keyframes cpubFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cpub-animate {
+  animation: cpubFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* --- HERO SECTION --- */
+.cpub-hero {
+  padding: 5rem 1.5rem 3rem;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cpub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--c-dark);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1.5rem;
+}
+
+.cpub-icon-badge { color: var(--c-accent); }
+
+.cpub-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--c-dark);
+  margin-bottom: 1.5rem;
+}
+
+.cpub-subtitle {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--c-text-muted);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.cpub-legal-ref {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--c-blue);
+  background: rgba(0, 86, 214, 0.1);
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+/* --- TABLE SECTION --- */
+.cpub-table-section {
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.cpub-section-header {
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid var(--c-accent);
+}
+.cpub-section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--c-dark);
+  margin: 0;
+}
+
+/* Container con card effect per la tabella */
+.cpub-table-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  border: 1px solid var(--c-border);
+  overflow: hidden; /* Per arrotondare gli angoli */
+}
+
+/* Wrapper per scroll orizzontale su mobile */
+.cpub-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cpub-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Forza scroll su schermi piccoli */
+}
+
+.cpub-table th {
+  background: var(--c-surface);
+  text-align: left;
+  padding: 1.2rem 1.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--c-text-muted);
+  font-weight: 700;
+  border-bottom: 2px solid var(--c-border);
+}
+
+.cpub-table td {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--c-border);
+  vertical-align: middle;
+  font-size: 0.95rem;
+  color: var(--c-dark);
+}
+
+.cpub-table tr:last-child td { border-bottom: none; }
+.cpub-table tr:hover { background-color: rgba(241, 245, 249, 0.5); }
+
+/* Stili specifici celle */
+.cpub-cell-date {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+
+.cpub-entity-name {
+  display: block;
+  font-weight: 700;
+  color: var(--c-dark);
+  margin-bottom: 2px;
+}
+.cpub-entity-detail {
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+}
+
+.cpub-cell-amount {
+  font-weight: 800;
+  color: var(--c-blue);
+  font-size: 1.1rem;
+  text-align: right;
+}
+
+/* --- DOWNLOAD BLOCK (Single File) --- */
+.cpub-download-section {
+  padding: 0 1.5rem 6rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.cpub-download-card {
+  background: var(--c-dark);
+  color: #fff;
+  border-radius: 20px;
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+}
+
+/* Decorazione background */
+.cpub-download-card::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.cpub-dl-content h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+.cpub-dl-content p {
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+  margin-bottom: 0;
+  max-width: 500px;
+}
+
+.cpub-dl-btn {
+  background: var(--c-accent);
+  color: #fff;
+  text-decoration: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.cpub-dl-btn:hover {
+  transform: translateY(-3px);
+  background: #ff751a;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* --- FOOTER --- */
+.cpub-info-section {
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-border);
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+.cpub-info-container { max-width: 700px; margin: 0 auto; }
+.cpub-info-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--c-dark); }
+.cpub-info-text { font-size: 0.9rem; color: var(--c-text-muted); line-height: 1.6; }
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+  .cpub-download-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+  .cpub-dl-btn { width: 100%; justify-content: center; }
+  .cpub-table th, .cpub-table td { padding: 1rem; }
+}

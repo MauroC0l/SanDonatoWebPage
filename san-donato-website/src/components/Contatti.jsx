@@ -26,7 +26,7 @@ export default function Contacts() {
       <header className="contacts-header">
         <div className="header-content">
           <h1>
-            {header.titlePrefix} AAAA <span className="highlight-text">{header.titleHighlight}</span>
+            {header.titlePrefix} <span className="highlight-text">{header.titleHighlight}</span>
           </h1>
           <p className="subtitle">{header.subtitle}</p>
           <div className="header-decoration"></div>

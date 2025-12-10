@@ -1,0 +1,168 @@
+/* ============================= */
+/* PrivacyPage.css - Scoped: prv- */
+/* ============================= */
+
+:root {
+  --prv-bg: #f8fafc;
+  --prv-card-bg: #ffffff;
+  --prv-primary: #1e293b;   /* Blu scuro elegante */
+  --prv-accent: #3b82f6;    /* Blu affidabile per link */
+  --prv-text: #334155;
+  --prv-text-light: #64748b;
+  --prv-border: #e2e8f0;
+  --prv-radius: 16px;
+}
+
+/* Animazione Dedicata */
+@keyframes prvEntry {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.prv-fade-in {
+  animation: prvEntry 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* LAYOUT */
+.privacy-page {
+  min-height: 80vh; /* Non forza 100vh se il contenuto è poco */
+  background: var(--prv-bg);
+  padding: 3rem 1rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--prv-text);
+  display: flex;
+  justify-content: center;
+}
+
+.prv-container {
+  max-width: 800px;
+  width: 100%;
+}
+
+/* HEADER */
+.prv-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.prv-icon-circle {
+  width: 60px;
+  height: 60px;
+  background: #e0f2fe;
+  color: var(--prv-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1rem;
+}
+
+.prv-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--prv-primary);
+  margin-bottom: 0.5rem;
+}
+
+.prv-subtitle {
+  color: var(--prv-text-light);
+  font-size: 1.1rem;
+}
+
+/* CARD CONTENUTO */
+.prv-content-card {
+  background: var(--prv-card-bg);
+  border-radius: var(--prv-radius);
+  padding: 2.5rem;
+  box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
+  border: 1px solid var(--prv-border);
+}
+
+.prv-content-card h2 {
+  color: var(--prv-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prv-content-card p {
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--prv-text);
+}
+
+/* LISTA DOCUMENTI */
+.prv-documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prv-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 1px solid var(--prv-border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  background: #fdfdfd;
+}
+
+.prv-doc-item:hover {
+  border-color: var(--prv-accent);
+  background: #eff6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+}
+
+.prv-doc-icon {
+  font-size: 2rem;
+  color: #ef4444; /* Rosso PDF */
+}
+
+.prv-doc-info {
+  flex-grow: 1;
+}
+
+.prv-doc-info h3 {
+  font-size: 1.1rem;
+  color: var(--prv-primary);
+  margin: 0 0 0.2rem 0;
+  font-weight: 600;
+}
+
+.prv-doc-info span {
+  font-size: 0.9rem;
+  color: var(--prv-text-light);
+}
+
+.prv-download-action {
+  font-size: 1.5rem;
+  color: var(--prv-accent);
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.prv-doc-item:hover .prv-download-action {
+  opacity: 1;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+  .prv-content-card {
+    padding: 1.5rem;
+  }
+  
+  .prv-doc-item {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .prv-doc-info {
+    margin: 0.5rem 0;
+  }
+}

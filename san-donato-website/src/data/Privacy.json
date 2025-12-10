@@ -1,0 +1,18 @@
+{
+  "header": {
+    "title": "Privacy & Policy",
+    "subtitle": "Trasparenza e protezione dei dati."
+  },
+  "content": {
+    "introTitle": "La tua privacy è importante",
+    "introText": "In questa sezione rendiamo disponibili i documenti ufficiali relativi al trattamento dei dati personali (GDPR)."
+  },
+  "documents": [
+    {
+      "id": 1,
+      "label": "INFORMATIVA IN MATERIA DI PROTEZIONE DEI DATI PERSONALI (GDPR) 2023/2024",
+      "description": "Scarica il documento completo sul trattamento dei dati per gli iscritti.",
+      "fileUrl": "/documenti/PSD_GDPR_2023_2024.pdf"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "hero": {
+    "badge": "Trasparenza Amministrativa",
+    "title": "Contributi Pubblici & Ristori",
+    "subtitle": "In ottemperanza agli obblighi di trasparenza (L. 124/2017), pubblichiamo il dettaglio delle sovvenzioni, sussidi e vantaggi economici ricevuti dalla Pubblica Amministrazione, con specifico riferimento alle misure di sostegno COVID-19.",
+    "legalRef": "Rif. Legge 124/2017"
+  },
+  "covidTable": {
+    "title": "Elenco Contributi Pubblici COVID",
+    "headers": ["Data Incasso", "Ente Erogatore / Causale", "Importo"],
+    "rows": [
+      {
+        "id": 1,
+        "date": "31.07.2020",
+        "entity": "PRESIDENZA DEL CONSIGLIO",
+        "details": "Fondi DL 19/5/2020",
+        "amount": "800"
+      },
+      {
+        "id": 2,
+        "date": "12.10.2020",
+        "entity": "REGIONE PIEMONTE",
+        "details": "Contributi ad Associazioni Sportive",
+        "amount": "3.549"
+      },
+      {
+        "id": 3,
+        "date": "04.12.2020",
+        "entity": "PRESIDENZA DEL CONSIGLIO",
+        "details": "Bis/Fondi DL 19/5/2020",
+        "amount": "3.103"
+      },
+      {
+        "id": 4,
+        "date": "04.06.2021",
+        "entity": "PRESIDENZA DEL CONSIGLIO",
+        "details": "Fondi Parte 1 Dip Sport PCM 2021",
+        "amount": "800"
+      },
+      {
+        "id": 5,
+        "date": "15.10.2021",
+        "entity": "PRESIDENZA DEL CONSIGLIO",
+        "details": "Fondi Parte 2 Dip Sport PCM 2021",
+        "amount": "2.200"
+      },
+      {
+        "id": 6,
+        "date": "23.12.2021",
+        "entity": "PRESIDENZA DEL CONSIGLIO",
+        "details": "Fondi Parte 3 Dip Sport PCM 2021",
+        "amount": "2.500"
+      },
+      {
+        "id": 7,
+        "date": "21.02.2022",
+        "entity": "REGIONE PIEMONTE",
+        "details": "Contributi ad Associazioni Sportive",
+        "amount": "2.500"
+      }
+    ]
+  },
+  "singleDocument": {
+    "title": "Rendiconto Ufficiale Completo",
+    "description": "Scarica il documento ufficiale firmato contenente il riepilogo formale di tutti i contributi elencati in questa pagina.",
+    "fileName": "Rendiconto_Contributi.pdf",
+    "fileSize": "PDF",
+    "link": "/documenti/PSD_Aiuti_Stato.pdf"
+  },
+  "footer": {
+    "title": "Nota Informativa",
+    "text": "La pubblicazione dei dati avviene in conformità con la normativa vigente per le Associazioni Sportive Dilettantistiche. Per ulteriori chiarimenti contattare l'amministrazione."
+  }
+}

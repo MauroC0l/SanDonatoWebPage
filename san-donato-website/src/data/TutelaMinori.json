@@ -1,0 +1,36 @@
+{
+  "header": {
+    "title": "Tutela dei Minori",
+    "subtitle": "Impegno, Responsabilità e Trasparenza per la sicurezza dei nostri atleti."
+  },
+  "intro": {
+    "title": "Il Nostro Impegno",
+    "text": "La A.S.D. Polisportiva San Donato si impegna quotidianamente a garantire un ambiente sicuro, inclusivo e rispettoso per tutti i giovani atleti. La tutela dei minori è al centro della nostra missione educativa e sportiva."
+  },
+  "documents": [
+    {
+      "id": 1,
+      "title": "FIGC Policy minori ",
+      "description": "Documento che definisce le procedure per prevenire comportamenti scorretti e garantire la sicurezza in un torneo FIGC.",
+      "fileUrl": "/documenti/FIGC_Policy-per-la-tutela-dei-minori.pdf"
+    },
+    {
+      "id": 2,
+      "title": "Uisp Policy minori",
+      "description": "Documento che definisce le procedure per prevenire comportamenti scorretti e garantire la sicurezza in un torneo UISP",
+      "fileUrl": "/documenti/policy-uisp.pdf"
+    },
+    {
+      "id": 3,
+      "title": "Csi Policy minori ",
+      "description": "Documento che definisce le procedure per prevenire comportamenti scorretti e garantire la sicurezza in un torneo CSI.",
+      "fileUrl": "/documenti/Fascicolo-Policy-CSI_w.pdf"
+    }
+  ],
+  "safeguarding": {
+    "title": "Responsabile Safeguarding",
+    "description": "Per segnalazioni o informazioni relative alla tutela dei minori, è possibile contattare il nostro Responsabile contro abusi, violenze e discriminazioni:",
+    "officerName": "Avv. Nome Cognome", 
+    "contactEmail": "safeguarding@polisportivasandonato.it" 
+  }
+}
