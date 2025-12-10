@@ -1,35 +1,45 @@
-import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
+import React from 'react';
+import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
+import { FiMapPin, FiMail } from "react-icons/fi";
 import "../../css/TopHeader.css";
 
-import { FiMapPin, FiPhone, FiMail, FiHome } from "react-icons/fi";
-
+// IMPORT DATI JSON
+import headerData from "../../data/TopHeader.json";
 
 export default function TopHeader() {
-    const email = "info@polisportivasandonato.it";
-    const address = "ASD Polisportiva San Donato Via Le Chiuse 20/A - 10144 Torino P.Iva 09911610013 - C.F. 97699790016";
+    const { contactInfo, socialLinks } = headerData;
 
     return (
         <div className="top-header">
             <div className="top-header-container">
+                
+                {/* Social Icons */}
                 <div className="social-icons">
-                    <a href="https://www.facebook.com/polisportivasandonato/#" target="_blank" rel="noopener noreferrer">
+                    <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                         <FaFacebookF />
                     </a>
-                    <a href="https://www.instagram.com/poli_sandonato/" target="_blank" rel="noopener noreferrer">
+                    <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                         <FaInstagram />
                     </a>
-                    <a href="https://www.youtube.com/@PolisportivaSanDonato" target="_blank" rel="noopener noreferrer">
+                    <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                         <FaYoutube />
                     </a>
-                    <a href="https://www.tiktok.com/@sando_to?_t=ZN-90F6uVwJWtS&_r=1" target="_blank" rel="noopener noreferrer">
+                    <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                         <SiTiktok />
                     </a>
                 </div>
+
+                {/* Contatti */}
                 <div className="contact-info">
-                    <span><FiMapPin className="contact-icon" /> {address}</span>
-                    <span><FiMail className="contact-icon" /> {email}</span>
+                    <span>
+                        <FiMapPin className="contact-icon" /> {contactInfo.address}
+                    </span>
+                    <span>
+                        <FiMail className="contact-icon" /> {contactInfo.email}
+                    </span>
                 </div>
+
             </div>
         </div>
     );
