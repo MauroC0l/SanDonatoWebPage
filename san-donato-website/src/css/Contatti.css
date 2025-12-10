@@ -1,83 +1,73 @@
+/* --- Contatti.css --- */
+
+/* RESET DI BASE PER QUESTA PAGINA */
+/* Fondamentale per evitare spazi fantasma indesiderati */
+.contacts-page * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 :root {
   --c-primary: #002b5c;
   --c-accent: #ff6600;
   --c-bg: #f4f7f9;
   --c-card-bg: #ffffff;
   --c-text-main: #333333;
-  --c-text-light: #666666;
+  --c-text-light: #555555;
   
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 10px 15px -3px rgba(0, 43, 92, 0.08);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 43, 92, 0.1);
-  --radius-card: 24px;
-  --radius-btn: 12px;
+  --radius-card: 16px;
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .contacts-page {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--c-text-main);
-  padding: 2rem 1rem 4rem;
-  background: var(--c-bg); /* Sfondo pagina leggero */
+  background: var(--c-bg);
   min-height: 100vh;
+  padding: 1.5rem 1rem 4rem; /* Padding ridotto per mobile */
+  color: var(--c-text-main);
 }
 
-/* Animazione fluida */
-.fade-in {
-  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- HEADER --- */
+/* --- HEADER DELLA PAGINA --- */
 .contacts-header {
   text-align: center;
-  margin-bottom: 3.5rem;
-  padding: 0 1rem;
+  margin-bottom: 2rem;
 }
 
 .contacts-header h1 {
-  /* Clamp scala il font: min 2rem, ideal 5vw, max 3.5rem */
-  font-size: clamp(2rem, 5vw, 3.5rem); 
-  font-weight: 800;
+  font-size: 1.8rem;
   color: var(--c-primary);
-  margin: 0;
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-size: 1rem;
   color: var(--c-text-light);
-  margin-top: 0.5rem;
-  font-weight: 500;
 }
 
 .header-decoration {
-  width: 60px;
+  width: 50px;
   height: 4px;
   background: var(--c-accent);
-  margin: 1.5rem auto 0;
+  margin: 1rem auto 0;
   border-radius: 2px;
 }
 
-/* --- LAYOUT GRID RESPONSIVE --- */
+/* --- GRIGLIA PRINCIPALE --- */
 .contacts-container {
   display: grid;
-  /* Mobile First: 1 colonna */
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  max-width: 1200px;
+  grid-template-columns: 1fr; /* Mobile: 1 colonna */
+  gap: 1.5rem;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
-/* Tablet e Desktop: 2 colonne */
+/* Desktop: 2 Colonne */
 @media (min-width: 900px) {
   .contacts-container {
-    grid-template-columns: 1.2fr 1fr; /* Sinistra un po' più larga */
-    gap: 3rem;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2.5rem;
     align-items: start;
   }
 }
@@ -85,360 +75,317 @@
 .contacts-column {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-/* --- CARDS STILE --- */
+/* --- CARD GENERICA (RIVOLUZIONATA) --- */
 .contact-card {
   background: var(--c-card-bg);
   border-radius: var(--radius-card);
-  padding: 2rem;
-  box-shadow: var(--shadow-md);
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden; /* Per l'overlay della mappa */
+  padding: 1.25rem; /* Padding interno compatto */
+  box-shadow: var(--shadow-card);
+  
+  /* LAYOUT FLEX: Icona a sinistra | Contenuto a destra */
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem; /* Spazio tra icona e testo */
 }
 
-.contact-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Icona flottante nell'angolo o a lato */
+/* --- ICONA A SINISTRA --- */
 .card-icon-wrapper {
-  display: inline-flex;
+  flex-shrink: 0; /* Impedisce all'icona di schiacciarsi */
+  width: 42px;
+  height: 42px;
+  background: rgba(0, 43, 92, 0.08);
+  border-radius: 10px;
+  color: var(--c-primary);
+  
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 43, 92, 0.05);
-  border-radius: 12px;
-  color: var(--c-primary);
-  font-size: 1.4rem;
-  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Icona specifica pagamenti */
+.card-icon-wrapper.bank {
+  background: #eef2f5;
+}
+
+/* --- CONTENUTO DELLA CARD (Destra) --- */
+.card-content {
+  /* FONDAMENTALE: impedisce overflow su mobile */
+  flex: 1;
+  min-width: 0; 
+  
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Spazio verticale tra titolo, testo e mappa */
 }
 
 .card-title {
-  font-size: 1.5rem;
-  color: var(--c-primary);
-  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
   font-weight: 700;
+  color: var(--c-primary);
+  line-height: 1.2;
 }
 
-/* --- MAPPA --- */
+.address-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--c-text-light);
+}
+
+/* --- MAPPA (Ora contenuta perfettamente) --- */
 .map-link-container {
   display: block;
+  width: 100%;
+  margin-top: 0.8rem;
+  border-radius: 12px;
+  overflow: hidden; /* Taglia l'immagine se eccede i bordi arrotondati */
   position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-top: 1.5rem;
-  box-shadow: var(--shadow-sm);
-  aspect-ratio: 16/9; /* Mantiene proporzioni su mobile */
+  
+  /* Mantiene il rettangolo anche se l'immagine non carica */
+  aspect-ratio: 16/9; 
+  background: #eee;
 }
 
 .map-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+  object-fit: cover; /* Riempie il box senza deformarsi */
+  display: block;
 }
 
 .map-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 43, 92, 0.7);
+  background: rgba(0, 43, 92, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  backdrop-filter: blur(2px);
+  transition: opacity 0.2s;
+}
+/* Su mobile niente hover overlay per pulizia, o solo touch */
+@media (hover: hover) {
+  .map-link-container:hover .map-overlay { opacity: 1; }
 }
 
-.map-link-container:hover .map-overlay { opacity: 1; }
-.map-link-container:hover .map-image { transform: scale(1.05); }
-
-/* --- ORARI E TELEFONO --- */
+/* --- INFO, ORARI E TELEFONO --- */
 .info-group {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
 }
 
 .highlight {
+  display: inline-block;
   color: var(--c-accent);
   font-weight: 700;
-  background: rgba(255, 102, 0, 0.1);
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  background: rgba(255, 102, 0, 0.08);
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.3rem;
 }
 
 .divider {
   border: 0;
   height: 1px;
   background: #eee;
-  margin: 1.5rem 0;
+  margin: 0.8rem 0;
+  width: 100%;
+}
+
+.mobile-contact-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .sub-title {
-  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
   color: var(--c-primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Pulsante Telefono Mobile-Style */
+.info-note {
+  font-size: 0.85rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Bottone Telefono */
 .phone-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
   background: var(--c-primary);
   color: white;
   text-decoration: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: var(--radius-btn);
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 1.1rem;
-  transition: background 0.2s;
-  width: fit-content;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  width: 100%; /* Pieno su mobile */
 }
-
-.phone-btn:hover { background: #004085; }
-.name-tag { font-weight: 400; opacity: 0.8; font-size: 0.9rem; }
 
 /* --- EMAIL E DATI --- */
 .email-link {
   display: block;
   color: var(--c-primary);
   text-decoration: none;
-  padding: 0.3rem 0;
-  transition: color 0.2s;
+  padding: 0.2rem 0;
+  word-break: break-all; /* Spezza le email lunghe */
+  font-size: 0.95rem;
 }
-.email-link.primary { font-weight: 600; font-size: 1.1rem; }
-.email-link:hover { color: var(--c-accent); }
+
+.email-link.primary { font-weight: 600; }
 
 .fiscal-data-box {
-  margin-top: 1.5rem;
-  background: #f1f3f5;
-  padding: 1rem;
-  border-radius: 12px;
+  margin-top: 0.8rem;
+  background: #f8f9fa;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-family: monospace;
-  font-size: 0.95rem;
 }
 
 .fiscal-row {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.3rem;
+  flex-direction: column; /* Impilati su mobile per sicurezza */
+  margin-bottom: 0.4rem;
 }
-.fiscal-row span { font-weight: bold; color: var(--c-text-light); }
+.fiscal-row span { font-weight: bold; color: #666; }
 
-/* --- SEZIONE PAGAMENTI (Destra) --- */
-.payment-highlight {
-  border: 2px solid rgba(0, 43, 92, 0.05);
-}
-
+/* --- SEZIONE PAGAMENTI (BONIFICO) --- */
 .card-header-row {
+  /* Per la card pagamenti che aveva struttura diversa */
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
 }
-.card-header-row .card-title { margin: 0; }
-.card-icon-wrapper.bank { margin: 0; background: #eef2f5; }
+/* Se la card pagamenti usa la struttura standard flex, questo serve meno, 
+   ma lo teniamo per sicurezza se il layout HTML varia leggermente */
+
+.payment-intro {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.8rem;
+}
 
 .iban-wrapper {
-  background: #f8fafc;
+  background: #f1f5f9;
   border: 1px dashed #cbd5e1;
-  border-radius: 16px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1rem;
   text-align: center;
-  margin: 1.5rem 0;
+  width: 100%; /* Forza larghezza contenitore */
 }
 
 .iban-label {
-  display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  color: #94a3b8;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
+  color: #888;
+  display: block;
+  margin-bottom: 0.3rem;
 }
 
 .iban-code {
-  display: block;
-  font-family: 'Fira Code', 'Courier New', monospace;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-family: monospace;
+  font-size: 0.95rem;
   color: var(--c-primary);
-  word-break: break-all; /* Fondamentale per mobile */
+  font-weight: 700;
+  display: block;
+  word-break: break-all; /* FONDAMENTALE: spezza IBAN lungo */
+  margin-bottom: 0.8rem;
   line-height: 1.4;
-  margin-bottom: 1rem;
 }
 
 .copy-btn {
-  background: white;
+  background: #fff;
   border: 1px solid #ddd;
-  padding: 0.5rem 1.2rem;
-  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-  color: var(--c-text-main);
+  gap: 0.4rem;
 }
+.copy-btn.copied { background: #d1fae5; border-color: #10b981; color: #065f46; }
 
-.copy-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
-.copy-btn.copied { background: #d1fae5; border-color: #10b981; color: #047857; }
-
-.bank-logo-wrapper { text-align: center; }
-.bank-img { max-height: 50px; opacity: 0.8; }
-
-/* --- SATISPAY --- */
-.satispay-card {
-  background: linear-gradient(145deg, #ff4b4b, #e63e3e);
-  color: white;
-  border: none;
+.bank-logo-wrapper {
+  margin-top: 1rem;
   text-align: center;
 }
+.bank-img {
+  max-height: 40px;
+  opacity: 0.8;
+}
 
-.satispay-title, .shop-name { color: white; }
-.satispay-title { margin-bottom: 0.2rem; }
-.shop-name { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1.5rem; }
+/* --- SATISPAY --- */
+/* Questa card è speciale, diversa dalle altre */
+.satispay-card {
+  display: block; /* Non flex row come le altre */
+  text-align: center;
+  background: linear-gradient(135deg, #ff5e5e, #e03a3a);
+  color: white;
+  padding: 1.5rem;
+}
+
+.satispay-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+
+.shop-name {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
 
 .qr-frame {
   background: white;
-  padding: 1rem;
-  border-radius: 16px;
+  padding: 0.8rem;
+  border-radius: 12px;
   display: inline-block;
-  position: relative;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .qr-image {
-  width: 140px;
-  height: 140px;
+  width: 130px;
+  height: 130px;
   display: block;
 }
 
 .scan-me-badge {
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--c-text-main);
+  display: inline-block;
+  background: #333;
   color: white;
-  padding: 0.3rem 0.8rem;
+  padding: 0.2rem 0.8rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: bold;
+  margin-top: -10px;
+  position: relative;
+  z-index: 2;
 }
 
-/* --- MEDIA QUERY AGGIUNTIVE PER MOBILE VERY SMALL --- */
-@media (max-width: 480px) {
-  .contacts-page { padding: 1rem; }
-  .contact-card { padding: 1.5rem; }
-  .phone-btn { width: 100%; } /* Bottone full width su mobile */
-  .iban-code { font-size: 1rem; }
-}
-
-
-/* --- AGGIUNTE E CORREZIONI PER MOBILE --- */
-
-/* 1. Gestione Email lunghe (spesso causa di overflow) */
-.email-link {
-  display: block;
-  color: var(--c-primary);
-  text-decoration: none;
-  padding: 0.3rem 0;
-  transition: color 0.2s;
+/* --- MEDIA QUERY DESKTOP AGGIUSTAMENTI --- */
+@media (min-width: 600px) {
+  /* Su schermi più larghi rimettiamo i dati fiscali in riga */
+  .fiscal-row { flex-direction: row; justify-content: space-between; }
   
-  /* FIX: Forza l'a capo se l'email è troppo lunga */
-  word-break: break-word; 
-  overflow-wrap: anywhere; 
-  hyphens: auto;
-}
-
-/* 2. Gestione Dati Fiscali (CF e P.IVA) */
-.fiscal-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.3rem;
+  /* Titoli più grandi */
+  .card-title { font-size: 1.4rem; }
   
-  /* FIX: Se lo schermo è stretto, manda il valore a capo */
-  flex-wrap: wrap; 
-  gap: 0.5rem;
-}
-
-/* 3. Ottimizzazione specifica per schermi piccoli (< 550px) */
-@media (max-width: 550px) {
-  
-  /* Riduciamo il padding della pagina esterna */
-  .contacts-page {
-    padding: 1rem 0.8rem 3rem; 
-  }
-
-  /* Riduciamo drasticamente il padding interno delle card */
-  .contact-card {
-    padding: 1.25rem; 
-    border-radius: 16px; /* Raggio leggermente ridotto */
-  }
-
-  /* Titoli leggermente più piccoli per evitare wrapping brutti */
-  .card-title {
-    font-size: 1.3rem;
-  }
-
-  /* IBAN: Riduciamo padding e font per farlo stare tutto */
-  .iban-wrapper {
-    padding: 1rem;
-    margin: 1rem 0;
-  }
-  
-  .iban-code {
-    font-size: 0.95rem; /* Un po' più piccolo su mobile */
-    word-break: break-all; /* Spezza ovunque necessario */
-  }
-
-  /* Bottone Telefono al 100% larghezza */
-  .phone-btn {
-    width: 100%;
-    box-sizing: border-box; /* Assicura che il padding non aumenti la larghezza */
-  }
-
-  /* Allineamento dati fiscali a sinistra su mobile per leggibilità */
-  .fiscal-row {
-    flex-direction: column;
-    justify-content: flex-start;
-  }
-  
-  /* Riduce dimensione icona nelle card per guadagnare spazio */
-  .card-icon-wrapper {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-  }
-}
-
-/* 4. Fix specifico per la card Satispay */
-.satispay-content {
-  /* Assicura che il contenuto non sbordi */
-  width: 100%;
-  overflow: hidden; 
-}
-
-.qr-frame {
-  max-width: 100%;
-  box-sizing: border-box;
+  /* IBAN più grande */
+  .iban-code { font-size: 1.1rem; }
 }

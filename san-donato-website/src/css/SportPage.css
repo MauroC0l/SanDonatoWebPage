@@ -1,0 +1,259 @@
+/* =========================================
+   SPORT PAGE SYSTEM (Scoped: sp-)
+   ========================================= */
+
+:root {
+  --sp-bg: #f8f9fa;
+  --sp-card-bg: #ffffff;
+  --sp-text-main: #1f2937;
+  --sp-text-muted: #6b7280;
+  --sp-orange: #ff6600;
+  --sp-blue: #0056d6;
+  --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  --radius-lg: 20px;
+}
+
+.sp-page-wrapper {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--sp-bg);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  color: var(--sp-text-main);
+}
+
+/* --- Animazioni --- */
+.fade-in { animation: fadeIn 0.5s ease-out; }
+.fade-in-up { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; transform: translateY(15px); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* --- Header --- */
+.sp-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.sp-main-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: #111;
+  margin-bottom: 0.5rem;
+  letter-spacing: -1px;
+}
+
+.sp-highlight {
+  background: linear-gradient(120deg, var(--sp-blue), var(--sp-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sp-subtitle {
+  color: var(--sp-text-muted);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* --- Tabs Navigation --- */
+.sp-tabs-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  position: sticky;
+  top: 1rem;
+  z-index: 100; /* Sta sopra al contenuto nello scroll */
+}
+
+.sp-tabs-wrapper {
+  background: #fff;
+  padding: 0.5rem;
+  border-radius: 50px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sp-tab-button {
+  border: none;
+  background: transparent;
+  padding: 0.8rem 1.5rem;
+  border-radius: 40px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sp-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.sp-tab-button:hover {
+  background: rgba(0,0,0,0.03);
+  color: #333;
+}
+
+.sp-tab-button.active {
+  background: var(--tab-color); /* Colore dinamico in base allo sport */
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transform: scale(1.05);
+}
+
+.sp-tab-icon { font-size: 1.1rem; display: flex; }
+
+/* --- Content Area --- */
+.sp-content-area {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sp-sport-intro {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sp-sport-intro h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+/* Banner speciale per Volley */
+.sp-alert-banner {
+  background: #fff5eb;
+  border: 1px solid #ffd6b3;
+  color: #c2410c;
+  padding: 1rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  text-align: left;
+  max-width: 500px;
+}
+
+/* --- Schedule Grid --- */
+.sp-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* --- Card Styles --- */
+.sp-card {
+  background: var(--sp-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
+  border-top: 5px solid #ccc; /* Sovrascritto inline */
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.sp-card:hover {
+  transform: translateY(-5px);
+}
+
+.sp-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.sp-group-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111;
+  line-height: 1.2;
+}
+
+.sp-group-badge {
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+  margin-left: 0.5rem;
+}
+
+.sp-location-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.sp-icon-small { color: var(--sp-text-muted); margin-top: 3px; }
+.sp-icon-tiny { font-size: 0.8rem; opacity: 0.7; }
+
+.sp-map-link {
+  color: var(--sp-blue);
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+}
+.sp-map-link:hover { text-decoration: underline; }
+.sp-map-link small { color: var(--sp-text-muted); font-weight: 400; font-size: 0.85rem; }
+
+.sp-times-list {
+  margin-top: auto; /* Spinge in basso se la card è alta */
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.sp-time-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+.sp-time-row:last-child { margin-bottom: 0; }
+
+.sp-day { font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px; }
+.sp-hour { font-family: monospace, sans-serif; color: #666; display: flex; align-items: center; gap: 6px; }
+
+/* --- Footer Note --- */
+.sp-footer-note {
+  margin-top: 4rem;
+  text-align: center;
+  color: var(--sp-text-muted);
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.8;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .sp-tabs-wrapper {
+    width: 100%;
+    overflow-x: auto; /* Scroll orizzontale se necessario */
+    justify-content: space-between;
+  }
+  
+  .sp-tab-button {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .sp-tab-label { display: none; } /* Su schermi piccolissimi mostra solo icona */
+}
+
+@media (min-width: 400px) {
+  .sp-tab-label { display: inline; } /* Ripristina etichetta se c'è spazio */
+}
