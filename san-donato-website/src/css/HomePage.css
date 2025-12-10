@@ -1,8 +1,8 @@
 /* =========================================
-   HOME PAGE STYLES (No Bootstrap)
+   HOME PAGE STYLES (Modern & Mobile-First)
+   Scoped: hp-, nfc-, lcs-, ev-
    ========================================= */
 
-/* Variabili Scoped */
 :root {
   --hp-bg: #f8f9fa;
   --hp-white: #ffffff;
@@ -12,8 +12,8 @@
   --hp-text: #333;
   --hp-text-muted: #6c757d;
   --hp-border: #e9ecef;
-  --hp-radius: 12px;
-  --hp-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --hp-radius: 16px;
+  --hp-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
 }
 
 /* --- LAYOUT GENERALE --- */
@@ -22,38 +22,31 @@
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--hp-text);
-  padding-bottom: 4rem;
+  padding-bottom: 6rem; /* Spazio extra per mobile */
 }
 
 .hp-main-container {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
-/* --- GRID SYSTEM (Cuore del Layout) --- */
+/* --- GRID SYSTEM DESKTOP (3 Colonne) --- */
 .hp-grid-layout {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile: 1 colonna (Stacked) */
-  gap: 2rem;
+  gap: 2.5rem;
   margin-top: 3rem;
+  grid-template-columns: 3fr 5fr 4fr; /* Default Desktop */
+  align-items: start;
 }
 
-/* Desktop: 3 Colonne */
-@media (min-width: 992px) {
-  .hp-grid-layout {
-    /* Live (25%) - News (42%) - Calendar (33%) approx */
-    grid-template-columns: 3fr 5fr 4fr; 
-    align-items: start; /* Allinea le colonne in alto */
-  }
-}
-
-/* --- COLUMN STYLES --- */
+/* --- COLUMN HEADERS --- */
 .column-header {
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--hp-border);
-  padding-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .col-title {
@@ -66,71 +59,8 @@
   gap: 10px;
 }
 
-.text-danger { color: var(--hp-danger); }
-
 /* =========================================
-   ELEMENTI UI COMUNI (Bottoni, Badge)
-   ========================================= */
-
-/* Bottoni personalizzati */
-.hp-btn {
-  display: inline-block;
-  width: 100%;
-  padding: 0.6rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-}
-
-.btn-danger {
-  background-color: var(--hp-danger);
-  color: white;
-}
-.btn-danger:hover { background-color: #bb2d3b; }
-
-.btn-outline {
-  background-color: transparent;
-  border-color: var(--hp-text);
-  color: var(--hp-text);
-}
-.btn-outline:hover {
-  background-color: var(--hp-text);
-  color: white;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  color: var(--hp-primary);
-  text-decoration: underline;
-  width: auto;
-}
-
-.view-all-wrapper { text-align: center; margin-top: 1.5rem; }
-
-/* Badge */
-.hp-badge {
-  display: inline-block;
-  padding: 0.35em 0.65em;
-  font-size: 0.75em;
-  font-weight: 700;
-  line-height: 1;
-  color: #fff;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: 0.25rem;
-}
-.badge-danger { background-color: var(--hp-danger); }
-.badge-secondary { background-color: var(--hp-text-muted); }
-
-/* =========================================
-   COLONNA 1: LIVE (lcs-)
+   COLONNA 1: LIVE MATCHES (lcs-)
    ========================================= */
 .live-pulse-icon {
   font-size: 0.6em;
@@ -143,66 +73,49 @@
   100% { opacity: 1; transform: scale(1); }
 }
 
-.live-card-simple {
-  background: var(--hp-white);
-  border: 1px solid var(--hp-border);
-  border-radius: var(--hp-radius);
-  padding: 1.2rem;
-  margin-bottom: 1.2rem;
-  box-shadow: var(--hp-shadow);
-  transition: transform 0.2s;
-}
-.live-card-simple:hover { 
-  transform: translateY(-3px); 
-  border-color: var(--hp-accent); 
+.live-list {
+  display: flex;
+  flex-direction: column; /* Desktop: Verticale */
+  gap: 1rem;
 }
 
-.lcs-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 1rem; 
+.live-card-simple {
+  background: var(--hp-white);
+  border-radius: var(--hp-radius);
+  padding: 1.2rem;
+  box-shadow: var(--hp-shadow);
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+  min-width: 280px; /* Larghezza minima per slider mobile */
 }
+.live-card-simple:hover { transform: translateY(-3px); }
+
+/* Indicatore LIVE rosso laterale */
+.live-card-simple::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--hp-danger);
+}
+
+.lcs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .yt-icon { color: #ff0000; font-size: 1.6rem; }
 
 .lcs-match-info { text-align: center; margin-bottom: 1.2rem; }
-.lcs-teams { 
-  font-weight: 700; 
-  color: var(--hp-primary); 
-  display: flex; 
-  flex-direction: column; 
-  gap: 0.3rem; 
-  font-size: 1.1rem;
-}
-.lcs-teams .vs { 
-  font-size: 0.85rem; 
-  color: var(--hp-text-muted); 
-  font-weight: 400; 
-  text-transform: uppercase; 
-}
+.lcs-teams { font-weight: 800; color: var(--hp-primary); display: flex; flex-direction: column; gap: 0.2rem; font-size: 1.1rem; }
+.lcs-teams .vs { font-size: 0.8rem; color: var(--hp-text-muted); font-weight: 500; text-transform: uppercase; }
 
 .channel-promo-box {
-  background: #f1f3f5; 
-  border-radius: 8px; 
-  padding: 1rem; 
-  text-align: center; 
-  font-size: 0.9rem;
-  border: 1px dashed #ced4da; 
-  margin-top: 1.5rem;
+  background: #222; color: white; border-radius: 12px; padding: 1rem; text-align: center; font-size: 0.9rem; margin-top: 1rem;
 }
-.channel-promo-box a { 
-  color: var(--hp-primary); 
-  font-weight: 700; 
-  text-decoration: none; 
-}
-.channel-promo-box a:hover { text-decoration: underline; }
+.channel-promo-box a { color: #ffca2c; font-weight: 700; text-decoration: none; }
 
 /* =========================================
    COLONNA 2: NEWS FEED (nfc-)
    ========================================= */
 .news-feed-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Desktop: Verticale */
   gap: 1.5rem;
 }
 
@@ -211,157 +124,161 @@
   border-radius: var(--hp-radius);
   overflow: hidden;
   box-shadow: var(--hp-shadow);
-  display: flex; /* Layout orizzontale */
-  height: 130px; 
+  display: flex; 
+  height: 140px; 
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid rgba(0,0,0,0.02);
+  transition: transform 0.2s;
+  border: 1px solid rgba(0,0,0,0.04);
+  
+  /* Per mobile slider */
+  flex-shrink: 0; 
+  scroll-snap-align: start;
 }
-
-.news-feed-card:hover {
-  transform: translateX(5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+.news-feed-card:hover { transform: translateX(5px); }
 
 .nfc-image {
-  width: 150px;
+  width: 160px;
   background-size: cover;
   background-position: center;
   flex-shrink: 0;
 }
 
 .nfc-content {
-  padding: 1rem;
+  padding: 1.2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   flex-grow: 1;
+  min-width: 0; /* Fix flexbox text overflow */
 }
 
-.nfc-meta { 
-  font-size: 0.75rem; 
-  color: var(--hp-text-muted); 
-  margin-bottom: 0.4rem; 
-  text-transform: uppercase; 
-  font-weight: 600; 
-}
+.nfc-meta { font-size: 0.75rem; color: var(--hp-accent); margin-bottom: 0.4rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
 .nfc-title { 
-  font-size: 1.05rem; 
-  color: var(--hp-primary); 
-  font-weight: 700; 
-  margin: 0 0 0.5rem 0; 
-  line-height: 1.25;
-  display: -webkit-box; 
-  -webkit-line-clamp: 2; 
-  -webkit-box-orient: vertical; 
-  overflow: hidden;
+  font-size: 1.1rem; color: var(--hp-primary); font-weight: 800; margin: 0 0 0.5rem 0; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.nfc-link { 
-  font-size: 0.85rem; 
-  color: var(--hp-accent); 
-  font-weight: 600; 
-  display: flex; 
-  align-items: center; 
-  gap: 5px; 
-  margin-top: auto; 
-}
+.nfc-link { font-size: 0.85rem; color: var(--hp-text-muted); font-weight: 600; display: flex; align-items: center; gap: 5px; margin-top: auto; }
+
+.view-all-wrapper { text-align: center; margin-top: 1.5rem; }
+.hp-btn.btn-link { color: var(--hp-primary); font-weight: 600; text-decoration: none; border-bottom: 2px solid transparent; transition: border 0.2s; }
+.hp-btn.btn-link:hover { border-color: var(--hp-accent); }
 
 /* =========================================
    COLONNA 3: CALENDARIO (ev-)
    ========================================= */
-.events-list { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 1rem; 
-}
+.events-list { display: flex; flex-direction: column; gap: 1rem; }
 
 .event-row {
-  background: var(--hp-white); 
-  border: 1px solid var(--hp-border); 
-  border-radius: var(--hp-radius);
-  padding: 0.9rem; 
-  display: flex; 
-  align-items: center; 
-  gap: 1rem; 
-  transition: all 0.2s;
+  background: var(--hp-white); border: 1px solid var(--hp-border); border-radius: 12px;
+  padding: 1rem; display: flex; align-items: center; gap: 1.2rem; transition: all 0.2s;
 }
 .event-row:hover { border-color: var(--hp-accent); }
 
 .event-date-box {
-  background: #eef2f5; 
-  width: 55px; 
-  height: 55px; 
-  border-radius: 10px;
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  align-items: center;
-  flex-shrink: 0; 
-  color: var(--hp-primary);
+  background: #f0f2f5; width: 60px; height: 60px; border-radius: 12px;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  flex-shrink: 0; color: var(--hp-primary); font-weight: 800;
 }
-.ev-day { font-size: 1.4rem; font-weight: 800; line-height: 1; }
-.ev-month { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--hp-accent); }
+.ev-day { font-size: 1.6rem; line-height: 1; }
+.ev-month { font-size: 0.7rem; text-transform: uppercase; color: var(--hp-accent); }
 
 .event-details { flex-grow: 1; overflow: hidden; }
-
-.ev-meta { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  margin-bottom: 3px; 
-  font-size: 0.75rem; 
-}
-.ev-tag { padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; }
-/* Tag Colors */
-.tag-calcio { background: #e3f2fd; color: #1565c0; }
-.tag-volley { background: #fff3e0; color: #ef6c00; }
-.tag-basket { background: #fbe9e7; color: #d84315; }
-.tag-evento { background: #f3e5f5; color: #8e24aa; }
-
-.ev-title { 
-  margin: 0; 
-  font-size: 0.95rem; 
-  font-weight: 700; 
-  color: var(--hp-text); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-}
-.ev-location { 
-  margin: 0; 
-  font-size: 0.8rem; 
-  color: var(--hp-text-muted); 
-  display: flex; 
-  align-items: center; 
-  gap: 4px; 
-}
+.ev-title { font-size: 1rem; font-weight: 700; color: var(--hp-text); margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-location { font-size: 0.85rem; color: var(--hp-text-muted); display: flex; align-items: center; gap: 5px; margin: 0; }
 
 /* =========================================
-   UTILITY & RESPONSIVE
+   📱 MOBILE REVOLUTION (Max-width: 991px)
    ========================================= */
-.loader-container {
-  display: flex; 
-  justify-content: center; 
-  padding: 3rem;
-}
-.loader {
-  border: 4px solid #f3f3f3; 
-  border-top: 4px solid var(--hp-accent); 
-  border-radius: 50%; 
-  width: 40px; 
-  height: 40px; 
-  animation: spin 1s linear infinite;
-}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Mobile e Tablet: News Card diventa verticale se c'è poco spazio */
-@media (max-width: 500px) {
-  .news-feed-card {
-    height: auto;
-    flex-direction: column;
+@media (max-width: 991px) {
+  
+  .hp-main-container {
+    padding: 0; /* Full width su mobile */
+    overflow-x: hidden; /* Evita scroll orizzontale della pagina */
   }
+
+  /* Reset Grid a layout verticale */
+  .hp-grid-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    margin-top: 1rem;
+  }
+
+  /* Padding interno per i titoli delle sezioni */
+  .column-header {
+    padding: 0 1.5rem;
+    margin-bottom: 1rem;
+    border: none;
+  }
+
+  /* --- 1. SLIDER ORIZZONTALE PER LIVE & NEWS --- */
+  .live-list, 
+  .news-feed-list {
+    flex-direction: row; /* Diventa orizzontale */
+    overflow-x: auto; /* Abilita lo scroll */
+    scroll-snap-type: x mandatory; /* Scatto magnetico */
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem; /* Spazio per l'ombra */
+    gap: 1rem;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll su iOS */
+    
+    /* Nascondi scrollbar ma mantieni funzionalità */
+    scrollbar-width: none; 
+  }
+  .live-list::-webkit-scrollbar, .news-feed-list::-webkit-scrollbar { display: none; }
+
+  /* --- 2. CARD MODIFICATE PER MOBILE --- */
+  
+  /* Live Card Mobile */
+  .live-card-simple {
+    min-width: 85vw; /* Occupa quasi tutto lo schermo */
+    scroll-snap-align: center;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* News Card Mobile (Instagram Style) */
+  .news-feed-card {
+    min-width: 280px;
+    width: 80vw; /* Card larghe */
+    height: auto; /* Altezza adattabile */
+    flex-direction: column; /* Immagine sopra, testo sotto */
+    scroll-snap-align: center;
+    border-radius: 16px;
+  }
+
   .nfc-image {
     width: 100%;
-    height: 160px;
+    height: 160px; /* Immagine grande */
+  }
+
+  .nfc-content {
+    padding: 1rem;
+  }
+
+  .nfc-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+  }
+
+  /* Promo Box Mobile */
+  .channel-promo-box {
+    min-width: 260px;
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+
+  /* --- 3. CALENDARIO (Resta lista verticale) --- */
+  .hp-col-calendar {
+    padding: 0 1.5rem; /* Padding laterale ripristinato */
+  }
+  
+  .event-row {
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: none;
   }
 }
