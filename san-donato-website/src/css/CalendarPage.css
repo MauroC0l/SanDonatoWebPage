@@ -333,3 +333,87 @@
   .cp-modal-body { padding: 1.5rem; padding-bottom: 3rem; /* Safe area */ }
   .cp-modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
 }
+
+/* ==========================================================================
+   📱 MOBILE & RESPONSIVE OVERHAUL
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .cp-dashboard-container { padding: 0; align-items: flex-start; height: 100vh; overflow: hidden; }
+  .cp-main-grid { grid-template-columns: 1fr; gap: 0; height: 100%; max-width: none; border-radius: 0; }
+  .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; }
+}
+
+@media (max-width: 768px) {
+  /* Toolbar Mobile */
+  .cp-toolbar { padding: 1rem; gap: 1rem; }
+  .cp-toolbar-title h2 { font-size: 1.25rem; }
+  .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center; color: var(--cp-text-main); cursor: pointer; }
+  .cp-toolbar-actions-row { flex-wrap: wrap; }
+  .cp-nav-controls { flex: 1; justify-content: space-between; }
+  
+  /* Sidebar come Bottom Sheet (Drawer) */
+  .cp-sidebar {
+    position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+    height: 85vh; z-index: 200; background: white;
+    border-radius: 24px 24px 0 0; padding: 1.5rem;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+    transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: block; /* Override flex */
+  }
+  .cp-sidebar.cp-mobile-open { transform: translateY(0); }
+  
+  .cp-backdrop {
+    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 150; animation: fadein 0.3s;
+  }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+  .cp-mobile-drag-handle { display: block; width: 40px; height: 5px; background: #E2E8F0; border-radius: 10px; margin: 0 auto 1.5rem auto; }
+  .cp-btn-close-mobile { display: flex; background: #F1F5F9; border: none; width: 32px; height: 32px; border-radius: 50%; align-items: center; justify-content: center; }
+
+  /* Adatta carte sidebar */
+  .cp-card { border: none; box-shadow: none; padding: 0; margin-bottom: 2rem; }
+  .cp-stat-box { margin-bottom: 1rem; }
+
+  /* Calendar Grid Mobile Optimization */
+  .cp-calendar-content { padding: 0.5rem; }
+  .cp-week-header { margin-bottom: 0.5rem; }
+  .cp-day-name { font-size: 0.7rem; }
+  .cp-month-grid { gap: 4px; min-height: auto; grid-template-rows: repeat(6, minmax(60px, 1fr)); }
+  
+  .cp-day-cell { min-height: 60px; padding: 4px; border-radius: 10px; align-items: center; }
+  .cp-day-number { font-size: 0.8rem; margin-bottom: 2px; width: 20px; height: 20px; }
+  
+  /* Trasforma Pills in Dots su Mobile */
+  .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 3px; width: 100%; height: 100%; align-content: flex-start; }
+  
+  /* --- MODIFICA CHIAVE QUI SOTTO --- */
+  .cp-event-pill {
+    padding: 0; border: none; width: 6px; height: 6px; border-radius: 50%;
+    background-color: var(--pill-dot); /* Usa il colore del dot */
+    flex-shrink: 0;
+    
+    /* QUESTA RIGA FA LA MAGIA: 
+       Disabilita il click sull'evento specifico su mobile.
+       Il click "passa attraverso" e attiva il click del genitore (la cella del giorno),
+       che porta alla vista lista.
+    */
+    pointer-events: none; 
+  }
+  /* ---------------------------------- */
+
+  .cp-pill-text { display: none; } /* Nascondi testo */
+
+  /* Modal Mobile (Bottom Sheet Style) */
+  .cp-modal-overlay { align-items: flex-end; padding: 0; }
+  .cp-modal-card {
+    max-width: none; border-radius: 24px 24px 0 0;
+    animation: cp-slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes cp-slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  
+  .cp-mobile-drag-handle-modal { display: block; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; z-index: 10; }
+  .cp-btn-close { top: 1.5rem; right: 1.5rem; width: 32px; height: 32px; }
+  .cp-modal-header { height: 100px; padding: 1.5rem 1.5rem 1rem 1.5rem; }
+  .cp-modal-body { padding: 1.5rem; padding-bottom: 3rem; /* Safe area */ }
+  .cp-modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
+}

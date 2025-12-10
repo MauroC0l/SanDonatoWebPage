@@ -1,0 +1,17 @@
+{
+  "carouselImages": [
+    "/caroselloHome/homeBackground.jpg",
+    "/caroselloHome/homeBackground2.jpg",
+    "/caroselloHome/homeBackground5.jpg",
+    "/caroselloHome/homeBackground6.jpg",
+    "/caroselloHome/homeBackground7.jpg",
+    "/caroselloHome/homeBackground8.jpg"
+  ],
+  "content": {
+    "subtitle": "⚽ CALCIO — 🏐 PALLAVOLO — 🏀 BASKET",
+    "description": "La PSD promuove attività sportive ed educative, favorendo aggregazione, socialità e benessere sul territorio."
+  },
+  "settings": {
+    "intervalSpeed": 6000
+  }
+}
