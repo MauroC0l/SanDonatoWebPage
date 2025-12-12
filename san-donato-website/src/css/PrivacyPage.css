@@ -22,13 +22,15 @@
 .prv-fade-in {
   animation: prvEntry 0.6s ease-out forwards;
   opacity: 0;
+  overflow-x: hidden;
 }
 
 /* LAYOUT */
 .privacy-page {
-  min-height: 80vh; /* Non forza 100vh se il contenuto è poco */
+  min-height: 80vh; 
   background: var(--prv-bg);
-  padding: 3rem 1rem;
+  /* Padding fluido */
+  padding: clamp(1.5rem, 4vw, 3rem) 1rem; 
   font-family: 'Inter', sans-serif;
   color: var(--prv-text);
   display: flex;
@@ -60,7 +62,8 @@
 }
 
 .prv-title {
-  font-size: 2.2rem;
+  /* Dimensione fluida */
+  font-size: clamp(1.8rem, 4vw, 2.2rem); 
   font-weight: 800;
   color: var(--prv-primary);
   margin-bottom: 0.5rem;
@@ -75,7 +78,8 @@
 .prv-content-card {
   background: var(--prv-card-bg);
   border-radius: var(--prv-radius);
-  padding: 2.5rem;
+  /* Padding fluido */
+  padding: clamp(1.5rem, 4vw, 2.5rem); 
   box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
   border: 1px solid var(--prv-border);
 }
@@ -109,6 +113,8 @@
   text-decoration: none;
   transition: all 0.3s ease;
   background: #fdfdfd;
+  flex-shrink: 0;
+  min-width: 0; /* Permette la compressione se necessario */
 }
 
 .prv-doc-item:hover {
@@ -120,11 +126,14 @@
 
 .prv-doc-icon {
   font-size: 2rem;
-  color: #ef4444; /* Rosso PDF */
+  color: #ef4444;
+  flex-shrink: 0; /* Icona non si restringe */
 }
 
 .prv-doc-info {
   flex-grow: 1;
+  overflow: hidden; /* Nasconde testo in eccesso se non c'è spazio */
+  min-width: 0;
 }
 
 .prv-doc-info h3 {
@@ -132,11 +141,17 @@
   color: var(--prv-primary);
   margin: 0 0 0.2rem 0;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .prv-doc-info span {
   font-size: 0.9rem;
   color: var(--prv-text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .prv-download-action {
@@ -144,6 +159,7 @@
   color: var(--prv-accent);
   opacity: 0.6;
   transition: opacity 0.3s;
+  flex-shrink: 0;
 }
 
 .prv-doc-item:hover .prv-download-action {
@@ -154,15 +170,27 @@
 @media (max-width: 600px) {
   .prv-content-card {
     padding: 1.5rem;
+    /* Assicura che la card non causi overflow su schermi molto stretti */
+    width: calc(100% - 2rem); 
   }
   
   .prv-doc-item {
     flex-direction: column;
     text-align: center;
     padding: 1.5rem;
+    align-items: center;
   }
 
   .prv-doc-info {
     margin: 0.5rem 0;
+    text-align: center;
+  }
+  
+  /* Rimuoviamo la troncazione sui titoli quando sono impilati */
+  .prv-doc-info h3, 
+  .prv-doc-info span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 }

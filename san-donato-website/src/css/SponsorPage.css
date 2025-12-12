@@ -32,8 +32,10 @@
   width: 100%;
   min-height: 100vh;
   color: var(--spn-text-primary);
-  padding: 40px 16px; 
+  /* Padding fluido con clamp */
+  padding: clamp(20px, 4vw, 40px) 16px; 
   padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
 }
 
 .sponsor-container {
@@ -45,14 +47,16 @@
 /* 2. HEADER */
 .sponsor-header {
   text-align: center;
-  margin-bottom: 40px; 
+  /* Margine fluido */
+  margin-bottom: clamp(20px, 6vw, 40px); 
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .page-title {
-  font-size: 2rem; 
+  /* Dimensione fluida */
+  font-size: clamp(2rem, 5vw, 3.5rem); 
   font-weight: 800;
   color: var(--spn-text-primary);
   margin-bottom: 12px;
@@ -76,7 +80,7 @@
   padding: 0 10px;
 }
 
-/* 3. GRIGLIA */
+/* 3. GRIGLIA: MOBILE FIRST (1 Colonna) */
 .sponsor-grid {
   display: grid;
   grid-template-columns: 1fr; 
@@ -98,9 +102,8 @@
   height: auto; 
   min-height: 260px;
   
-  /* Animazione sequenziale */
   opacity: 0;
-  animation: spnFadeInUp 0.6s ease-out forwards; /* Usa forwards! */
+  animation: spnFadeInUp 0.6s ease-out forwards;
   
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -132,7 +135,6 @@
   object-fit: contain;
   transition: transform 0.4s ease;
   
-  /* SU MOBILE: Colore pieno di default */
   filter: grayscale(0%);
   opacity: 1;
 }
@@ -175,7 +177,8 @@
 
 @media (min-width: 640px) {
   .sponsor-grid {
-    grid-template-columns: repeat(2, 1fr);
+    /* Passaggio a 2 colonne su schermi medi */
+    grid-template-columns: repeat(2, 1fr); 
     gap: 24px;
   }
   
@@ -186,7 +189,8 @@
 
 @media (min-width: 1024px) {
   .sponsor-page {
-    padding: 80px 24px;
+    /* Padding più ampio su desktop */
+    padding: 80px 24px; 
   }
   
   .sponsor-header {
@@ -198,7 +202,8 @@
   }
 
   .sponsor-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    /* Uso di auto-fit per permettere più colonne se lo spazio lo consente */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     gap: 32px;
   }
   

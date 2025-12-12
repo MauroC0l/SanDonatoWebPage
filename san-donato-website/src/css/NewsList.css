@@ -1,42 +1,32 @@
-  .news-container {
+.news-container {
     width: 98%;
     padding: 1rem 0;
     margin-top: 2rem;
-    /* sposta la lista più in basso */
+    margin-inline: auto; /* Centra il container */
   }
 
   /* --- Griglia --- */
   .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    /* Usa un minmax() più stretto per permettere 3/4 colonne su schermi larghi */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
     gap: 1.5rem;
     justify-content: center;
     align-items: stretch;
     width: 100%;
+    /* Protezione per layout: padding laterale sul container della griglia */
+    padding: 0 1rem; 
   }
 
-  /* Responsività */
-  @media (max-width: 1400px) {
-    .news-grid {
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-  }
-
-  @media (max-width: 1200px) {
-    .news-grid {
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-  }
-
-  @media (max-width: 900px) {
-    .news-grid {
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-  }
-
+  /* Responsività: Mantenuto un layout flessibile con auto-fit */
+  /* NOTA: Le media query più specifiche definite in NewsPage.css (es. a 1200px) 
+     potrebbero sovrascrivere queste per un controllo più granulare del numero di colonne. 
+     Se NewsList.css è l'unico file che definisce la griglia, questa logica è corretta. */
+  
   @media (max-width: 600px) {
     .news-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr; /* 1 colonna su smartphone */
+      padding: 0; /* Rimuovi padding se il container genitore lo gestisce */
     }
   }
 
@@ -60,8 +50,8 @@
   /* Immagine */
   .news-image-wrapper {
     width: 100%;
-    height: 150px;
-    /* ridotto come era prima */
+    /* Altezza fluida con clamp o fissa se lo stile lo richiede. Mantengo 150px. */
+    height: 150px; 
     overflow: hidden;
   }
 
@@ -90,11 +80,12 @@
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
-  min-height: 2.6em; /* spazio fisso per titolo di 2 righe circa */
+  /* Utilizzo di un'altezza più flessibile per la limitazione */
+  min-height: 2.6em; 
   line-height: 1.3em;
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* limita a 2 righe */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
 }
@@ -105,7 +96,6 @@
     color: #777;
     margin-bottom: 0.5rem;
     min-height: 1.2em;
-    /* spazio uniforme anche se manca */
   }
 
   /* Preview uniforme anche senza subtitle */
@@ -122,16 +112,17 @@
   .news-footer {
     display: flex;
     justify-content: space-between;
-    /* autore a sx, pulsante a dx */
     align-items: flex-end;
     margin-top: auto;
     padding-top: 0.5rem;
+    flex-wrap: wrap; /* Assicura che si adatti se lo spazio è limitato */
   }
 
   .news-author-date {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    min-width: 0; /* Permette la troncazione del testo */
   }
 
   .news-author {
@@ -177,12 +168,15 @@
     transform: translateY(-2px);
   }
 
-  /* --- Paginazione --- */
+  /* --- Paginazione (Mantenuta, è responsive) --- */
   .pagination {
     display: flex;
     justify-content: center;
     margin-top: 2rem;
     gap: 0.5rem;
+    /* Aggiunto padding per schermi molto stretti */
+    padding: 0 1rem; 
+    flex-wrap: wrap;
   }
 
   .page-btn {
@@ -194,6 +188,7 @@
     font-weight: 500;
     transition: background 0.3s ease;
     color: #333;
+    flex-shrink: 0;
   }
 
   .page-btn:hover {
@@ -216,24 +211,24 @@
     color: #555;
     font-weight: 500;
   }
-
+  
   .loader-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-}
-
-.loader {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #ff6600;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
+  
+  .loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #ff6600;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }

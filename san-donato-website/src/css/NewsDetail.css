@@ -4,6 +4,7 @@
 
 .news-detail-page {
   font-family: 'Inter', system-ui, Avenir, Helvetica, sans-serif;
+  /* Larghezza fluida con max-width */
   max-width: 900px;
   width: 95%;
   margin: 3rem auto;
@@ -20,7 +21,7 @@
 /* --- 1. Immagine Hero (In cima - Estetica) --- */
 .news-detail-hero {
   width: 100%;
-  height: 350px; /* Altezza fissa per header elegante */
+  height: clamp(200px, 35vw, 350px); /* Altezza fluida */
   object-fit: cover;
   border-radius: 16px;
   margin-bottom: 2rem;
@@ -29,7 +30,8 @@
 
 /* --- Titolo --- */
 .news-detail-title {
-  font-size: clamp(2rem, 5vw, 2.6rem);
+  /* Uso di clamp per fluidità */
+  font-size: clamp(2rem, 5vw, 2.6rem); 
   font-weight: 800;
   color: #1d3557;
   margin-bottom: 0.8rem;
@@ -46,6 +48,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap; /* Aggiunto per evitare overflow su schermi molto stretti */
 }
 
 .news-detail-meta span:first-child {
@@ -70,12 +73,15 @@
    ========================================= */
 .news-image-preview-container {
   margin: 2rem 0 3rem 0;
-  text-align: center; /* Centra la miniatura */
+  text-align: center;
+  /* Protezione da overflow */
+  overflow-x: hidden; 
 }
 
 .news-detail-image-preview {
-  width: 25%; /* Ridotta ulteriormente (era 50%) */
-  min-width: 200px; /* Evita che diventi troppo piccola su schermi stretti */
+  /* Utilizzo di clamp per una larghezza fluida e controllata: 
+     min 200px, 25% su desktop, max 400px */
+  width: clamp(200px, 25%, 400px); 
   height: auto;
   border-radius: 8px;
   cursor: zoom-in;
@@ -190,6 +196,8 @@
   .news-detail-page {
     padding: 1.5rem;
     margin: 1.5rem auto;
+    /* Assicuriamo che la pagina non superi mai il bordo */
+    width: calc(100% - 2rem); 
   }
   
   .news-detail-hero {
@@ -197,7 +205,9 @@
   }
 
   .news-detail-image-preview {
-    width: 60%; /* Su mobile la ingrandiamo un po' per essere toccabile */
+    /* Su mobile la ingrandiamo un po' per essere toccabile, 
+       ma la limitiamo per non essere invadente (max 80%) */
+    width: clamp(200px, 60vw, 80%); 
   }
 
   .news-detail-title {

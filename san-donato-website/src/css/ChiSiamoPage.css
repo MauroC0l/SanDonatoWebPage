@@ -5,9 +5,9 @@
 .csp-avant-garde-wrapper {
   --c-bg: #ffffff;
   --c-surface: #f1f5f9;
-  --c-dark: #0f172a;       /* Blu scuro profondo (PSD istituzionale) */
-  --c-accent: #ff6600;     /* Arancio PSD */
-  --c-blue: #0056d6;       /* Blu elettrico per dettagli */
+  --c-dark: #0f172a;       
+  --c-accent: #ff6600;     
+  --c-blue: #0056d6;       
   --c-text-main: #1e293b;
   --c-text-muted: #64748b;
   --c-border: #e2e8f0;
@@ -16,18 +16,16 @@
   color: var(--c-text-main);
   width: 100%;
   background: var(--c-bg);
+  overflow-x: hidden;
 }
 
 /* --- 1. HERO & BADGE --- */
 .csp-hero-block {
-  padding: 6rem 2rem 4rem;
+  /* Padding fluido */
+  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem) clamp(2rem, 8vw, 4rem); 
   text-align: left;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.csp-hero-content {
-  /* Container interno se necessario, altrimenti eredita dal blocco */
 }
 
 /* Nuovo Stile Badge "Dal 2008" */
@@ -58,7 +56,8 @@
 }
 
 .csp-hero-title {
-  font-size: clamp(3rem, 6vw, 5rem);
+  /* Titolo fluido con clamp */
+  font-size: clamp(2.5rem, 8vw, 5rem); 
   font-weight: 900;
   line-height: 1;
   margin: 0 0 1.5rem 0;
@@ -69,6 +68,8 @@
   background: linear-gradient(90deg, var(--c-blue), var(--c-dark));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text; /* Aggiunto per compatibilità */
+  display: inline-block;
 }
 
 .csp-hero-subtitle {
@@ -80,14 +81,19 @@
 
 /* --- 2. MANIFESTO (Clean Grid) --- */
 .csp-manifesto-section {
-  padding: 4rem 2rem;
+  /* Padding fluido */
+  padding: clamp(2rem, 8vw, 4rem) clamp(1rem, 5vw, 2rem); 
   background: #fff;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .csp-section-header { margin-bottom: 3rem; }
-.csp-section-header h2 { font-size: 2.5rem; font-weight: 800; margin: 0; color: var(--c-dark); }
+.csp-section-header h2 { 
+  /* Titolo fluido */
+  font-size: clamp(2rem, 4vw, 2.5rem); 
+  font-weight: 800; margin: 0; color: var(--c-dark); 
+}
 .csp-header-line { width: 80px; height: 6px; background: var(--c-accent); margin-top: 10px; border-radius: 3px; }
 
 .csp-section-header.csp-center { text-align: center; }
@@ -95,6 +101,7 @@
 
 .csp-values-grid {
   display: grid;
+  /* Griglia fluida: minimo 300px per colonna */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
 }
@@ -113,14 +120,14 @@
 
 /* --- 3. ORGANIGRAMMA (Dark Section) --- */
 .csp-org-section-dark {
-  background: var(--c-dark); /* Sfondo scuro totale */
-  padding: 6rem 2rem;
+  background: var(--c-dark);
+  /* Padding fluido */
+  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem); 
   color: #fff;
   position: relative;
   overflow: hidden;
 }
 
-/* Elemento decorativo di sfondo */
 .csp-org-section-dark::before {
   content: '';
   position: absolute;
@@ -133,17 +140,22 @@
 .csp-org-container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
 
 .csp-org-header { margin-bottom: 4rem; text-align: center; }
-.csp-org-header h2 { font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; }
+.csp-org-header h2 { 
+  /* Titolo fluido */
+  font-size: clamp(2rem, 5vw, 3rem); 
+  font-weight: 800; margin-bottom: 0.5rem; 
+}
 .csp-org-header p { color: rgba(255,255,255,0.6); font-size: 1.1rem; }
 
 .csp-org-grid-modern {
   display: grid;
+  /* Griglia fluida: min 260px, fino a 4 colonne */
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 2rem;
 }
 
 .csp-org-card-glass {
-  background: rgba(255, 255, 255, 0.05); /* Effetto vetro su scuro */
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 2rem;
   border-radius: 24px;
@@ -156,7 +168,6 @@
   transform: translateY(-10px);
 }
 
-/* Cambio colore testo in hover per contrasto su bianco */
 .csp-org-card-glass:hover h3 { color: var(--c-dark); }
 .csp-org-card-glass:hover p { color: var(--c-text-muted); }
 .csp-org-card-glass:hover .csp-divider-small { background: var(--c-accent); }
@@ -177,17 +188,19 @@
 
 /* --- 4. MEMBERSHIP (Expanded Layout) --- */
 .csp-membership-section {
-  padding: 6rem 2rem;
+  /* Padding fluido */
+  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem); 
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .csp-pricing-grid {
   display: grid;
+  /* Griglia fluida: min 280px, fino a 3 colonne */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 2rem;
   margin-top: 3rem;
-  align-items: center; /* Per centrare la card 'popular' se è più alta */
+  align-items: center;
 }
 
 .csp-pricing-card {
@@ -201,18 +214,21 @@
 }
 
 .csp-pricing-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-5px); /* Ridotto l'effetto hover per mobile */
   box-shadow: 0 20px 40px rgba(0,0,0,0.08);
 }
 
 .csp-pricing-card.csp-popular {
   border: 2px solid var(--c-accent);
-  background: #fffaf5; /* Arancio chiarissimo */
+  background: #fffaf5;
   transform: scale(1.05);
   z-index: 2;
   box-shadow: 0 25px 50px rgba(255, 102, 0, 0.15);
 }
-.csp-pricing-card.csp-popular:hover { transform: scale(1.05) translateY(-10px); }
+/* Manteniamo l'effetto hover su desktop, ma lo riduciamo su mobile */
+@media (min-width: 901px) {
+  .csp-pricing-card.csp-popular:hover { transform: scale(1.05) translateY(-10px); }
+}
 
 .csp-pop-badge {
   position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
@@ -268,10 +284,27 @@
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .csp-hero-title { font-size: 3rem; }
-  .csp-org-grid-modern { grid-template-columns: 1fr; }
-  .csp-impact-bar { flex-direction: column; text-align: center; }
-  .csp-pricing-card.csp-popular { transform: scale(1); }
+  /* Titoli più piccoli su mobile/tablet */
+  .csp-hero-title { font-size: clamp(2.5rem, 8vw, 4rem); } 
+  /* Ritorno ad una colonna singola per organigramma */
+  .csp-org-grid-modern { 
+    grid-template-columns: 1fr; 
+    max-width: 450px; 
+    margin-inline: auto;
+  }
+  .csp-impact-bar { 
+    /* Passa ad una colonna o wrap */
+    flex-direction: column; 
+    text-align: center; 
+    align-items: center;
+  }
+  /* Rimuove l'ingrandimento extra sulla card popolare su tablet */
+  .csp-pricing-card.csp-popular { transform: scale(1); } 
+  .csp-pricing-card.csp-popular:hover { transform: scale(1) translateY(-5px); }
+  /* La griglia pricing torna ad 1 colonna se la minmax è superata */
+  .csp-pricing-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 
 /* --- AGGIUNTA FONDAMENTALE PER ANIMAZIONE --- */

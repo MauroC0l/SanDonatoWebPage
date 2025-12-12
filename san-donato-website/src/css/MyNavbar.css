@@ -4,19 +4,21 @@
   --primary-color: #002b5c;
   --accent-color: #ff6600;
   --text-white: #ffffff;
+  --dark-text: #333;
   
-  /* Glassmorphism Variables */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  
-  --nav-height: 70px;
+  /* Modern Glass/Elevated Variables */
+  --nav-bg: #002b5c; /* Colore solido di backup */
+  --nav-glass-bg: rgba(0, 43, 92, 0.9); /* Versione glassata scura */
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --nav-height: 65px; /* Leggermente ridotta l'altezza */
 }
 
-/* Navbar Base */
+/* 1. Navbar Base & Glassmorphism */
 .navbar {
-  background: var(--primary-color);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Sfondo Glassmorphism scuro per un look premium */
+  background: var(--nav-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   
   color: var(--text-white);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -25,132 +27,130 @@
   align-items: center;
   justify-content: center;
   
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  /* Ombra più pronunciata per effetto elevato */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
   position: sticky;
   top: 0;
   z-index: 1000;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   
-  /* PROTEZIONE OVERFLOW */
+  /* Correzione Overflow: usa width: 100% e lascia che il container gestisca i margini */
   width: 100%;
-  max-width: 100vw;
-  overflow-x: clip; 
 }
 
-/* Contenitore interno */
+/* 2. Contenitore interno e Allineamento */
 .navbar-container {
   display: flex;
   align-items: center;
   width: 100%;
   max-width: 1400px;
   
-  /* MODIFICA QUI: Centra il contenuto invece di distribuirlo */
-  justify-content: center; 
-  
-  padding: 0 1rem;
+  /* Centra il contenuto e gestisce il padding laterale */
+  padding: 0 2rem; /* Aumento il padding su desktop */
   margin: 0 auto;
 }
 
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem; /* Leggermente aumentato il gap */
+  width: 100%;
   
-  /* MODIFICA QUI: Rimuovi width: 100% o usa fit-content */
-  width: fit-content; 
-  justify-content: center;
+  /* Centra i link visibili nella navbar */
+  justify-content: center; 
+  
+  /* RIMOSSA la logica di scroll orizzontale, non necessaria con il "Altro" dropdown */
 }
 
-/* --- PULSANTI (Stile Pillola) --- */
+/* 3. Stile Link (Pillola Moderna) */
 .nav-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem; 
+  gap: 0.5rem; 
   
-  padding: 0.6rem 1.1rem;
+  padding: 0.5rem 1rem; /* Ridotto leggermente il padding */
   color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
   
-  border-radius: 50px;
-  border: 1px solid transparent;
+  border-radius: 40px; /* Forma più arrotondata */
+  border: 2px solid transparent;
   background: transparent;
   
-  font-size: 0.95rem; 
+  font-size: 0.9rem; /* Ridotto per il desktop */ 
   font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: nowrap; 
+  flex-shrink: 0; 
   
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .nav-link svg {
-  font-size: 1.3rem; 
+  font-size: 1.1rem; /* Ridotto per bilanciare il testo */
   flex-shrink: 0;    
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1)); 
 }
 
 .nav-link:hover {
-  background: var(--glass-bg);
-  border-color: var(--glass-border);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
   color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .nav-link.active {
+  /* Sfondo più vibrante */
   background: linear-gradient(135deg, var(--accent-color), #ff8533);
   color: white;
-  font-weight: 700;
-  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
-  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 3px 12px rgba(255, 102, 0, 0.4);
+  border-color: #ffaa70; /* Bordo colorato */
+  transform: translateY(-1px);
 }
 
-/* --- PULSANTE "ALTRO" --- */
+/* 4. Pulsante "Altro" */
 .dropdown {
   position: relative;
   flex-shrink: 0;
-  
-  /* MODIFICA QUI: Rimuovi margin-left: auto */
-  margin-left: 0; 
+  margin-left: 0.5rem; /* Aggiungo un piccolo margine per separarlo */
 }
 
 .dropdown-toggle {
-  background: rgba(255,255,255,0.05); 
-  padding-right: 0.9rem;
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08); /* Sfondo più chiaro per farlo risaltare */
+  padding-right: 1rem;
+  border-color: rgba(255,255,255,0.2);
 }
 
 .dropdown-toggle:hover,
 .dropdown-toggle.active-toggle {
   background: rgba(255,255,255,0.15);
   border-color: var(--accent-color);
-  color: var(--accent-color);
+  color: var(--text-white); /* Mantengo il testo bianco, non accent */
 }
 
-/* --- MENU A TENDINA --- */
+/* 5. Menu a Tendina (Dropdown Menu) */
 .dropdown-menu {
   position: absolute;
-  top: 140%;
+  top: calc(100% + 10px); /* Spostato leggermente più in basso */
   
-  /* SEMPRE ancorato a destra del pulsante "Altro" */
-  right: 0; 
+  right: 0; /* Allineato perfettamente a destra del pulsante */
   left: auto;
   
   background: #ffffff;
-  min-width: 260px;
+  min-width: 240px;
   
-  border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-  padding: 0.8rem;
+  border-radius: 12px; /* Ridotto l'arrotondamento */
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  padding: 0.6rem;
   
   display: none;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.2rem;
   z-index: 1001;
   
-  /* L'animazione parte dall'angolo in alto a destra */
   transform-origin: top right;
+  border: 1px solid #eee; /* Bordo leggero */
 }
 
 .dropdown-menu.show {
@@ -160,28 +160,28 @@
 
 /* Elementi Dropdown */
 .dropdown-item {
-  padding: 0.8rem 1rem;
-  color: #333;
+  padding: 0.7rem 0.9rem;
+  color: var(--dark-text);
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 1rem; 
-  border-radius: 12px;
+  gap: 0.8rem; 
+  border-radius: 8px;
   transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
 }
 
 .dropdown-item svg {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #888;
   transition: color 0.2s;
 }
 
 .dropdown-item:hover {
-  background: #fff0e6; 
+  background: #f5f5f5; /* Sfondo neutro/chiaro per eleganza */
   color: var(--accent-color);
-  transform: translateX(5px);
+  transform: translateX(3px); /* Effetto hover più discreto */
 }
 
 .dropdown-item:hover svg {
@@ -190,7 +190,7 @@
 
 .arrow {
   margin-left: 0.3rem;
-  font-size: 0.8rem !important; 
+  font-size: 0.7rem !important; 
   transition: transform 0.3s ease;
 }
 
@@ -199,33 +199,51 @@
 }
 
 @keyframes menuPop {
-  from { opacity: 0; transform: scale(0.9) translateY(-10px); }
+  from { opacity: 0; transform: scale(0.95) translateY(-5px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* =========================================
-   MOBILE OPTIMIZATION
+   MOBILE OPTIMIZATION (Rifinitura)
    ========================================= */
+@media (max-width: 1050px) {
+  /* Riduciamo il padding laterale della navbar su schermi più piccoli */
+  .navbar-container {
+    padding: 0 1rem;
+  }
+}
+
 @media (max-width: 650px) {
+  .navbar {
+    /* Rimuovo il blur su schermi molto piccoli per migliorare le performance */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--primary-color);
+    height: 60px; /* Ancora più basso su mobile */
+  }
+  
   .navbar-container {
     padding: 0 0.8rem;
   }
   
-  /* Su mobile riduciamo leggermente i testi e i padding per eleganza */
+  /* Su mobile riduciamo ulteriormente i testi e i padding */
   .nav-link {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;    
-    gap: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;    
+    gap: 0.4rem;
   }
   
   .nav-link svg {
-    font-size: 1.2rem; 
+    font-size: 1.1rem; 
   }
   
-  /* Sicurezza per schermi piccoli: il menu non deve uscire a sinistra */
+  /* Assicuriamo che il menu non superi la larghezza dello schermo e non esca */
   .dropdown-menu {
-      max-width: 90vw; 
-      width: 250px;
+      top: calc(100% + 8px);
+      right: 0.8rem; 
+      max-width: calc(100vw - 1.6rem); 
+      width: clamp(200px, 80vw, 280px); 
+      min-width: unset;
   }
 }
 
@@ -234,6 +252,11 @@
     padding: 0 0.5rem;
   }
   .nav-link {
-    padding: 0.5rem 0.6rem;
+    padding: 0.4rem 0.5rem;
+  }
+  /* Ripristina l'ancoraggio corretto del menu a tendina */
+  .dropdown-menu {
+    right: 0.5rem;
+    max-width: calc(100vw - 1rem);
   }
 }

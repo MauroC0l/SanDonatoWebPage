@@ -18,6 +18,7 @@
   background: var(--c-bg);
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* --- ANIMAZIONI --- */
@@ -33,7 +34,8 @@
 
 /* --- HERO SECTION --- */
 .cpub-hero {
-  padding: 5rem 1.5rem 3rem;
+  /* Padding fluido */
+  padding: clamp(3rem, 10vw, 5rem) 1.5rem 3rem; 
   text-align: center;
   max-width: 900px;
   margin: 0 auto;
@@ -57,7 +59,8 @@
 .cpub-icon-badge { color: var(--c-accent); }
 
 .cpub-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  /* Titolo fluido */
+  font-size: clamp(2rem, 5vw, 3.5rem); 
   font-weight: 900;
   line-height: 1.1;
   color: var(--c-dark);
@@ -108,7 +111,7 @@
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   border: 1px solid var(--c-border);
-  overflow: hidden; /* Per arrotondare gli angoli */
+  /* Rimosso overflow: hidden per permettere lo scroll del wrapper */
 }
 
 /* Wrapper per scroll orizzontale su mobile */
@@ -116,12 +119,15 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  /* Padding interno per scrollare la tabella all'interno della card */
+  padding: 1px; 
 }
 
 .cpub-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* Forza scroll su schermi piccoli */
+  /* Forza scroll su schermi piccoli */
+  min-width: 700px; 
 }
 
 .cpub-table th {
@@ -134,6 +140,7 @@
   color: var(--c-text-muted);
   font-weight: 700;
   border-bottom: 2px solid var(--c-border);
+  white-space: nowrap; /* Non wrappare gli header */
 }
 
 .cpub-table td {
@@ -152,6 +159,7 @@
   font-family: monospace;
   font-weight: 600;
   color: var(--c-text-muted);
+  white-space: nowrap;
 }
 
 .cpub-entity-name {
@@ -159,6 +167,7 @@
   font-weight: 700;
   color: var(--c-dark);
   margin-bottom: 2px;
+  word-break: break-word; /* Permette il wrap del nome lungo */
 }
 .cpub-entity-detail {
   font-size: 0.85rem;
@@ -170,6 +179,7 @@
   color: var(--c-blue);
   font-size: 1.1rem;
   text-align: right;
+  white-space: nowrap;
 }
 
 /* --- DOWNLOAD BLOCK (Single File) --- */
@@ -183,7 +193,8 @@
   background: var(--c-dark);
   color: #fff;
   border-radius: 20px;
-  padding: 3rem;
+  /* Padding fluido */
+  padding: clamp(2rem, 5vw, 3rem); 
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -203,6 +214,10 @@
   border-radius: 50%;
 }
 
+.cpub-dl-content {
+  flex: 1;
+  min-width: 0;
+}
 .cpub-dl-content h3 {
   font-size: 1.5rem;
   font-weight: 800;
@@ -228,13 +243,9 @@
   align-items: center;
   gap: 10px;
   z-index: 2;
+  flex-shrink: 0;
 }
-
-.cpub-dl-btn:hover {
-  transform: translateY(-3px);
-  background: #ff751a;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-}
+/* Hover mantenuto */
 
 /* --- FOOTER --- */
 .cpub-info-section {
@@ -255,5 +266,8 @@
     padding: 2rem;
   }
   .cpub-dl-btn { width: 100%; justify-content: center; }
-  .cpub-table th, .cpub-table td { padding: 1rem; }
+  .cpub-table th, .cpub-table td { 
+    /* Padding ridotto per guadagnare spazio orizzontale */
+    padding: 1rem; 
+  }
 }

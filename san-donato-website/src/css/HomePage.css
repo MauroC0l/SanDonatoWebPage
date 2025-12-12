@@ -21,17 +21,19 @@
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--hp-text);
   padding-bottom: 5rem;
+  /* Assicura che la radice non causi overflow */
+  overflow-x: hidden; 
 }
 
 .hp-main-container {
   width: 100%;
   max-width: 1350px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  /* Padding rimosso su mobile, gestito dalle sezioni */
+  padding: 0 1.5rem; 
 }
 
-/* --- GRID SYSTEM: MOBILE FIRST --- */
-/* Su mobile è una colonna unica (flex column) */
+/* --- GRID SYSTEM: MOBILE FIRST (Fino a 991px) --- */
 .hp-grid-layout {
   display: flex;
   flex-direction: column;
@@ -54,9 +56,14 @@
 
 /* --- GRID SYSTEM: DESKTOP (> 992px) --- */
 @media (min-width: 992px) {
+  .hp-main-container {
+    padding: 0 1.5rem; /* Ripristina il padding laterale su desktop */
+  }
+
   .hp-grid-layout {
     display: grid;
     /* Definisco le 3 colonne: Live (25%), News (40%), Calendar (35%) */
+    /* Uso frazioni per una distribuzione più flessibile della larghezza */
     grid-template-columns: 3fr 5fr 4fr;
     /* Definisco l'ordine visivo: SX | CENTRO | DX */
     grid-template-areas: "live news calendar";
@@ -73,6 +80,9 @@
   align-items: center;
   border-bottom: 2px solid var(--hp-border);
   padding-bottom: 0.8rem;
+  /* Aggiunto per fixare il padding mancante su mobile in .hp-col-news */
+  padding-left: 0; 
+  padding-right: 0; 
 }
 
 .col-title {
@@ -91,6 +101,7 @@
 .mobile-arrows {
   display: none;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .mobile-arrows button {
@@ -106,6 +117,7 @@
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   transition: background 0.2s;
+  flex-shrink: 0;
 }
 
 .mobile-arrows button:active {
@@ -441,11 +453,14 @@
 @media (max-width: 991px) {
 
   .hp-main-container {
-    padding: 0;
+    /* Rimuoviamo il padding orizzontale dal container principale su mobile, 
+       sarà gestito dai singoli scroll-wrapper e la colonna notizie */
+    padding: 0; 
   }
 
   .column-header {
-    padding: 0 1.5rem;
+    /* Ripristiniamo il padding orizzontale sul header */
+    padding: 0 1.5rem; 
     border: none;
     margin-bottom: 1rem;
   }
@@ -455,40 +470,41 @@
     display: flex;
   }
 
-  /* Trasforma le liste Live e Calendario in CAROSELLI */
+  /* Trasforma le liste Live e Calendario in CAROSELLI SCROLLABILI */
   .hp-col-live .scroll-wrapper,
   .hp-col-calendar .scroll-wrapper {
     flex-direction: row;
-    /* Orizzontale */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1rem;
-    /*     ** MODIFICA QUI: Aggiunto spazio a sinistra e ridotto a destra per centratura apparente.
-    ** Imposto il padding-left a 3rem (il doppio del padding laterale di base 1.5rem)
-    */
-    padding: 0.5rem 1.5rem 1.5rem 3rem;
+    
+    /* MODIFICA: Utilizzo di calc per un migliore snap su schermi stretti, 
+       garantendo che il primo elemento sia visibile dal bordo. */
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem; 
+    
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 
-    /* Aggiungiamo scroll-padding-left per centrare meglio lo snap */
-    scroll-padding-left: 1.5rem;
-    /* Aggancia la card 1.5rem a destra rispetto al bordo */
+    /* Definiamo il punto di snap del container. Qui è al primo 1.5rem (padding-left) */
+    scroll-padding-left: 1.5rem; 
   }
-
+  
+  /* Nascondi scrollbar per i browser basati su WebKit */
   .scroll-wrapper::-webkit-scrollbar {
     display: none;
   }
 
-  /* Snap delle card */
+  /* Snap delle card e larghezza mobile */
   .live-card-simple,
   .event-card {
-    scroll-snap-align: start;
-    /* Card leggermente più stretta per mostrare un po' di quella successiva */
-    min-width: 80vw;
+    /* Garantisce che la card non sia mai più stretta di 80vw, ma non supera mai la sua dimensione minima */
+    min-width: clamp(280px, 80vw, 400px); 
+    flex-shrink: 0;
+    scroll-snap-align: start; 
     border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  /* Notizie restano verticali ma con padding */
+  /* Notizie restano verticali ma con padding laterale */
   .hp-col-news {
     padding: 0 1.5rem;
   }

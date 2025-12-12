@@ -4,12 +4,11 @@
    ========================================= */
 
 .c5xm-wrapper {
-  /* Eredita o ridefinisce le variabili del sistema principale */
   --c-bg: #ffffff;
   --c-surface: #f1f5f9;
-  --c-dark: #0f172a;       /* Blu scuro istituzionale */
-  --c-accent: #ff6600;     /* Arancio PSD */
-  --c-blue: #0056d6;       /* Blu elettrico */
+  --c-dark: #0f172a;       
+  --c-accent: #ff6600;     
+  --c-blue: #0056d6;       
   --c-text-main: #1e293b;
   --c-text-muted: #64748b;
   --c-border: #e2e8f0;
@@ -34,9 +33,10 @@
 
 /* --- HERO SECTION --- */
 .c5xm-hero {
+  /* Padding fluido */
+  padding: clamp(3rem, 10vw, 6rem) 1.5rem clamp(4rem, 12vw, 8rem); 
   background: var(--c-dark);
   color: #fff;
-  padding: 6rem 1.5rem 8rem; /* Extra padding bottom per l'overlap */
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -74,17 +74,21 @@
 }
 
 .c5xm-title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  /* Titolo fluido */
+  font-size: clamp(2.5rem, 8vw, 4.5rem); 
   font-weight: 900;
   line-height: 1.1;
   margin-bottom: 1.5rem;
   background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
 .c5xm-subtitle {
-  font-size: clamp(1.1rem, 3vw, 1.35rem);
+  /* Sottotitolo fluido */
+  font-size: clamp(1rem, 3vw, 1.35rem); 
   color: rgba(255,255,255,0.7);
   max-width: 600px;
   margin: 0 auto;
@@ -93,8 +97,8 @@
 
 /* --- FOCUS CARD (Il Codice Fiscale) --- */
 .c5xm-code-section {
-  margin-top: -5rem; /* Overlap effect */
-  padding: 0 1.5rem;
+  margin-top: -5rem;
+  padding: 0 1rem; /* Ridotto padding su schermi stretti */
   position: relative;
   z-index: 10;
   display: flex;
@@ -105,7 +109,8 @@
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-  padding: 3rem 2rem;
+  /* Padding fluido */
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 5vw, 2rem); 
   max-width: 800px;
   width: 100%;
   text-align: center;
@@ -135,11 +140,13 @@
 }
 
 .c5xm-code {
-  font-family: 'Courier New', monospace; /* Monospace per sembrare un modulo */
-  font-size: clamp(1.8rem, 6vw, 3.5rem);
+  font-family: 'Courier New', monospace;
+  /* Codice fiscale fluido per evitare overflow */
+  font-size: clamp(1.5rem, 6vw, 3.5rem); 
   font-weight: 800;
   color: var(--c-dark);
   letter-spacing: -1px;
+  word-break: break-word; /* Protezione estrema */
 }
 
 .c5xm-copy-btn {
@@ -168,7 +175,7 @@
 }
 
 .c5xm-copy-btn.copied {
-  background: #10b981; /* Verde successo */
+  background: #10b981;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
@@ -177,6 +184,7 @@
   margin-top: 4rem;
   margin-bottom: 4rem;
   text-align: center;
+  padding: 0 1rem;
 }
 .c5xm-facsimile-title {
   font-size: 1.5rem;
@@ -194,6 +202,7 @@
   padding: 15px;
   position: relative;
   text-align: left;
+  /* Ombra e rotazione mantenute per estetica */
   box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
   transform: rotate(-1deg);
   transition: transform 0.3s;
@@ -248,12 +257,20 @@
 
 .c5xm-code-boxes {
   display: flex;
-  gap: 2px;
+  /* Ridotto il gap per schermi stretti */
+  gap: 1px; 
   margin-top: 5px;
+  flex-wrap: nowrap; /* Non wrappa il codice */
+  overflow-x: auto; /* Permette lo scroll se troppo lungo */
+  padding-bottom: 5px;
 }
+
+.c5xm-code-boxes::-webkit-scrollbar { display: none; }
+
 .c5xm-box-char {
-  width: 25px;
-  height: 35px;
+  /* Larghezza e altezza fluida per i caratteri */
+  width: clamp(20px, 4vw, 25px); 
+  height: clamp(30px, 6vw, 35px);
   border: 1px solid #333;
   display: flex;
   align-items: center;
@@ -262,6 +279,7 @@
   color: #000;
   font-family: monospace;
   background: #fff;
+  flex-shrink: 0;
 }
 
 /* --- TIMELINE SCADENZE --- */
@@ -280,6 +298,7 @@
 
 .c5xm-grid {
   display: grid;
+  /* Griglia fluida: min 280px */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   max-width: 1000px;
@@ -336,8 +355,11 @@
 
 /* --- MOBILE --- */
 @media (max-width: 600px) {
-  .c5xm-hero { padding-bottom: 6rem; }
+  /* Rimosso padding-bottom hero per clamp() */
   .c5xm-card { padding: 2rem 1rem; }
-  .c5xm-code { font-size: 1.6rem; word-break: break-all; }
-  .c5xm-box-char { width: 20px; height: 30px; font-size: 0.8rem; }
+  /* Utilizziamo clamp() per il codice fiscale, break-all non necessario con clamp */
+  .c5xm-code { 
+    font-size: clamp(1.4rem, 6vw, 2rem); 
+    word-break: normal;
+  }
 }

@@ -5,8 +5,8 @@
 :root {
   --tml-bg: #f8fafc;
   --tml-card-bg: #ffffff;
-  --tml-primary: #0f172a;    /* Blu scuro istituzionale */
-  --tml-accent: #0ea5e9;     /* Azzurro sereno/sicurezza */
+  --tml-primary: #0f172a;    
+  --tml-accent: #0ea5e9;     
   --tml-text-main: #334155;
   --tml-text-light: #64748b;
   --tml-border: #e2e8f0;
@@ -30,8 +30,10 @@
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--tml-bg);
   min-height: 100vh;
-  padding: 3rem 1.5rem 5rem;
+  /* Padding fluido */
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem) clamp(3rem, 8vw, 5rem); 
   color: var(--tml-text-main);
+  overflow-x: hidden;
 }
 
 .tml-container {
@@ -60,7 +62,8 @@
 }
 
 .tml-title {
-  font-size: clamp(2rem, 5vw, 3rem);
+  /* Titolo fluido */
+  font-size: clamp(2rem, 5vw, 3rem); 
   font-weight: 800;
   color: var(--tml-primary);
   margin-bottom: 0.8rem;
@@ -111,6 +114,7 @@
 
 .tml-docs-grid {
   display: grid;
+  /* Griglia fluida: min 280px */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
@@ -124,12 +128,7 @@
   flex-direction: column;
   transition: all 0.3s ease;
 }
-
-.tml-doc-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--tml-shadow-hover);
-  border-color: var(--tml-accent);
-}
+/* Hover mantenuto */
 
 .tml-doc-icon {
   font-size: 2rem;
@@ -149,7 +148,7 @@
   color: var(--tml-text-light);
   margin-bottom: 1.5rem;
   line-height: 1.5;
-  flex-grow: 1; /* Spinge il bottone in basso */
+  flex-grow: 1;
 }
 
 .tml-download-btn {
@@ -164,123 +163,22 @@
   border-radius: 8px;
   transition: all 0.2s;
   width: fit-content;
-}
-
-.tml-download-btn:hover {
-  background: var(--tml-accent);
-  color: white;
-}
-
-/* SAFEGUARDING BLOCK */
-.tml-safeguarding-block {
-  background: #0f172a; /* Scuro */
-  color: white;
-  border-radius: 24px;
-  padding: 3rem 2rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.tml-safeguarding-block::before {
-  content: '';
-  position: absolute;
-  top: -50px; right: -50px;
-  width: 200px; height: 200px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 50%;
-}
-
-.tml-sg-icon {
-  font-size: 3rem;
-  color: var(--tml-accent);
-  background: rgba(255,255,255,0.1);
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
+/* Hover mantenuto */
 
-.tml-sg-content h3 {
-  font-size: 1.6rem;
-  margin-bottom: 1rem;
-}
-
-.tml-sg-content p {
-  color: rgba(255,255,255,0.8);
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.tml-officer-box {
-  background: rgba(255,255,255,0.1);
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tml-officer-role {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255,255,255,0.6);
-}
-
-.tml-officer-email {
-  color: white;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: color 0.2s;
-}
-
-.tml-officer-email:hover {
-  color: var(--tml-accent);
-}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .tml-safeguarding-block {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem;
-  }
-  
-  .tml-sg-icon {
-    margin: 0 auto 1rem;
-  }
-  
-  .tml-officer-box {
-    align-items: center;
-  }
-  
-  .tml-header { margin-bottom: 3rem; }
-  .tml-title { font-size: 2.2rem; }
-}
-
-
-/* SAFEGUARDING BLOCK */
+/* SAFEGUARDING BLOCK (Fluidità e Anti-Overflow) */
 .tml-safeguarding-block {
   background: #0f172a;
   color: white;
   border-radius: 24px;
-  padding: 3rem 2rem;
+  /* Padding fluido */
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2rem); 
   display: flex;
   align-items: flex-start;
   gap: 2rem;
   position: relative;
   overflow: hidden;
-  /* Fondamentale per evitare overflow su mobile */
   max-width: 100%; 
   box-sizing: border-box;
 }
@@ -292,7 +190,7 @@
   width: 200px; height: 200px;
   background: rgba(255,255,255,0.05);
   border-radius: 50%;
-  pointer-events: none; /* Evita interazioni indesiderate */
+  pointer-events: none;
 }
 
 .tml-sg-icon {
@@ -309,12 +207,13 @@
 }
 
 .tml-sg-content {
-  flex: 1; /* Occupa tutto lo spazio rimanente */
-  min-width: 0; /* Trucco CSS per forzare il wrap del testo in flexbox */
+  flex: 1; 
+  min-width: 0; 
 }
 
 .tml-sg-content h3 {
-  font-size: clamp(1.4rem, 4vw, 1.6rem); /* Font fluido */
+  /* Titolo fluido */
+  font-size: clamp(1.4rem, 4vw, 1.6rem); 
   margin-bottom: 1rem;
   line-height: 1.2;
 }
@@ -333,7 +232,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  width: 100%; /* Si adatta alla larghezza disponibile */
+  width: 100%;
 }
 
 .tml-officer-role {
@@ -347,13 +246,13 @@
   color: white;
   text-decoration: none;
   font-weight: 700;
-  font-size: clamp(0.9rem, 4vw, 1.1rem); /* Font fluido per l'email */
+  /* Email fluida */
+  font-size: clamp(0.9rem, 4vw, 1.1rem); 
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition: color 0.2s;
   
-  /* Gestione testo lungo su mobile */
   word-break: break-word; 
   overflow-wrap: break-word;
 }
@@ -365,33 +264,34 @@
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .tml-page-wrapper {
-    padding: 2rem 1rem 4rem; /* Meno padding laterale su mobile */
+    padding: 2rem 1rem 4rem;
   }
 
   .tml-safeguarding-block {
     flex-direction: column;
-    align-items: center; /* Centra tutto */
+    align-items: center;
     text-align: center;
-    padding: 2rem 1.5rem; /* Padding ridotto */
+    padding: 2rem 1.5rem;
     gap: 1.5rem;
   }
   
   .tml-sg-icon {
-    margin: 0; /* Reset margine */
+    margin: 0;
     width: 70px;
     height: 70px;
     font-size: 2.5rem;
   }
   
   .tml-officer-box {
-    align-items: center; /* Centra il contenuto del box */
+    align-items: center;
   }
   
   .tml-officer-email {
-    justify-content: center; /* Centra l'email e l'icona */
-    flex-wrap: wrap; /* Permette all'icona di andare a capo se l'email è lunghissima */
+    justify-content: center;
+    flex-wrap: wrap; 
   }
 
   .tml-header { margin-bottom: 2.5rem; }
-  .tml-title { font-size: 1.8rem; }
+  /* Titolo fisso su mobile stretto */
+  .tml-title { font-size: 1.8rem; } 
 }

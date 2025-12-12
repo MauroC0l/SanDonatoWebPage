@@ -4,7 +4,8 @@
 .hero-section {
     background: rgba(255, 255, 255, 0.95);
     color: #002b5c;
-    padding: clamp(0.2rem, 0.5vw, 0.5rem) 0.5vw;
+    /* Padding fluido */
+    padding: clamp(0.2rem, 0.5vw, 0.5rem) clamp(1rem, 2vw, 2rem); 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,6 +14,7 @@
 
     opacity: 0;
     animation: fadeIn 0.8s ease forwards;
+    overflow-x: hidden;
 }
 
 .hero-content {
@@ -20,10 +22,13 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(1.3635rem, 3.636vw, 3.1815rem);
-    max-width: 90vw;
+    /* Gap fluido */
+    gap: clamp(1.3635rem, 3.636vw, 3.1815rem); 
+    max-width: 1300px; /* Aggiunto max-width per desktop */
     margin: 0 auto;
-    padding: 1.818vw;
+    /* Padding fluido */
+    padding: clamp(1rem, 1.818vw, 2rem); 
+    width: 100%;
 
     opacity: 0;
     transform: translateY(36.36px);
@@ -32,23 +37,28 @@
 }
 
 .hero-title {
-    font-size: clamp(2.0907rem, 4.1814vw, 3.34512rem);
+    /* Dimensione titolo fluida */
+    font-size: clamp(2.0907rem, 4.1814vw, 3.34512rem); 
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.04545em;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .hero-subtitle {
-    font-size: clamp(1.1817rem, 1.818vw, 1.6362rem);
+    /* Dimensione sottotitolo fluida */
+    font-size: clamp(1.1817rem, 1.818vw, 1.6362rem); 
     font-weight: 500;
     color: #ff6600;
     margin-top: 0.2727em;
 }
 
 .hero-message {
-    font-size: clamp(0.8181rem, 1.3635vw, 1.0908rem);
+    /* Dimensione messaggio fluida */
+    font-size: clamp(0.8181rem, 1.3635vw, 1.0908rem); 
     color: #002b5c;
     margin-top: 0.909em;
     text-align: center;
@@ -68,11 +78,12 @@
     transform: translateX(27.27px);
     animation: fadeLeft 1s ease forwards;
     animation-delay: 0.9s;
+    flex-shrink: 0;
 }
 
 .hero-logo {
-    /* Dimensione Desktop */
-    width: clamp(90.9px, 13.635vw, 163.62px);
+    /* Dimensione logo fluida */
+    width: clamp(90px, 13.635vw, 163.62px); 
     height: auto;
     transition: transform 0.3s ease;
 }
@@ -87,7 +98,7 @@
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
 
-/* --- OTTIMIZZAZIONE MOBILE (Modificata) --- */
+/* --- OTTIMIZZAZIONE MOBILE --- */
 @media (max-width: 768px) {
     .hero-section {
         padding: 1.5rem 1rem; 
@@ -96,11 +107,13 @@
     .hero-content { 
         flex-direction: column;
         text-align: center; 
-        gap: 1.5rem; /* Ridotto il gap per avvicinare il logo al testo */
+        gap: 1.5rem; 
+        padding: 1rem; /* Ridotto il padding su mobile */
     }
 
     .hero-text {
         width: 100%;
+        min-width: 0;
     }
 
     .hero-subtitle { 
@@ -109,14 +122,15 @@
     }
 
     .hero-logo-container {
-        transform: translateY(10px); 
+        /* L'animazione da sinistra viene sovrascritta da fadeUp per un look mobile più pulito */
         animation: fadeUp 1s ease forwards;
         animation-delay: 0.6s;
+        transform: translateY(10px); 
     }
 
-    /* MODIFICA: Logo ridotto del 50% circa rispetto a prima */
     .hero-logo { 
-        width: 70px; /* Prima era 130px, ora è molto più piccolo */
+        /* Larghezza più gestibile su mobile, con clamp per flessibilità */
+        width: clamp(70px, 15vw, 100px); 
         max-width: 100%;
         margin-top: 0;
     }
@@ -124,5 +138,6 @@
     .hero-message {
         margin-top: 0.8rem;
         font-size: 0.85rem;
+        max-width: 100%; /* Assicura che non causi overflow */
     }
 }
