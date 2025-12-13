@@ -5,8 +5,8 @@ import "../css/CalendarPage.css";
 // 🛠 CONFIGURAZIONE GOOGLE
 // ==========================================
 // Sostituisci queste stringhe con i tuoi dati reali
-const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY; 
-const CALENDAR_ID = process.env.VITE_CALENDAR_ID;
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY; 
+const CALENDAR_ID = import.meta.env.VITE_CALENDAR_ID;
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
