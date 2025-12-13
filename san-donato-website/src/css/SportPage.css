@@ -19,7 +19,6 @@
   min-height: 100vh;
   padding: 2rem 1rem 4rem;
   color: var(--sp-text-main);
-  overflow-x: hidden; /* Protezione anti-overflow generale */
 }
 
 /* --- Animazioni --- */
@@ -33,12 +32,10 @@
 .sp-header {
   text-align: center;
   margin-bottom: 2.5rem;
-  padding: 0 1rem; /* Assicura padding laterale anche se wrapper non lo ha */
 }
 
 .sp-main-title {
-  /* Uso di clamp per fluidità */
-  font-size: clamp(2rem, 5vw, 3rem); 
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 900;
   color: #111;
   margin-bottom: 0.5rem;
@@ -49,8 +46,6 @@
   background: linear-gradient(120deg, var(--sp-blue), var(--sp-orange));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text; /* Aggiunto per compatibilità */
-  display: inline-block; /* Essenziale per il text-gradient */
 }
 
 .sp-subtitle {
@@ -67,9 +62,7 @@
   margin-bottom: 3rem;
   position: sticky;
   top: 1rem;
-  z-index: 100;
-  /* Aggiunto padding orizzontale per gestire overflow su schermi piccoli */
-  padding: 0 1rem; 
+  z-index: 100; /* Sta sopra al contenuto nello scroll */
 }
 
 .sp-tabs-wrapper {
@@ -79,8 +72,6 @@
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   display: flex;
   gap: 0.5rem;
-  /* Aggiunto per scroll su mobile */
-  max-width: 100%;
 }
 
 .sp-tab-button {
@@ -96,8 +87,6 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
-  white-space: nowrap; /* Non rompe il testo del tab */
-  flex-shrink: 0; /* Non si restringe oltre il necessario */
 }
 
 .sp-tab-button:hover {
@@ -106,7 +95,7 @@
 }
 
 .sp-tab-button.active {
-  background: var(--tab-color);
+  background: var(--tab-color); /* Colore dinamico in base allo sport */
   color: #fff;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   transform: scale(1.05);
@@ -118,7 +107,6 @@
 .sp-content-area {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem; /* Padding laterale per il contenuto */
 }
 
 .sp-sport-intro {
@@ -144,15 +132,13 @@
   gap: 1rem;
   margin-top: 1rem;
   text-align: left;
-  /* Larghezza fluida ma con limite */
-  max-width: min(500px, 100%); 
+  max-width: 500px;
 }
 
 /* --- Schedule Grid --- */
 .sp-schedule-grid {
   display: grid;
-  /* minmax(280px, 1fr) invece di 300px per schermi più piccoli */
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
@@ -162,7 +148,7 @@
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: var(--shadow-soft);
-  border-top: 5px solid #ccc;
+  border-top: 5px solid #ccc; /* Sovrascritto inline */
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease;
@@ -220,7 +206,7 @@
 .sp-map-link small { color: var(--sp-text-muted); font-weight: 400; font-size: 0.85rem; }
 
 .sp-times-list {
-  margin-top: auto;
+  margin-top: auto; /* Spinge in basso se la card è alta */
   background: #f9fafb;
   border-radius: 12px;
   padding: 1rem;
@@ -252,32 +238,16 @@
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
-  .sp-tabs-container {
-    padding: 0; /* Rimuoviamo il padding del container su mobile stretto */
-  }
-
   .sp-tabs-wrapper {
-    /* Ora il wrapper si estende a tutta la larghezza e scrolla */
-    width: 100%; 
-    overflow-x: auto; 
-    justify-content: flex-start; /* Allinea a sinistra per lo scroll */
-    padding: 0.5rem 1rem; /* Aggiunge padding per i bordi dello schermo */
-    border-radius: 0; /* Rimuove border-radius per look a tutta larghezza */
-    box-shadow: none; /* Rimuove box-shadow per un look più mobile */
-  }
-
-  .sp-tabs-wrapper::-webkit-scrollbar {
-    display: none;
-  }
-  .sp-tabs-wrapper {
-      -ms-overflow-style: none;  
-      scrollbar-width: none;  
+    width: 100%;
+    overflow-x: auto; /* Scroll orizzontale se necessario */
+    justify-content: space-between;
   }
   
   .sp-tab-button {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
-    flex: 0 0 auto; /* Importante: non si restringe */
+    flex: 1;
     justify-content: center;
   }
   
