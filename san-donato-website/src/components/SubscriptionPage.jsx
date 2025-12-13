@@ -1,29 +1,23 @@
+// Componente SubscriptionPage.js
+import "../css/SubscriptionPage.css";
+
 export default function SubscriptionPage() {
-  const externalUrl = "https://www.uffwebsm.it/PSD/"; // <--- URL completo
+  // L'iframe punterà ora alla tua API Route locale (che è HTTPS)
+  const url = "https://www.uffwebsm.it/PSD/"; 
   
   return (
     <div className="container mt-4">
       <h3>Portale Subscription</h3>
       <p className="text-muted">Accesso al Portale Esterno</p>
       
-      <div 
-        style={{ 
-          width: '100%', 
-          height: '800px', 
-          border: '1px solid #ddd', 
-          borderRadius: '8px', 
-          overflow: 'hidden',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}
-      >
+      <div className="iframe-wrapper"> {/* Aggiunto un wrapper per il CSS responsive */}
         <iframe 
-          src={externalUrl} 
+          src={url} 
           title="Portale Subscription"
-          width="100%"
-          height="100%"
+          // Rimosso width e height per il CSS
           style={{ border: 'none' }}
-          // Rimosso il sandbox per il momento per escluderlo come causa.
-          // Tuttavia, il vero problema è il Mixed Content.
+          // Il sandbox non è necessario se usi il proxy, ma non fa male
+          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"
         />
       </div>
     </div>
