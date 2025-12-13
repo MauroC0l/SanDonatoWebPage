@@ -23,18 +23,37 @@
 }
 
 /* Reset */
-.cp-dashboard-container * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* SOLUZIONE GLITCH: 
+   scrollbar-gutter: stable assicura che lo spazio per la scrollbar 
+   sia sempre riservato, evitando salti quando overflow diventa hidden.
+*/
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--cp-bg-app);
+}
+
+/* Classe toggleata da React quando si apre la modale */
+body.cp-modal-open {
+  overflow: hidden;
+}
 
 /* --- LAYOUT GENERALE --- */
 .cp-dashboard-container {
-  height: 100vh; /* Forza l'altezza alla finestra del browser */
+  height: 100vh; 
   padding: clamp(1rem, 1.5vw, 1.5rem); 
   background-color: var(--cp-bg-app);
   color: var(--cp-text-main);
-  font-family: 'Inter', system-ui, sans-serif;
   display: flex;
   justify-content: center;
-  overflow: hidden; /* Nessuno scroll globale */
+  overflow: hidden; /* Nessuno scroll globale nel container */
 }
 
 .cp-main-grid {
@@ -42,7 +61,7 @@
   gap: 1.5rem;
   width: 100%;
   max-width: 1600px;
-  height: 100%; /* Occupa tutta l'altezza disponibile */
+  height: 100%; 
 }
 
 /* --- SIDEBAR --- */
@@ -52,7 +71,7 @@
   flex-direction: column;
   gap: 1rem;
   height: 100%;
-  overflow-y: auto; /* La sidebar può scrollare se necessario */
+  overflow-y: auto; 
   flex-shrink: 0;
   padding-bottom: 1rem;
 }
@@ -93,23 +112,23 @@
 .cp-info-match { font-size: 1.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.25rem; }
 .cp-info-date { font-size: 0.8rem; font-weight: 500; opacity: 0.8; }
 
-/* --- MAIN CALENDAR AREA (NO SCROLL) --- */
+/* --- MAIN CALENDAR AREA --- */
 .cp-calendar-wrapper {
   background: var(--cp-bg-card);
   border-radius: 20px;
   box-shadow: var(--cp-shadow-md);
   border: 1px solid var(--cp-border-color);
-  flex: 1; /* Prende lo spazio restante */
+  flex: 1; 
   display: flex; flex-direction: column;
-  height: 100%; /* Altezza piena */
-  overflow: hidden; /* Cruciale: evita scrollbar esterna */
+  height: 100%; 
+  overflow: hidden; 
 }
 
 .cp-toolbar {
   padding: 1.25rem;
   border-bottom: 1px solid var(--cp-border-color);
   display: flex; flex-direction: column; gap: 0.75rem;
-  flex-shrink: 0; /* Non si riduce */
+  flex-shrink: 0;
 }
 
 .cp-toolbar-header-row { display: flex; justify-content: space-between; align-items: center; }
@@ -127,11 +146,11 @@
 .cp-btn-view { border: none; padding: 5px 12px; border-radius: 7px; font-size: 0.75rem; font-weight: 600; color: var(--cp-text-muted); cursor: pointer; background: transparent; transition: all 0.2s; }
 .cp-btn-view.cp-active { background: white; color: var(--cp-text-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-/* CONTENT & GRID (NO SCROLL LOGIC) */
+/* CONTENT & GRID */
 .cp-calendar-content {
-    flex: 1; /* Occupa tutto lo spazio verticale rimanente */
+    flex: 1; 
     padding: 1rem;
-    overflow: hidden; /* Se c'è troppo contenuto, viene tagliato o gestito internamente */
+    overflow: hidden; 
     display: flex; 
     flex-direction: column;
 }
@@ -142,9 +161,8 @@
 .cp-month-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* MAGIA PER IL NO SCROLL: */
-    grid-template-rows: repeat(6, 1fr); /* Divide l'altezza esatta in 6 righe uguali */
-    height: 100%; /* Usa tutta l'altezza del contenitore padre */
+    grid-template-rows: repeat(6, 1fr); 
+    height: 100%; 
     gap: 6px;
 }
 
@@ -152,7 +170,7 @@
     background: white; border-radius: 12px; border: 1px solid var(--cp-border-color);
     padding: 4px; transition: all 0.2s; 
     display: flex; flex-direction: column;
-    overflow: hidden; /* Nasconde eventi in eccesso invece di scrollare */
+    overflow: hidden; 
     cursor: pointer;
 }
 .cp-day-cell:hover { border-color: var(--cp-accent-blue); }
@@ -172,11 +190,11 @@
 }
 .cp-event-pill:hover { opacity: 0.8; }
 
-/* List View (Scrollabile internamente se necessario) */
+/* List View */
 .cp-list-container { overflow-y: auto; height: 100%; padding-right: 4px; }
 .cp-empty-state { text-align: center; padding: 4rem; color: var(--cp-text-muted); font-style: italic; }
 .cp-list-view-item { display: flex; align-items: center; gap: 1rem; background: white; border: 1px solid var(--cp-border-color); padding: 1rem; border-radius: 12px; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
-.cp-list-view-item:hover { transform: translateY(-2px); border-color: var(--cp-accent-blue); }
+.cp-list-view-item:hover { transform: translateY(2px); border-color: var(--cp-accent-blue); }
 .cp-date-box { width: 50px; height: 50px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
 .cp-date-month { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
 .cp-date-day { font-size: 1.2rem; font-weight: 800; line-height: 1; }
@@ -189,9 +207,9 @@
    ========================================== */
 .cp-modal-overlay {
     position: fixed;
-    inset: 0; /* Top, Right, Bottom, Left: 0 */
-    background-color: rgba(15, 23, 42, 0.4); /* Sfondo scuro semitrasparente */
-    backdrop-filter: blur(6px); /* EFFETTO SFOCATURA RICHIESTO */
+    inset: 0; 
+    background-color: rgba(15, 23, 42, 0.4); 
+    backdrop-filter: blur(6px); 
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -202,7 +220,7 @@
 .cp-modal-card {
     background: white;
     width: 90%;
-    max-width: 480px; /* Larghezza massima contenuta */
+    max-width: 480px; 
     border-radius: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow: hidden;
@@ -210,7 +228,7 @@
     animation: cp-popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
-    max-height: 85vh; /* Non esce dallo schermo in altezza */
+    max-height: 85vh; 
 }
 
 @keyframes cp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -222,7 +240,7 @@
 .cp-modal-header {
     padding: 1.5rem;
     padding-bottom: 1rem;
-    color: white; /* Testo colorato dalla categoria */
+    color: white; 
 }
 .cp-modal-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .cp-badge-large { font-size: 0.7rem; background: rgba(255,255,255,0.9); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -246,9 +264,17 @@
 .cp-detail-content label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; margin-bottom: 2px; }
 .cp-detail-content p { margin: 0; font-size: 0.95rem; font-weight: 500; color: var(--cp-text-main); line-height: 1.5; }
 
-/* MODIFICA PER GLI A CAPO NELLA DESCRIZIONE */
+/* FIX PER LINK DIRETTA: Assicura che sia cliccabile e visibile */
+.cp-link-diretta {
+  text-decoration: underline;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  z-index: 10; /* Assicura che stia sopra eventuali altri livelli */
+}
+
 .cp-desc-row p {
-    white-space: pre-wrap; /* Mantiene spazi e ritorni a capo */
+    white-space: pre-wrap; 
 }
 
 .cp-desc-row { background: #F8FAFC; padding: 1rem; border-radius: 12px; margin-top: 0.5rem; }
@@ -267,11 +293,9 @@
   .cp-dashboard-container { padding: 0; height: 100vh; display: block; overflow: hidden; }
   .cp-main-grid { flex-direction: column; gap: 0; height: 100%; }
   
-  /* Sidebar Mobile (Drawer) */
   .cp-sidebar {
     position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: 80vh; 
     width: 100%; background: white; 
-    /* Z-INDEX ALTO PER COPRIRE NAVBAR */
     z-index: 10000; 
     border-radius: 24px 24px 0 0; padding: 1.5rem; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
     transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -279,7 +303,6 @@
   }
   .cp-sidebar.cp-mobile-open { transform: translateY(0); }
   
-  /* BACKDROP CON Z-INDEX ALTO */
   .cp-backdrop { 
     display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
     backdrop-filter: blur(4px); 
@@ -289,26 +312,22 @@
   .cp-mobile-drag-handle, .cp-btn-close-mobile { display: flex; }
   .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; }
   
-  /* Calendar Mobile */
   .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; display: flex; flex-direction: column; }
   .cp-calendar-content { padding: 0.5rem; }
   
-  /* Su mobile RIABILITIAMO lo scroll per la griglia e usiamo righe auto */
   .cp-month-grid { 
       height: auto; 
       min-height: 0; 
-      grid-template-rows: repeat(6, minmax(70px, 1fr)); /* Altezza minima per tocco */
-      overflow-y: auto; /* Scrolla su mobile */
+      grid-template-rows: repeat(6, minmax(70px, 1fr)); 
+      overflow-y: auto; 
   }
-  .cp-calendar-content { overflow-y: auto; } /* Scroll container su mobile */
+  .cp-calendar-content { overflow-y: auto; } 
 
   .cp-day-cell { min-height: 70px; }
   
-  /* Dots instead of Pills on Mobile */
   .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 3px; }
   .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; background-color: var(--pill-dot); pointer-events: none; }
   .cp-pill-text { display: none; }
   
-  /* Modal Mobile Adjustments */
   .cp-modal-card { width: 95%; max-height: 80vh; }
 }

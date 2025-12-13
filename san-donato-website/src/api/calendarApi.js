@@ -1,63 +1,112 @@
-// calendarApi.js
+// src/api/calendarApi.js
 
 // Variabili d'ambiente VITE
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY; 
 const CALENDAR_ID = import.meta.env.VITE_CALENDAR_ID;
 
 // ====================================================
-// CONFIGURAZIONE DINAMICA CATEGORIE E COLORI
+// MAPPA COLORI GOOGLE CALENDAR (colorId -> Hex)
+// ====================================================
+const GOOGLE_COLORS = {
+    "1": "#7986cb", // Lavender
+    "2": "#33b679", // Sage
+    "3": "#8e24aa", // Grape
+    "4": "#e67c73", // Flamingo
+    "5": "#f6c026", // Banana
+    "6": "#f5511d", // Tangerine
+    "7": "#039be5", // Peacock
+    "8": "#616161", // Graphite
+    "9": "#3f51b5", // Blueberry
+    "10": "#0b8043", // Basil
+    "11": "#d60000"  // Tomato
+};
+
+const DEFAULT_EVENT_COLOR = "#039be5";
+
+// ====================================================
+// HELPERS
 // ====================================================
 
-// Definisci le classi CSS disponibili per i colori (devono esistere nel tuo CSS)
-export const COLOR_CLASSES = [
-    "volley-u18", "basket-maschile", "volley-misto", "calcio-default", 
-    "amichevole-base", "torneo-speciale", "generico"
-];
+/**
+ * Analizza la descrizione per estrarre metadati custom come Categoria e Diretta.
+ */
+const parseDescription = (description = "", summary = "") => {
+    let category = "Altro";
+    let diretta = null;
+
+    if (description) {
+        // 1. Estrazione Categoria (Es. "Categoria: Serie A")
+        const catMatch = description.match(/Categoria:\s*(.*)/i);
+        if (catMatch && catMatch[1].trim()) {
+            category = catMatch[1].trim();
+        }
+
+        // 2. Estrazione Diretta (Es. "Diretta: https://youtube.com/...")
+        const liveMatch = description.match(/Diretta:\s*(.*)/i);
+        if (liveMatch && liveMatch[1].trim()) {
+            diretta = liveMatch[1].trim();
+        }
+    }
+
+    // Fallback per la categoria se non trovata nella descrizione
+    if (category === "Altro" && summary) {
+        // Opzionale: logica per dedurre categoria dal titolo se necessario
+    }
+
+    return { category, diretta };
+};
 
 /**
- * Funzione per generare una categoria e un colore CSS basandosi sulla Descrizione.
+ * Pulisce la descrizione per la UI.
+ * Rimuove le righe "Categoria:..." e "Diretta:..."
+ * Rimuove il prefisso "Nota:" lasciando solo il contenuto.
  */
-export const getDynamicCategory = (description = "", summary = "") => {
-    let categoryName = "Altro Sport"; 
+const cleanDescription = (description = "") => {
+    if (!description) return "";
 
-    // 1. Cerca la categoria nella Descrizione (Formato: Categoria: Nome Categoria)
-    const categoryMatch = description.match(/Categoria:\s*(.*)/i);
-    
-    if (categoryMatch && categoryMatch[1].trim()) {
-        categoryName = categoryMatch[1].trim();
-    } else {
-        // Fallback
-        categoryName = summary || "Evento Senza Categoria"; 
-    }
+    return description
+        .split('\n') // Divide in righe
+        .filter(line => {
+            // Rimuovi righe che iniziano con Categoria o Diretta
+            const isMeta = line.match(/^(Categoria|Diretta):/i);
+            return !isMeta; 
+        })
+        .map(line => {
+            // Se la riga inizia con "Nota:", rimuovi il prefisso
+            return line.replace(/^Nota:\s*/i, '');
+        })
+        .join('\n') // Riunisci le righe
+        .trim(); // Rimuovi spazi extra inizio/fine
+};
 
-    // Normalizza la categoria per l'hashing (assicura un colore coerente)
-    const normalizedName = categoryName.toLowerCase().replace(/\s/g, '');
-    
-    // Algoritmo di hashing semplice
-    let hash = 0;
-    for (let i = 0; i < normalizedName.length; i++) {
-        hash = normalizedName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const colorIndex = Math.abs(hash) % COLOR_CLASSES.length;
-    const cssVar = COLOR_CLASSES[colorIndex];
-
-    return { id: categoryName, cssVar: cssVar };
+/**
+ * Genera un colore statico per i FILTRI (non per gli eventi).
+ */
+export const getCategoryColorInfo = (categoryName) => {
+    const COLOR_CLASSES = [
+        "volley-u18", "basket-maschile", "volley-misto", "calcio-default", 
+        "amichevole-base", "torneo-speciale", "generico"
+    ];
+    
+    const normalizedName = categoryName.toLowerCase().replace(/\s/g, '');
+    let hash = 0;
+    for (let i = 0; i < normalizedName.length; i++) {
+        hash = normalizedName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colorIndex = Math.abs(hash) % COLOR_CLASSES.length;
+    
+    return { cssVar: COLOR_CLASSES[colorIndex] };
 };
 
 // ====================================================
 // FUNZIONE PRINCIPALE API
 // ====================================================
 
-/**
- * Recupera tutti gli eventi dal calendario Google nel range specificato.
- * @returns {Promise<{events: Array, categories: Array}>} Lista di eventi mappati e categorie uniche.
- */
 export async function fetchCalendarEvents() {
     if (!GOOGLE_API_KEY || !CALENDAR_ID) {
         throw new Error("Chiavi API o ID Calendario non configurati.");
     }
     
-    // Range temporale esteso (da 6 mesi fa a 1 anno nel futuro)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const timeMin = sixMonthsAgo.toISOString();
@@ -71,12 +120,11 @@ export async function fetchCalendarEvents() {
     const response = await fetch(url);
     
     if (!response.ok) {
-        throw new Error(`Errore nel caricamento del calendario. Status: ${response.status}. Controlla API Key, ID Calendario e permessi.`);
+        throw new Error(`Errore API Google: ${response.status}`);
     }
 
     const data = await response.json();
     
-    // Controlla se l'array items è vuoto
     if (!data.items || data.items.length === 0) {
         return { events: [], categories: [] };
     }
@@ -87,11 +135,23 @@ export async function fetchCalendarEvents() {
         const startDate = new Date(item.start.dateTime || item.start.date);
         const endDate = new Date(item.end.dateTime || item.end.date);
         
-        const categoryObj = getDynamicCategory(item.description || "", item.summary);
-            
-        // Aggiunge la categoria alla lista unica
-        if (!uniqueCategoriesMap.has(categoryObj.id)) {
-            uniqueCategoriesMap.set(categoryObj.id, categoryObj);
+        // Parsing Metadati
+        const { category, diretta } = parseDescription(item.description, item.summary);
+        
+        // Pulizia Descrizione per la UI (Rimuove Categoria, Diretta e prefix Nota)
+        const displayDescription = cleanDescription(item.description);
+        
+        // Gestione Colore
+        const eventColor = item.colorId && GOOGLE_COLORS[item.colorId] 
+            ? GOOGLE_COLORS[item.colorId] 
+            : DEFAULT_EVENT_COLOR;
+
+        // Gestione Categorie per i filtri
+        if (!uniqueCategoriesMap.has(category)) {
+            uniqueCategoriesMap.set(category, {
+                id: category,
+                ...getCategoryColorInfo(category)
+            });
         }
 
         return {
@@ -100,9 +160,11 @@ export async function fetchCalendarEvents() {
             start: startDate,
             end: endDate,
             location: item.location || "Luogo da definire",
-            category: categoryObj.id, 
-            cssVar: categoryObj.cssVar, 
-            description: item.description 
+            description: displayDescription, // Qui passiamo la versione pulita
+            category: category,
+            diretta: diretta,
+            color: eventColor,
+            cssVar: getCategoryColorInfo(category).cssVar 
         };
     });
 

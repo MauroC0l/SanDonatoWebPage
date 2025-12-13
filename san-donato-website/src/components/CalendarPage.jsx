@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
-import { fetchCalendarEvents, COLOR_CLASSES } from '../api/calendarApi';
+import { fetchCalendarEvents } from '../api/calendarApi';
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -40,6 +40,7 @@ const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentCol
 const IconCheck = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
 const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const IconFilter = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>;
+const IconVideo = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>;
 
 // --- COMPONENTI UI ---
 
@@ -59,9 +60,9 @@ const EventPill = ({ event, onClick }) => {
       onClick={(e) => { e.stopPropagation(); onClick(event); }}
       className="cp-event-pill"
       style={{ 
-        '--pill-bg': `var(--cp-cat-${event.cssVar}-bg)`,
-        '--pill-text': `var(--cp-cat-${event.cssVar}-text)`,
-        '--pill-dot': `var(--cp-cat-${event.cssVar}-dot)`
+        backgroundColor: event.color,
+        color: '#fff', 
+        borderLeft: 'none'
       }}
       title={event.title}
     >
@@ -70,7 +71,7 @@ const EventPill = ({ event, onClick }) => {
   );
 };
 
-export default function ModernCalendarPage() {
+export default function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [availableCategories, setAvailableCategories] = useState([]); 
@@ -100,17 +101,14 @@ export default function ModernCalendarPage() {
     loadEvents();
   }, []);
 
-  // --- NUOVO: Blocca lo scroll del body quando c'è un evento selezionato (Modal Aperto) ---
+  // GESTIONE SCROLLBAR SENZA GLITCH
   useEffect(() => {
     if (selectedEvent) {
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('cp-modal-open');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('cp-modal-open');
     }
-    // Cleanup quando il componente viene smontato
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => { document.body.classList.remove('cp-modal-open'); };
   }, [selectedEvent]);
 
   const filteredEvents = useMemo(() => {
@@ -168,10 +166,14 @@ export default function ModernCalendarPage() {
   }, [currentDate]);
 
   const nextMatch = useMemo(() => {
-    if (loading || events.length === 0) return null;
-    const futureEvents = events.filter(e => e.start >= new Date()).sort((a, b) => a.start - b.start);
+    if (loading || filteredEvents.length === 0) return null;
+    
+    const futureEvents = filteredEvents
+        .filter(e => e.start >= new Date())
+        .sort((a, b) => a.start - b.start);
+
     return futureEvents.length > 0 ? futureEvents[0] : null;
-  }, [events, loading]);
+  }, [filteredEvents, loading]);
 
 
   if (error) {
@@ -198,17 +200,42 @@ export default function ModernCalendarPage() {
                     <div className="cp-stat-box">
                     <div className="cp-stat-icon">🏆</div>
                     <div>
-                        <div className="cp-stat-value">{loading ? "..." : events.length}</div>
+                        <div className="cp-stat-value">{loading ? "..." : filteredEvents.length}</div>
                         <div className="cp-stat-label">Match Totali</div>
                     </div>
                     </div>
+                </div>
+
+
+                <div className="cp-info-box">
+                    <div className="cp-info-label">Prossimo Match</div>
+                    {loading ? (
+                        <div>Caricamento...</div>
+                    ) : nextMatch ? (
+                        <>
+                            <div className="cp-info-match">{nextMatch.title}</div>
+                            <div style={{ marginBottom: '0.5rem' }}>
+                                <span className="cp-category-badge" style={{ 
+                                    backgroundColor: nextMatch.color, 
+                                    color: '#fff',
+                                    fontSize: '0.65rem',
+                                    padding: '2px 8px'
+                                }}>
+                                    {nextMatch.category}
+                                </span>
+                            </div>
+                            <div className="cp-info-date">{formatDate(nextMatch.start)}</div>
+                        </>
+                    ) : (
+                        <div>Nessun evento futuro</div>
+                    )}
                 </div>
 
                 {/* FILTRI */}
                 <div className="cp-card" style={{ flex: 1, overflowY: 'auto' }}>
                     <div className="cp-filter-header">
                     <span className="cp-filter-title">Categorie ({availableCategories.length})</span>
-                    <span className="cp-filter-count">{filteredEvents.length}</span>
+                    <span className="cp-filter-count">{activeFilters.length}</span>
                     </div>
                     <div>
                     {availableCategories.map((category) => (
@@ -223,19 +250,6 @@ export default function ModernCalendarPage() {
                     </div>
                 </div>
                 
-                <div className="cp-info-box">
-                    <div className="cp-info-label">Prossimo Match</div>
-                    {loading ? (
-                        <div>Caricamento...</div>
-                    ) : nextMatch ? (
-                        <>
-                            <div className="cp-info-match">{nextMatch.title}</div>
-                            <div className="cp-info-date">{formatDate(nextMatch.start)}</div>
-                        </>
-                    ) : (
-                        <div>Nessun evento futuro</div>
-                    )}
-                </div>
             </aside>
         </>
 
@@ -315,8 +329,8 @@ export default function ModernCalendarPage() {
                             dailyEvents.map(ev => (
                                 <div key={ev.id} onClick={() => setSelectedEvent(ev)} className="cp-list-view-item">
                                     <div className="cp-date-box" style={{ 
-                                        backgroundColor: `var(--cp-cat-${ev.cssVar}-bg)`, 
-                                        color: `var(--cp-cat-${ev.cssVar}-text)` 
+                                        backgroundColor: ev.color, 
+                                        color: '#fff' 
                                     }}>
                                         <span className="cp-date-month">{MONTH_NAMES[ev.start.getMonth()].substring(0,3)}</span>
                                         <span className="cp-date-day">{ev.start.getDate()}</span>
@@ -324,8 +338,8 @@ export default function ModernCalendarPage() {
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div className="cp-meta-row">
                                             <span className="cp-category-badge" style={{ 
-                                                backgroundColor: `var(--cp-cat-${ev.cssVar}-bg)`, 
-                                                color: `var(--cp-cat-${ev.cssVar}-text)` 
+                                                backgroundColor: ev.color, 
+                                                color: '#fff' 
                                             }}>{ev.category}</span>
                                             <span className="cp-meta-time">
                                                 <IconClock /> {formatTime(ev.start)}
@@ -351,16 +365,16 @@ export default function ModernCalendarPage() {
         <div className="cp-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="cp-modal-card" onClick={e => e.stopPropagation()}>
             
-            <div className="cp-modal-header" style={{ backgroundColor: `var(--cp-cat-${selectedEvent.cssVar}-bg)` }}>
+            <div className="cp-modal-header" style={{ 
+                backgroundColor: selectedEvent.color 
+            }}>
                 <div className="cp-modal-header-top">
-                    <span className="cp-category-badge cp-badge-large" style={{ 
-                        color: `var(--cp-cat-${selectedEvent.cssVar}-text)` 
-                    }}>
+                    <span className="cp-category-badge cp-badge-large" style={{ color: '#fff' }}>
                         {selectedEvent.category}
                     </span>
                     <button className="cp-btn-close" onClick={() => setSelectedEvent(null)}><IconX /></button>
                 </div>
-                <h2 className="cp-modal-title" style={{ color: `var(--cp-cat-${selectedEvent.cssVar}-text)` }}>{selectedEvent.title}</h2>
+                <h2 className="cp-modal-title" style={{ color: '#fff' }}>{selectedEvent.title}</h2>
             </div>
             
             <div className="cp-modal-body">
@@ -386,26 +400,52 @@ export default function ModernCalendarPage() {
                             <p>{selectedEvent.location}</p>
                         </div>
                     </div>
-                    {selectedEvent.description && (
-                         <div className="cp-detail-row cp-desc-row">
+                    
+                    {/* CAMPO DIRETTA CORRETTO */}
+                    {selectedEvent.diretta && (
+                        <div className="cp-detail-row">
+                            <div className="cp-icon-box"><IconVideo /></div>
                             <div className="cp-detail-content">
-                                <label>Dettagli</label>
-                                {/* style={{ whiteSpace: 'pre-wrap' }} preserva i newline */}
-                                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedEvent.description}</p>
+                                <label>Diretta Streaming</label>
+                                <p>
+                                    <a 
+                                        href={selectedEvent.diretta} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="cp-link-diretta"
+                                        style={{ color: selectedEvent.color }}
+                                    >
+                                        Guarda Live
+                                    </a>
+                                </p>
                             </div>
                         </div>
                     )}
-                </div>
-                
-                <div className="cp-modal-footer">
-                    <button className="cp-btn-primary" onClick={() => window.open(`https://calendar.google.com/calendar/u/0/r/eventedit/copy/${selectedEvent.id}`, '_blank')}>
-                        Copia in Google Calendar
-                    </button>
-                </div>
+
+                    {selectedEvent.description && (
+                      <div className="cp-detail-row cp-desc-row">
+                        <div className="cp-detail-content">
+                            <label>Dettagli</label>
+                            {/* La descrizione qui è già "pulita" dalla funzione cleanDescription dell'API */}
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{selectedEvent.description}</p>
+                        </div>
+                    </div>
+                )}
             </div>
-          </div>
+            
+            <div className="cp-modal-footer">
+                <button 
+                    className="cp-btn-primary" 
+                    onClick={() => window.open(`http://maps.google.com/?q=$?q=${encodeURIComponent(selectedEvent.location)}`, '_blank')}
+                >
+                   Apri su Maps
+                </button>
+            </div>
+
         </div>
-      )}
+      </div>
     </div>
-  );
+  )}
+</div>
+);
 }
