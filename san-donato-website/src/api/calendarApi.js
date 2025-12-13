@@ -62,9 +62,18 @@ const cleanDescription = (description = "") => {
  */
 const parseDirectLink = (description = "") => {
     const match = description && description.match(/Diretta:\s*(.*)/i);
-    return match && match[1].trim() ? match[1].trim() : null;
-};
+    
+    if (!match || !match[1].trim()) return null;
 
+    let url = match[1].trim();
+
+    // CONTROLLO: Se l'URL non inizia con http:// o https://, lo aggiungiamo
+    if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+    }
+
+    return url;
+};
 // ====================================================
 // FUNZIONE PRINCIPALE API
 // ====================================================
@@ -131,6 +140,9 @@ export async function fetchCalendarEvents() {
  * La Categoria viene iniettata dalla config, non letta dal testo.
  */
 function transformEvent(item, config) {
+    // Controllo se esiste un orario preciso (dateTime) o se è solo data (date)
+    const hasTime = !!item.start.dateTime;
+
     const startDate = new Date(item.start.dateTime || item.start.date);
     const endDate = new Date(item.end.dateTime || item.end.date);
     
@@ -142,14 +154,19 @@ function transformEvent(item, config) {
         title: item.summary || "Evento senza titolo",
         start: startDate,
         end: endDate,
-        location: item.location || "Luogo da definire",
+        
+        // MODIFICA QUI: Non mettere il testo di default, lascia vuoto se manca
+        location: item.location || "", 
+        
         description: displayDescription, 
         
-        // Assegnazione Categoria Automatica basata sul calendario di provenienza
         category: config.label,
         color: config.color,
         cssVar: config.cssVar,
         
-        diretta: direttaLink
+        diretta: direttaLink,
+        
+        // MODIFICA QUI: Aggiungiamo il flag per sapere se mostrare l'orario
+        hasTime: hasTime 
     };
 }

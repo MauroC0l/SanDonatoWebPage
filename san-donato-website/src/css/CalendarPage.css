@@ -199,7 +199,7 @@ body.cp-modal-open {
 .cp-date-day { font-size: 1.2rem; font-weight: 800; line-height: 1; }
 .cp-event-title { margin: 0.2rem 0; font-size: 1rem; font-weight: 700; }
 .cp-meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; }
-.cp-category-badge { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; }
+.cp-category-badge { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; color:black }
 
 /* ==========================================
    MODAL (POPUP CENTRALE)
@@ -219,7 +219,7 @@ body.cp-modal-open {
 @keyframes cp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes cp-popIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-.cp-modal-header { padding: 1.5rem; padding-bottom: 1rem; color: white; }
+.cp-modal-header { padding: 1.5rem; padding-bottom: 1rem; color: rgb(255, 255, 255); }
 .cp-modal-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .cp-badge-large { font-size: 0.7rem; background: rgba(255,255,255,0.9); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
@@ -295,4 +295,18 @@ body.cp-modal-open {
   .cp-pill-text { display: none; }
   
   .cp-modal-card { width: 95%; max-height: 80vh; }
+}
+
+.cp-error-msg {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  animation: cp-fadeIn 0.2s ease-out;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
 }
