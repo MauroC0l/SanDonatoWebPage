@@ -246,6 +246,11 @@
 .cp-detail-content label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; margin-bottom: 2px; }
 .cp-detail-content p { margin: 0; font-size: 0.95rem; font-weight: 500; color: var(--cp-text-main); line-height: 1.5; }
 
+/* MODIFICA PER GLI A CAPO NELLA DESCRIZIONE */
+.cp-desc-row p {
+    white-space: pre-wrap; /* Mantiene spazi e ritorni a capo */
+}
+
 .cp-desc-row { background: #F8FAFC; padding: 1rem; border-radius: 12px; margin-top: 0.5rem; }
 
 .cp-btn-primary {
@@ -265,13 +270,22 @@
   /* Sidebar Mobile (Drawer) */
   .cp-sidebar {
     position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: 80vh; 
-    width: 100%; background: white; z-index: 200; 
+    width: 100%; background: white; 
+    /* Z-INDEX ALTO PER COPRIRE NAVBAR */
+    z-index: 10000; 
     border-radius: 24px 24px 0 0; padding: 1.5rem; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
     transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: block; 
   }
   .cp-sidebar.cp-mobile-open { transform: translateY(0); }
-  .cp-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 150; }
+  
+  /* BACKDROP CON Z-INDEX ALTO */
+  .cp-backdrop { 
+    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+    backdrop-filter: blur(4px); 
+    z-index: 9999; 
+  }
+
   .cp-mobile-drag-handle, .cp-btn-close-mobile { display: flex; }
   .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; }
   

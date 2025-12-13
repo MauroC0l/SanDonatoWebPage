@@ -100,6 +100,19 @@ export default function ModernCalendarPage() {
     loadEvents();
   }, []);
 
+  // --- NUOVO: Blocca lo scroll del body quando c'è un evento selezionato (Modal Aperto) ---
+  useEffect(() => {
+    if (selectedEvent) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    // Cleanup quando il componente viene smontato
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedEvent]);
+
   const filteredEvents = useMemo(() => {
     return events.filter(ev => activeFilters.includes(ev.category));
   }, [events, activeFilters]);
@@ -146,7 +159,7 @@ export default function ModernCalendarPage() {
     }
 
     const nextMonthDays = [];
-    const totalSlots = 42; // 6 rows * 7 days
+    const totalSlots = 42; 
     const remainingSlots = totalSlots - (prevMonthDays.length + currentMonthDays.length);
     for (let i = 1; i <= remainingSlots; i++) {
         nextMonthDays.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
@@ -377,7 +390,8 @@ export default function ModernCalendarPage() {
                          <div className="cp-detail-row cp-desc-row">
                             <div className="cp-detail-content">
                                 <label>Dettagli</label>
-                                <p>{selectedEvent.description}</p>
+                                {/* style={{ whiteSpace: 'pre-wrap' }} preserva i newline */}
+                                <p style={{ whiteSpace: 'pre-wrap' }}>{selectedEvent.description}</p>
                             </div>
                         </div>
                     )}
