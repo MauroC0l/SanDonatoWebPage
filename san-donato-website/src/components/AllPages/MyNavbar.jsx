@@ -15,8 +15,8 @@ export default function MyNavbar() {
 
   const allLinks = [
     { to: "/", label: "Home", icon: <FaHome /> },
-    { to: "/news", label: "News", icon: <FaNewspaper /> },
     { to: "/calendario", label: "Calendario", icon: <FaCalendarAlt /> },
+    { to: "/news", label: "News", icon: <FaNewspaper /> },
     { to: "/sports", label: "Sport", icon: <FaFutbol /> },
     { to: "/iscrizione", label: "Iscriviti", icon: <FaHandshake /> },
     { to: "/chi-siamo", label: "Chi Siamo", icon: <FaUsers /> },
