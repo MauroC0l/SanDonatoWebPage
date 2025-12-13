@@ -12,11 +12,40 @@
   --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Categorie */
-  --cp-cat-serie-a-bg: #DBEAFE; --cp-cat-serie-a-text: #1E40AF; --cp-cat-serie-a-dot: #2563EB;
-  --cp-cat-champions-bg: #E0E7FF; --cp-cat-champions-text: #3730A3; --cp-cat-champions-dot: #4F46E5;
-  --cp-cat-coppa-bg: #FEE2E2; --cp-cat-coppa-text: #991B1B; --cp-cat-coppa-dot: #DC2626;
-  --cp-cat-amichevole-bg: #ECFDF5; --cp-cat-amichevole-text: #065F46; --cp-cat-amichevole-dot: #059669;
+  /* Volley Under 18 */
+  --cp-cat-volley-u18-dot: #0077b6;
+  --cp-cat-volley-u18-bg: #e0f2f7;
+  --cp-cat-volley-u18-text: #004d77;
+  
+  /* Basket Maschile */
+  --cp-cat-basket-maschile-dot: #ff9900;
+  --cp-cat-basket-maschile-bg: #fff0cc;
+  --cp-cat-basket-maschile-text: #b36b00;
+  
+  /* Volley Misto */
+  --cp-cat-volley-misto-dot: #00b894;
+  --cp-cat-volley-misto-bg: #e6fff7; 
+  --cp-cat-volley-misto-text: #006b53;
+
+  /* Calcio Default */
+  --cp-cat-calcio-default-dot: #1e293b;
+  --cp-cat-calcio-default-bg: #e2e8f0;
+  --cp-cat-calcio-default-text: #0f172a;
+  
+  /* Amichevole Base */
+  --cp-cat-amichevole-base-dot: #64748b;
+  --cp-cat-amichevole-base-bg: #f1f5f9;
+  --cp-cat-amichevole-base-text: #475569;
+
+  /* Torneo Speciale */
+  --cp-cat-torneo-speciale-dot: #a855f7;
+  --cp-cat-torneo-speciale-bg: #f3e8ff;
+  --cp-cat-torneo-speciale-text: #7e22ce;
+
+  /* Generico (Fallback) */
+  --cp-cat-generico-dot: #333; 
+  --cp-cat-generico-bg: #eee; 
+  --cp-cat-generico-text: #111;
 }
 
 /* Reset */

@@ -1,12 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
-
-// ==========================================
-// 🛠 CONFIGURAZIONE GOOGLE
-// ==========================================
-// Sostituisci queste stringhe con i tuoi dati reali
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY; 
-const CALENDAR_ID = import.meta.env.VITE_CALENDAR_ID;
+// Importa le funzioni e le costanti dal file API
+import { fetchCalendarEvents, getDynamicCategory, COLOR_CLASSES } from '../api/calendarApi';
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -20,42 +15,25 @@ const MONTH_NAMES = [
 const DAY_NAMES = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
 const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+
 const getFirstDayOfMonth = (year, month) => {
   const day = new Date(year, month, 1).getDay();
   return day === 0 ? 6 : day - 1;
 };
+
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
 // Formatter
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+
 const formatDayHeader = (date) => {
     const str = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
 
-// Categorie
-const CATEGORIES = {
-  SERIE_A: { id: "Serie A", cssVar: "serie-a" },
-  CHAMPIONS: { id: "Champions", cssVar: "champions" },
-  COPPA: { id: "Coppa Italia", cssVar: "coppa" },
-  AMICHEVOLE: { id: "Amichevole", cssVar: "amichevole" },
-  ALTRO: { id: "Altro", cssVar: "amichevole" } // Fallback
-};
-
-// Logica per assegnare colore/categoria basandosi sul titolo dell'evento Google
-const assignCategoryFromTitle = (title = "") => {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes("champions") || lowerTitle.includes("ucl")) return CATEGORIES.CHAMPIONS;
-  if (lowerTitle.includes("coppa") || lowerTitle.includes("tim")) return CATEGORIES.COPPA;
-  if (lowerTitle.includes("amichevole")) return CATEGORIES.AMICHEVOLE;
-  if (lowerTitle.includes("serie a")) return CATEGORIES.SERIE_A;
-  
-  // Default se non trova parole chiave
-  return CATEGORIES.SERIE_A; 
-};
-
-// Icon Components (Invariati)
+// --- ICON COMPONENTS ---
 const IconChevronLeft = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
 const IconChevronRight = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
 const IconCalendar = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
@@ -97,7 +75,8 @@ const EventPill = ({ event, onClick }) => {
 export default function ModernCalendarPage() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [activeFilters, setActiveFilters] = useState(Object.keys(CATEGORIES));
+  const [availableCategories, setAvailableCategories] = useState([]); 
+  const [activeFilters, setActiveFilters] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState("month");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -106,72 +85,44 @@ export default function ModernCalendarPage() {
 
   // --- FETCH GOOGLE CALENDAR ---
   useEffect(() => {
-    const fetchGoogleEvents = async () => {
+    const loadEvents = async () => {
       try {
         setLoading(true);
-        // Costruiamo le date per la query (es. da inizio anno corrente a fine anno prossimo)
-        // Oppure prendiamo un range ampio
-        const timeMin = new Date(new Date().getFullYear(), 0, 1).toISOString(); // Inizio anno
-        
-        console.log("CALENDAR ID:", CALENDAR_ID);
-        console.log("GOOGLE API KEY:", GOOGLE_API_KEY);
-
-        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=200`;
-
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-          throw new Error("Errore nel caricamento del calendario. Verifica API Key e Calendar ID.");
-        }
-
-        const data = await response.json();
-        
-        // Mappiamo i dati di Google nel formato del nostro app
-        const mappedEvents = data.items.map((item, index) => {
-          const startDate = new Date(item.start.dateTime || item.start.date);
-          const endDate = new Date(item.end.dateTime || item.end.date);
-          
-          // Assegna categoria
-          const categoryObj = assignCategoryFromTitle(item.summary);
-
-          return {
-            id: item.id || index,
-            title: item.summary || "Evento senza titolo",
-            start: startDate,
-            end: endDate,
-            location: item.location || "Luogo da definire",
-            category: categoryObj.id,
-            cssVar: categoryObj.cssVar,
-            description: item.description // Opzionale
-          };
-        });
+        const { events: mappedEvents, categories: categoriesArray } = await fetchCalendarEvents();
 
         setEvents(mappedEvents);
+        
+        // Inizializza i filtri
+        setAvailableCategories(categoriesArray);
+        setActiveFilters(categoriesArray.map(cat => cat.id));
+
         setLoading(false);
       } catch (err) {
         console.error(err);
         setError(err.message);
+        setLoading(false);
       }
     };
 
-    fetchGoogleEvents();
+    loadEvents();
   }, []);
 
+  // Logica di Filtro
   const filteredEvents = useMemo(() => {
-    return events.filter(ev => {
-        const catKey = Object.keys(CATEGORIES).find(key => CATEGORIES[key].id === ev.category);
-        return catKey && activeFilters.includes(catKey);
-    });
+    return events.filter(ev => activeFilters.includes(ev.category));
   }, [events, activeFilters]);
 
   const dailyEvents = useMemo(() => {
     return filteredEvents.filter(ev => isSameDay(ev.start, currentDate));
   }, [filteredEvents, currentDate]);
 
-  const toggleFilter = (key) => {
-    setActiveFilters(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  const toggleFilter = (categoryName) => {
+    setActiveFilters(prev => prev.includes(categoryName) 
+      ? prev.filter(k => k !== categoryName) 
+      : [...prev, categoryName]
+    );
   };
-
+  
   const handleNavigate = (direction) => {
     const newDate = new Date(currentDate);
     if (view === 'month') {
@@ -211,6 +162,18 @@ export default function ModernCalendarPage() {
     return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
   }, [currentDate]);
 
+  // Calcolo del Prossimo Match
+  const nextMatch = useMemo(() => {
+    if (loading || events.length === 0) return null;
+    
+    const futureEvents = events
+      .filter(e => e.start >= new Date())
+      .sort((a, b) => a.start - b.start);
+
+    return futureEvents.length > 0 ? futureEvents[0] : null;
+  }, [events, loading]);
+
+
   if (error) {
     return <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>Errore: {error}</div>;
   }
@@ -230,7 +193,7 @@ export default function ModernCalendarPage() {
                         <h3 className="cp-card-title">Calendario Sport</h3>
                         <button className="cp-btn-close-mobile" onClick={() => setIsMobileSidebarOpen(false)}><IconX /></button>
                     </div>
-                    <p className="cp-card-subtitle">Stagione 2025/2026</p>
+                    <p className="cp-card-subtitle">Stagione {new Date().getFullYear()}/{new Date().getFullYear() + 1}</p>
                     
                     <div className="cp-stat-box">
                     <div className="cp-stat-icon">🏆</div>
@@ -239,22 +202,22 @@ export default function ModernCalendarPage() {
                         <div className="cp-stat-label">Match Totali</div>
                     </div>
                     </div>
-                    {/* Rimosso pulsante Nuovo Evento perché ora è gestito da Google */}
                 </div>
 
+                {/* FILTRI DINAMICI */}
                 <div className="cp-card" style={{ flex: 1 }}>
                     <div className="cp-filter-header">
-                    <span className="cp-filter-title">Categorie</span>
+                    <span className="cp-filter-title">Categorie ({availableCategories.length})</span>
                     <span className="cp-filter-count">{filteredEvents.length}</span>
                     </div>
                     <div>
-                    {Object.entries(CATEGORIES).filter(([key]) => key !== 'ALTRO').map(([key, value]) => (
+                    {availableCategories.map((category) => (
                         <FilterToggle 
-                        key={key} 
-                        label={value.id} 
-                        cssVar={value.cssVar} 
-                        checked={activeFilters.includes(key)} 
-                        onChange={() => toggleFilter(key)}
+                        key={category.id} 
+                        label={category.id} 
+                        cssVar={category.cssVar} 
+                        checked={activeFilters.includes(category.id)} 
+                        onChange={() => toggleFilter(category.id)}
                         />
                     ))}
                     </div>
@@ -263,21 +226,14 @@ export default function ModernCalendarPage() {
                 <div className="cp-info-box">
                     <div className="cp-info-label">Prossimo Match</div>
                     {loading ? (
-                       <div>Caricamento...</div>
-                    ) : events.length > 0 ? (
-                        // Cerca il primo evento futuro
-                        (() => {
-                            const futureEvents = events.filter(e => e.start >= new Date());
-                            const nextEvent = futureEvents.length > 0 ? futureEvents[0] : events[events.length -1];
-                            return (
-                                <>
-                                    <div className="cp-info-match">{nextEvent.title}</div>
-                                    <div className="cp-info-date">{formatDate(nextEvent.start)}</div>
-                                </>
-                            )
-                        })()
+                        <div>Caricamento...</div>
+                    ) : nextMatch ? (
+                        <>
+                            <div className="cp-info-match">{nextMatch.title}</div>
+                            <div className="cp-info-date">{formatDate(nextMatch.start)}</div>
+                        </>
                     ) : (
-                        <div>Nessun evento</div>
+                        <div>Nessun evento futuro</div>
                     )}
                 </div>
             </aside>
@@ -426,12 +382,12 @@ export default function ModernCalendarPage() {
                             <p>{selectedEvent.location}</p>
                         </div>
                     </div>
-                    {/* Se c'è una descrizione su Google, mostriamola */}
+                    {/* Mostra la descrizione completa dell'evento */}
                     {selectedEvent.description && (
                          <div className="cp-detail-row">
                             <div className="cp-detail-content" style={{marginTop: 10}}>
-                                <label>Info Extra</label>
-                                <p style={{fontSize: '0.9rem', fontWeight: 400}}>{selectedEvent.description}</p>
+                                <label>Dettagli Evento</label>
+                                <p style={{fontSize: '0.9rem', fontWeight: 400, whiteSpace: 'pre-wrap'}}>{selectedEvent.description}</p>
                             </div>
                         </div>
                     )}
