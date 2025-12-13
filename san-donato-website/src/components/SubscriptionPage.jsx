@@ -8,7 +8,12 @@ export default function SubscriptionPage() {
       
       <div 
         style={{ 
-          // ... (stile omesso per brevità)
+          width: '100%', 
+          height: '800px', // Abbastanza alto per vedere tutto il form e il captcha
+          border: '1px solid #ddd', 
+          borderRadius: '8px', 
+          overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
         }}
       >
         <iframe 
