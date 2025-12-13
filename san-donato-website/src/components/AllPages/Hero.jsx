@@ -2,7 +2,7 @@ import React from "react";
 import "../../css/Hero.css";
 
 export default function Hero() {
-    const title = "Polisportiva San Donato";
+    const title = "Polisportiva San Donatoooooooooooooooooooo";
     const subtitle = "La community dello sport in San Donato a Torino";
     const message = "\"Chi gioca divertendosi vince sempre\""; 
     const logoImage = "/logo-polisportiva.png"; // Assicurati che il percorso sia corretto

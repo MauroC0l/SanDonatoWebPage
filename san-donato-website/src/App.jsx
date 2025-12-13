@@ -49,7 +49,7 @@ export default function App() {
       </main>
       <footer className="bg-gray-900 text-white py-6 text-center w-full">
         <div className="max-w-screen-xl mx-auto px-4">
-          © Polisportiva San Donato — Tutti i diritti riservati ALLORAAAAA
+          © Polisportiva San Donato — Tutti i diritti riservati
         </div>
       </footer>
     </div>
