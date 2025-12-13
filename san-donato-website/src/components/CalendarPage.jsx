@@ -113,6 +113,9 @@ export default function ModernCalendarPage() {
         // Oppure prendiamo un range ampio
         const timeMin = new Date(new Date().getFullYear(), 0, 1).toISOString(); // Inizio anno
         
+        console.log("CALENDAR ID:", CALENDAR_ID);
+        console.log("GOOGLE API KEY:", GOOGLE_API_KEY);
+
         const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=200`;
 
         const response = await fetch(url);
