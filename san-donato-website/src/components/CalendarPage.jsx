@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
-// Importa le funzioni e le costanti dal file API
-import { fetchCalendarEvents, getDynamicCategory, COLOR_CLASSES } from '../api/calendarApi';
+import { fetchCalendarEvents, COLOR_CLASSES } from '../api/calendarApi';
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -23,7 +22,6 @@ const getFirstDayOfMonth = (year, month) => {
 
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
-// Formatter
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 
 const formatDayHeader = (date) => {
@@ -83,7 +81,6 @@ export default function ModernCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- FETCH GOOGLE CALENDAR ---
   useEffect(() => {
     const loadEvents = async () => {
       try {
@@ -91,11 +88,8 @@ export default function ModernCalendarPage() {
         const { events: mappedEvents, categories: categoriesArray } = await fetchCalendarEvents();
 
         setEvents(mappedEvents);
-        
-        // Inizializza i filtri
         setAvailableCategories(categoriesArray);
         setActiveFilters(categoriesArray.map(cat => cat.id));
-
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -103,11 +97,9 @@ export default function ModernCalendarPage() {
         setLoading(false);
       }
     };
-
     loadEvents();
   }, []);
 
-  // Logica di Filtro
   const filteredEvents = useMemo(() => {
     return events.filter(ev => activeFilters.includes(ev.category));
   }, [events, activeFilters]);
@@ -154,7 +146,7 @@ export default function ModernCalendarPage() {
     }
 
     const nextMonthDays = [];
-    const totalSlots = 42;
+    const totalSlots = 42; // 6 rows * 7 days
     const remainingSlots = totalSlots - (prevMonthDays.length + currentMonthDays.length);
     for (let i = 1; i <= remainingSlots; i++) {
         nextMonthDays.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
@@ -162,14 +154,9 @@ export default function ModernCalendarPage() {
     return [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
   }, [currentDate]);
 
-  // Calcolo del Prossimo Match
   const nextMatch = useMemo(() => {
     if (loading || events.length === 0) return null;
-    
-    const futureEvents = events
-      .filter(e => e.start >= new Date())
-      .sort((a, b) => a.start - b.start);
-
+    const futureEvents = events.filter(e => e.start >= new Date()).sort((a, b) => a.start - b.start);
     return futureEvents.length > 0 ? futureEvents[0] : null;
   }, [events, loading]);
 
@@ -183,7 +170,7 @@ export default function ModernCalendarPage() {
 
       <div className="cp-main-grid">
         
-        {/* SIDEBAR (Drawer su mobile) */}
+        {/* SIDEBAR */}
         <>
             {isMobileSidebarOpen && <div className="cp-backdrop" onClick={() => setIsMobileSidebarOpen(false)} />}
             <aside className={`cp-sidebar ${isMobileSidebarOpen ? 'cp-mobile-open' : ''}`}>
@@ -204,8 +191,8 @@ export default function ModernCalendarPage() {
                     </div>
                 </div>
 
-                {/* FILTRI DINAMICI */}
-                <div className="cp-card" style={{ flex: 1 }}>
+                {/* FILTRI */}
+                <div className="cp-card" style={{ flex: 1, overflowY: 'auto' }}>
                     <div className="cp-filter-header">
                     <span className="cp-filter-title">Categorie ({availableCategories.length})</span>
                     <span className="cp-filter-count">{filteredEvents.length}</span>
@@ -251,7 +238,6 @@ export default function ModernCalendarPage() {
                         }
                     </h2>
                  </div>
-                 {/* Mobile Filter Button */}
                  <button className="cp-btn-mobile-filter" onClick={() => setIsMobileSidebarOpen(true)}>
                     <IconFilter />
                  </button>
@@ -260,7 +246,7 @@ export default function ModernCalendarPage() {
               <div className="cp-toolbar-actions-row">
                   <div className="cp-nav-controls">
                     <button onClick={() => handleNavigate("PREV")} className="cp-btn-icon"><IconChevronLeft /></button>
-                    <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Ritorna a oggi</button>
+                    <button onClick={() => setCurrentDate(new Date())} className="cp-btn-text">Oggi</button>
                     <button onClick={() => handleNavigate("NEXT")} className="cp-btn-icon"><IconChevronRight /></button>
                   </div>
 
@@ -272,7 +258,7 @@ export default function ModernCalendarPage() {
             </div>
 
             <div className="cp-calendar-content">
-                {loading && <div style={{padding: 20, textAlign:'center'}}>Caricamento eventi da Google...</div>}
+                {loading && <div className="cp-loading-msg">Caricamento eventi...</div>}
                 
                 {!loading && view === 'month' && (
                     <>
@@ -291,9 +277,10 @@ export default function ModernCalendarPage() {
                                             setCurrentDate(dayObj.date);
                                             setView('list');
                                         }}
-                                        style={{ cursor: 'pointer' }}
                                     >
-                                        <div className="cp-day-number">{dayObj.date.getDate()}</div>
+                                        <div className="cp-day-header">
+                                            <span className="cp-day-number">{dayObj.date.getDate()}</span>
+                                        </div>
                                         <div className="cp-events-container">
                                             {dayEvents.map(ev => <EventPill key={ev.id} event={ev} onClick={setSelectedEvent} />)}
                                         </div>
@@ -346,20 +333,24 @@ export default function ModernCalendarPage() {
         </main>
       </div>
 
+      {/* MODAL DETTAGLI (POPUP CENTRALE) */}
       {selectedEvent && (
         <div className="cp-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="cp-modal-card" onClick={e => e.stopPropagation()}>
-            <div className="cp-mobile-drag-handle-modal"></div>
+            
             <div className="cp-modal-header" style={{ backgroundColor: `var(--cp-cat-${selectedEvent.cssVar}-bg)` }}>
-                <button className="cp-btn-close" onClick={() => setSelectedEvent(null)}><IconX /></button>
-                <span className="cp-category-badge cp-badge-large" style={{ 
-                    color: `var(--cp-cat-${selectedEvent.cssVar}-text)` 
-                }}>
-                    {selectedEvent.category}
-                </span>
+                <div className="cp-modal-header-top">
+                    <span className="cp-category-badge cp-badge-large" style={{ 
+                        color: `var(--cp-cat-${selectedEvent.cssVar}-text)` 
+                    }}>
+                        {selectedEvent.category}
+                    </span>
+                    <button className="cp-btn-close" onClick={() => setSelectedEvent(null)}><IconX /></button>
+                </div>
+                <h2 className="cp-modal-title" style={{ color: `var(--cp-cat-${selectedEvent.cssVar}-text)` }}>{selectedEvent.title}</h2>
             </div>
+            
             <div className="cp-modal-body">
-                <h2 className="cp-modal-title">{selectedEvent.title}</h2>
                 <div className="cp-detail-grid">
                     <div className="cp-detail-row">
                         <div className="cp-icon-box"><IconCalendar /></div>
@@ -382,22 +373,20 @@ export default function ModernCalendarPage() {
                             <p>{selectedEvent.location}</p>
                         </div>
                     </div>
-                    {/* Mostra la descrizione completa dell'evento */}
                     {selectedEvent.description && (
-                         <div className="cp-detail-row">
-                            <div className="cp-detail-content" style={{marginTop: 10}}>
-                                <label>Dettagli Evento</label>
-                                <p style={{fontSize: '0.9rem', fontWeight: 400, whiteSpace: 'pre-wrap'}}>{selectedEvent.description}</p>
+                         <div className="cp-detail-row cp-desc-row">
+                            <div className="cp-detail-content">
+                                <label>Dettagli</label>
+                                <p>{selectedEvent.description}</p>
                             </div>
                         </div>
                     )}
                 </div>
+                
                 <div className="cp-modal-footer">
-                    {/* Pulsante per aprire su Google Calendar */}
                     <button className="cp-btn-primary" onClick={() => window.open(`https://calendar.google.com/calendar/u/0/r/eventedit/copy/${selectedEvent.id}`, '_blank')}>
-                        Aggiungi al mio calendario
+                        Copia in Google Calendar
                     </button>
-                    <button className="cp-btn-outline" onClick={() => setSelectedEvent(null)}>Chiudi</button>
                 </div>
             </div>
           </div>

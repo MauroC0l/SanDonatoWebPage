@@ -1,5 +1,5 @@
 :root {
-  /* Palette Colori Scoped */
+  /* Palette Colori */
   --cp-bg-app: #F8FAFC;
   --cp-bg-card: #FFFFFF;
   --cp-bg-hover: #F1F5F9;
@@ -12,40 +12,14 @@
   --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Volley Under 18 */
-  --cp-cat-volley-u18-dot: #0077b6;
-  --cp-cat-volley-u18-bg: #e0f2f7;
-  --cp-cat-volley-u18-text: #004d77;
-  
-  /* Basket Maschile */
-  --cp-cat-basket-maschile-dot: #ff9900;
-  --cp-cat-basket-maschile-bg: #fff0cc;
-  --cp-cat-basket-maschile-text: #b36b00;
-  
-  /* Volley Misto */
-  --cp-cat-volley-misto-dot: #00b894;
-  --cp-cat-volley-misto-bg: #e6fff7; 
-  --cp-cat-volley-misto-text: #006b53;
-
-  /* Calcio Default */
-  --cp-cat-calcio-default-dot: #1e293b;
-  --cp-cat-calcio-default-bg: #e2e8f0;
-  --cp-cat-calcio-default-text: #0f172a;
-  
-  /* Amichevole Base */
-  --cp-cat-amichevole-base-dot: #64748b;
-  --cp-cat-amichevole-base-bg: #f1f5f9;
-  --cp-cat-amichevole-base-text: #475569;
-
-  /* Torneo Speciale */
-  --cp-cat-torneo-speciale-dot: #a855f7;
-  --cp-cat-torneo-speciale-bg: #f3e8ff;
-  --cp-cat-torneo-speciale-text: #7e22ce;
-
-  /* Generico (Fallback) */
-  --cp-cat-generico-dot: #333; 
-  --cp-cat-generico-bg: #eee; 
-  --cp-cat-generico-text: #111;
+  /* Categorie Colori */
+  --cp-cat-volley-u18-dot: #0077b6; --cp-cat-volley-u18-bg: #e0f2f7; --cp-cat-volley-u18-text: #004d77;
+  --cp-cat-basket-maschile-dot: #ff9900; --cp-cat-basket-maschile-bg: #fff0cc; --cp-cat-basket-maschile-text: #b36b00;
+  --cp-cat-volley-misto-dot: #00b894; --cp-cat-volley-misto-bg: #e6fff7; --cp-cat-volley-misto-text: #006b53;
+  --cp-cat-calcio-default-dot: #1e293b; --cp-cat-calcio-default-bg: #e2e8f0; --cp-cat-calcio-default-text: #0f172a;
+  --cp-cat-amichevole-base-dot: #64748b; --cp-cat-amichevole-base-bg: #f1f5f9; --cp-cat-amichevole-base-text: #475569;
+  --cp-cat-torneo-speciale-dot: #a855f7; --cp-cat-torneo-speciale-bg: #f3e8ff; --cp-cat-torneo-speciale-text: #7e22ce;
+  --cp-cat-generico-dot: #333; --cp-cat-generico-bg: #eee; --cp-cat-generico-text: #111;
 }
 
 /* Reset */
@@ -53,318 +27,274 @@
 
 /* --- LAYOUT GENERALE --- */
 .cp-dashboard-container {
-  min-height: 100vh;
-  /* Padding fluido */
-  padding: clamp(1rem, 2vw, 2rem); 
+  height: 100vh; /* Forza l'altezza alla finestra del browser */
+  padding: clamp(1rem, 1.5vw, 1.5rem); 
   background-color: var(--cp-bg-app);
   color: var(--cp-text-main);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   display: flex;
   justify-content: center;
-  /* Protezione da overflow */
-  overflow-x: hidden; 
+  overflow: hidden; /* Nessuno scroll globale */
 }
 
 .cp-main-grid {
-  display: grid;
-  /* Sidebar fissa 320px su desktop */
-  grid-template-columns: 320px 1fr; 
+  display: flex;
   gap: 1.5rem;
   width: 100%;
   max-width: 1600px;
-  /* Altezza fissa su desktop per overflow-y */
-  height: calc(100vh - 4rem); 
+  height: 100%; /* Occupa tutta l'altezza disponibile */
 }
 
-/* --- SIDEBAR (Desktop) --- */
+/* --- SIDEBAR --- */
 .cp-sidebar {
+  width: 300px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: auto;
-  padding-right: 4px;
-  /* Aggiunto per fixare problema di overflow su alcuni browser */
-  height: 100%; 
+  height: 100%;
+  overflow-y: auto; /* La sidebar può scrollare se necessario */
+  flex-shrink: 0;
+  padding-bottom: 1rem;
 }
 
-/* Utilità Sidebar (Elementi nascosti di default) */
-.cp-mobile-drag-handle, .cp-mobile-drag-handle-modal { display: none; }
-.cp-backdrop { display: none; }
-.cp-btn-close-mobile { display: none; }
+.cp-backdrop, .cp-mobile-drag-handle, .cp-btn-close-mobile { display: none; }
 
 .cp-card {
   background: var(--cp-bg-card);
-  border-radius: 20px;
-  padding: 1.5rem;
+  border-radius: 16px;
+  padding: 1.25rem;
   box-shadow: var(--cp-shadow-sm);
   border: 1px solid var(--cp-border-color);
-  transition: transform 0.2s ease;
 }
 
-.cp-card-title { margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
-.cp-card-subtitle { margin: 0.25rem 0 1.5rem 0; font-size: 0.875rem; color: var(--cp-text-muted); }
+.cp-card-title { margin: 0; font-size: 1.1rem; font-weight: 800; }
+.cp-card-subtitle { margin: 0.25rem 0 1rem 0; font-size: 0.8rem; color: var(--cp-text-muted); }
 
-.cp-stat-box { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: #F8FAFC; border-radius: 16px; }
-.cp-stat-icon { font-size: 1.5rem; }
-.cp-stat-value { font-size: 1.75rem; font-weight: 800; line-height: 1; color: var(--cp-text-main); }
-.cp-stat-label { font-size: 0.7rem; color: var(--cp-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; margin-top: 4px; }
-
-.cp-btn-primary {
-  width: 100%; padding: 1rem; background: var(--cp-primary-color); color: white; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2);
-}
-.cp-btn-primary:active { transform: scale(0.98); }
+.cp-stat-box { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #F8FAFC; border-radius: 12px; }
+.cp-stat-icon { font-size: 1.25rem; }
+.cp-stat-value { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.cp-stat-label { font-size: 0.65rem; color: var(--cp-text-muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
 
 /* Filtri */
-.cp-filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.cp-filter-title { font-size: 0.75rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; }
-.cp-filter-count { background: #E2E8F0; padding: 2px 8px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+.cp-filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+.cp-filter-title { font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; }
+.cp-filter-count { background: #E2E8F0; padding: 2px 6px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
 
-.cp-filter-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-radius: 12px; cursor: pointer; border: 1px solid transparent; margin-bottom: 0.5rem; transition: all 0.2s; }
+.cp-filter-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border-radius: 10px; cursor: pointer; border: 1px solid transparent; margin-bottom: 0.25rem; transition: all 0.2s; }
 .cp-filter-item:hover { background: var(--cp-bg-hover); }
 .cp-filter-item.cp-active { background: white; border-color: var(--cp-border-color); box-shadow: var(--cp-shadow-sm); }
 .cp-filter-item.cp-inactive { opacity: 0.6; }
-.cp-filter-label { display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; font-weight: 500; }
-.cp-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 2px white; }
+.cp-filter-label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; }
+.cp-dot { width: 8px; height: 8px; border-radius: 50%; }
 
 /* Info Box */
-.cp-info-box { background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border: none; border-radius: 20px; padding: 1.5rem; color: #1E3A8A; }
-.cp-info-label { font-size: 0.75rem; font-weight: 700; opacity: 0.8; margin-bottom: 0.5rem; text-transform: uppercase; }
-.cp-info-match { font-size: 1.25rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.5rem; }
-.cp-info-date { font-size: 0.875rem; font-weight: 500; opacity: 0.9; }
+.cp-info-box { background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-radius: 16px; padding: 1.25rem; color: #1E3A8A; margin-top: auto; }
+.cp-info-label { font-size: 0.7rem; font-weight: 700; opacity: 0.7; margin-bottom: 0.25rem; text-transform: uppercase; }
+.cp-info-match { font-size: 1.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.25rem; }
+.cp-info-date { font-size: 0.8rem; font-weight: 500; opacity: 0.8; }
 
-/* --- MAIN CALENDAR AREA --- */
+/* --- MAIN CALENDAR AREA (NO SCROLL) --- */
 .cp-calendar-wrapper {
   background: var(--cp-bg-card);
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: var(--cp-shadow-md);
   border: 1px solid var(--cp-border-color);
+  flex: 1; /* Prende lo spazio restante */
   display: flex; flex-direction: column;
-  overflow: hidden;
-  position: relative;
-  /* Altezza dinamica su desktop */
-  height: 100%; 
+  height: 100%; /* Altezza piena */
+  overflow: hidden; /* Cruciale: evita scrollbar esterna */
 }
 
 .cp-toolbar {
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-bottom: 1px solid var(--cp-border-color);
-  display: flex; flex-direction: column; gap: 1rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  flex-shrink: 0; /* Non si riduce */
 }
 
 .cp-toolbar-header-row { display: flex; justify-content: space-between; align-items: center; }
 .cp-toolbar-actions-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .cp-btn-mobile-filter { display: none; }
+.cp-toolbar-title h2 { font-size: 1.5rem; font-weight: 800; margin: 0; text-transform: capitalize; }
 
-.cp-toolbar-title h2 { font-size: 1.75rem; font-weight: 800; margin: 0; text-transform: capitalize; letter-spacing: -0.03em; }
+.cp-nav-controls { display: flex; gap: 4px; background: #F1F5F9; padding: 3px; border-radius: 10px; align-items: center; }
+.cp-btn-icon { background: white; border: 1px solid rgba(0,0,0,0.05); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; color: var(--cp-text-muted); transition: all 0.2s; }
+.cp-btn-icon:hover { color: var(--cp-primary-color); border-color: #CBD5E1; }
+.cp-btn-text { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 0 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; color: var(--cp-text-main); border-radius: 7px; height: 28px; transition: all 0.2s; }
+.cp-btn-text:hover { color: var(--cp-accent-blue); }
 
-/* NAV CONTROLS & BUTTONS */
-.cp-nav-controls { 
-    display: flex; gap: 6px; 
-    background: #F1F5F9; 
-    padding: 4px; 
-    border-radius: 12px; 
-    align-items: center;
-    flex-shrink: 0; /* Evita che si restringano */
-}
-
-.cp-btn-icon { 
-    background: white; 
-    border: 1px solid rgba(0,0,0,0.05); 
-    width: 32px; height: 32px; 
-    display: flex; align-items: center; justify-content: center; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    color: var(--cp-text-muted); 
-    transition: all 0.2s; 
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-.cp-btn-icon:hover { 
-    color: var(--cp-primary-color); 
-    transform: translateY(-1px); 
-    border-color: #CBD5E1;
-}
-
-/* STILE BOTTONE OGGI AGGIORNATO */
-.cp-btn-text { 
-    background: white;
-    border: 1px solid rgba(0,0,0,0.05);
-    padding: 0 1.25rem;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    color: var(--cp-text-main);
-    border-radius: 8px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    flex-shrink: 0; /* Evita che si restringano */
-}
-.cp-btn-text:hover { 
-    border-color: var(--cp-accent-blue);
-    color: var(--cp-accent-blue);
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.15);
-    transform: translateY(-1px);
-}
-.cp-btn-text:active {
-    transform: scale(0.98);
-    box-shadow: none;
-}
-
-.cp-view-controls { background: #F1F5F9; padding: 4px; border-radius: 12px; display: flex; flex-shrink: 0; }
-.cp-btn-view { border: none; padding: 6px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--cp-text-muted); cursor: pointer; background: transparent; transition: all 0.2s; }
+.cp-view-controls { background: #F1F5F9; padding: 3px; border-radius: 10px; display: flex; }
+.cp-btn-view { border: none; padding: 5px 12px; border-radius: 7px; font-size: 0.75rem; font-weight: 600; color: var(--cp-text-muted); cursor: pointer; background: transparent; transition: all 0.2s; }
 .cp-btn-view.cp-active { background: white; color: var(--cp-text-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-/* GRID MESE */
-.cp-calendar-content { flex: 1; overflow-y: auto; padding: 1.5rem; }
+/* CONTENT & GRID (NO SCROLL LOGIC) */
+.cp-calendar-content {
+    flex: 1; /* Occupa tutto lo spazio verticale rimanente */
+    padding: 1rem;
+    overflow: hidden; /* Se c'è troppo contenuto, viene tagliato o gestito internamente */
+    display: flex; 
+    flex-direction: column;
+}
 
-.cp-week-header { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 1rem; }
-.cp-day-name { text-align: center; font-size: 0.8rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; }
+.cp-week-header { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 0.5rem; flex-shrink: 0; }
+.cp-day-name { text-align: center; font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
 
-.cp-month-grid { 
-  display: grid; 
-  grid-template-columns: repeat(7, 1fr); 
-  /* Altezza dinamica delle righe */
-  grid-template-rows: repeat(6, minmax(100px, 1fr)); 
-  gap: 8px; 
-  min-height: 700px; 
+.cp-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* MAGIA PER IL NO SCROLL: */
+    grid-template-rows: repeat(6, 1fr); /* Divide l'altezza esatta in 6 righe uguali */
+    height: 100%; /* Usa tutta l'altezza del contenitore padre */
+    gap: 6px;
 }
 
 .cp-day-cell {
-  background: white; border-radius: 16px; border: 1px solid var(--cp-border-color);
-  padding: 0.5rem; transition: all 0.2s; min-height: 100px; display: flex; flex-direction: column;
+    background: white; border-radius: 12px; border: 1px solid var(--cp-border-color);
+    padding: 4px; transition: all 0.2s; 
+    display: flex; flex-direction: column;
+    overflow: hidden; /* Nasconde eventi in eccesso invece di scrollare */
+    cursor: pointer;
 }
-.cp-day-cell:hover { border-color: var(--cp-accent-blue); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); z-index: 10; }
-.cp-day-cell.cp-other-month { background: #FAFAFA; opacity: 0.6; }
+.cp-day-cell:hover { border-color: var(--cp-accent-blue); }
+.cp-day-cell.cp-other-month { background: #FAFAFA; opacity: 0.5; }
 .cp-day-cell.cp-today { border: 2px solid var(--cp-accent-blue); background: #EFF6FF; }
 
-.cp-day-number { font-size: 0.9rem; font-weight: 700; color: var(--cp-text-muted); margin-bottom: 0.5rem; display: flex; justify-content: center; width: 24px; height: 24px; align-items: center; border-radius: 50%; }
+.cp-day-header { display: flex; justify-content: flex-end; padding: 2px 4px; }
+.cp-day-number { font-size: 0.8rem; font-weight: 600; color: var(--cp-text-muted); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .cp-today .cp-day-number { background: var(--cp-accent-blue); color: white; }
 
-.cp-events-container { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.cp-events-container { display: flex; flex-direction: column; gap: 2px; overflow-y: hidden; flex: 1; }
 
-/* Event Pills (Desktop Style) */
 .cp-event-pill {
-  background-color: var(--pill-bg);
-  color: var(--pill-text);
-  border-left: 3px solid var(--pill-text);
-  font-size: 0.75rem; font-weight: 600; padding: 4px 8px; border-radius: 6px;
-  cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transition: opacity 0.2s;
-  /* Default: clickabile su desktop */
-  pointer-events: auto; 
+    background-color: var(--pill-bg); color: var(--pill-text); border-left: 3px solid var(--pill-text);
+    font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
 .cp-event-pill:hover { opacity: 0.8; }
 
-/* List View */
-.cp-list-container { 
-  max-width: 800px; 
-  margin: 0 auto; 
-  padding: 0 1rem 2rem; 
-}
+/* List View (Scrollabile internamente se necessario) */
+.cp-list-container { overflow-y: auto; height: 100%; padding-right: 4px; }
 .cp-empty-state { text-align: center; padding: 4rem; color: var(--cp-text-muted); font-style: italic; }
+.cp-list-view-item { display: flex; align-items: center; gap: 1rem; background: white; border: 1px solid var(--cp-border-color); padding: 1rem; border-radius: 12px; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
+.cp-list-view-item:hover { transform: translateY(-2px); border-color: var(--cp-accent-blue); }
+.cp-date-box { width: 50px; height: 50px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+.cp-date-month { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
+.cp-date-day { font-size: 1.2rem; font-weight: 800; line-height: 1; }
+.cp-event-title { margin: 0.2rem 0; font-size: 1rem; font-weight: 700; }
+.cp-meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; }
+.cp-category-badge { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; }
 
-.cp-list-view-item {
-  display: flex; align-items: center; gap: 1.25rem; background: white; border: 1px solid var(--cp-border-color);
-  padding: 1.25rem; border-radius: 20px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; box-shadow: var(--cp-shadow-sm);
+/* ==========================================
+   MODAL (POPUP CENTRALE)
+   ========================================== */
+.cp-modal-overlay {
+    position: fixed;
+    inset: 0; /* Top, Right, Bottom, Left: 0 */
+    background-color: rgba(15, 23, 42, 0.4); /* Sfondo scuro semitrasparente */
+    backdrop-filter: blur(6px); /* EFFETTO SFOCATURA RICHIESTO */
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: cp-fadeIn 0.2s ease-out;
 }
-.cp-list-view-item:hover { transform: translateY(-2px); box-shadow: var(--cp-shadow-md); border-color: var(--cp-accent-blue); }
 
-.cp-date-box { width: 64px; height: 64px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-.cp-date-month { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
-.cp-date-day { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.cp-modal-card {
+    background: white;
+    width: 90%;
+    max-width: 480px; /* Larghezza massima contenuta */
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    position: relative;
+    animation: cp-popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh; /* Non esce dallo schermo in altezza */
+}
 
-.cp-meta-row { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.25rem; flex-wrap: wrap; }
-.cp-category-badge { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.05em; flex-shrink: 0; }
-.cp-meta-time, .cp-meta-location { font-size: 0.8rem; color: var(--cp-text-muted); display: flex; align-items: center; gap: 4px; font-weight: 500; }
-.cp-event-title { margin: 0.25rem 0; font-size: 1.1rem; font-weight: 700; color: var(--cp-text-main); }
-.cp-list-arrow { color: #CBD5E1; }
+@keyframes cp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cp-popIn { 
+    from { opacity: 0; transform: scale(0.95) translateY(10px); } 
+    to { opacity: 1; transform: scale(1) translateY(0); } 
+}
 
-/* Modal (Omesso il codice del modal per brevità, è già ben strutturato per la responsività con Bottom Sheet) */
+.cp-modal-header {
+    padding: 1.5rem;
+    padding-bottom: 1rem;
+    color: white; /* Testo colorato dalla categoria */
+}
+.cp-modal-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+.cp-badge-large { font-size: 0.7rem; background: rgba(255,255,255,0.9); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+.cp-btn-close {
+    background: rgba(14, 14, 14, 0.412); border: none; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; color: inherit; transition: background 0.2s;
+}
+.cp-btn-close:hover { background: rgba(25, 24, 24, 0.704); }
+
+.cp-modal-title { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 800; }
+
+.cp-modal-body { padding: 1.5rem; overflow-y: auto; }
+
+.cp-detail-grid { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.cp-detail-row { display: flex; gap: 1rem; align-items: flex-start; }
+.cp-icon-box { 
+    width: 40px; height: 40px; background: #F1F5F9; border-radius: 12px; 
+    display: flex; align-items: center; justify-content: center; color: var(--cp-text-muted); flex-shrink: 0;
+}
+.cp-detail-content label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; margin-bottom: 2px; }
+.cp-detail-content p { margin: 0; font-size: 0.95rem; font-weight: 500; color: var(--cp-text-main); line-height: 1.5; }
+
+.cp-desc-row { background: #F8FAFC; padding: 1rem; border-radius: 12px; margin-top: 0.5rem; }
+
+.cp-btn-primary {
+  width: 100%; padding: 1rem; background: var(--cp-primary-color); color: white; border: none; border-radius: 14px; font-weight: 600; cursor: pointer;
+  transition: transform 0.1s;
+}
+.cp-btn-primary:active { transform: scale(0.98); }
 
 
-/* ==========================================================================
-   📱 MOBILE & RESPONSIVE OVERHAUL (Sotto 1024px)
-   ========================================================================== */
+/* ==========================================
+   MOBILE & RESPONSIVE
+   ========================================== */
 @media (max-width: 1024px) {
-  .cp-dashboard-container { padding: 0; align-items: flex-start; height: 100vh; overflow: hidden; }
-  .cp-main-grid { 
-    grid-template-columns: 1fr; gap: 0; height: 100%; max-width: none; border-radius: 0; 
-    /* Rimuove l'altezza fissa su mobile per non forzare troppo */
-    height: auto; 
-    min-height: 100vh;
-  }
-  .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; }
+  .cp-dashboard-container { padding: 0; height: 100vh; display: block; overflow: hidden; }
+  .cp-main-grid { flex-direction: column; gap: 0; height: 100%; }
   
-  /* Nascondi Sidebar di default */
-  .cp-sidebar { display: none; } 
-  .cp-mobile-open { display: block; }
-}
-
-@media (max-width: 768px) {
-  /* Toolbar Mobile */
-  .cp-toolbar { padding: 1rem; gap: 1rem; }
-  .cp-toolbar-title h2 { font-size: 1.25rem; }
-  .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center; color: var(--cp-text-main); cursor: pointer; }
-  .cp-toolbar-actions-row { flex-wrap: wrap; }
-  .cp-nav-controls { flex: 1; justify-content: space-between; }
-  
-  /* Sidebar come Bottom Sheet (Drawer) - Stili OK */
+  /* Sidebar Mobile (Drawer) */
   .cp-sidebar {
-    position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-    height: 85vh; z-index: 200; background: white;
-    border-radius: 24px 24px 0 0; padding: 1.5rem;
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+    position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: 80vh; 
+    width: 100%; background: white; z-index: 200; 
+    border-radius: 24px 24px 0 0; padding: 1.5rem; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
     transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: block; 
   }
   .cp-sidebar.cp-mobile-open { transform: translateY(0); }
+  .cp-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 150; }
+  .cp-mobile-drag-handle, .cp-btn-close-mobile { display: flex; }
+  .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; }
   
-  .cp-backdrop {
-    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 150; animation: fadein 0.3s;
-  }
-  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-
-  .cp-mobile-drag-handle { display: block; width: 40px; height: 5px; background: #E2E8F0; border-radius: 10px; margin: 0 auto 1.5rem auto; }
-  .cp-btn-close-mobile { display: flex; background: #F1F5F9; border: none; width: 32px; height: 32px; border-radius: 50%; align-items: center; justify-content: center; }
-
-  /* Adatta carte sidebar */
-  .cp-card { border: none; box-shadow: none; padding: 0; margin-bottom: 2rem; }
-  .cp-stat-box { margin-bottom: 1rem; }
-
-  /* Calendar Grid Mobile Optimization */
+  /* Calendar Mobile */
+  .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; display: flex; flex-direction: column; }
   .cp-calendar-content { padding: 0.5rem; }
-  .cp-week-header { margin-bottom: 0.5rem; }
-  .cp-day-name { font-size: 0.7rem; }
-  .cp-month-grid { gap: 4px; min-height: auto; grid-template-rows: repeat(6, minmax(60px, 1fr)); }
   
-  .cp-day-cell { min-height: 60px; padding: 4px; border-radius: 10px; align-items: center; }
-  .cp-day-number { font-size: 0.8rem; margin-bottom: 2px; width: 20px; height: 20px; }
-  
-  /* Trasforma Pills in Dots su Mobile */
-  .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 3px; width: 100%; height: 100%; align-content: flex-start; }
-  
-  .cp-event-pill {
-    padding: 0; border: none; width: 6px; height: 6px; border-radius: 50%;
-    background-color: var(--pill-dot);
-    flex-shrink: 0;
-    pointer-events: none; /* Disabilita click sull'evento specifico su mobile */
+  /* Su mobile RIABILITIAMO lo scroll per la griglia e usiamo righe auto */
+  .cp-month-grid { 
+      height: auto; 
+      min-height: 0; 
+      grid-template-rows: repeat(6, minmax(70px, 1fr)); /* Altezza minima per tocco */
+      overflow-y: auto; /* Scrolla su mobile */
   }
+  .cp-calendar-content { overflow-y: auto; } /* Scroll container su mobile */
 
-  .cp-pill-text { display: none; } 
-
-  /* Modal Mobile (Bottom Sheet Style) - Stili OK */
-  .cp-modal-overlay { align-items: flex-end; padding: 0; }
-  .cp-modal-card {
-    max-width: none; border-radius: 24px 24px 0 0;
-    animation: cp-slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes cp-slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .cp-day-cell { min-height: 70px; }
   
-  .cp-mobile-drag-handle-modal { display: block; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 10px; z-index: 10; }
-  .cp-btn-close { top: 1.5rem; right: 1.5rem; width: 32px; height: 32px; }
-  .cp-modal-header { height: 100px; padding: 1.5rem 1.5rem 1rem 1.5rem; }
-  .cp-modal-body { padding: 1.5rem; padding-bottom: 3rem; }
-  .cp-modal-title { font-size: 1.5rem; margin-bottom: 1.5rem; }
+  /* Dots instead of Pills on Mobile */
+  .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 3px; }
+  .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; background-color: var(--pill-dot); pointer-events: none; }
+  .cp-pill-text { display: none; }
+  
+  /* Modal Mobile Adjustments */
+  .cp-modal-card { width: 95%; max-height: 80vh; }
 }
