@@ -174,7 +174,7 @@ export default function HomePage() {
                         btnText = hasDirectLink ? "Guarda ora" : "Vai al Canale";
                         btnClass = "btn-danger";
                     } else {
-                        btnText = "Vai alla diretta";
+                        btnText = "Vai al Canale";
                     }
 
                     return (
