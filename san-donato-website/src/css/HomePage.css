@@ -213,6 +213,7 @@
   flex-direction: column;
   gap: 4px;
   font-size: 1.1rem;
+  margin-bottom: 0.5rem; /* Aggiunto piccolo margine */
 }
 
 .lcs-teams .vs {
@@ -260,6 +261,50 @@
   background: white;
   border-radius: var(--hp-radius);
   border: 1px dashed var(--hp-border);
+}
+
+
+.lcs-location-sm {
+  display: flex; /* Flexbox per allineare icona e testo */
+  justify-content: center; /* Centra orizzontalmente */
+  align-items: center; /* Centra verticalmente */
+  gap: 6px; /* Spazio tra icona e testo */
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.lcs-location-sm svg {
+    font-size: 0.8em; /* Leggera correzione dimensione icona */
+    /* opzionale: margin-top: -1px; per allineamento ottico fine */
+}
+
+
+/* --- MODIFICA 2: STILE COUNTDOWN --- */
+.countdown-wrapper {
+  background-color: #fefce8; /* Sfondo giallo chiaro leggero */
+  color: #854d0e; /* Colore testo ocra scuro */
+  border: 1px dashed #eab308;
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin: 0.8rem 0; /* Spazio sopra e sotto */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.countdown-label {
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.countdown-time {
+  font-weight: 800;
+  font-family: monospace; /* Font monospaziato per evitare che i numeri saltino */
+  font-size: 1.1rem;
 }
 
 /* =========================================
@@ -512,4 +557,179 @@
   .news-item-compact {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   }
+}
+
+
+
+.live-pulse-icon {
+  font-size: 0.5em;
+  color: var(--hp-danger);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.live-card-simple {
+  background: var(--hp-white);
+  border-radius: var(--hp-radius);
+  padding: 1.2rem;
+  box-shadow: var(--hp-shadow);
+  border: 1px solid transparent;
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  min-width: 280px;
+}
+
+/* Stile speciale per la card "Prossimo Evento" */
+.live-card-next {
+  border: 1px solid #cbd5e1;
+  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+}
+
+.live-card-simple:hover {
+  transform: translateY(-3px);
+  border-color: var(--hp-accent);
+}
+
+.lcs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.hp-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+}
+
+.badge-danger { background: var(--hp-danger); }
+.badge-secondary { background: #64748b; }
+
+.yt-icon {
+  color: #ff0000;
+  font-size: 1.4rem;
+}
+
+.lcs-match-info {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.lcs-teams {
+  font-weight: 800;
+  color: var(--hp-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.lcs-location-sm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.lcs-location-sm svg {
+    font-size: 0.8em;
+}
+
+/* --- COUNTDOWN BOX STYLING --- */
+.lcs-lock-overlay {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.countdown-box {
+  background-color: #f1f5f9;
+  border: 1px dashed #94a3b8;
+  color: var(--hp-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.cb-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.cb-timer {
+  font-family: monospace;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--hp-primary);
+}
+
+/* --- BOTTONI --- */
+.hp-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.7rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-danger {
+  background: var(--hp-danger);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+}
+
+.btn-outline {
+  border: 1px solid var(--hp-border);
+  color: var(--hp-text);
+}
+
+/* Stile pulsante BLOCCATO */
+.btn-locked {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  pointer-events: none; /* Disabilita click via CSS */
+  border: 1px solid #cbd5e1;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--hp-primary);
+  text-decoration: underline;
+  width: auto;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.empty-state-box {
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+  font-style: italic;
+  background: white;
+  border-radius: var(--hp-radius);
+  border: 1px dashed var(--hp-border);
 }
