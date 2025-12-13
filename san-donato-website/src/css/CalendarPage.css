@@ -12,23 +12,22 @@
   --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Categorie Colori */
-  --cp-cat-volley-u18-dot: #0077b6; --cp-cat-volley-u18-bg: #e0f2f7; --cp-cat-volley-u18-text: #004d77;
-  --cp-cat-basket-maschile-dot: #ff9900; --cp-cat-basket-maschile-bg: #fff0cc; --cp-cat-basket-maschile-text: #b36b00;
-  --cp-cat-volley-misto-dot: #00b894; --cp-cat-volley-misto-bg: #e6fff7; --cp-cat-volley-misto-text: #006b53;
-  --cp-cat-calcio-default-dot: #1e293b; --cp-cat-calcio-default-bg: #e2e8f0; --cp-cat-calcio-default-text: #0f172a;
-  --cp-cat-amichevole-base-dot: #64748b; --cp-cat-amichevole-base-bg: #f1f5f9; --cp-cat-amichevole-base-text: #475569;
-  --cp-cat-torneo-speciale-dot: #a855f7; --cp-cat-torneo-speciale-bg: #f3e8ff; --cp-cat-torneo-speciale-text: #7e22ce;
-  --cp-cat-generico-dot: #333; --cp-cat-generico-bg: #eee; --cp-cat-generico-text: #111;
+  /* Categorie Colori - Devono corrispondere alle 'cssVar' in calendarApi.js */
+  --cp-cat-volley-u18f-dot: #0077b6; 
+  --cp-cat-basket-u18-dot: #ff9900; 
+  --cp-cat-volley-misto-dot: #00b894; 
+  --cp-cat-calcio-default-dot: #1e293b; 
+  --cp-cat-amichevole-base-dot: #64748b; 
+  --cp-cat-torneo-speciale-dot: #a855f7; 
+  --cp-cat-generico-dot: #333;
+
+  /* Nota: Le variabili -bg e -text sono state rimosse se non usate, 
+     ma puoi reinserirle se vuoi sfondi specifici nei filtri */
 }
 
 /* Reset */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* SOLUZIONE GLITCH: 
-   scrollbar-gutter: stable assicura che lo spazio per la scrollbar 
-   sia sempre riservato, evitando salti quando overflow diventa hidden.
-*/
 html {
   scrollbar-gutter: stable;
 }
@@ -40,7 +39,6 @@ body {
   background-color: var(--cp-bg-app);
 }
 
-/* Classe toggleata da React quando si apre la modale */
 body.cp-modal-open {
   overflow: hidden;
 }
@@ -53,7 +51,7 @@ body.cp-modal-open {
   color: var(--cp-text-main);
   display: flex;
   justify-content: center;
-  overflow: hidden; /* Nessuno scroll globale nel container */
+  overflow: hidden; 
 }
 
 .cp-main-grid {
@@ -184,7 +182,8 @@ body.cp-modal-open {
 .cp-events-container { display: flex; flex-direction: column; gap: 2px; overflow-y: hidden; flex: 1; }
 
 .cp-event-pill {
-    background-color: var(--pill-bg); color: var(--pill-text); border-left: 3px solid var(--pill-text);
+    /* Ora il colore di background arriva inline dallo stile React, 
+       non servono variabili CSS complesse qui */
     font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
@@ -206,42 +205,21 @@ body.cp-modal-open {
    MODAL (POPUP CENTRALE)
    ========================================== */
 .cp-modal-overlay {
-    position: fixed;
-    inset: 0; 
-    background-color: rgba(15, 23, 42, 0.4); 
-    backdrop-filter: blur(6px); 
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: cp-fadeIn 0.2s ease-out;
+    position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px); z-index: 9999;
+    display: flex; align-items: center; justify-content: center; animation: cp-fadeIn 0.2s ease-out;
 }
 
 .cp-modal-card {
-    background: white;
-    width: 90%;
-    max-width: 480px; 
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    overflow: hidden;
-    position: relative;
-    animation: cp-popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    max-height: 85vh; 
+    background: white; width: 90%; max-width: 480px; border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden;
+    position: relative; animation: cp-popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; flex-direction: column; max-height: 85vh; 
 }
 
 @keyframes cp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes cp-popIn { 
-    from { opacity: 0; transform: scale(0.95) translateY(10px); } 
-    to { opacity: 1; transform: scale(1) translateY(0); } 
-}
+@keyframes cp-popIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-.cp-modal-header {
-    padding: 1.5rem;
-    padding-bottom: 1rem;
-    color: white; 
-}
+.cp-modal-header { padding: 1.5rem; padding-bottom: 1rem; color: white; }
 .cp-modal-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
 .cp-badge-large { font-size: 0.7rem; background: rgba(255,255,255,0.9); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
@@ -264,27 +242,15 @@ body.cp-modal-open {
 .cp-detail-content label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; margin-bottom: 2px; }
 .cp-detail-content p { margin: 0; font-size: 0.95rem; font-weight: 500; color: var(--cp-text-main); line-height: 1.5; }
 
-/* FIX PER LINK DIRETTA: Assicura che sia cliccabile e visibile */
-.cp-link-diretta {
-  text-decoration: underline;
-  font-weight: bold;
-  cursor: pointer;
-  position: relative;
-  z-index: 10; /* Assicura che stia sopra eventuali altri livelli */
-}
-
-.cp-desc-row p {
-    white-space: pre-wrap; 
-}
+.cp-link-diretta { text-decoration: underline; font-weight: bold; cursor: pointer; position: relative; z-index: 10; }
 
 .cp-desc-row { background: #F8FAFC; padding: 1rem; border-radius: 12px; margin-top: 0.5rem; }
+.cp-desc-row p { white-space: pre-wrap; }
 
 .cp-btn-primary {
-  width: 100%; padding: 1rem; background: var(--cp-primary-color); color: white; border: none; border-radius: 14px; font-weight: 600; cursor: pointer;
-  transition: transform 0.1s;
+  width: 100%; padding: 1rem; background: var(--cp-primary-color); color: white; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; transition: transform 0.1s;
 }
 .cp-btn-primary:active { transform: scale(0.98); }
-
 
 /* ==========================================
    MOBILE & RESPONSIVE
@@ -313,7 +279,7 @@ body.cp-modal-open {
   .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; }
   
   .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; display: flex; flex-direction: column; }
-  .cp-calendar-content { padding: 0.5rem; }
+  .cp-calendar-content { padding: 0.5rem; overflow-y: auto; }
   
   .cp-month-grid { 
       height: auto; 
@@ -321,12 +287,11 @@ body.cp-modal-open {
       grid-template-rows: repeat(6, minmax(70px, 1fr)); 
       overflow-y: auto; 
   }
-  .cp-calendar-content { overflow-y: auto; } 
 
   .cp-day-cell { min-height: 70px; }
   
   .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 3px; }
-  .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; background-color: var(--pill-dot); pointer-events: none; }
+  .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; pointer-events: none; } /* background-color arriva inline da React */
   .cp-pill-text { display: none; }
   
   .cp-modal-card { width: 95%; max-height: 80vh; }

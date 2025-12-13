@@ -2,100 +2,67 @@
 
 // Variabili d'ambiente VITE
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY; 
-const CALENDAR_ID = import.meta.env.VITE_CALENDAR_ID;
 
 // ====================================================
-// MAPPA COLORI GOOGLE CALENDAR (colorId -> Hex)
+// CONFIGURAZIONE CALENDARI (Multi-Calendar)
 // ====================================================
-const GOOGLE_COLORS = {
-    "1": "#7986cb", // Lavender
-    "2": "#33b679", // Sage
-    "3": "#8e24aa", // Grape
-    "4": "#e67c73", // Flamingo
-    "5": "#f6c026", // Banana
-    "6": "#f5511d", // Tangerine
-    "7": "#039be5", // Peacock
-    "8": "#616161", // Graphite
-    "9": "#3f51b5", // Blueberry
-    "10": "#0b8043", // Basil
-    "11": "#d60000"  // Tomato
-};
-
-const DEFAULT_EVENT_COLOR = "#039be5";
+// Qui definisci i calendari da cui scaricare gli eventi.
+// Ogni oggetto rappresenta una Categoria.
+const CALENDARS_CONFIG = [
+    {
+        id: import.meta.env.VITE_PSD_CALENDAR_ID,
+        label: "Eventi PSD",
+        cssVar: "evnenti-psd",
+        color: "#ff9900"
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U18F_CALENDAR_ID, 
+        label: "Volley U18F",
+        cssVar: "volley-u18f",     // Deve corrispondere a una variabile nel CSS
+        color: "#0077b6"          // Colore di fallback (es. per le pillole)
+    },
+    {
+        id: import.meta.env.VITE_BASKET_U18_CALENDAR_ID,
+        label: "Basket U18",
+        cssVar: "basket-u18",
+        color: "#95eb15ff"
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_MISTO_CALENDAR_ID,
+        label: "Volley Misto",
+        cssVar: "volley-misto",
+        color: "#00b894"
+    },
+    // Aggiungi qui altri calendari se necessario (es. Calcio, Under 14, ecc.)
+];
 
 // ====================================================
 // HELPERS
 // ====================================================
 
 /**
- * Analizza la descrizione per estrarre metadati custom come Categoria e Diretta.
- */
-const parseDescription = (description = "", summary = "") => {
-    let category = "Altro";
-    let diretta = null;
-
-    if (description) {
-        // 1. Estrazione Categoria (Es. "Categoria: Serie A")
-        const catMatch = description.match(/Categoria:\s*(.*)/i);
-        if (catMatch && catMatch[1].trim()) {
-            category = catMatch[1].trim();
-        }
-
-        // 2. Estrazione Diretta (Es. "Diretta: https://youtube.com/...")
-        const liveMatch = description.match(/Diretta:\s*(.*)/i);
-        if (liveMatch && liveMatch[1].trim()) {
-            diretta = liveMatch[1].trim();
-        }
-    }
-
-    // Fallback per la categoria se non trovata nella descrizione
-    if (category === "Altro" && summary) {
-        // Opzionale: logica per dedurre categoria dal titolo se necessario
-    }
-
-    return { category, diretta };
-};
-
-/**
  * Pulisce la descrizione per la UI.
- * Rimuove le righe "Categoria:..." e "Diretta:..."
- * Rimuove il prefisso "Nota:" lasciando solo il contenuto.
+ * - Rimuove le righe che contengono il link della "Diretta".
+ * - Rimuove il prefisso "Nota:" lasciando solo il testo.
+ * NON cerca più la "Categoria" nel testo, perché è definita dal calendario di origine.
  */
 const cleanDescription = (description = "") => {
     if (!description) return "";
 
     return description
-        .split('\n') // Divide in righe
-        .filter(line => {
-            // Rimuovi righe che iniziano con Categoria o Diretta
-            const isMeta = line.match(/^(Categoria|Diretta):/i);
-            return !isMeta; 
-        })
-        .map(line => {
-            // Se la riga inizia con "Nota:", rimuovi il prefisso
-            return line.replace(/^Nota:\s*/i, '');
-        })
-        .join('\n') // Riunisci le righe
-        .trim(); // Rimuovi spazi extra inizio/fine
+        .split('\n')
+        .filter(line => !line.match(/^Diretta:/i)) // Rimuove la riga della diretta
+        .map(line => line.replace(/^Nota:\s*/i, '')) // Pulisce il prefisso Nota
+        .join('\n')
+        .trim();
 };
 
 /**
- * Genera un colore statico per i FILTRI (non per gli eventi).
+ * Estrae solo il link della diretta se presente nella descrizione.
  */
-export const getCategoryColorInfo = (categoryName) => {
-    const COLOR_CLASSES = [
-        "volley-u18", "basket-maschile", "volley-misto", "calcio-default", 
-        "amichevole-base", "torneo-speciale", "generico"
-    ];
-    
-    const normalizedName = categoryName.toLowerCase().replace(/\s/g, '');
-    let hash = 0;
-    for (let i = 0; i < normalizedName.length; i++) {
-        hash = normalizedName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const colorIndex = Math.abs(hash) % COLOR_CLASSES.length;
-    
-    return { cssVar: COLOR_CLASSES[colorIndex] };
+const parseDirectLink = (description = "") => {
+    const match = description && description.match(/Diretta:\s*(.*)/i);
+    return match && match[1].trim() ? match[1].trim() : null;
 };
 
 // ====================================================
@@ -103,10 +70,11 @@ export const getCategoryColorInfo = (categoryName) => {
 // ====================================================
 
 export async function fetchCalendarEvents() {
-    if (!GOOGLE_API_KEY || !CALENDAR_ID) {
-        throw new Error("Chiavi API o ID Calendario non configurati.");
+    if (!GOOGLE_API_KEY) {
+        throw new Error("Chiave API Google mancante (.env).");
     }
     
+    // Impostiamo il range temporale (-6 mesi, +1 anno)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const timeMin = sixMonthsAgo.toISOString();
@@ -115,60 +83,73 @@ export async function fetchCalendarEvents() {
     nextYear.setFullYear(nextYear.getFullYear() + 1);
     const timeMax = nextYear.toISOString();
     
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=200`;
+    // 1. Creiamo un array di Promesse (una fetch per ogni calendario configurato)
+    const fetchPromises = CALENDARS_CONFIG.map(async (config) => {
+        // Se l'ID non è configurato (è ancora il placeholder), saltiamo
+        if (config.id.includes("INSERISCI_QUI")) return [];
 
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-        throw new Error(`Errore API Google: ${response.status}`);
-    }
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(config.id)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=100`;
 
-    const data = await response.json();
-    
-    if (!data.items || data.items.length === 0) {
-        return { events: [], categories: [] };
-    }
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.warn(`Errore fetch calendario "${config.label}": ${response.status}`);
+                return []; // Ritorniamo array vuoto per non rompere l'intera pagina
+            }
+            const data = await response.json();
+            
+            // Trasformiamo gli eventi assegnando la categoria di QUESTO calendario
+            return (data.items || []).map(item => transformEvent(item, config));
 
-    const uniqueCategoriesMap = new Map();
-    
-    const mappedEvents = data.items.map((item, index) => {
-        const startDate = new Date(item.start.dateTime || item.start.date);
-        const endDate = new Date(item.end.dateTime || item.end.date);
-        
-        // Parsing Metadati
-        const { category, diretta } = parseDescription(item.description, item.summary);
-        
-        // Pulizia Descrizione per la UI (Rimuove Categoria, Diretta e prefix Nota)
-        const displayDescription = cleanDescription(item.description);
-        
-        // Gestione Colore
-        const eventColor = item.colorId && GOOGLE_COLORS[item.colorId] 
-            ? GOOGLE_COLORS[item.colorId] 
-            : DEFAULT_EVENT_COLOR;
-
-        // Gestione Categorie per i filtri
-        if (!uniqueCategoriesMap.has(category)) {
-            uniqueCategoriesMap.set(category, {
-                id: category,
-                ...getCategoryColorInfo(category)
-            });
+        } catch (error) {
+            console.error(`Errore di rete calendario "${config.label}":`, error);
+            return [];
         }
-
-        return {
-            id: item.id || index,
-            title: item.summary || "Evento senza titolo",
-            start: startDate,
-            end: endDate,
-            location: item.location || "Luogo da definire",
-            description: displayDescription, // Qui passiamo la versione pulita
-            category: category,
-            diretta: diretta,
-            color: eventColor,
-            cssVar: getCategoryColorInfo(category).cssVar 
-        };
     });
 
-    const categoriesArray = Array.from(uniqueCategoriesMap.values());
+    // 2. Eseguiamo tutte le richieste in parallelo
+    const results = await Promise.all(fetchPromises);
 
-    return { events: mappedEvents, categories: categoriesArray };
+    // 3. Uniamo tutti gli array di risultati in un unico array (flat)
+    const allEvents = results.flat();
+
+    // 4. Ordiniamo tutti gli eventi per data (poiché unendo liste diverse si perde l'ordine cronologico globale)
+    allEvents.sort((a, b) => a.start - b.start);
+
+    // 5. Prepariamo l'elenco delle categorie per i filtri basandoci sulla config
+    const categories = CALENDARS_CONFIG.map(c => ({
+        id: c.label,
+        cssVar: c.cssVar,
+        color: c.color
+    }));
+
+    return { events: allEvents, categories: categories };
+}
+
+/**
+ * Trasforma l'evento Google grezzo nel formato interno.
+ * La Categoria viene iniettata dalla config, non letta dal testo.
+ */
+function transformEvent(item, config) {
+    const startDate = new Date(item.start.dateTime || item.start.date);
+    const endDate = new Date(item.end.dateTime || item.end.date);
+    
+    const displayDescription = cleanDescription(item.description);
+    const direttaLink = parseDirectLink(item.description);
+
+    return {
+        id: item.id,
+        title: item.summary || "Evento senza titolo",
+        start: startDate,
+        end: endDate,
+        location: item.location || "Luogo da definire",
+        description: displayDescription, 
+        
+        // Assegnazione Categoria Automatica basata sul calendario di provenienza
+        category: config.label,
+        color: config.color,
+        cssVar: config.cssVar,
+        
+        diretta: direttaLink
+    };
 }
