@@ -219,7 +219,7 @@ export default function HomePage() {
                     );
                     }) : (
                     <div className="empty-state-box">
-                        Nessuna diretta nelle prossime 12h
+                        Nessuna diretta programmata per oggi
                     </div>
                     )
                 )}
