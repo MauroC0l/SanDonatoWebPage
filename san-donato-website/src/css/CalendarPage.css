@@ -12,17 +12,8 @@
   --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   
-  /* Categorie Colori - Devono corrispondere alle 'cssVar' in calendarApi.js */
-  --cp-cat-volley-u18f-dot: #0077b6; 
-  --cp-cat-basket-u18-dot: #ff9900; 
-  --cp-cat-volley-misto-dot: #00b894; 
-  --cp-cat-calcio-default-dot: #1e293b; 
-  --cp-cat-amichevole-base-dot: #64748b; 
-  --cp-cat-torneo-speciale-dot: #a855f7; 
-  --cp-cat-generico-dot: #333;
-
-  /* Nota: Le variabili -bg e -text sono state rimosse se non usate, 
-     ma puoi reinserirle se vuoi sfondi specifici nei filtri */
+  /* Nota: Le variabili specifiche per categoria sono state rimosse 
+     poiché i colori ora vengono passati dinamicamente via inline style */
 }
 
 /* Reset */
@@ -102,7 +93,7 @@ body.cp-modal-open {
 .cp-filter-item.cp-active { background: white; border-color: var(--cp-border-color); box-shadow: var(--cp-shadow-sm); }
 .cp-filter-item.cp-inactive { opacity: 0.6; }
 .cp-filter-label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; }
-.cp-dot { width: 8px; height: 8px; border-radius: 50%; }
+.cp-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
 /* Info Box */
 .cp-info-box { background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-radius: 16px; padding: 1.25rem; color: #1E3A8A; margin-top: auto; }
@@ -182,8 +173,7 @@ body.cp-modal-open {
 .cp-events-container { display: flex; flex-direction: column; gap: 2px; overflow-y: hidden; flex: 1; }
 
 .cp-event-pill {
-    /* Ora il colore di background arriva inline dallo stile React, 
-       non servono variabili CSS complesse qui */
+    /* Ora il colore di background arriva inline dallo stile React */
     font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
@@ -221,7 +211,7 @@ body.cp-modal-open {
 
 .cp-modal-header { padding: 1.5rem; padding-bottom: 1rem; color: rgb(255, 255, 255); }
 .cp-modal-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-.cp-badge-large { font-size: 0.7rem; background: rgba(255,255,255,0.9); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.cp-badge-large { font-size: 0.7rem; background: rgba(255, 255, 255, 0.5); padding: 4px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
 .cp-btn-close {
     background: rgba(14, 14, 14, 0.412); border: none; width: 32px; height: 32px; border-radius: 50%;

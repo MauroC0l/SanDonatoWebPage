@@ -7,31 +7,119 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 // CONFIGURAZIONE CALENDARI (Multi-Calendar)
 // ====================================================
 const CALENDARS_CONFIG = [
+    // --- GENERALE ---
     {
         id: import.meta.env.VITE_PSD_CALENDAR_ID,
         label: "Eventi PSD",
-        cssVar: "evnenti-psd",
-        color: "#ff9900"
+        cssVar: "eventi-psd",
+        color: "#6c5ce7" // Royal Purple
+    },
+    // --- CALCIO (Palette Verdi, Smeraldo, Arancio-Giallo) ---
+    {
+        id: import.meta.env.VITE_CALCIO_SECONDA_CATEGORIA_CALENDAR_ID,
+        label: "Calcio Seconda Categoria",
+        cssVar: "calcio-seconda-categoria",
+        color: "#27ae60" // Nephritis Green
     },
     {
-        id: import.meta.env.VITE_VOLLEY_U18F_CALENDAR_ID, 
-        label: "Volley U18F",
-        cssVar: "volley-u18f",
-        color: "#0077b6"
+        id: import.meta.env.VITE_CALCIO_ALLIEVI_CALENDAR_ID,
+        label: "Calcio Allievi",
+        cssVar: "calcio-allievi",
+        color: "#2ecc71" // Emerald
     },
     {
-        id: import.meta.env.VITE_BASKET_U18_CALENDAR_ID,
-        label: "Basket U18",
-        cssVar: "basket-u18",
-        color: "#95eb15ff"
+        id: import.meta.env.VITE_CALCIO_JUNIORES_CALENDAR_ID,
+        label: "Calcio Juniores",
+        cssVar: "calcio-juniores",
+        color: "#16a085" // Green Sea
     },
     {
-        id: import.meta.env.VITE_VOLLEY_MISTO_CALENDAR_ID,
-        label: "Volley Misto",
-        cssVar: "volley-misto",
-        color: "#00b894"
+        id: import.meta.env.VITE_CALCIO_OPEN_CALENDAR_ID,
+        label: "Calcio Open",
+        cssVar: "calcio-open",
+        color: "#1abc9c" // Turquoise
     },
-    // Aggiungi qui altri calendari...
+    {
+        id: import.meta.env.VITE_CALCIO_RAGAZZI_CALENDAR_ID,
+        label: "Calcio Ragazzi",
+        cssVar: "calcio-ragazzi",
+        color: "#e67e22" // Carrot Orange
+    },
+    {
+        id: import.meta.env.VITE_CALCIO_U12_CALENDAR_ID,
+        label: "Calcio U12",
+        cssVar: "calcio-u12",
+        color: "#f39c12" // Orange
+    },
+    // --- VOLLEY (Palette Rosa, Viola, Blu, Ciano) ---
+    {
+        id: import.meta.env.VITE_VOLLEY_ECCELLENZA_B_CALENDAR_ID,
+        label: "Volley Eccellenza B",
+        cssVar: "volley-eccellenza-b",
+        color: "#d63031" // Persian Red
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_ECCELLENZA_C_CALENDAR_ID,
+        label: "Volley Eccellenza C",
+        cssVar: "volley-eccellenza-c",
+        color: "#e17055" // Burnt Orange
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_MISTA_CALENDAR_ID,
+        label: "Volley Mista",
+        cssVar: "volley-mista",
+        color: "#fd79a8" // Pico Pink
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_MISTA_LIGHT_CALENDAR_ID,
+        label: "Volley Mista Light",
+        cssVar: "volley-mista-light",
+        color: "#e84393" // Prunus Avium
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U14_CALENDAR_ID,
+        label: "Volley U14",
+        cssVar: "volley-u14",
+        color: "#8e44ad" // Wisteria
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U15_CALENDAR_ID,
+        label: "Volley U15",
+        cssVar: "volley-u15",
+        color: "#9b59b6" // Amethyst
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U16_CALENDAR_ID,
+        label: "Volley U16",
+        cssVar: "volley-u16",
+        color: "#74b9ff" // Green Darner Blue
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U17_CALENDAR_ID,
+        label: "Volley U17",
+        cssVar: "volley-u17",
+        color: "#0984e3" // Electron Blue
+    },
+    {
+        id: import.meta.env.VITE_VOLLEY_U18_CALENDAR_ID,
+        label: "Volley U18",
+        cssVar: "volley-u18",
+        color: "#2980b9" // Belize Hole
+    },
+    // --- BASKET (Palette Rossi scuri, Marroni) ---
+    {
+        id: import.meta.env.VITE_BASKET_OPEN_CALENDAR_ID,
+        label: "Basket Open",
+        cssVar: "basket-open",
+        color: "#c0392b" // Old Brick
+    },
+    {
+        id: import.meta.env.VITE_BASKET_U19_CALENDAR_ID,
+        label: "Basket U19",
+        cssVar: "basket-u19",
+        color: "#d35400" // Pumpkin
+    }
+
 ];
 
 // ====================================================

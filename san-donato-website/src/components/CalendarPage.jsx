@@ -44,10 +44,16 @@ const IconVideo = () => <svg width="16" height="16" fill="none" stroke="currentC
 
 // --- COMPONENTI UI ---
 
-const FilterToggle = ({ label, cssVar, checked, onChange }) => (
+const FilterToggle = ({ label, color, checked, onChange }) => (
   <div onClick={onChange} className={`cp-filter-item ${checked ? 'cp-active' : 'cp-inactive'}`}>
     <div className="cp-filter-label">
-      <span className="cp-dot" style={{ backgroundColor: `var(--cp-cat-${cssVar}-dot)` }}></span>
+      {/* Mostra il pallino colorato solo se attivo, usando il colore passato come prop */}
+      {checked && (
+        <span 
+          className="cp-dot" 
+          style={{ backgroundColor: color }}
+        ></span>
+      )}
       <span>{label}</span>
     </div>
     {checked && <IconCheck />}
@@ -242,7 +248,8 @@ export default function CalendarPage() {
                   <FilterToggle
                     key={category.id}
                     label={category.id}
-                    cssVar={category.cssVar}
+                    // Passiamo direttamente il colore esadecimale qui
+                    color={category.color}
                     checked={activeFilters.includes(category.id)}
                     onChange={() => toggleFilter(category.id)}
                   />
@@ -343,13 +350,11 @@ export default function CalendarPage() {
                           }}>{ev.category}</span>
                           <span className="cp-meta-time">
                             <IconClock />
-                            {/* MODIFICA: Controllo hasTime */}
                             {ev.hasTime ? formatTime(ev.start) : "Orario da definire"}
                           </span>
                         </div>
                         <h3 className="cp-event-title">{ev.title}</h3>
                         <div className="cp-meta-location">
-                          {/* MODIFICA: Visivamente mostriamo il placeholder, ma i dati sotto rimangono vuoti */}
                           <IconMap /> {ev.location || "Luogo da definire"}
                         </div>
                       </div>
@@ -395,7 +400,6 @@ export default function CalendarPage() {
                   <div className="cp-detail-content">
                     <label>Orario</label>
                     <p>
-                      {/* MODIFICA: Uso il flag hasTime */}
                       {selectedEvent.hasTime
                         ? `${formatTime(selectedEvent.start)} - ${formatTime(selectedEvent.end)}`
                         : "Orario da definire"
@@ -438,7 +442,6 @@ export default function CalendarPage() {
                   <div className="cp-detail-row cp-desc-row">
                     <div className="cp-detail-content">
                       <label>Dettagli</label>
-                      {/* La descrizione qui è già "pulita" dalla funzione cleanDescription dell'API */}
                       <p style={{ whiteSpace: 'pre-wrap' }}>{selectedEvent.description}</p>
                     </div>
                   </div>
@@ -449,7 +452,6 @@ export default function CalendarPage() {
                 <div className="cp-modal-footer">
                   <button
                     className="cp-btn-primary"
-                    // Se location è vuota, disabilita il bottone
                     onClick={() => {
                       window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedEvent.location)}`, '_blank');
                     }}
