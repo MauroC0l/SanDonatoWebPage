@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
-import EventDetailsModal from "../../components/EventDetailsModal"; // Assicurati che il percorso sia corretto
+import EventDetailsModal from "../../components/EventDetailsModal"; 
 import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchTodayEvents, fetchWeekEvents } from '../../api/calendarApi';
 import { FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper, FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock } from "react-icons/fa";
@@ -67,7 +67,7 @@ export default function HomePage() {
   const getShortDate = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // --- LOGICA STATUS ---
+  // --- LOGICA STATUS (Solo per la card in Home, non per il modale) ---
   const getMatchStatus = (dateObj) => {
     if (!dateObj) return "UPCOMING";
     const diffMs = new Date(dateObj) - new Date();
@@ -119,6 +119,7 @@ export default function HomePage() {
     if (!ev.hasTime) return false; 
     const now = new Date();
     const diffHours = (ev.start - now) / (1000 * 60 * 60);
+    // Mostra eventi che iniziano tra 2 ore fa e 12 ore nel futuro
     return diffHours >= -2 && diffHours <= 12; 
   });
 
@@ -230,7 +231,7 @@ export default function HomePage() {
               <div className="scroll-wrapper" ref={calendarListRef}>
                 {loading ? <div className="loader-small"></div> : (
                     weekEvents.length > 0 ? weekEvents.map((event) => (
-                    // AGGIUNTO: onClick per aprire il modale
+                    // OnClick apre il modale passando l'oggetto event completo
                     <div 
                         key={event.id} 
                         className="event-card clickable-card" 

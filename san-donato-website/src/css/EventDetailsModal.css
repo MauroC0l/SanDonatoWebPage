@@ -53,6 +53,44 @@
 .cp-detail-content label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748B; text-transform: uppercase; margin-bottom: 2px; }
 .cp-detail-content p { margin: 0; font-size: 0.95rem; font-weight: 500; color: #0F172A; line-height: 1.5; }
 
+/* STILI SPECIALI PER RISULTATI E MARCATORI */
+.cp-result-text {
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 0.5px;
+}
+
+.cp-scorers-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cp-scorers-list li {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.cp-scorers-list li::before {
+    content: "•";
+    color: #cbd5e1;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.cp-mono-text {
+    font-family: monospace;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* -------------------------------------- */
+
 .cp-link-diretta { text-decoration: underline; font-weight: bold; cursor: pointer; position: relative; z-index: 10; }
 
 .cp-desc-row { background: #F8FAFC; padding: 1rem; border-radius: 12px; margin-top: 0.5rem; }

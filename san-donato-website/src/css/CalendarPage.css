@@ -202,6 +202,13 @@ body.cp-modal-open {
 }
 
 /* ==========================================
+   AGGIUNTA: Stile per gli eventi passati
+   ========================================== */
+.cp-event-past {
+  opacity: 0.6; /* Solo opacità: il colore originale si mantiene ma è "tenue" */
+}
+
+/* ==========================================
    MOBILE & RESPONSIVE
    ========================================== */
 @media (max-width: 1024px) {
@@ -242,6 +249,4 @@ body.cp-modal-open {
   .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 3px; }
   .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; pointer-events: none; }
   .cp-pill-text { display: none; }
-  
-  /* Nota: gli stili responsive per .cp-modal-card sono stati spostati in EventDetailsModal.css */
 }

@@ -23,6 +23,10 @@ const getFirstDayOfMonth = (year, month) => {
 
 const isSameDay = (d1, d2) => d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
+const isEventPast = (date) => {
+  return new Date(date) < new Date();
+};
+
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 
 const formatDayHeader = (date) => {
@@ -32,7 +36,7 @@ const formatDayHeader = (date) => {
 
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
 
-// --- ICON COMPONENTS (Mantenute quelle usate nella dashboard) ---
+// --- ICON COMPONENTS ---
 const IconChevronLeft = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
 const IconChevronRight = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
 const IconClock = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
@@ -59,10 +63,12 @@ const FilterToggle = ({ label, color, checked, onChange }) => (
 );
 
 const EventPill = ({ event, onClick }) => {
+  const isPast = isEventPast(event.start);
+
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onClick(event); }}
-      className="cp-event-pill"
+      className={`cp-event-pill ${isPast ? 'cp-event-past' : ''}`}
       style={{
         backgroundColor: event.color,
         color: '#fff',
@@ -330,34 +336,41 @@ export default function CalendarPage() {
                     <strong>{formatDayHeader(currentDate)}</strong>
                   </div>
                 ) : (
-                  dailyEvents.map(ev => (
-                    <div key={ev.id} onClick={() => setSelectedEvent(ev)} className="cp-list-view-item">
-                      <div className="cp-date-box" style={{
-                        backgroundColor: ev.color,
-                        color: '#fff'
-                      }}>
-                        <span className="cp-date-month">{MONTH_NAMES[ev.start.getMonth()].substring(0, 3)}</span>
-                        <span className="cp-date-day">{ev.start.getDate()}</span>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="cp-meta-row">
-                          <span className="cp-category-badge" style={{
-                            backgroundColor: ev.color,
-                            color: '#fff'
-                          }}>{ev.category}</span>
-                          <span className="cp-meta-time">
-                            <IconClock />
-                            {ev.hasTime ? formatTime(ev.start) : "Orario da definire"}
-                          </span>
+                  dailyEvents.map(ev => {
+                    const isPast = isEventPast(ev.start);
+                    return (
+                      <div 
+                        key={ev.id} 
+                        onClick={() => setSelectedEvent(ev)} 
+                        className={`cp-list-view-item ${isPast ? 'cp-event-past' : ''}`}
+                      >
+                        <div className="cp-date-box" style={{
+                          backgroundColor: ev.color,
+                          color: '#fff'
+                        }}>
+                          <span className="cp-date-month">{MONTH_NAMES[ev.start.getMonth()].substring(0, 3)}</span>
+                          <span className="cp-date-day">{ev.start.getDate()}</span>
                         </div>
-                        <h3 className="cp-event-title">{ev.title}</h3>
-                        <div className="cp-meta-location">
-                          <IconMap /> {ev.location || "Luogo da definire"}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="cp-meta-row">
+                            <span className="cp-category-badge" style={{
+                              backgroundColor: ev.color,
+                              color: '#fff'
+                            }}>{ev.category}</span>
+                            <span className="cp-meta-time">
+                              <IconClock />
+                              {ev.hasTime ? formatTime(ev.start) : "Orario da definire"}
+                            </span>
+                          </div>
+                          <h3 className="cp-event-title">{ev.title}</h3>
+                          <div className="cp-meta-location">
+                            <IconMap /> {ev.location || "Luogo da definire"}
+                          </div>
                         </div>
+                        <div className="cp-list-arrow"><IconChevronRight /></div>
                       </div>
-                      <div className="cp-list-arrow"><IconChevronRight /></div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             )}
@@ -365,7 +378,6 @@ export default function CalendarPage() {
         </main>
       </div>
 
-      {/* NUOVO COMPONENTE MODALE */}
       <EventDetailsModal 
         event={selectedEvent} 
         onClose={() => setSelectedEvent(null)} 
