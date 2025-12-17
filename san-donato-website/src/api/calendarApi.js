@@ -225,7 +225,7 @@ async function fetchEventsInternal(timeMin, timeMax) {
 
     const fetchPromises = CALENDARS_CONFIG.map(async (config) => {
         if (!config.id || config.id.includes("INSERISCI_QUI")) return [];
-        // Aggiungiamo orderBy startTime
+        
         const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(config.id)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=100`;
 
         try {
@@ -245,7 +245,18 @@ async function fetchEventsInternal(timeMin, timeMax) {
     // Ordinamento cronologico
     allEvents.sort((a, b) => a.start - b.start);
 
-    return { events: allEvents };
+    // --- CORREZIONE: Generiamo l'array delle categorie per i filtri ---
+    // Il componente si aspetta che 'id' sia uguale alla 'label' dell'evento (es. "Calcio Open")
+    const categories = CALENDARS_CONFIG
+        .filter(c => c.id && !c.id.includes("INSERISCI_QUI"))
+        .map(c => ({
+            id: c.label,   // Fondamentale: deve corrispondere a ev.category
+            label: c.label,
+            color: c.color
+        }));
+
+    // Restituiamo sia gli eventi che le categorie
+    return { events: allEvents, categories }; 
 }
 
 // ====================================================
