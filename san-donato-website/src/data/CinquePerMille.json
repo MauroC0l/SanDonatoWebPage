@@ -1,10 +1,10 @@
 {
-  "fiscalCode": "97517860010",
+  "fiscalCode": "97699790016",
   "hero": {
     "tag": "Sostienici Gratuitamente",
     "titleLine1": "Il tuo 5x1000",
-    "titleLine2": "alla Polisportiva",
-    "subtitle": "Non ti costa nulla, ma per noi vale tantissimo. Aiutaci a promuovere lo sport per tutti."
+    "titleLine2": "per lo sport di base",
+    "subtitle": "Per aggregare attraverso lo sport bambini, ragazzi e giovani! Sostieni anche tu le attività della Polisportiva San Donato."
   },
   "codeSection": {
     "title": "Il nostro Codice Fiscale",
@@ -14,7 +14,7 @@
   },
   "facsimile": {
     "sectionTitle": "Come compilare il modulo",
-    "subtitle": "Cerca il riquadro \"Sostegno alle associazioni sportive dilettantistiche...\"",
+    "subtitle": "Compila il riquadro \"Sostegno alle associazioni sportive dilettantistiche...\"",
     "moduleHeader": "Scelta per la destinazione del cinque per mille dell'Irpef",
     "moduleBody": "SOSTEGNO ALLE ASSOCIAZIONI SPORTIVE DILETTANTISTICHE RICONOSCIUTE AI FINI SPORTIVI DAL CONI A NORMA DI LEGGE CHE SVOLGONO UNA RILEVANTE ATTIVITA' DI INTERESSE SOCIALE",
     "labelSignature": "FIRMA",
@@ -22,33 +22,33 @@
     "labelCode": "CODICE FISCALE DEL BENEFICIARIO"
   },
   "deadlines": {
-    "title": "Le Scadenze da Ricordare",
+    "title": "Come e quando donare",
     "items": [
       {
         "id": 1,
-        "date": "30 Set",
+        "date": "730",
         "model": "Modello 730",
-        "desc": "Scadenza per la presentazione del Modello 730 ordinario o precompilato."
+        "desc": "Consegna la dichiarazione al C.A.F. o utilizza il modello precompilato online."
       },
       {
         "id": 2,
-        "date": "30 Nov",
-        "model": "Modello Redditi",
-        "desc": "Termine ultimo per la presentazione del Modello Redditi (ex Unico)."
+        "date": "CU",
+        "model": "Certificazione Unica",
+        "desc": "Puoi donare il 5x1000 anche se sei esonerato dalla presentazione dei redditi."
       },
       {
         "id": 3,
-        "date": "30 Giu",
-        "model": "Cartaceo",
-        "desc": "Presentazione presso Uffici Postali per chi non invia telematicamente."
+        "date": "UNICO",
+        "model": "Modello Redditi",
+        "desc": "Inserisci il codice fiscale nel riquadro ASD riconosciute dal CONI."
       }
     ]
   },
   "whySection": {
-    "title": "Perché donare a noi?",
+    "title": "Il tuo sostegno fa la differenza",
     "paragraphs": [
-      "<strong>Polisportiva San Donato</strong> è sinonimo di sport per tutti. Da anni ci impegniamo a portare i valori dell'inclusione, della lealtà e della crescita personale attraverso l'attività sportiva nel nostro territorio.",
-      "Il tuo 5x1000 si trasforma concretamente in attrezzature, spazi sicuri per i giovani, e progetti sociali che rendono lo sport accessibile a chiunque, indipendentemente dalle possibilità economiche."
+      "Il tuo 5XMILLE è fondamentale per promuovere lo <strong>sport di base nel quartiere</strong> e per sostenere attività di incontro e relazione con i bambini e i giovani.",
+      "<strong>Polisportiva San Donato</strong> (CF 97699790016) trasforma la tua firma in progetti concreti di inclusione e crescita per le nuove generazioni."
     ]
   }
 }

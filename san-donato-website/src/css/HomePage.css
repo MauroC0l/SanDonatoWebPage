@@ -21,7 +21,6 @@
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--hp-text);
   padding-bottom: 5rem;
-  /* Assicura che la radice non causi overflow */
   overflow-x: hidden; 
 }
 
@@ -29,7 +28,6 @@
   width: 100%;
   max-width: 1350px;
   margin: 0 auto;
-  /* Padding rimosso su mobile, gestito dalle sezioni */
   padding: 0 1.5rem; 
 }
 
@@ -41,31 +39,17 @@
   margin-top: 2rem;
 }
 
-/* Assegnazione Aree (Serve per il Desktop) */
-.hp-col-live {
-  grid-area: live;
-}
-
-.hp-col-news {
-  grid-area: news;
-}
-
-.hp-col-calendar {
-  grid-area: calendar;
-}
+.hp-col-live { grid-area: live; }
+.hp-col-news { grid-area: news; }
+.hp-col-calendar { grid-area: calendar; }
 
 /* --- GRID SYSTEM: DESKTOP (> 992px) --- */
 @media (min-width: 992px) {
-  .hp-main-container {
-    padding: 0 1.5rem; /* Ripristina il padding laterale su desktop */
-  }
+  .hp-main-container { padding: 0 1.5rem; }
 
   .hp-grid-layout {
     display: grid;
-    /* Definisco le 3 colonne: Live (25%), News (40%), Calendar (35%) */
-    /* Uso frazioni per una distribuzione più flessibile della larghezza */
     grid-template-columns: 3fr 5fr 4fr;
-    /* Definisco l'ordine visivo: SX | CENTRO | DX */
     grid-template-areas: "live news calendar";
     gap: 2.5rem;
     align-items: start;
@@ -80,7 +64,6 @@
   align-items: center;
   border-bottom: 2px solid var(--hp-border);
   padding-bottom: 0.8rem;
-  /* Aggiunto per fixare il padding mancante su mobile in .hp-col-news */
   padding-left: 0; 
   padding-right: 0; 
 }
@@ -97,7 +80,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Frecce Mobile (Nascoste di default su desktop) */
 .mobile-arrows {
   display: none;
   gap: 8px;
@@ -120,15 +102,11 @@
   flex-shrink: 0;
 }
 
-.mobile-arrows button:active {
-  background: #f1f5f9;
-}
+.mobile-arrows button:active { background: #f1f5f9; }
 
-/* --- WRAPPER SCROLLABILE (Desktop Verticale / Mobile Orizzontale) --- */
 .scroll-wrapper {
   display: flex;
   flex-direction: column;
-  /* Default Desktop: Verticale */
   gap: 1rem;
 }
 
@@ -142,17 +120,9 @@
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.4;
-  }
-
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
 }
 
 .live-card-simple {
@@ -164,8 +134,12 @@
   transition: transform 0.2s;
   position: relative;
   overflow: hidden;
-  /* Larghezza minima per evitare schiacciamento su mobile */
   min-width: 280px;
+}
+
+.live-card-next {
+  border: 1px solid #cbd5e1;
+  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
 }
 
 .live-card-simple:hover {
@@ -188,23 +162,12 @@
   color: white;
 }
 
-.badge-danger {
-  background: var(--hp-danger);
-}
+.badge-danger { background: var(--hp-danger); }
+.badge-secondary { background: #64748b; }
 
-.badge-secondary {
-  background: #64748b;
-}
+.yt-icon { color: #ff0000; font-size: 1.4rem; }
 
-.yt-icon {
-  color: #ff0000;
-  font-size: 1.4rem;
-}
-
-.lcs-match-info {
-  text-align: center;
-  margin-bottom: 1rem;
-}
+.lcs-match-info { text-align: center; margin-bottom: 1rem; }
 
 .lcs-teams {
   font-weight: 800;
@@ -213,19 +176,16 @@
   flex-direction: column;
   gap: 4px;
   font-size: 1.1rem;
-  margin-bottom: 0.5rem; /* Aggiunto piccolo margine */
+  margin-bottom: 0.5rem;
 }
 
-.lcs-teams .vs {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  font-weight: 500;
-}
+.lcs-teams .vs { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
 
 .hp-btn {
-  display: block;
-  text-align: center;
-  padding: 0.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.7rem;
   border-radius: 8px;
   font-weight: 600;
   font-size: 0.9rem;
@@ -236,11 +196,17 @@
 .btn-danger {
   background: var(--hp-danger);
   color: white;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
 }
 
-.btn-outline {
-  border: 1px solid var(--hp-border);
-  color: var(--hp-text);
+.btn-outline { border: 1px solid var(--hp-border); color: var(--hp-text); }
+
+.btn-locked {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  pointer-events: none;
+  border: 1px solid #cbd5e1;
 }
 
 .btn-link {
@@ -263,49 +229,46 @@
   border: 1px dashed var(--hp-border);
 }
 
-
 .lcs-location-sm {
-  display: flex; /* Flexbox per allineare icona e testo */
-  justify-content: center; /* Centra orizzontalmente */
-  align-items: center; /* Centra verticalmente */
-  gap: 6px; /* Spazio tra icona e testo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
   color: #64748b;
   font-size: 0.9rem;
 }
 
-.lcs-location-sm svg {
-    font-size: 0.8em; /* Leggera correzione dimensione icona */
-    /* opzionale: margin-top: -1px; per allineamento ottico fine */
-}
+.lcs-location-sm svg { font-size: 0.8em; }
 
+.lcs-lock-overlay { margin-bottom: 1rem; display: flex; justify-content: center; }
 
-/* --- MODIFICA 2: STILE COUNTDOWN --- */
-.countdown-wrapper {
-  background-color: #fefce8; /* Sfondo giallo chiaro leggero */
-  color: #854d0e; /* Colore testo ocra scuro */
-  border: 1px dashed #eab308;
-  padding: 6px 12px;
+.countdown-box {
+  background-color: #f1f5f9;
+  border: 1px dashed #94a3b8;
+  color: var(--hp-primary);
+  padding: 8px 16px;
   border-radius: 8px;
-  margin: 0.8rem 0; /* Spazio sopra e sotto */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  text-align: center;
+  width: 100%;
 }
 
-.countdown-label {
-  font-weight: 500;
+.cb-label {
+  display: block;
+  font-size: 0.65rem;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
-.countdown-time {
+.cb-timer {
+  font-family: monospace;
+  font-size: 1.25rem;
   font-weight: 800;
-  font-family: monospace; /* Font monospaziato per evitare che i numeri saltino */
-  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--hp-primary);
 }
+
 
 /* =========================================
    2. CALENDARIO (ev-)
@@ -319,9 +282,13 @@
   gap: 1rem;
   box-shadow: var(--hp-shadow);
   border: 1px solid transparent;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background-color 0.2s;
   min-width: 280px;
-  /* Per slider mobile */
+}
+
+/* AGGIUNTA: Cursore pointer per la card cliccabile */
+.event-card.clickable-card {
+  cursor: pointer;
 }
 
 .event-card:hover {
@@ -342,21 +309,10 @@
   color: var(--hp-primary);
 }
 
-.ed-day {
-  font-size: 0.7rem;
-  font-weight: 700;
-  opacity: 0.7;
-}
+.ed-day { font-size: 0.7rem; font-weight: 700; opacity: 0.7; }
+.ed-date { font-size: 1.1rem; font-weight: 800; }
 
-.ed-date {
-  font-size: 1.1rem;
-  font-weight: 800;
-}
-
-.event-info {
-  flex-grow: 1;
-  overflow: hidden;
-}
+.event-info { flex-grow: 1; overflow: hidden; }
 
 .ev-tag {
   font-size: 0.65rem;
@@ -366,26 +322,6 @@
   border-radius: 4px;
   display: inline-block;
   margin-bottom: 4px;
-}
-
-.tag-calcio {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-
-.tag-volley {
-  background: #ffedd5;
-  color: #ea580c;
-}
-
-.tag-basket {
-  background: #fce7f3;
-  color: #db2777;
-}
-
-.tag-evento {
-  background: #f3e8ff;
-  color: #9333ea;
 }
 
 .ev-title {
@@ -404,11 +340,7 @@
   color: #64748b;
 }
 
-.ev-meta-row span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+.ev-meta-row span { display: flex; align-items: center; gap: 4px; }
 
 /* =========================================
    3. NOTIZIE (nic-)
@@ -446,10 +378,7 @@
   flex-shrink: 0;
 }
 
-.nic-content {
-  flex-grow: 1;
-  min-width: 0;
-}
+.nic-content { flex-grow: 1; min-width: 0; }
 
 .nic-date {
   font-size: 0.75rem;
@@ -471,10 +400,7 @@
   overflow: hidden;
 }
 
-.view-all-wrapper {
-  text-align: center;
-  margin-top: 1rem;
-}
+.view-all-wrapper { text-align: center; margin-top: 1rem; }
 
 .loader {
   border: 3px solid #eee;
@@ -486,250 +412,45 @@
   margin: 2rem auto;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* =========================================
    📱 MOBILE TRANSFORMATION (< 992px)
    ========================================= */
 @media (max-width: 991px) {
 
-  .hp-main-container {
-    /* Rimuoviamo il padding orizzontale dal container principale su mobile, 
-       sarà gestito dai singoli scroll-wrapper e la colonna notizie */
-    padding: 0; 
-  }
+  .hp-main-container { padding: 0; }
 
   .column-header {
-    /* Ripristiniamo il padding orizzontale sul header */
     padding: 0 1.5rem; 
     border: none;
     margin-bottom: 1rem;
   }
 
-  /* Mostra le frecce per Live e Calendario */
-  .mobile-arrows {
-    display: flex;
-  }
+  .mobile-arrows { display: flex; }
 
-  /* Trasforma le liste Live e Calendario in CAROSELLI SCROLLABILI */
   .hp-col-live .scroll-wrapper,
   .hp-col-calendar .scroll-wrapper {
     flex-direction: row;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1rem;
-    
-    /* MODIFICA: Utilizzo di calc per un migliore snap su schermi stretti, 
-       garantendo che il primo elemento sia visibile dal bordo. */
     padding: 0.5rem 1.5rem 1.5rem 1.5rem; 
-    
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-
-    /* Definiamo il punto di snap del container. Qui è al primo 1.5rem (padding-left) */
     scroll-padding-left: 1.5rem; 
   }
   
-  /* Nascondi scrollbar per i browser basati su WebKit */
-  .scroll-wrapper::-webkit-scrollbar {
-    display: none;
-  }
+  .scroll-wrapper::-webkit-scrollbar { display: none; }
 
-  /* Snap delle card e larghezza mobile */
   .live-card-simple,
   .event-card {
-    /* Garantisce che la card non sia mai più stretta di 80vw, ma non supera mai la sua dimensione minima */
     min-width: clamp(280px, 80vw, 400px); 
     flex-shrink: 0;
     scroll-snap-align: start; 
     border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  /* Notizie restano verticali ma con padding laterale */
-  .hp-col-news {
-    padding: 0 1.5rem;
-  }
-
-  .news-item-compact {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  }
-}
-
-
-
-.live-pulse-icon {
-  font-size: 0.5em;
-  color: var(--hp-danger);
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
-}
-
-.live-card-simple {
-  background: var(--hp-white);
-  border-radius: var(--hp-radius);
-  padding: 1.2rem;
-  box-shadow: var(--hp-shadow);
-  border: 1px solid transparent;
-  transition: transform 0.2s;
-  position: relative;
-  overflow: hidden;
-  min-width: 280px;
-}
-
-/* Stile speciale per la card "Prossimo Evento" */
-.live-card-next {
-  border: 1px solid #cbd5e1;
-  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
-}
-
-.live-card-simple:hover {
-  transform: translateY(-3px);
-  border-color: var(--hp-accent);
-}
-
-.lcs-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.hp-badge {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: white;
-}
-
-.badge-danger { background: var(--hp-danger); }
-.badge-secondary { background: #64748b; }
-
-.yt-icon {
-  color: #ff0000;
-  font-size: 1.4rem;
-}
-
-.lcs-match-info {
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.lcs-teams {
-  font-weight: 800;
-  color: var(--hp-primary);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.lcs-location-sm {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.lcs-location-sm svg {
-    font-size: 0.8em;
-}
-
-/* --- COUNTDOWN BOX STYLING --- */
-.lcs-lock-overlay {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: center;
-}
-
-.countdown-box {
-  background-color: #f1f5f9;
-  border: 1px dashed #94a3b8;
-  color: var(--hp-primary);
-  padding: 8px 16px;
-  border-radius: 8px;
-  text-align: center;
-  width: 100%;
-}
-
-.cb-label {
-  display: block;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  color: #64748b;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.cb-timer {
-  font-family: monospace;
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: var(--hp-primary);
-}
-
-/* --- BOTTONI --- */
-.hp-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.7rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.btn-danger {
-  background: var(--hp-danger);
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
-}
-
-.btn-outline {
-  border: 1px solid var(--hp-border);
-  color: var(--hp-text);
-}
-
-/* Stile pulsante BLOCCATO */
-.btn-locked {
-  background-color: #e2e8f0;
-  color: #94a3b8;
-  cursor: not-allowed;
-  pointer-events: none; /* Disabilita click via CSS */
-  border: 1px solid #cbd5e1;
-}
-
-.btn-link {
-  background: none;
-  border: none;
-  color: var(--hp-primary);
-  text-decoration: underline;
-  width: auto;
-  margin: 0 auto;
-  cursor: pointer;
-}
-
-.empty-state-box {
-  text-align: center;
-  padding: 2rem;
-  color: #94a3b8;
-  font-style: italic;
-  background: white;
-  border-radius: var(--hp-radius);
-  border: 1px dashed var(--hp-border);
+  .hp-col-news { padding: 0 1.5rem; }
+  .news-item-compact { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
 }

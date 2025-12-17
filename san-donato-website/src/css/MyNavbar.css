@@ -244,7 +244,27 @@
       max-width: calc(100vw - 1.6rem); 
       width: clamp(200px, 80vw, 280px); 
       min-width: unset;
+      min-width: 200px;
   }
+}
+
+/* Gestione specifica per mobile: nascondiamo il testo "Documenti" se lo spazio è pochissimo */
+@media (max-width: 480px) {
+  .dropdown-toggle .link-text {
+    display: none; /* Mostra solo l'icona del file e la freccia su telefoni mini */
+  }
+}
+
+/* Allineamento a destra degli ultimi dropdown */
+.dropdown:last-child .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+/* Stile per distinguere il toggle dei documenti quando è attivo un suo figlio */
+.dropdown-toggle.active-toggle {
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 380px) {

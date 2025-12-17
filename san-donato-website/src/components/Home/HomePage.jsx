@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
+import EventDetailsModal from "../../components/EventDetailsModal"; // Assicurati che il percorso sia corretto
 import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchTodayEvents, fetchWeekEvents } from '../../api/calendarApi';
 import { FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper, FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock } from "react-icons/fa";
@@ -11,17 +12,15 @@ const CountdownTimer = ({ targetDate, onComplete }) => {
   const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
-    // Target: Esatto orario di inizio
     const target = new Date(targetDate).getTime(); 
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = target - now;
 
-      // Se il tempo è scaduto
       if (distance < 0) {
         clearInterval(interval);
-        if (onComplete) onComplete(); // Sblocca il pulsante
+        if (onComplete) onComplete();
         return;
       }
 
@@ -37,7 +36,6 @@ const CountdownTimer = ({ targetDate, onComplete }) => {
     return () => clearInterval(interval);
   }, [targetDate, onComplete]);
 
-  // Se non c'è timeLeft (o calcolo iniziale), non renderizzare nulla
   if (!timeLeft) return null;
 
   return (
@@ -54,6 +52,9 @@ export default function HomePage() {
   const [todayEvents, setTodayEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
   
+  // --- STATO PER IL MODALE ---
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
   // Stato dummy per forzare il re-render quando scade il timer
   const [, setTick] = useState(0);
 
@@ -77,9 +78,8 @@ export default function HomePage() {
     return "UPCOMING";
   };
 
-  // Funzione chiamata quando il countdown finisce
   const handleTimerComplete = useCallback(() => {
-    setTick(t => t + 1); // Forza re-render per aggiornare lo status a LIVE
+    setTick(t => t + 1); 
   }, []);
 
   // --- FETCH DATA ---
@@ -151,25 +151,17 @@ export default function HomePage() {
                     displayedMatches.length > 0 ? displayedMatches.map((match, index) => {
                     
                     const status = getMatchStatus(match.start);
-                    
                     const hasDirectLink = !!match.diretta && match.diretta !== "";
                     const linkUrl = match.diretta || "https://youtube.com/@PolisportivaSanDonato";
-
-                    // --- LOGICA PROSSIMO EVENTO ---
-                    // È il primo della lista ED è ancora nel futuro?
                     const isNextEvent = index === 0 && status === "UPCOMING";
-                    
-                    // Se è il prossimo evento, il pulsante è bloccato (isLocked = true)
-                    // Se lo status è LIVE, è sbloccato.
                     const isLocked = isNextEvent; 
 
-                    // Testo pulsante
                     let btnText = "Canale YT";
                     let btnClass = "btn-outline";
 
                     if (isLocked) {
                         btnText = "In attesa dell'inizio";
-                        btnClass = "btn-locked"; // Classe CSS specifica per disabilitato
+                        btnClass = "btn-locked"; 
                     } else if (status === "LIVE") {
                         btnText = hasDirectLink ? "Guarda ora" : "Vai al Canale";
                         btnClass = "btn-danger";
@@ -198,7 +190,6 @@ export default function HomePage() {
                                 </div>
                             </div>
 
-                            {/* SEZIONE COUNTDOWN (Solo se bloccato) */}
                             {isLocked && (
                                 <div className="lcs-lock-overlay">
                                     <CountdownTimer targetDate={match.start} onComplete={handleTimerComplete} />
@@ -239,7 +230,12 @@ export default function HomePage() {
               <div className="scroll-wrapper" ref={calendarListRef}>
                 {loading ? <div className="loader-small"></div> : (
                     weekEvents.length > 0 ? weekEvents.map((event) => (
-                    <div key={event.id} className="event-card">
+                    // AGGIUNTO: onClick per aprire il modale
+                    <div 
+                        key={event.id} 
+                        className="event-card clickable-card" 
+                        onClick={() => setSelectedEvent(event)}
+                    >
                         <div className="event-date-badge" style={{backgroundColor: event.color}}>
                         <span className="ed-day">{getDayName(event.start)}</span>
                         <span className="ed-date">{getShortDate(event.start)}</span>
@@ -290,6 +286,15 @@ export default function HomePage() {
 
         </div>
       </div>
+
+      {/* RENDER MODALE */}
+      {selectedEvent && (
+        <EventDetailsModal 
+            event={selectedEvent} 
+            onClose={() => setSelectedEvent(null)} 
+        />
+      )}
+
     </div>
   );
 }

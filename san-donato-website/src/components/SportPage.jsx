@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { 
-  FaBasketballBall, 
-  FaFutbol, 
-  FaVolleyballBall, 
-  FaMapMarkerAlt, 
-  FaClock, 
+import {
+  FaBasketballBall,
+  FaFutbol,
+  FaVolleyballBall,
+  FaMapMarkerAlt,
+  FaClock,
   FaCalendarAlt,
   FaPhoneAlt,
   FaInfoCircle
@@ -13,7 +13,7 @@ import "../css/SportPage.css";
 
 // IMPORTIAMO I DATI DAL JSON
 // Assicurati che il percorso sia corretto rispetto a dove hai salvato il file json
-import sportsData from "../data/SportPage.json"; 
+import sportsData from "../data/SportPage.json";
 
 import dynamicData from "../data/Data.json";
 
@@ -35,7 +35,7 @@ export default function SportPage() {
   return (
     // Ho applicato la classe "sp-fade-in" suggerita per evitare il problema dello schermo bianco
     <div className="sp-page-wrapper sp-fade-in">
-      
+
       {/* HEADER */}
       <header className="sp-header">
         <h1 className="sp-main-title">
@@ -71,29 +71,29 @@ export default function SportPage() {
 
       {/* CONTENT AREA */}
       <div className="sp-content-area">
-        
+
         {/* Intro Sport Selezionato */}
         <div className="sp-sport-intro sp-fade-in-up" key={`${activeTab}-intro`}>
           <h2 style={{ color: activeData.color }}>{activeData.title}</h2>
           <p>{activeData.description}</p>
-          
+
           {/* Banner Volley Speciale (o qualsiasi sport con extraInfo) */}
           {activeData.extraInfo && (
-             <div className="sp-alert-banner">
-               <FaPhoneAlt />
-               <div>
-                 <strong>Info Utili:</strong>
-                 <span>{activeData.extraInfo}</span>
-               </div>
-             </div>
+            <div className="sp-alert-banner">
+              <FaPhoneAlt />
+              <div>
+                <strong>Info Utili:</strong>
+                <span>{activeData.extraInfo}</span>
+              </div>
+            </div>
           )}
         </div>
 
         {/* Griglia Orari */}
         <div className="sp-schedule-grid sp-fade-in-up" key={`${activeTab}-grid`}>
           {activeData.groups.map((group, index) => (
-            <div 
-              className="sp-card" 
+            <div
+              className="sp-card"
               key={index}
               style={{ borderTopColor: activeData.color }}
             >
@@ -101,12 +101,12 @@ export default function SportPage() {
                 <h3 className="sp-group-name">{group.name}</h3>
                 <span className="sp-group-badge">{group.years}</span>
               </div>
-              
+
               <div className="sp-location-block">
                 <FaMapMarkerAlt className="sp-icon-small" />
-                <a 
-                  href={`http://googleusercontent.com/maps.google.com/?q=${encodeURIComponent(group.address)}`} 
-                  target="_blank" 
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(group.address)}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="sp-map-link"
                 >
@@ -135,9 +135,9 @@ export default function SportPage() {
 
       {/* FOOTER NOTE */}
       <div className="sp-footer-note">
-        <FaInfoCircle /> 
+        <FaInfoCircle />
         <p>
-          Gli orari potrebbero subire variazioni. Per i gruppi non presenti in elenco, 
+          Gli orari potrebbero subire variazioni. Per i gruppi non presenti in elenco,
           contattare direttamente la segreteria o il responsabile tecnico.
         </p>
       </div>

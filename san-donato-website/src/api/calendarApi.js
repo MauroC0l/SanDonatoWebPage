@@ -119,7 +119,6 @@ const CALENDARS_CONFIG = [
         cssVar: "basket-u19",
         color: "#d35400" // Pumpkin
     }
-
 ];
 
 // ====================================================
@@ -250,23 +249,22 @@ export async function fetchTodayEvents() {
 }
 
 /**
- * 3. Eventi della SETTIMANA CORRENTE
- * Recupera eventi da Lunedì a Domenica della settimana corrente.
+ * 3. Eventi della SETTIMANA CORRENTE (Futuri)
+ * Recupera eventi da ADESSO fino a Domenica sera.
+ * Non mostra eventi già passati nella settimana.
  */
 export async function fetchWeekEvents() {
-    const curr = new Date(); // Oggi
+    const now = new Date(); // Start: Adesso (esclude eventi passati)
     
-    // Calcola il primo giorno della settimana (Lunedì)
-    // Se oggi è domenica (0), sottrai 6 giorni, altrimenti sottrai (day - 1)
-    const day = curr.getDay();
-    const diff = curr.getDate() - day + (day === 0 ? -6 : 1); 
+    // Calcola la fine della settimana corrente (Domenica)
+    const currentDay = now.getDay(); // 0 (Dom) - 6 (Sab)
     
-    const monday = new Date(curr.setDate(diff));
-    monday.setHours(0, 0, 0, 0);
-
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6); // Aggiungi 6 giorni per arrivare a domenica
+    // Distanza in giorni fino alla prossima domenica (o oggi se è domenica)
+    const daysUntilSunday = currentDay === 0 ? 0 : 7 - currentDay;
+    
+    const sunday = new Date(now);
+    sunday.setDate(now.getDate() + daysUntilSunday);
     sunday.setHours(23, 59, 59, 999);
 
-    return fetchEventsInternal(monday.toISOString(), sunday.toISOString());
+    return fetchEventsInternal(now.toISOString(), sunday.toISOString());
 }
