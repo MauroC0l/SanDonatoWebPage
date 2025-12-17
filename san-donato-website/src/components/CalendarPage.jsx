@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
-import EventDetailsModal from "./EventDetailsModal"; // Assicurati che il percorso sia corretto
+import EventDetailsModal from "./EventDetailsModal"; 
 import { fetchCalendarEvents } from '../api/calendarApi';
 
 // ==========================================
@@ -44,6 +44,7 @@ const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentCol
 const IconCheck = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
 const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const IconFilter = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>;
+const IconDoubleCheck = () => <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M5 13l4 4L19 7" /></svg>; // Simbolo generico per select/deselect
 
 // --- COMPONENTI UI ---
 
@@ -134,6 +135,17 @@ export default function CalendarPage() {
       ? prev.filter(k => k !== categoryName)
       : [...prev, categoryName]
     );
+  };
+
+  // Funzione per selezionare/deselezionare tutto
+  const toggleAllFilters = () => {
+    if (activeFilters.length > 0) {
+        // Se c'è qualcosa selezionato, deseleziona tutto
+        setActiveFilters([]);
+    } else {
+        // Se è vuoto, seleziona tutto
+        setActiveFilters(availableCategories.map(c => c.id));
+    }
   };
 
   const handleNavigate = (direction) => {
@@ -244,8 +256,14 @@ export default function CalendarPage() {
             {/* FILTRI */}
             <div className="cp-card" style={{ flex: 1, overflowY: 'auto' }}>
               <div className="cp-filter-header">
-                <span className="cp-filter-title">Categorie ({availableCategories.length})</span>
-                <span className="cp-filter-count">{activeFilters.length}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="cp-filter-title">Categorie</span>
+                    <span className="cp-filter-count">{activeFilters.length}</span>
+                </div>
+                
+                <button className="cp-btn-reset" onClick={toggleAllFilters}>
+                    {activeFilters.length > 0 ? "Deseleziona tutto" : "Seleziona tutto"}
+                </button>
               </div>
               <div>
                 {availableCategories.map((category) => (
