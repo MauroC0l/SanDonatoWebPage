@@ -47,12 +47,6 @@ const IconFilter = () => <svg width="20" height="20" fill="none" stroke="current
 
 // --- COMPONENTI UI ---
 
-const LoadingSpinner = () => (
-  <div className="cp-loading-container">
-    <div className="cp-spinner"></div>
-  </div>
-);
-
 const FilterToggle = ({ label, color, checked, onChange }) => (
   <div onClick={onChange} className={`cp-filter-item ${checked ? 'cp-active' : 'cp-inactive'}`}>
     <div className="cp-filter-label">
@@ -237,8 +231,9 @@ export default function CalendarPage() {
             <div className="cp-info-box">
               <div className="cp-info-label">Prossimo Match</div>
               {loading ? (
+                /* Uso lo stesso spinner della home anche qui, ma senza margin: auto */
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
-                  <div className="cp-spinner" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div>
+                    <div className="cp-loader"></div>
                 </div>
               ) : nextMatch ? (
                 <>
@@ -320,7 +315,7 @@ export default function CalendarPage() {
           </div>
 
           <div className="cp-calendar-content">
-            {loading && <LoadingSpinner />}
+            {loading && <div className="cp-loader"></div>}
 
             {!loading && view === 'month' && (
               <>

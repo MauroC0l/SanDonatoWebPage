@@ -14,7 +14,7 @@ export default function TopHeader() {
         <div className="top-header">
             <div className="top-header-container">
                 
-                {/* Social Icons */}
+                {/* Social Icons (Sinistra) */}
                 <div className="social-icons">
                     <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                         <FaFacebookF />
@@ -30,12 +30,13 @@ export default function TopHeader() {
                     </a>
                 </div>
 
-                {/* Contatti */}
+                {/* Contatti (Destra) */}
                 <div className="contact-info">
-                    <span>
+                    {/* Aggiunta classe specifica per gestire la visibilità responsive */}
+                    <span className="contact-address">
                         <FiMapPin className="contact-icon" /> {contactInfo.address}
                     </span>
-                    <span>
+                    <span className="contact-email">
                         <FiMail className="contact-icon" /> {contactInfo.email}
                     </span>
                 </div>

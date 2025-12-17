@@ -5,24 +5,32 @@ export default function Hero() {
     const title = "Polisportiva San Donato";
     const subtitle = "La community dello sport in San Donato a Torino";
     const message = "\"Chi gioca divertendosi vince sempre\""; 
-    const logoImage = "/logo-polisportiva.png"; // Assicurati che il percorso sia corretto
+    const logoImage = "/logo-polisportiva.png"; 
 
     return (
         <section className="hero-section">
-            <div className="hero-content">
+            <div className="hero-grid">
+                
+                {/* 1. Testi (Titolo + Sottotitolo) */}
                 <div className="hero-text">
                     <h1 className="hero-title">{title}</h1>
                     <div className="hero-subtitle">{subtitle}</div>
                 </div>
 
-                <div className="hero-logo-container">
+                {/* 2. Logo */}
+                <div className="hero-visual">
                     <img
                         src={logoImage}
                         alt="Logo Polisportiva San Donato"
                         className="hero-logo"
                     />
-                    <div className="hero-message">{message}</div> 
                 </div>
+
+                {/* 3. Messaggio */}
+                <div className="hero-message-box">
+                    {message}
+                </div>
+
             </div>
         </section>
     );

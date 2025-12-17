@@ -1,88 +1,88 @@
 /* --- Hero.css --- */
 
-/* --- STILE DESKTOP BASE (Invariato) --- */
+/* --- STILE BASE (DESKTOP - Identico all'originale) --- */
 .hero-section {
     background: rgba(255, 255, 255, 0.95);
     color: #002b5c;
-    /* Padding fluido */
+    /* Padding e shadow originali */
     padding: clamp(0.2rem, 0.5vw, 0.5rem) clamp(1rem, 2vw, 2rem); 
     display: flex;
-    align-items: center;
     justify-content: center;
-    text-align: left;
+    align-items: center;
     box-shadow: 0 0.909px 3.636px rgba(0,0,0,0.05);
+    overflow-x: hidden;
 
+    /* Animazione contenitore */
     opacity: 0;
     animation: fadeIn 0.8s ease forwards;
-    overflow-x: hidden;
 }
 
-.hero-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    /* Gap fluido */
-    gap: clamp(1.3635rem, 3.636vw, 3.1815rem); 
-    max-width: 1300px; /* Aggiunto max-width per desktop */
-    margin: 0 auto;
-    /* Padding fluido */
-    padding: clamp(1rem, 1.818vw, 2rem); 
+.hero-grid {
+    display: grid;
     width: 100%;
-
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: clamp(1rem, 1.818vw, 2rem);
+    align-items: center;
+    
+    /* LAYOUT DESKTOP ORIGINALE: 
+       Simuliamo la vecchia struttura Flexbox con Grid:
+       - Colonna Sinistra (Testo): Occupa 2 righe
+       - Colonna Destra (Logo sopra, Messaggio sotto)
+    */
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 
+        "text visual"
+        "text message";
+    column-gap: clamp(1.3635rem, 3.636vw, 3.1815rem); /* Gap originale */
+    
     opacity: 0;
     transform: translateY(36.36px);
     animation: slideUp 1s ease forwards;
     animation-delay: 0.3s;
 }
 
+/* --- 1. TESTI --- */
+.hero-text {
+    grid-area: text;
+    text-align: left;
+    min-width: 0;
+}
+
 .hero-title {
-    /* Dimensione titolo fluida */
+    /* Font size e stile originali */
     font-size: clamp(2.0907rem, 4.1814vw, 3.34512rem); 
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.04545em;
-    flex-shrink: 1;
-    min-width: 0;
+    color: #002b5c;
 }
 
 .hero-subtitle {
-    /* Dimensione sottotitolo fluida */
+    /* Font size e stile originali */
     font-size: clamp(1.1817rem, 1.818vw, 1.6362rem); 
     font-weight: 500;
     color: #ff6600;
     margin-top: 0.2727em;
 }
 
-.hero-message {
-    /* Dimensione messaggio fluida */
-    font-size: clamp(0.8181rem, 1.3635vw, 1.0908rem); 
-    color: #002b5c;
-    margin-top: 0.909em;
-    text-align: center;
-    font-style: italic;
-
-    opacity: 0;
-    transform: translateY(18.18px);
-    animation: fadeUp 1s ease forwards;
-    animation-delay: 1.2s;
-}
-
-.hero-logo-container {
+/* --- 2. LOGO --- */
+.hero-visual {
+    grid-area: visual;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center; /* Centrato nella sua colonna a destra */
+    
+    /* Animazione originale */
     opacity: 0;
     transform: translateX(27.27px);
     animation: fadeLeft 1s ease forwards;
     animation-delay: 0.9s;
-    flex-shrink: 0;
 }
 
 .hero-logo {
-    /* Dimensione logo fluida */
+    /* Dimensioni originali */
     width: clamp(90px, 13.635vw, 163.62px); 
     height: auto;
     transition: transform 0.3s ease;
@@ -92,52 +92,105 @@
     transform: scale(1.05);
 }
 
+/* --- 3. MESSAGGIO --- */
+.hero-message-box {
+    grid-area: message;
+    display: flex;
+    justify-content: center; /* Centrato sotto il logo */
+    
+    /* Stili originali */
+    font-size: clamp(0.8181rem, 1.3635vw, 1.0908rem); 
+    color: #002b5c;
+    margin-top: 0.5rem; /* Leggermente ridotto per compensare grid gap */
+    text-align: center;
+    font-style: italic;
+
+    /* Animazione originale */
+    opacity: 0;
+    transform: translateY(18.18px);
+    animation: fadeUp 1s ease forwards;
+    animation-delay: 1.2s;
+}
+
+/* --- ANIMAZIONI ORIGINALI --- */
 @keyframes fadeIn { to { opacity: 1; } }
 @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeLeft { to { opacity: 1; transform: translateX(0); } }
 @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
 
-/* --- OTTIMIZZAZIONE MOBILE --- */
+/* --- OTTIMIZZAZIONE MOBILE (Layout Nuovo) --- */
 @media (max-width: 768px) {
     .hero-section {
-        padding: 1.5rem 1rem; 
+        padding: 0.5rem; /* Padding esterno minimo */
     }
 
-    .hero-content { 
-        flex-direction: column;
-        text-align: center; 
-        gap: 1.5rem; 
-        padding: 1rem; /* Ridotto il padding su mobile */
+    .hero-grid {
+        /* Rimuoviamo le animazioni complesse del container per mobile */
+        animation: fadeIn 0.8s ease forwards;
+        transform: none;
+        padding: 0.5rem;
+        
+        /* LAYOUT GRID MOBILE OTTIMIZZATO */
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas: 
+            "visual text"   /* Riga 1: Logo sx, Testo dx */
+            "message message"; /* Riga 2: Messaggio full width */
+        gap: 0.5rem 1rem;
     }
 
+    /* 1. Logo compatto a sinistra */
+    .hero-visual {
+        justify-content: flex-start;
+        /* Reset animazioni desktop */
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+    
+    .hero-logo {
+        width: 65px; /* Dimensione fissa piccola */
+    }
+
+    /* 2. Testo a destra */
     .hero-text {
-        width: 100%;
-        min-width: 0;
+        padding-right: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
-    .hero-subtitle { 
-        margin-bottom: 0;
+    .hero-title {
+        font-size: 1.2rem; 
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+        /* Limita a 2 righe per sicurezza */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* 3. Messaggio sotto */
+    .hero-message-box {
         margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(0, 43, 92, 0.1);
+        font-size: 0.75rem;
+        
+        /* Reset animazioni desktop */
+        animation: fadeUp 1s ease forwards 0.5s; /* Piccola animazione mobile */
+        opacity: 0;
     }
+}
 
-    .hero-logo-container {
-        /* L'animazione da sinistra viene sovrascritta da fadeUp per un look mobile più pulito */
-        animation: fadeUp 1s ease forwards;
-        animation-delay: 0.6s;
-        transform: translateY(10px); 
-    }
-
-    .hero-logo { 
-        /* Larghezza più gestibile su mobile, con clamp per flessibilità */
-        width: clamp(70px, 15vw, 100px); 
-        max-width: 100%;
-        margin-top: 0;
-    }
-
-    .hero-message {
-        margin-top: 0.8rem;
-        font-size: 0.85rem;
-        max-width: 100%; /* Assicura che non causi overflow */
-    }
+/* Micro schermi */
+@media (max-width: 350px) {
+    .hero-logo { width: 50px; }
+    .hero-title { font-size: 1rem; }
 }

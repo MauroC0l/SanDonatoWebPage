@@ -221,30 +221,21 @@ body.cp-modal-open {
 }
 
 /* ==========================================
-   LOADING SPINNER
+   LOADER (ESATTA COPIA DI HOME PAGE)
    ========================================== */
-.cp-loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 200px;
-  gap: 1rem;
-}
-
-.cp-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--cp-border-color);
-  border-top: 4px solid var(--cp-accent-blue);
+.cp-loader {
+  border: 3px solid #eee;
+  /* Utilizzo il colore esatto dell'accento della Home Page (#ff6600) invece di quello locale */
+  border-top: 3px solid #ff6600; 
   border-radius: 50%;
-  animation: cp-spin 1s linear infinite;
+  width: 30px;
+  height: 30px;
+  animation: cp-spin 1s infinite;
+  margin: 2rem auto;
 }
 
 @keyframes cp-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ==========================================
