@@ -2,9 +2,13 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
 import EventDetailsModal from "../../components/EventDetailsModal"; 
+import ResultsModal from "../../components/ResultsModal";
 import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchTodayEvents, fetchWeekEvents } from '../../api/calendarApi';
-import { FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper, FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock } from "react-icons/fa";
+import { 
+    FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper, 
+    FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy 
+} from "react-icons/fa";
 import "../../css/HomePage.css";
 
 // --- COMPONENTE COUNTDOWN INTERNO ---
@@ -52,8 +56,9 @@ export default function HomePage() {
   const [todayEvents, setTodayEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
   
-  // --- STATO PER IL MODALE ---
+  // --- STATI MODALI ---
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [showResults, setShowResults] = useState(false); // NUOVO STATE
 
   // Stato dummy per forzare il re-render quando scade il timer
   const [, setTick] = useState(0);
@@ -67,22 +72,16 @@ export default function HomePage() {
   const getShortDate = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Helper per badge "New" (48 ore)
+  // Helper per badge "New"
   const isPostNew = (dateString, daysWindow = 7) => {
-  if (!dateString) return false;
-
-  const [day, month, year] = dateString.split('/');
-
-  const postDate = new Date(year, month - 1, day);
-
-  const today = new Date();
-
-  const differenceInTime = today.getTime() - postDate.getTime();
-
-  const differenceInDays = differenceInTime / (1000 * 3600 * 24);
-
-  return differenceInDays >= 0 && differenceInDays <= daysWindow;
-};
+    if (!dateString) return false;
+    const [day, month, year] = dateString.split('/');
+    const postDate = new Date(year, month - 1, day);
+    const today = new Date();
+    const differenceInTime = today.getTime() - postDate.getTime();
+    const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+    return differenceInDays >= 0 && differenceInDays <= daysWindow;
+  };
 
   // --- LOGICA STATUS ---
   const getMatchStatus = (dateObj) => {
@@ -152,7 +151,7 @@ export default function HomePage() {
       <div className="hp-main-container">
         <div className="hp-grid-layout">
             
-            {/* 1. LIVE MATCHES */}
+            {/* 1. LIVE CENTER */}
             <aside className="hp-col hp-col-live">
               <div className="column-header">
                 <h3 className="col-title text-danger"><FaCircle className="live-pulse-icon" /> Live Center</h3>
@@ -194,7 +193,6 @@ export default function HomePage() {
                                         <span className="hp-badge badge-danger">IN ONDA</span> : 
                                         <span className="hp-badge badge-secondary">OGGI {formatTime(match.start)}</span>
                                     }
-                                    {/* Badge Categoria con colore di default (CSS) */}
                                     <span className="hp-badge badge-category">
                                         {match.category}
                                     </span>
@@ -279,6 +277,14 @@ export default function HomePage() {
                     )
                 )}
               </div>
+
+              {/* NUOVO PULSANTE RISULTATI */}
+              <div className="calendar-actions">
+                  <button className="btn-results-week" onClick={() => setShowResults(true)}>
+                    <FaTrophy /> Vedi risultati della settimana
+                  </button>
+              </div>
+
             </aside>
 
             {/* 3. NEWS */}
@@ -290,7 +296,6 @@ export default function HomePage() {
               {loading ? <div className="loader"></div> : (
                 <div className="news-vertical-list">
                   {latestNews.map((news) => {
-                    console.log("CHIAMO IS POST SU: ", news);
                     const showNewBadge = isPostNew(news.date) || isPostNew(news.isoDate); 
 
                     return (
@@ -315,11 +320,17 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* MODALE DETTAGLI EVENTO */}
       {selectedEvent && (
         <EventDetailsModal 
             event={selectedEvent} 
             onClose={() => setSelectedEvent(null)} 
         />
+      )}
+
+      {/* NUOVO MODALE RISULTATI */}
+      {showResults && (
+        <ResultsModal onClose={() => setShowResults(false)} />
       )}
 
     </div>

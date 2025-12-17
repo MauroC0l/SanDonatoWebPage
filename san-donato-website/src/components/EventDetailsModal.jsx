@@ -1,24 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import "../css/EventDetailsModal.css";
 
 // --- UTILITIES INTERNE ---
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date));
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
-
-// Funzione per pulire l'HTML sporco in arrivo dal calendario
-const stripHtml = (html) => {
-    if (!html) return "";
-    // 1. Sostituisce <br>, <br/>, <br /> con \n
-    let text = html.replace(/<br\s*\/?>/gi, '\n');
-    // 2. Sostituisce i tag <p> chiusi con \n
-    text = text.replace(/<\/p>/gi, '\n');
-    // 3. Rimuove tutti gli altri tag HTML (<...>)
-    text = text.replace(/<[^>]+>/g, '');
-    // 4. Decodifica le entità HTML di base (es. &nbsp; -> spazio)
-    const txt = document.createElement("textarea");
-    txt.innerHTML = text;
-    return txt.value;
-};
 
 // --- ICONE SVG ---
 const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
@@ -27,81 +12,19 @@ const IconClock = () => <svg width="16" height="16" fill="none" stroke="currentC
 const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const IconVideo = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>;
 const IconReplay = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
-
-// Icone Dettagli Sportivi
 const IconTrophy = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
 const IconBall = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const IconList = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>;
 
-
 export default function EventDetailsModal({ event, onClose }) {
-  
-  // --- 1. LOGICA DI PARSING DESCRIZIONE ---
-  const eventDetails = useMemo(() => {
-    if (!event || !event.description) return { 
-        cleanDescription: "", 
-        result: null, 
-        scorers: [], 
-        partials: null 
-    };
+  if (!event) return null;
 
-    // Pulizia HTML iniziale
-    const cleanedDescription = stripHtml(event.description);
-    const lines = cleanedDescription.split('\n');
-    
-    let result = null;
-    let scorers = [];
-    let partials = null;
-    let cleanLines = [];
-
-    lines.forEach(line => {
-        const trimmed = line.trim();
-        const lower = trimmed.toLowerCase();
-        
-        // --- FILTRI ---
-
-        // 1. Parsing Risultato
-        if (lower.startsWith('partita:')) {
-            result = trimmed.substring(8).trim(); 
-        } 
-        // 2. Parsing Marcatori
-        else if (lower.startsWith('marcatori:')) {
-            const rawScorers = trimmed.substring(10).trim();
-            if (rawScorers) {
-                scorers = rawScorers.split(',').map(s => s.trim()).filter(s => s !== "");
-            }
-        }
-        // 3. Parsing Parziali
-        else if (lower.startsWith('parziali:')) {
-            partials = trimmed.substring(9).trim(); 
-        }
-        // 4. NUOVO: Rimuove righe che contengono info sulla Diretta/Streaming (perché abbiamo già il bottone)
-        else if (lower.startsWith('diretta:') || lower.startsWith('streaming:') || lower.startsWith('link:')) {
-            // Non facciamo nulla, la ignoriamo volutamente
-        }
-        // 5. Tutto il resto va nella descrizione visibile (se non è vuoto)
-        else if (trimmed !== "") {
-            cleanLines.push(line);
-        }
-    });
-
-    return {
-        cleanDescription: cleanLines.join('\n').trim(),
-        result,
-        scorers,
-        partials
-    };
-  }, [event]);
-
-  // --- 2. CONTROLLO EVENTO PASSATO ---
-  const isEventEnded = useMemo(() => {
-      if (!event) return false;
+  // Controllo fine evento per decidere tra Live o Replay
+  const isEventEnded = (() => {
       const now = new Date();
       const end = event.end ? new Date(event.end) : new Date(event.start);
       return now > end;
-  }, [event]);
-
-  if (!event) return null;
+  })();
 
   return (
     <div className="cp-modal-overlay" onClick={onClose}>
@@ -152,37 +75,37 @@ export default function EventDetailsModal({ event, onClose }) {
               </div>
             </div>
 
-            {/* --- SEZIONI LOGICHE --- */}
+            {/* --- DATI PARSATI DALL'API --- */}
             
-            {eventDetails.result && (
+            {event.result && (
                 <div className="cp-detail-row">
                     <div className="cp-icon-box" style={{color: event.color, backgroundColor: '#fff', border: `1px solid ${event.color}`}}>
                         <IconTrophy />
                     </div>
                     <div className="cp-detail-content">
                         <label>Risultato</label>
-                        <p className="cp-result-text">{eventDetails.result}</p>
+                        <p className="cp-result-text">{event.result}</p>
                     </div>
                 </div>
             )}
 
-            {eventDetails.partials && (
+            {event.partials && (
                 <div className="cp-detail-row">
                     <div className="cp-icon-box"><IconList /></div>
                     <div className="cp-detail-content">
                         <label>Parziali Set</label>
-                        <p className="cp-mono-text">{eventDetails.partials}</p>
+                        <p className="cp-mono-text">{event.partials}</p>
                     </div>
                 </div>
             )}
 
-            {eventDetails.scorers.length > 0 && (
+            {event.scorers && event.scorers.length > 0 && (
                 <div className="cp-detail-row">
                     <div className="cp-icon-box"><IconBall /></div>
                     <div className="cp-detail-content">
                         <label>Marcatori</label>
                         <ul className="cp-scorers-list">
-                            {eventDetails.scorers.map((scorer, idx) => (
+                            {event.scorers.map((scorer, idx) => (
                                 <li key={idx}>{scorer}</li>
                             ))}
                         </ul>
@@ -190,7 +113,7 @@ export default function EventDetailsModal({ event, onClose }) {
                 </div>
             )}
 
-            {/* DIRETTA STREAMING / REPLAY */}
+            {/* STREAMING */}
             {event.diretta && (
               <div className="cp-detail-row">
                 <div className="cp-icon-box">
@@ -214,11 +137,11 @@ export default function EventDetailsModal({ event, onClose }) {
             )}
 
             {/* DESCRIZIONE PULITA */}
-            {eventDetails.cleanDescription && (
+            {event.description && (
               <div className="cp-detail-row cp-desc-row">
                 <div className="cp-detail-content">
                   <label>Dettagli</label>
-                  <p style={{ whiteSpace: 'pre-wrap' }}>{eventDetails.cleanDescription}</p>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{event.description}</p>
                 </div>
               </div>
             )}

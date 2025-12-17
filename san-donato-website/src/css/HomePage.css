@@ -156,10 +156,10 @@
 
 .lcs-badges-group {
     display: flex;
-    flex-direction: row; /* Modifica: Disposizione orizzontale */
+    flex-direction: row; 
     gap: 6px;
-    align-items: center; /* Allineamento verticale centrato */
-    flex-wrap: wrap; /* A capo se non c'è spazio */
+    align-items: center; 
+    flex-wrap: wrap; 
 }
 
 .hp-badge {
@@ -305,7 +305,6 @@
   min-width: 280px;
 }
 
-/* AGGIUNTA: Cursore pointer per la card cliccabile */
 .event-card.clickable-card {
   cursor: pointer;
 }
@@ -360,6 +359,41 @@
 }
 
 .ev-meta-row span { display: flex; align-items: center; gap: 4px; }
+
+/* NUOVO: Pulsante Risultati */
+.calendar-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-results-week {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ffffff;
+    border: 1px solid var(--hp-border);
+    color: var(--hp-primary);
+    font-weight: 600;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-results-week:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.btn-results-week svg {
+    color: #fbbf24;
+    font-size: 1.1em;
+}
 
 /* =========================================
    3. NOTIZIE (nic-)
@@ -491,6 +525,11 @@
     flex-shrink: 0;
     scroll-snap-align: start; 
     border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Adjust del pulsante risultati su mobile */
+  .calendar-actions {
+      padding: 0 1.5rem;
   }
 
   .hp-col-news { padding: 0 1.5rem; }

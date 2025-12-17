@@ -1,0 +1,287 @@
+/* ==========================================
+   GLASSMORPHISM CONTAINER
+   ========================================== */
+.rm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rm-fadeIn 0.3s ease-out;
+}
+
+.rm-container {
+    background: #f8fafc;
+    width: 100%;
+    max-width: 500px; /* Più stretto per sembrare più mobile-app like */
+    height: 85vh;
+    max-height: 750px;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: rm-slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+.rm-header {
+    padding: 1.2rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.rm-header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rm-header-title h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+.rm-trophy-icon {
+    color: #f59e0b; /* Amber 500 */
+    font-size: 1.3rem;
+}
+
+.rm-close-btn {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rm-close-btn:hover {
+    background: #e2e8f0;
+    color: #ef4444;
+}
+
+/* ==========================================
+   CONTENT LIST
+   ========================================== */
+.rm-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #f1f5f9; /* Sfondo leggermente grigio per far risaltare le card bianche */
+}
+
+.rm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ==========================================
+   RESULT CARD STYLE (MODERN)
+   ========================================== */
+.rm-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.rm-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+/* HEADER INTERNO CARD */
+.rm-card-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.rm-date {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+
+.rm-category-badge {
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* HERO SCORE (IL RISULTATO) */
+.rm-hero-score {
+    margin: 0.5rem 0 1.5rem 0;
+}
+
+.rm-score-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif; /* Assicurati di avere un font sans-serif pulito */
+}
+
+.rm-score-num {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+}
+
+.rm-score-divider {
+    font-size: 2rem;
+    color: #cbd5e1;
+    margin-top: -6px; /* Aggiustamento visivo verticale */
+}
+
+.rm-score-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #334155;
+}
+
+/* DETAILS SECTION (Marcatori & Parziali) */
+.rm-details-container {
+    width: 100%;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.rm-detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+}
+
+.rm-icon-wrapper {
+    margin-top: 2px;
+    font-size: 1rem;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.rm-detail-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.rm-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.rm-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.font-mono {
+    font-family: monospace;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* LOADER & EMPTY STATES */
+.rm-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #94a3b8;
+    gap: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #0f172a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.rm-empty {
+    text-align: center;
+    color: #94a3b8;
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rm-empty-icon {
+    opacity: 0.3;
+}
+
+/* ANIMATIONS */
+@keyframes rm-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rm-slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+    .rm-container {
+        height: 90vh;
+        max-height: none;
+        border-radius: 24px 24px 0 0;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .rm-score-num {
+        font-size: 3rem;
+    }
+}
