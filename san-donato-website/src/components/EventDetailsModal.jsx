@@ -230,7 +230,7 @@ export default function EventDetailsModal({ event, onClose }) {
               <button
                 className="cp-btn-primary"
                 onClick={() => {
-                  window.open(`http://googleusercontent.com/maps.google.com/3{encodeURIComponent(event.location)}`, '_blank');
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`);
                 }}
               >
                 Apri su Maps

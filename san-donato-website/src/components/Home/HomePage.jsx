@@ -67,13 +67,29 @@ export default function HomePage() {
   const getShortDate = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // --- LOGICA STATUS (Solo per la card in Home, non per il modale) ---
+  // Helper per badge "New" (48 ore)
+  const isPostNew = (dateString, daysWindow = 7) => {
+  if (!dateString) return false;
+
+  const [day, month, year] = dateString.split('/');
+
+  const postDate = new Date(year, month - 1, day);
+
+  const today = new Date();
+
+  const differenceInTime = today.getTime() - postDate.getTime();
+
+  const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+
+  return differenceInDays >= 0 && differenceInDays <= daysWindow;
+};
+
+  // --- LOGICA STATUS ---
   const getMatchStatus = (dateObj) => {
     if (!dateObj) return "UPCOMING";
     const diffMs = new Date(dateObj) - new Date();
     const diffMin = Math.floor(diffMs / 60000); 
     
-    // Live se iniziata da meno di 2.5h (-150m) o inizia tra meno di 15m
     if (diffMin <= 15 && diffMin > -150) return "LIVE";
     return "UPCOMING";
   };
@@ -119,7 +135,6 @@ export default function HomePage() {
     if (!ev.hasTime) return false; 
     const now = new Date();
     const diffHours = (ev.start - now) / (1000 * 60 * 60);
-    // Mostra eventi che iniziano tra 2 ore fa e 12 ore nel futuro
     return diffHours >= -2 && diffHours <= 12; 
   });
 
@@ -174,10 +189,16 @@ export default function HomePage() {
                         <div key={match.id} className={`live-card-simple ${isNextEvent ? "live-card-next" : ""}`}>
                             
                             <div className="lcs-header">
-                                {status === "LIVE" ? 
-                                    <span className="hp-badge badge-danger">IN ONDA</span> : 
-                                    <span className="hp-badge badge-secondary">OGGI {formatTime(match.start)}</span>
-                                }
+                                <div className="lcs-badges-group">
+                                    {status === "LIVE" ? 
+                                        <span className="hp-badge badge-danger">IN ONDA</span> : 
+                                        <span className="hp-badge badge-secondary">OGGI {formatTime(match.start)}</span>
+                                    }
+                                    {/* Badge Categoria con colore di default (CSS) */}
+                                    <span className="hp-badge badge-category">
+                                        {match.category}
+                                    </span>
+                                </div>
                                 <FaYoutube className="yt-icon" />
                             </div>
 
@@ -231,7 +252,6 @@ export default function HomePage() {
               <div className="scroll-wrapper" ref={calendarListRef}>
                 {loading ? <div className="loader-small"></div> : (
                     weekEvents.length > 0 ? weekEvents.map((event) => (
-                    // OnClick apre il modale passando l'oggetto event completo
                     <div 
                         key={event.id} 
                         className="event-card clickable-card" 
@@ -269,15 +289,22 @@ export default function HomePage() {
 
               {loading ? <div className="loader"></div> : (
                 <div className="news-vertical-list">
-                  {latestNews.map((news) => (
-                    <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
-                      <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/placeholder.jpg"})` }}></div>
-                      <div className="nic-content">
-                        <span className="nic-date">{news.date}</span>
-                        <h4 className="nic-title">{news.title}</h4>
-                      </div>
-                    </div>
-                  ))}
+                  {latestNews.map((news) => {
+                    console.log("CHIAMO IS POST SU: ", news);
+                    const showNewBadge = isPostNew(news.date) || isPostNew(news.isoDate); 
+
+                    return (
+                        <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
+                            {showNewBadge && <span className="news-new-badge">NEW</span>}
+
+                            <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/placeholder.jpg"})` }}></div>
+                            <div className="nic-content">
+                                <span className="nic-date">{news.date}</span>
+                                <h4 className="nic-title">{news.title}</h4>
+                            </div>
+                        </div>
+                    );
+                  })}
                 </div>
               )}
               <div className="view-all-wrapper">
@@ -288,7 +315,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* RENDER MODALE */}
       {selectedEvent && (
         <EventDetailsModal 
             event={selectedEvent} 

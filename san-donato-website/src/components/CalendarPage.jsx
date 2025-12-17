@@ -44,9 +44,14 @@ const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentCol
 const IconCheck = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
 const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
 const IconFilter = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>;
-const IconDoubleCheck = () => <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7M5 13l4 4L19 7" /></svg>; // Simbolo generico per select/deselect
 
 // --- COMPONENTI UI ---
+
+const LoadingSpinner = () => (
+  <div className="cp-loading-container">
+    <div className="cp-spinner"></div>
+  </div>
+);
 
 const FilterToggle = ({ label, color, checked, onChange }) => (
   <div onClick={onChange} className={`cp-filter-item ${checked ? 'cp-active' : 'cp-inactive'}`}>
@@ -232,7 +237,9 @@ export default function CalendarPage() {
             <div className="cp-info-box">
               <div className="cp-info-label">Prossimo Match</div>
               {loading ? (
-                <div>Caricamento...</div>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
+                  <div className="cp-spinner" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div>
+                </div>
               ) : nextMatch ? (
                 <>
                   <div className="cp-info-match">{nextMatch.title}</div>
@@ -313,7 +320,7 @@ export default function CalendarPage() {
           </div>
 
           <div className="cp-calendar-content">
-            {loading && <div className="cp-loading-msg">Caricamento eventi...</div>}
+            {loading && <LoadingSpinner />}
 
             {!loading && view === 'month' && (
               <>
