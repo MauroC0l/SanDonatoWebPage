@@ -234,6 +234,29 @@ body.cp-modal-open {
   .cp-dashboard-container { padding: 0; height: 100vh; display: block; overflow: hidden; }
   .cp-main-grid { flex-direction: column; gap: 0; height: 100%; }
   
+  .cp-mobile-drag-handle { display: flex; /* ... */ }
+
+  .cp-btn-close-mobile {
+    display: flex; /* Sovrascrive il display: none globale */
+    align-items: center;
+    justify-content: center;
+    background-color: var(--cp-bg-hover); /* Sfondo grigio chiaro */
+    border: 1px solid transparent;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%; /* Cerchio perfetto, oppure usa 10px per quadrato stondato */
+    color: var(--cp-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .cp-btn-close-mobile:active {
+    background-color: var(--cp-border-color); /* Feedback visivo al tocco */
+    color: var(--cp-text-main);
+    transform: scale(0.95);
+  }
+
   .cp-sidebar {
     position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: 80vh; 
     width: 100%; background: white; 
