@@ -478,17 +478,41 @@
 
 .view-all-wrapper { text-align: center; margin-top: 1rem; }
 
-.loader {
-  border: 3px solid #eee;
-  border-top: 3px solid var(--hp-accent);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s infinite;
-  margin: 2rem auto;
+/* Contenitore per centrare perfettamente il loader */
+.loader-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0;
+  flex-grow: 1; /* Fa sì che occupi lo spazio disponibile se il genitore è flex */
+  min-height: 100px; /* Altezza minima per evitare "salti" di layout */
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Loader Standard (News) */
+.loader {
+  border: 3px solid #e2e8f0; /* Grigio chiaro */
+  border-top: 3px solid var(--hp-accent); /* Colore accento */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+/* Loader Piccolo (Live e Calendar) */
+.loader-small {
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid var(--hp-accent);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 /* =========================================
    📱 MOBILE TRANSFORMATION (< 992px)
