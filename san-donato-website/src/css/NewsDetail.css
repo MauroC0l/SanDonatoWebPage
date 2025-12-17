@@ -1,134 +1,166 @@
-/* ================================
-   NEWS DETAIL PAGE - FINAL VERSION (Small Preview)
-   ================================ */
+/* =========================================
+   NEWS DETAIL - LAYOUT DI LETTURA
+   ========================================= */
 
 .news-detail-page {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, sans-serif;
-  /* Larghezza fluida con max-width */
-  max-width: 900px;
-  width: 95%;
-  margin: 3rem auto;
-  padding: 3rem;
-  background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  animation: fadeSlideUp 0.6s ease forwards;
-  color: #333;
+  /* Layout centrale focalizzato sul testo */
+  max-width: 840px; 
+  width: 92%;
+  margin: 3rem auto 5rem;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  /* Ombra più profonda per staccarlo dallo sfondo */
+  box-shadow: var(--shadow-md); 
+  padding: clamp(2rem, 5vw, 4rem);
+  color: var(--text-main);
+  animation: fadeUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  position: relative;
+  overflow: hidden; /* Per contenere elementi decorativi se necessario */
 }
 
-/* --- 1. Immagine Hero (In cima - Estetica) --- */
+/* --- Hero Image & Header --- */
 .news-detail-hero {
   width: 100%;
-  height: clamp(200px, 35vw, 350px); /* Altezza fluida */
+  height: clamp(250px, 40vh, 500px);
   object-fit: cover;
-  border-radius: 16px;
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border-radius: var(--radius-md);
+  margin-bottom: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* --- Titolo --- */
 .news-detail-title {
-  /* Uso di clamp per fluidità */
-  font-size: clamp(2rem, 5vw, 2.6rem); 
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 800;
-  color: #1d3557;
-  margin-bottom: 0.8rem;
-  line-height: 1.2;
+  line-height: 1.1;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
 }
 
-/* --- Meta informazioni --- */
+/* Meta Data (Autore, Data) Styled as Pills */
 .news-detail-meta {
-  font-size: 0.95rem;
-  color: #64748b;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f0f0f0;
   display: flex;
-  gap: 1rem;
   align-items: center;
-  flex-wrap: wrap; /* Aggiunto per evitare overflow su schermi molto stretti */
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-family: monospace, sans-serif; /* Tocco tecnico moderno */
 }
 
-.news-detail-meta span:first-child {
-  color: #ff6600;
+.news-detail-meta span {
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
-/* --- Contenuto del post --- */
+.news-detail-meta span:first-child {
+  background: rgba(255, 123, 51, 0.1);
+  color: var(--accent-color);
+}
+
+/* --- Contenuto Tipografico --- */
 .news-detail-content {
-  font-size: 1.05rem;
-  color: #444;
+  font-size: 1.125rem; /* 18px base */
   line-height: 1.8;
-  margin-bottom: 2rem;
+  color: #334155;
+  margin-bottom: 3rem;
 }
 
 .news-detail-content p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
 }
 
-/* =========================================
-   2. IMMAGINE CLICCABILE (Ridotta al 25%)
-   ========================================= */
+.news-detail-content h3, .news-detail-content h4 {
+  color: var(--primary-color);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+/* --- Anteprima Immagine Cliccabile --- */
 .news-image-preview-container {
-  margin: 2rem 0 3rem 0;
+  margin: 3rem auto;
   text-align: center;
-  /* Protezione da overflow */
-  overflow-x: hidden; 
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .news-detail-image-preview {
-  /* Utilizzo di clamp per una larghezza fluida e controllata: 
-     min 200px, 25% su desktop, max 400px */
-  width: clamp(200px, 25%, 400px); 
-  height: auto;
-  border-radius: 8px;
+  width: clamp(250px, 30vw, 400px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   cursor: zoom-in;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border: 4px solid #fff;
 }
 
 .news-detail-image-preview:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transform: scale(1.03) rotate(1deg); /* Leggera rotazione giocosa */
+  box-shadow: var(--shadow-lg);
 }
 
 .news-image-caption {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #888;
-  font-weight: 500;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--accent-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* --- Footer Navigazione --- */
+.news-detail-footer {
+  display: flex;
+  justify-content: flex-start;
+  padding-top: 2rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.news-detail-footer .btn {
+  background: white;
+  color: var(--text-main);
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.news-detail-footer .btn:hover {
+  border-color: var(--primary-color);
+  transform: translateX(-5px);
 }
 
 /* =========================================
-   LIGHTBOX (MODALE A TUTTO SCHERMO)
+   LIGHTBOX AVANZATO (Glassmorphism)
    ========================================= */
 .news-lightbox-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(29, 53, 87, 0.98);
-  z-index: 9999;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85); /* Dark Blur Background */
+  backdrop-filter: blur(10px); /* Effetto vetro sfocato */
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  animation: fadeIn 0.3s forwards;
-  cursor: zoom-out;
   padding: 2rem;
-  box-sizing: border-box;
+  animation: fadeIn 0.3s ease forwards;
 }
 
 .news-lightbox-image {
-  max-width: 100%;
-  max-height: 95vh;
+  max-width: 95vw;
+  max-height: 90vh;
   object-fit: contain;
-  border-radius: 4px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  animation: scaleIn 0.3s forwards;
+  border-radius: 8px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .news-lightbox-close {
@@ -136,80 +168,49 @@
   top: 2rem;
   right: 2rem;
   background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.2);
   color: white;
-  border: none;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
   font-size: 1.5rem;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .news-lightbox-close:hover {
-  background: rgba(255, 69, 0, 0.8);
+  background: var(--accent-color);
+  transform: rotate(90deg);
 }
 
-/* --- Footer pulsante --- */
-.news-detail-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
-}
-
-.news-detail-footer .btn {
-  background: linear-gradient(120deg, #ff6600, #ff8533);
-  border: none;
-  color: #fff;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 0.8rem 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.news-detail-footer .btn:hover {
-  background: linear-gradient(120deg, #ff8533, #ff6600);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 102, 0, 0.3);
-}
-
-/* --- Animazioni --- */
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(20px); }
+/* Animazioni */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 @keyframes fadeIn {
   to { opacity: 1; }
 }
 
-@keyframes scaleIn {
-  from { transform: scale(0.9); }
-  to { transform: scale(1); }
-}
-
-/* --- Responsività --- */
-@media (max-width: 768px) {
+/* Mobile Tweaks */
+@media (max-width: 600px) {
   .news-detail-page {
-    padding: 1.5rem;
-    margin: 1.5rem auto;
-    /* Assicuriamo che la pagina non superi mai il bordo */
-    width: calc(100% - 2rem); 
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2rem 1.5rem;
   }
   
-  .news-detail-hero {
-    height: 200px;
-  }
-
-  .news-detail-image-preview {
-    /* Su mobile la ingrandiamo un po' per essere toccabile, 
-       ma la limitiamo per non essere invadente (max 80%) */
-    width: clamp(200px, 60vw, 80%); 
-  }
-
   .news-detail-title {
     font-size: 1.8rem;
   }

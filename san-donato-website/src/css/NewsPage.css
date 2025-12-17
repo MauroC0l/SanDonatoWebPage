@@ -1,403 +1,429 @@
-/* --- Spaziatura tra sezioni --- */
-.section-spacing {
-  /* Uso di clamp per fluidità e per ridurre lo spazio negativo */
-  margin-top: clamp(-1rem, -3vw, -1rem); 
-  margin-bottom: clamp(2rem, 5vw, 5rem);
+/* =========================================
+   1. SISTEMA DI VARIABILI & RESET
+   ========================================= */
+:root {
+  /* Palette Colori */
+  --primary-color: #1d3557;       /* Navy profondo */
+  --primary-light: #457b9d;       /* Navy chiaro */
+  --accent-color: #ff7b33;        /* Arancione vibrante */
+  --accent-hover: #e65a10;        /* Arancione scuro */
+  --bg-body: #f8fafc;             /* Grigio ghiaccio */
+  --bg-surface: #ffffff;          /* Bianco puro */
+  --bg-input: #f1f5f9;            /* Sfondo input default */
+  --border-input: #cbd5e1;        /* Bordo input */
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  
+  /* Spaziature e Forme */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 4px 12px rgba(29, 53, 87, 0.05);
+  --shadow-md: 0 10px 30px rgba(29, 53, 87, 0.08);
+  --shadow-focus: 0 0 0 4px rgba(255, 123, 51, 0.15); /* Glow arancione */
+  
+  --transition-smooth: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* --- Sezione principale --- */
+/* =========================================
+   2. SEZIONE PRINCIPALE
+   ========================================= */
 .news-section {
-  background: rgba(248, 250, 252, 0.98);
-  /* Uso di clamp per padding fluido */
-  padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 2vw, 2rem); 
+  background-color: var(--bg-body);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  animation: fadeSlideUp 0.8s ease forwards;
-  overflow-x: hidden;
+  padding: clamp(2rem, 5vw, 4rem) 1rem;
+  color: var(--text-main);
+  animation: fadeInPage 0.6s ease-out forwards;
 }
 
 .news-section-title {
   text-align: center;
-  /* Uso di clamp per fluidità */
-  font-size: clamp(1.8rem, 4vw, 2.5rem); 
-  color: #1d3557;
-  font-weight: 700;
-  margin-bottom: 2rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 3.5rem;
   position: relative;
 }
 
 .news-section-title::after {
   content: "";
-  position: absolute;
-  bottom: -0.8rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: #ff7b33;
-  border-radius: 2px;
+  display: block;
+  width: 60px;
+  height: 5px;
+  background: var(--accent-color);
+  border-radius: 10px;
+  margin: 0.8rem auto 0;
 }
 
-/* --- Layout principale --- */
 .news-layout {
-  display: flex;
-  gap: 2.5rem;
-  align-items: flex-start;
-  max-width: 1400px; /* Aggiunto max-width per centratura */
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 3rem;
+  max-width: 1440px;
   margin: 0 auto;
-  width: 100%;
+  align-items: start;
 }
 
-/* --- Sidebar --- */
+/* =========================================
+   3. SIDEBAR STILE "GLASS CARD"
+   ========================================= */
 .news-sidebar {
-  /* Uso di flex-basis con clamp per una larghezza flessibile ma controllata */
-  flex: 0 0 clamp(260px, 20vw, 300px); 
-  background: linear-gradient(180deg, #1d3557, #457b9d);
-  color: #f1faee;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: var(--bg-surface);
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  
+  /* ✅ MODIFICA: Margine superiore aumentato per lo sticky */
   position: sticky;
-  /* top fluido */
-  top: clamp(5rem, 7vw, 8rem); 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  top: 100px; /* Aumentato da 2rem a 100px per lasciare spazio dal tetto della pagina */
+  
+  z-index: 10;
+  transition: top 0.3s ease;
 }
 
+/* Titolo Sidebar */
 .news-sidebar h4 {
-  text-align: center;
-  font-size: 1.35rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  position: relative;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.news-sidebar h4::after {
+.news-sidebar h4::before {
   content: "";
-  position: absolute;
-  bottom: -0.4rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
-  height: 3px;
-  background: #ff7b33;
-  border-radius: 3px;
+  display: block;
+  width: 6px;
+  height: 24px;
+  background: var(--accent-color);
+  border-radius: 4px;
 }
 
-/* Hover checkbox e label */
-.custom-checkbox:hover .form-check-input {
-  border-color: #ff7b33;
-  box-shadow: 0 0 5px rgba(255, 123, 51, 0.6);
+/* Gruppi Form */
+.form-group {
+  margin-bottom: 2rem;
 }
 
-.custom-checkbox:hover .form-check-label {
-  color: #ff7b33;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.2s ease, font-weight 0.2s ease;
-}
-
-/* Hover sui dropdown e datepicker */
-.news-sidebar .form-select:hover,
-.news-sidebar .form-control.custom-datepicker:hover {
-  border-color: #ff7b33;
-  box-shadow: 0 0 5px rgba(255, 123, 51, 0.6);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* --- Form --- */
-.news-sidebar .form-group {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(241, 250, 238, 0.3);
-}
-
-.news-sidebar .form-label {
-  font-weight: 600;
-  margin-bottom: 0.6rem;
+.form-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.8rem;
   display: block;
 }
 
-.news-sidebar .form-check {
-  margin-bottom: 0.4rem;
-}
-
-/* Contenitore checkbox in linea */
+/* =========================================
+   4. CHECKBOX DESIGN (Custom & Clean)
+   ========================================= */
 .custom-checkbox {
   display: flex;
   align-items: center;
-  gap: 8px;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-smooth);
 }
 
-/* Checkbox */
+.custom-checkbox:hover {
+  background-color: #f8fafc;
+}
+
 .custom-checkbox .form-check-input {
   appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #f1faee;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2px solid var(--border-input);
   border-radius: 6px;
-  background-color: transparent;
+  margin-right: 0.8rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  position: relative;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
 }
 
-/* Stato checked */
 .custom-checkbox .form-check-input:checked {
-  background-color: #ff7b33;
-  border-color: #ff7b33;
-  box-shadow: 0 0 6px rgba(230, 57, 70, 0.6);
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 10px rgba(255, 123, 51, 0.3);
 }
 
 .custom-checkbox .form-check-input:checked::after {
-  content: "✔";
-  font-size: 0.85rem;
-  color: #fff;
-  line-height: 1;
+  content: "";
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -60%) rotate(45deg);
 }
 
-/* Testo */
 .custom-checkbox .form-check-label {
-  cursor: pointer;
   font-size: 0.95rem;
-  margin: 0;
+  color: var(--text-main);
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
-.custom-checkbox .form-check-input:checked~.form-check-label {
-  color: #f1faee;
+.custom-checkbox .form-check-input:checked ~ .form-check-label {
+  color: var(--primary-color);
   font-weight: 600;
 }
 
-/* --- Bottone reset --- */
-.filter-reset-btn {
+/* =========================================
+   5. DROPDOWN & INPUT MODERNIZZATI
+   ========================================= */
+
+.form-select, 
+.news-sidebar .form-control {
+  appearance: none;
+  -webkit-appearance: none;
   width: 100%;
-  background: #ff7b33;
-  color: #f1faee;
-  font-weight: 600;
-  border: none;
+  background-color: var(--bg-input);
+  border: 1px solid transparent;
   border-radius: 12px;
-  padding: 0.7rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
-}
-
-.filter-reset-btn:hover {
-  background: #d62828;
-  transform: translateY(-2px);
-}
-
-/* --- Input e Select --- */
-.news-sidebar .form-control,
-.news-sidebar .form-select {
-  border-radius: 10px;
-  border: 1px solid #a8dadc;
-  padding: 0.5rem 0.8rem;
+  padding: 0.8rem 1rem;
   font-size: 0.95rem;
-  background-color: #f1faee;
-  color: #1d3557;
-  transition: all 0.2s ease;
+  font-weight: 500;
+  color: var(--primary-color);
+  transition: all var(--transition-smooth);
+  cursor: pointer;
 }
 
-.news-sidebar .form-control:focus,
-.news-sidebar .form-select:focus {
-  border-color: #ff7b33;
-  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3);
+/* Icona freccia custom */
+.form-select {
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231d3557' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 12px;
+}
+
+/* ✅ MODIFICA: Styling delle opzioni del dropdown (Supporto limitato dai browser) */
+.form-select option {
+  background-color: #fff;
+  color: var(--primary-color);
+  padding: 10px;
+}
+
+.form-select:hover, 
+.news-sidebar .form-control:hover {
+  background-color: #e2e8f0;
+}
+
+.form-select:focus, 
+.news-sidebar .form-control:focus {
+  background-color: #fff;
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-focus);
   outline: none;
 }
 
-/* --- Cards --- */
-.news-grid {
-  display: grid;
-  /* Uso di repeat(auto-fit, ...) per il contenitore principale, per fluidità */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-  gap: 1.5rem;
+/* Icona calendario input */
+.react-datepicker-wrapper {
   width: 100%;
 }
-
-/* Override delle dimensioni delle card (le tengo un po' più grandi per coerenza) */
-.news-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+.news-sidebar .custom-datepicker {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3e%3cline x1='16' y1='2' x2='16' y2='6'/%3e%3cline x1='8' y1='2' x2='8' y2='6'/%3e%3cline x1='3' y1='10' x2='21' y2='10'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 18px;
 }
 
-.news-img-wrapper {
-  height: 180px;
+/* =========================================
+   ✅ 6. CUSTOM DATEPICKER OVERRIDE
+   (Stilizzazione del calendario aperto)
+   ========================================= */
+
+/* Contenitore principale */
+.react-datepicker {
+  font-family: inherit !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  overflow: hidden;
+  background-color: #fff !important;
 }
 
-.news-card .card-body {
-  padding: 1rem 1.2rem;
+/* Header (Mese e Giorni) */
+.react-datepicker__header {
+  background-color: var(--primary-color) !important;
+  border-bottom: none !important;
+  padding-top: 1rem !important;
 }
 
-.news-card .card-title {
-  font-size: 1.1rem;
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker-year-header {
+  color: #fff !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1rem !important;
   margin-bottom: 0.5rem;
 }
 
-.news-card .card-subtitle {
-  font-size: 0.9rem;
-  margin-bottom: 0.7rem;
+.react-datepicker__day-name {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 600;
+  width: 2.2rem !important;
+  line-height: 2.2rem !important;
 }
 
-.news-card .card-text {
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin-bottom: 1.2rem;
+/* Giorni del calendario */
+.react-datepicker__day {
+  color: var(--text-main);
+  width: 2.2rem !important;
+  line-height: 2.2rem !important;
+  margin: 0.2rem !important;
+  border-radius: 50% !important; /* Giorni rotondi */
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.read-btn {
-  font-size: 0.95rem;
-  padding: 0.45rem 1rem;
+.react-datepicker__day:hover {
+  background-color: #e2e8f0 !important;
+  color: var(--primary-color);
 }
 
-
-/* --- Adattamento responsive della Griglia (MANTENUTO) --- */
-@media (max-width: 1400px) {
-  .news-grid {
-    grid-template-columns: repeat(4, 1fr); /* 4 colonne */
-  }
+/* Giorno Selezionato o nel Range */
+.react-datepicker__day--selected,
+.react-datepicker__day--range-start,
+.react-datepicker__day--range-end {
+  background-color: var(--accent-color) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(255, 123, 51, 0.4);
 }
 
-@media (max-width: 1200px) {
-  .news-grid {
-    grid-template-columns: repeat(3, 1fr); /* 3 colonne */
-  }
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  background-color: rgba(255, 123, 51, 0.15) !important;
+  color: var(--accent-hover) !important;
+  border-radius: 0 !important; /* Il range intermedio è quadrato */
 }
 
-@media (max-width: 992px) {
-  .news-layout {
-    flex-direction: column;
-    align-items: center; /* Centra la griglia e la sidebar */
-  }
-  .news-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 colonne */
-  }
-  .news-sidebar {
-    width: 100%;
-    position: static;
-  }
+/* Giorno Corrente (Oggi) */
+.react-datepicker__day--today {
+  font-weight: 800 !important;
+  position: relative;
+}
+.react-datepicker__day--today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
 }
 
-@media (max-width: 600px) {
-  .news-grid {
-    grid-template-columns: 1fr; /* 1 colonna */
-  }
+/* Frecce navigazione mese */
+.react-datepicker__navigation-icon::before {
+  border-color: #fff !important;
+  border-width: 2px 2px 0 0 !important;
 }
 
-/* ================================
-   DATEPICKER STILIZZATO MODERNO
-   (Stili mantenuti, non influiscono sulla responsività del layout principale)
-   ================================ */
+/* Rimuovi il triangolo in alto (più pulito) */
+.react-datepicker__triangle {
+  display: none !important;
+}
 
-.custom-datepicker {
-  border-radius: 14px;
-  border: 1px solid #ccc;
-  padding: 0.7rem 0.9rem;
-  font-size: 0.95rem;
-  background-color: #f9fafb;
-  color: #1d3557;
+/* =========================================
+   7. BOTTONE RESET & MOBILE
+   ========================================= */
+.filter-reset-btn {
   width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background-color: transparent;
+  color: var(--text-muted);
+  border: 2px dashed #cbd5e1;
+  font-weight: 600;
+  padding: 0.8rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  transition: all var(--transition-smooth);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
 }
 
-.custom-datepicker:focus {
-  border-color: #ff7b33;
-  box-shadow: 0 0 0 3px rgba(255, 123, 51, 0.3);
-  outline: none;
+.filter-reset-btn:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background-color: rgba(255, 123, 51, 0.05);
+  transform: translateY(-2px);
 }
 
-/* Header, Calendario e Footer Datepicker... (omessi per brevità, sono identici e responsive) */
-
-/* ==============================
-   📱 FILTRI MOBILE RESPONSIVE (FLUID VERSION)
-   ============================== */
-
-/* Contenitore pulsante */
+/* Mobile Toggle */
 .mobile-filters-toggle {
   display: none;
+  margin-bottom: 2rem;
   justify-content: center;
-  /* Larghezza fluida con clamp */
-  width: clamp(280px, 90vw, 420px); 
-  margin-inline: auto;
 }
 
-/* Pulsante "Filtri" */
 .filter-toggle-btn {
-  background: #ff7b33;
-  color: #fff;
-  font-weight: 600;
+  background: var(--primary-color);
+  color: white;
+  padding: 0.9rem 2.5rem;
+  border-radius: 50px;
   border: none;
-  border-radius: 0.8rem;
-  /* Padding e larghezza fluidi con clamp */
-  padding: clamp(0.7rem, 2.2vw, 0.9rem) clamp(1rem, 3vw, 1.4rem);
-  width: 100%;
-  max-width: clamp(280px, 85vw, 420px);
-  box-shadow: 0 0.4rem 1rem rgba(255, 123, 51, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(29, 53, 87, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: transform 0.2s ease;
 }
 
-.filter-toggle-btn:hover,
-.filter-toggle-btn:focus,
 .filter-toggle-btn:active {
-  background: #ff7b33 !important;
-  color: #fff;
-  transform: translateY(-0.1rem);
-  box-shadow: 0 0.4rem 1.4rem rgba(255, 123, 51, 0.4);
-  outline: none;
+  transform: scale(0.96);
 }
 
-/* Sidebar nascosta su smartphone */
+/* Responsive Logic */
 @media (max-width: 992px) {
-  .mobile-filters-toggle {
-    display: flex;
-    margin-bottom: clamp(0.4rem, 1.5vw, 0.8rem);
+  .news-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
-  .news-layout {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem; /* Ridotto il gap generale su mobile per compattare */
+  .mobile-filters-toggle {
+    display: flex;
   }
 
   .news-sidebar {
     display: none;
-    /* Larghezza fluida con clamp */
-    width: clamp(280px, 90vw, 420px); 
-    margin: 0 auto;
-    border-radius: 0.8rem;
-    box-shadow: 0 0.6rem 1.8rem rgba(0, 0, 0, 0.1);
-    /* Padding fluido */
-    padding: clamp(0.8rem, 2vw, 1.2rem); 
-    transform-origin: top center;
+    background: #fff;
+    border: none;
+    border-top: 4px solid var(--accent-color);
+    box-shadow: var(--shadow-md);
+    
+    /* Reset dello sticky su mobile */
+    position: static; 
   }
 
   .news-sidebar.show-mobile {
     display: block;
-    animation: dropdownPop 0.35s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-  }
-
-  .form-group {
-    margin-bottom: clamp(0.6rem, 1.8vw, 0.9rem);
+    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-/* Animazione fluida (fade + slide + scale) */
-@keyframes dropdownPop {
-  from {
-    opacity: 0;
-    transform: translateY(-0.6rem) scale(0.97);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(0.2rem) scale(1.02);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
