@@ -15,8 +15,7 @@ import ContributiPage from "./components/ContributiPage";
 import CinquePerMillePage from "./components/CinquePerMillePage";
 import SponsorPage from "./components/SponsorPage";
 import SportPage from "./components/SportPage";
-
-
+import NotFoundPage from "./components/NotFoundPage"; // <--- 1. Importa la pagina 404
 
 export default function App() {
   return (
@@ -44,6 +43,8 @@ export default function App() {
           <Route path="/contributi-pubblici" element={<ContributiPage />} />
           <Route path="/cinquepermille" element={<CinquePerMillePage />} />
           <Route path="/sponsor" element={<SponsorPage />} />
+
+          <Route path="*" element={<NotFoundPage />} /> 
 
         </Routes>
       </main>
