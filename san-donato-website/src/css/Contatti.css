@@ -1,25 +1,29 @@
 /* ============================= */
-/* Contatti.css - Scoped: cnt- */
+/* Contatti.css - Refined       */
 /* ============================= */
 
-/* RESET (Scoped to contacts page if possible, but safe here) */
+/* RESET (Scoped) */
 .contacts-page *, .contacts-page *::before, .contacts-page *::after {
   box-sizing: border-box;
 }
 
 :root {
   --cnt-primary: #002b5c;
+  --cnt-primary-light: #00408a; /* Variante più chiara per hover */
   --cnt-accent: #ff6600;
   --cnt-bg: #f4f7f9;
   --cnt-card-bg: #ffffff;
   --cnt-text-main: #333333;
-  --cnt-text-light: #555555;
+  --cnt-text-light: #666666;
+  --cnt-border: #e2e8f0;
+  --cnt-success: #10b981; /* Verde per il feedback copia */
   
   --radius-card: 20px;
-  --shadow-card: 0 8px 30px rgba(0, 43, 92, 0.08);
+  --shadow-card: 0 10px 30px -5px rgba(0, 43, 92, 0.08);
+  --shadow-hover: 0 20px 40px -5px rgba(0, 43, 92, 0.12);
 }
 
-/* Unique Animation for Contacts Page */
+/* Animation */
 @keyframes cntFadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -30,241 +34,452 @@
   background: var(--cnt-bg);
   min-height: 100vh;
   width: 100%;
-  /* Padding fluido */
-  padding: clamp(1.5rem, 5vw, 2rem) clamp(0.5rem, 3vw, 1.5rem) clamp(2rem, 8vw, 4rem); 
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem) 4rem;
   color: var(--cnt-text-main);
-  
   animation: cntFadeIn 0.6s ease-out forwards;
-  opacity: 0; 
-  overflow-x: hidden;
 }
 
-/* --- HEADER PAGINA --- */
+/* --- HEADER --- */
 .contacts-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   padding: 0 1rem;
 }
 
 .contacts-header h1 {
-  /* Titolo fluido */
-  font-size: clamp(1.8rem, 5vw, 2.5rem); 
+  font-size: clamp(2rem, 5vw, 2.8rem);
   color: var(--cnt-primary);
   font-weight: 800;
   margin-bottom: 0.5rem;
-  line-height: 1.2;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .highlight-text {
-  color: var(--cnt-primary);
+  color: var(--cnt-accent); /* Cambiato in arancione per risaltare meglio su blu */
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--cnt-text-light);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .header-decoration {
-  width: 50px;
+  width: 60px;
   height: 4px;
   background: var(--cnt-accent);
-  margin: 1rem auto 0;
-  border-radius: 2px;
+  margin: 1.5rem auto 0;
+  border-radius: 10px;
 }
 
-/* --- GRIGLIA CARDS --- */
+/* --- GRID LAYOUT --- */
 .contacts-container {
   display: grid;
-  /* Mobile First: 1 colonna */
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
 }
 
-/* Desktop: 2 columns */
 @media (min-width: 900px) {
   .contacts-container {
-    /* Manteniamo le proporzioni 1.2fr / 1fr */
     grid-template-columns: 1.2fr 1fr;
     gap: 2.5rem;
     align-items: start;
   }
 }
 
-/* Tablet / Schermi medi: 2 colonne per colonne più strette */
-@media (min-width: 600px) and (max-width: 899px) {
-  .contacts-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    padding: 0 1rem;
-  }
-  .contacts-column {
-    /* Assicura che entrambe le colonne riempiano l'altezza della griglia */
-    align-items: stretch; 
-  }
-}
-
 .contacts-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
+  gap: 2rem;
 }
 
-/* --- CARD GENERICA --- */
+/* --- CARD STYLE --- */
 .contact-card {
   background: var(--cnt-card-bg);
   border-radius: var(--radius-card);
-  /* Padding fluido */
-  padding: clamp(1.25rem, 4vw, 1.5rem); 
+  padding: 2rem;
   box-shadow: var(--shadow-card);
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid white;
 }
 
-/* --- RIGA HEADER (Icon + Title) --- */
+.contact-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Header Card (Icon + Title) */
 .card-header-row {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  width: 100%;
-  margin-bottom: 0.5rem;
+  justify-content: center; /* Centrato come richiesto */
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-/* Icona e titolo mantengono la dimensione fissa per consistenza */
 .card-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 43, 92, 0.08);
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  background: #f0f4f8;
+  border-radius: 14px;
   color: var(--cnt-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   flex-shrink: 0;
 }
 
-.card-icon-wrapper.bank { background: #eef2f5; }
+.card-icon-wrapper.bank { background: #fff7ed; color: var(--cnt-accent); }
 
 .card-title {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--cnt-primary);
   margin: 0;
-  line-height: 1.2;
-  text-align: center;
 }
 
-/* --- BODY CARD --- */
 .card-body {
-  width: 100%;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.8rem;
 }
 
-/* --- SPECIFIC ELEMENTS --- */
+/* --- SEDE & MAPPA --- */
 .address-text {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.6;
   color: var(--cnt-text-light);
+  margin-bottom: 1rem;
 }
 
-/* MAP */
 .map-link-container {
   display: block;
   width: 100%;
   border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 16/9;
-  background: #eee;
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   position: relative;
+  aspect-ratio: 16/9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .map-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.5s ease;
 }
-/* Overlay e Hover mantenuti */
 
-/* HOURS & INFO (Mantenuti) */
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 43, 92, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
-/* Mobile Contact Section */
+.map-overlay span {
+  background: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--cnt-primary);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.map-link-container:hover .map-overlay { opacity: 1; }
+.map-link-container:hover .map-image { transform: scale(1.05); }
+
+/* --- SEGRETERIA (FIX CONTATTI RAPIDI) --- */
+.info-group {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.info-label {
+  display: block;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+
+.info-value.highlight {
+  font-size: 1.2rem;
+  color: var(--cnt-primary);
+  font-weight: 700;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--cnt-border);
+  margin: 1.5rem 0;
+  border: none;
+}
+
 .mobile-contact-section {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
 }
 
-.phone-btn {
-  /* Utilizza clamp() per la larghezza massima per fluidità */
-  width: clamp(250px, 80%, 300px); 
-  /* altri stili mantenuti */
-  display: inline-flex;
+/* FIX: Allineamento Icona e Titolo */
+.sub-title {
+  display: flex; /* Flexbox è la chiave */
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+  font-size: 1.1rem;
+  color: var(--cnt-primary);
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.info-note {
+  font-size: 0.95rem;
+  color: var(--cnt-text-light);
+  margin-bottom: 1.2rem;
+}
+
+.phone-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
   background: var(--cnt-primary);
   color: white;
   text-decoration: none;
-  padding: 0.8rem 1.5rem;
+  padding: 0.9rem 2rem;
   border-radius: 50px;
   font-weight: 600;
-  font-size: 1rem;
-  transition: transform 0.2s;
-  max-width: 300px;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 43, 92, 0.2);
 }
 
-/* EMAIL */
+.phone-btn:hover {
+  background: var(--cnt-primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 43, 92, 0.3);
+}
+
+.name-tag {
+  opacity: 0.8;
+  font-weight: 400;
+  font-size: 0.9em;
+  border-left: 1px solid rgba(255,255,255,0.3);
+  padding-left: 0.8rem;
+}
+
+/* --- RECAPITI / EMAIL --- */
+.email-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
 .email-link {
-  /* Assicura che l'email si rompa se troppo lunga */
-  word-break: break-word;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
-/* IBAN */
-.iban-wrapper {
-  background: #f1f5f9;
+.email-link.primary {
+  background: #f0f9ff;
+  color: #0077cc;
+}
+.email-link.primary:hover { background: #e0f2fe; }
+
+.email-link.pec {
+  background: #fdf2f8;
+  color: #db2777;
+  font-size: 0.9rem;
+}
+
+.fiscal-data-box {
+  width: 100%;
+  background: #f8fafc;
   border: 1px dashed #cbd5e1;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 1rem;
+}
+
+.fiscal-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 1rem;
+  color: var(--cnt-text-main);
+  padding: 0.3rem 0;
+}
+
+.fiscal-row span {
+  font-weight: 700;
+  color: var(--cnt-text-light);
+}
+
+/* --- BANCA & IBAN (FIX PULSANTE COPIA) --- */
+.payment-intro {
+  margin-bottom: 1rem;
+  color: var(--cnt-text-light);
+}
+
+.iban-wrapper {
+  background: #f8fafc;
+  border: 1px solid var(--cnt-border);
+  border-radius: 16px;
+  padding: 1.5rem;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
   overflow: hidden;
 }
 
+.iban-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
 .iban-code {
-  font-family: monospace;
-  /* IBAN fluido */
-  font-size: clamp(0.9rem, 4vw, 1.1rem); 
+  font-family: 'Roboto Mono', monospace;
+  font-size: clamp(1rem, 4vw, 1.25rem);
   color: var(--cnt-primary);
   font-weight: 700;
-  text-align: center;
   word-break: break-all;
   line-height: 1.4;
   margin-bottom: 1rem;
 }
 
-/* MOBILE MEDIA QUERY */
-@media (max-width: 480px) {
-  .contacts-page { padding: 1rem 0.8rem 4rem; }
-  .contact-card { padding: 1.25rem; }
-  .card-title { font-size: 1.2rem; }
-  .card-icon-wrapper { width: 38px; height: 38px; font-size: 1rem; }
+/* Stile del pulsante copia migliorato */
+.copy-btn {
+  background: white;
+  border: 1px solid var(--cnt-border);
+  color: var(--cnt-text-main);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.copy-btn:hover {
+  border-color: var(--cnt-primary);
+  color: var(--cnt-primary);
+  transform: translateY(-1px);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+/* Stato "Copiato" */
+.copy-btn.copied {
+  background: var(--cnt-success);
+  border-color: var(--cnt-success);
+  color: white;
+  pointer-events: none; /* Previene click doppi */
+}
+
+.bank-logo-wrapper {
+  margin-top: 1.5rem;
+  height: 40px;
+}
+.bank-img {
+  height: 100%;
+  width: auto;
+  opacity: 0.8;
+}
+
+/* --- SATISPAY --- */
+.satispay-card {
+  border-top: 5px solid #ff4e50; /* Brand color Satispay */
+}
+
+.satispay-content {
+  text-align: center;
+}
+
+.satispay-title {
+  color: #ff4e50;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.2rem;
+}
+
+.shop-name {
+  color: var(--cnt-text-light);
+  margin-bottom: 1.5rem;
+}
+
+.qr-frame {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  background: white;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.qr-image {
+  width: 100%;
+  height: 100%;
+}
+
+.scan-me-badge {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff4e50;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(255, 78, 80, 0.4);
+}
+
+/* --- MOBILE QUERY --- */
+@media (max-width: 600px) {
+  .contact-card { padding: 1.5rem; }
+  .phone-btn { width: 100%; flex-direction: column; gap: 0.3rem; padding: 0.8rem; border-radius: 12px; }
+  .name-tag { border-left: none; border-top: 1px solid rgba(255,255,255,0.3); padding-left: 0; padding-top: 0.3rem; width: 100%; text-align: center; }
+  .iban-code { font-size: 1rem; }
 }

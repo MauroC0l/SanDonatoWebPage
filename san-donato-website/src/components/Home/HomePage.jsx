@@ -58,7 +58,7 @@ export default function HomePage() {
 
   // --- STATI MODALI ---
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showResults, setShowResults] = useState(false); // NUOVO STATE
+  const [showResults, setShowResults] = useState(false);
 
   // Stato dummy per forzare il re-render quando scade il timer
   const [, setTick] = useState(0);
@@ -251,7 +251,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="scroll-wrapper" ref={liveListRef}>
+            {/* NOTA: Qui ho corretto il ref da liveListRef a calendarListRef */}
+            <div className="scroll-wrapper" ref={calendarListRef}>
               {loading ? (
                 <div className="loader-wrapper">
                   <div className="loader-small"></div>
@@ -286,12 +287,14 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* NUOVO PULSANTE RISULTATI */}
-            <div className="calendar-actions">
-              <button className="btn-results-week" onClick={() => setShowResults(true)}>
-                <FaTrophy /> Vedi risultati della settimana
-              </button>
-            </div>
+            {/* MODIFICA: Il pulsante ora è mostrato solo se loading è false */}
+            {!loading && (
+              <div className="calendar-actions">
+                <button className="btn-results-week" onClick={() => setShowResults(true)}>
+                  <FaTrophy /> Vedi risultati della settimana
+                </button>
+              </div>
+            )}
 
           </aside>
 
@@ -340,7 +343,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* NUOVO MODALE RISULTATI */}
+      {/* MODALE RISULTATI */}
       {showResults && (
         <ResultsModal onClose={() => setShowResults(false)} />
       )}

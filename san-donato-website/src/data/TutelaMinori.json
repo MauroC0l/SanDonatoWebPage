@@ -1,11 +1,11 @@
 {
   "header": {
     "title": "Tutela dei Minori",
-    "subtitle": "Impegno, Responsabilità e Trasparenza per la sicurezza dei nostri atleti."
+    "subtitle": "Impegno, responsabilità e trasparenza per la sicurezza della community."
   },
   "intro": {
     "title": "Il Nostro Impegno",
-    "text": "La A.S.D. Polisportiva San Donato si impegna quotidianamente a garantire un ambiente sicuro, inclusivo e rispettoso per tutti i giovani atleti. Lo sport deve essere un’esperienza positiva e sicura per tutti i bambini e per tutti i ragazzi."
+    "text": "La A.S.D. Polisportiva San Donato si impegna quotidianamente a garantire un ambiente sicuro, inclusivo e rispettoso. Lo sport deve essere un’esperienza positiva e sicura, soprattutto per bambine, bambini e adolescenti."
   },
   "documents": [
     {
@@ -29,7 +29,7 @@
   ],
   "safeguarding": {
     "title": "Responsabile Safeguarding",
-    "description": "Per segnalazioni o informazioni relative alla tutela dei minori, è possibile contattare il nostro Responsabile contro abusi, violenze e discriminazioni:",
+    "description": "Per segnalazioni o informazioni relative alla tutela delle persone minorenni, è possibile contattare la nostra figura di riferimento contro abusi, violenze e discriminazioni a questo indirizzo: ",
     "officerName": "Avv. Nome Cognome", 
     "contactEmail": "safeguarding@polisportivasandonato.it" 
   }

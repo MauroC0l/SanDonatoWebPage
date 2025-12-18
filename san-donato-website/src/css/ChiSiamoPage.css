@@ -21,11 +21,23 @@
 
 /* --- 1. HERO & BADGE --- */
 .csp-hero-block {
-  /* Padding fluido */
+  /* BACKGROUND SU TUTTA LA FASCIA */
+  background-image: url('/chiSiamoPage/Sfondo_sito.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Impostazioni Full Width */
+  width: 100%;
+  max-width: none; /* Rimuoviamo il limite di 1200px qui */
+  margin: 0;
+  
+  /* Padding fluido (invariato) */
   padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem) clamp(2rem, 8vw, 4rem); 
   text-align: left;
-  max-width: 1200px;
-  margin: 0 auto;
+  
+  /* Necessario per posizionare l'overlay */
+  position: relative;
 }
 
 /* Nuovo Stile Badge "Dal 2008" */
@@ -62,6 +74,25 @@
   line-height: 1;
   margin: 0 0 1.5rem 0;
   color: var(--c-dark);
+}
+
+.csp-hero-content {
+  position: relative; /* Per stare sopra l'overlay */
+  z-index: 1;
+  
+  /* Qui rimettiamo il limite di larghezza per allineare il testo col resto del sito */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* (Opzionale) Overlay per migliorare la leggibilità del testo sull'immagine */
+.csp-hero-block::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* Regola l'ultimo numero (0.85) per rendere l'immagine più o meno visibile */
+  background: rgba(255, 255, 255, 0.85); 
+  z-index: 0;
 }
 
 .csp-text-gradient {
@@ -186,7 +217,59 @@
 .csp-divider-small { width: 40px; height: 3px; background: rgba(255,255,255,0.2); margin-bottom: 1rem; }
 .csp-org-card-glass p { font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.7); margin: 0; }
 
-/* --- 4. MEMBERSHIP (Expanded Layout) --- */
+/* --- 4. NEW STAFF SECTION (Twin Cards) --- */
+.csp-staff-section {
+  padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 5vw, 2rem);
+  background: #fff;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.csp-staff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.csp-staff-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-left: 5px solid var(--c-accent); /* Accent laterale */
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.csp-staff-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.csp-staff-icon {
+  font-size: 2.5rem;
+  color: var(--c-blue);
+  margin-bottom: 1rem;
+}
+
+.csp-staff-card h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--c-dark);
+  margin: 0 0 0.5rem 0;
+}
+
+.csp-staff-card p {
+  font-size: 1rem;
+  color: var(--c-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --- 5. MEMBERSHIP (Expanded Layout) --- */
 .csp-membership-section {
   /* Padding fluido */
   padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem); 
@@ -292,6 +375,8 @@
     max-width: 450px; 
     margin-inline: auto;
   }
+  .csp-staff-grid { grid-template-columns: 1fr; } /* Responsive per staff */
+  
   .csp-impact-bar { 
     /* Passa ad una colonna o wrap */
     flex-direction: column; 
@@ -307,7 +392,7 @@
   }
 }
 
-/* --- AGGIUNTA FONDAMENTALE PER ANIMAZIONE --- */
+/* --- ANIMAZIONE FADE IN --- */
 .csp-fade-in {
   animation: cspPageEntry 0.6s ease-out forwards;
   opacity: 0;

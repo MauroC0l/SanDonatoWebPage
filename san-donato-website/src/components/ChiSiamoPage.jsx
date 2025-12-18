@@ -10,7 +10,7 @@ import {
   FaUsersGear,
   FaFileSignature,
   FaWallet,
-  FaGraduationCap
+  FaGraduationCap,
 } from "react-icons/fa6";
 import { IoRibbon, IoBusiness } from "react-icons/io5";
 import "../css/ChiSiamoPage.css"; 
@@ -30,11 +30,11 @@ const ICON_MAP = {
   wallet: <FaWallet />,
   signature: <FaFileSignature />,
   gears: <FaUsersGear />,
-  gradcap: <FaGraduationCap />
+  gradcap: <FaGraduationCap />,
 };
 
 export default function ChiSiamoPage() {
-  const { hero, manifesto, organigramma, kits, impact, footer } = chiSiamoData;
+  const { hero, manifesto, organigramma, staff, kits, impact, footer } = chiSiamoData;
 
   return (
     // Aggiunto "csp-fade-in" per animazione d'ingresso
@@ -96,6 +96,29 @@ export default function ChiSiamoPage() {
         </div>
       </section>
 
+      {/* --- NUOVA SEZIONE: STAFF TECNICO & EDUCATIVO --- */}
+      <section className="csp-staff-section">
+        <div className="csp-section-header csp-center">
+          <h2>Staff Tecnico & Educativo</h2>
+          <div className="csp-header-line"></div>
+          <p style={{color: 'var(--c-text-muted)', marginTop: '1rem'}}>
+            Il cuore pulsante della nostra attività in campo.
+          </p>
+        </div>
+
+        <div className="csp-staff-grid">
+          {staff && staff.map((member, idx) => (
+            <div className="csp-staff-card" key={idx}>
+              <div className="csp-staff-icon">
+                {ICON_MAP[member.iconKey]}
+              </div>
+              <h3>{member.role}</h3>
+              <p>{member.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* 4. MEMBERSHIP & IMPACT */}
       <section className="csp-membership-section">
         <div className="csp-section-header csp-center">
@@ -146,10 +169,6 @@ export default function ChiSiamoPage() {
         </div>
 
       </section>
-
-      <footer className="csp-page-footer">
-        <p>{footer}</p>
-      </footer>
 
     </div>
   );

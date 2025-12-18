@@ -3,33 +3,33 @@
     "badgeText": "Dal 2008 Insieme",
     "titlePrefix": "Sport al",
     "titleHighlight": "Futuro Presente.",
-    "subtitle": "Nati il 29 febbraio 2008 per educare attraverso lo sport. Oggi siamo 350 tesserati uniti da valori di condivisione e libertà."
+    "subtitle": "Nata il 29 febbraio 2008 per educare attraverso lo sport, la Polisportiva San Donato oggi conta <strong>350 tesseramenti</strong>, fondati su valori di condivisione e libertà."
   },
   "manifesto": [
     { 
       "iconKey": "balance", 
       "title": "Uguaglianza", 
-      "text": "Uguali nel diritto a divertirsi, diversi nelle capacità." 
+      "text": "Pari diritto al divertimento e rispetto per le diverse capacità." 
     },
     { 
       "iconKey": "heart", 
       "title": "Serenità", 
-      "text": "Un clima senza pressioni: conta l'applicazione, non la performance." 
+      "text": "Clima senza pressioni. Contano l’impegno e il percorso, non la performance." 
     },
     { 
       "iconKey": "handshake", 
       "title": "Fair Play", 
-      "text": "Rispetto dell'avversario. Rifiuto netto della violenza." 
+      "text": "Rispetto reciproco e rifiuto netto di ogni forma di violenza." 
     },
     { 
       "iconKey": "group", 
       "title": "Squadra", 
-      "text": "Vittoria e sconfitta sono sempre condivise. Nessuno è solo." 
+      "text": "Vittorie e sconfitte sono sempre condivise. In squadra si affronta tutto insieme." 
     },
     { 
       "iconKey": "child", 
       "title": "Educazione", 
-      "text": "L'allenatore non addestra ma educa alla felicità del ragazzo." 
+      "text": "Chi accompagna l’attività sportiva non si limita ad allenare, ma educa al benessere e alla felicità." 
     },
     { 
       "iconKey": "map", 
@@ -62,16 +62,18 @@
       "role": "Resp. di Settore", 
       "iconKey": "gears", 
       "desc": "Coordinamento tecnico, rapporti con Federazioni e gare." 
+    }
+  ],
+  "staff": [
+    {
+      "role": "Allenatori e Allenatrici",
+      "iconKey": "whistle",
+      "desc": "Formazione, tecnica ed esempio di comportamento in campo."
     },
-    { 
-      "role": "Allenatori", 
-      "iconKey": "tie", 
-      "desc": "Educatori formati, esempio di comportamento in campo." 
-    },
-    { 
-      "role": "Aiuto Allenatori", 
-      "iconKey": "gradcap", 
-      "desc": "Giovani (16-18 anni) in formazione affiancati ai coach." 
+    {
+      "role": "Aiuto Allenatori/trici",
+      "iconKey": "gradcap",
+      "desc": "Giovani (16-18 anni) in formazione che affiancano lo staff durante gli allenamenti e in partita."
     }
   ],
   "kits": [
