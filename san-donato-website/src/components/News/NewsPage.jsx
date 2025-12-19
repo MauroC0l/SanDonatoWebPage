@@ -77,7 +77,7 @@ export default function NewsPage() {
 
   return (
     <section className="news-section">
-      <h2 className="news-section-title">Notizie della Polisportiva San Paolo</h2>
+      <h2 className="news-section-title">Notizie della Polisportiva San Donato</h2>
 
       {loading ? (
         <div className="loader-container">
