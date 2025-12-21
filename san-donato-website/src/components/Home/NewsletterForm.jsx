@@ -1,13 +1,12 @@
 import { useState } from 'react';
 
-export default function NewsletterForm() {
-  // Usiamo i nomi standard come da tua richiesta salvata
+const NewsletterForm = () => {
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     email: ''
   });
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState(null); // 'loading', 'success', 'error'
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,86 +17,68 @@ export default function NewsletterForm() {
     setStatus('loading');
 
     try {
-      const res = await fetch('/api/newsletter', {
+      // Chiamata al TUO backend (non direttamente a MailerLite)
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json(); // Leggiamo la risposta JSON
-
-      if (!res.ok) {
-        // Logghiamo l'errore specifico che arriva dal backend
-        console.error("Errore API:", data);
-        throw new Error(data.error?.message || 'Errore iscrizione');
+      if (response.ok) {
+        setStatus('success');
+        setFormData({ first_name: '', last_name: '', email: '' }); // Reset form
+      } else {
+        setStatus('error');
       }
-
-      setStatus('success');
-      setFormData({ first_name: '', last_name: '', email: '' });
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       setStatus('error');
     }
   };
 
   return (
-    <div className="p-4 border rounded shadow-md max-w-md mx-auto nl-form-box">
-      <h3 className="text-lg font-bold mb-4">Iscriviti alla Newsletter</h3>
-      
-      {status === 'success' ? (
-        <p className="text-green-600">Grazie! Ti sei iscritto con successo.</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <div>
-            <label className="block text-sm font-medium">Nome</label>
-            <input
-              type="text"
-              name="first_name" 
-              value={formData.first_name}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-              placeholder="Il tuo nome"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {/* Campo First Name */}
+      <input
+        type="text"
+        name="first_name"
+        placeholder="Il tuo nome"
+        value={formData.first_name}
+        onChange={handleChange}
+        required
+        className="border p-2 rounded"
+      />
 
-          <div>
-            <label className="block text-sm font-medium">Cognome</label>
-            <input
-              type="text"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-              placeholder="Il tuo cognome"
-            />
-          </div>
+      {/* Campo Last Name */}
+      <input
+        type="text"
+        name="last_name"
+        placeholder="Il tuo cognome"
+        value={formData.last_name}
+        onChange={handleChange}
+        required
+        className="border p-2 rounded"
+      />
 
-          <div>
-            <label className="block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-2 border rounded"
-              placeholder="latua@email.com"
-            />
-          </div>
+      {/* Campo Email */}
+      <input
+        type="email"
+        name="email"
+        placeholder="La tua email"
+        value={formData.email}
+        onChange={handleChange}
+        required
+        className="border p-2 rounded"
+      />
 
-          <button 
-            type="submit" 
-            disabled={status === 'loading'}
-            className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {status === 'loading' ? 'Caricamento...' : 'Iscriviti'}
-          </button>
-          
-          {status === 'error' && <p className="text-red-500 text-sm">Qualcosa è andato storto. Riprova.</p>}
-        </form>
-      )}
-    </div>
+      <button type="submit" disabled={status === 'loading'} className="bg-blue-600 text-white p-2 rounded">
+        {status === 'loading' ? 'Invio in corso...' : 'Iscriviti'}
+      </button>
+
+      {status === 'success' && <p className="text-green-600">Iscrizione avvenuta con successo!</p>}
+      {status === 'error' && <p className="text-red-600">Errore. Riprova più tardi.</p>}
+    </form>
   );
-}
+};
+
+export default NewsletterForm;
