@@ -27,30 +27,47 @@ export default function NewsList({ news }) {
   return (
     <div className="news-container container">
       <div className="news-grid">
-        {currentNews.map((p) => (
-          <article key={p.id} className="news-card">
-            <div className="news-image-wrapper">
-              {p.image && <img src={p.image} alt={p.title} className="news-image" />}
-            </div>
-            <div className="news-content">
-              <h3 className="news-title">{p.title}</h3>
-              <p className="news-excerpt">{p.preview}</p>
+        {currentNews.map((p) => {
+          // LOGICA IMMAGINE:
+          // Usa l'immagine del post se esiste, altrimenti usa il placeholder
+          const displayImage = p.image || "/logo-polisportiva.png";
 
-              <div className="news-footer">
-                <div className="news-author-date">
-                  <div className="news-author">{p.author}</div>
-                  <div className="news-date">{p.date}</div>
-                </div>
-                <Button
-                  className="news-btn"
-                  onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
-                >
-                  Leggi
-                </Button>
+          return (
+            <article key={p.id} className="news-card">
+              {/* Wrapper immagine cliccabile per andare al dettaglio */}
+              <div 
+                className="news-image-wrapper"
+                onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
+                style={{ cursor: "pointer" }}
+                title="Leggi la notizia"
+              >
+                <img 
+                  src={displayImage} 
+                  alt={p.title} 
+                  className="news-image" 
+                />
               </div>
-            </div>
-          </article>
-        ))}
+
+              <div className="news-content">
+                <h3 className="news-title">{p.title}</h3>
+                <p className="news-excerpt">{p.preview}</p>
+
+                <div className="news-footer">
+                  <div className="news-author-date">
+                    <div className="news-author">{p.author}</div>
+                    <div className="news-date">{p.date}</div>
+                  </div>
+                  <Button
+                    className="news-btn"
+                    onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
+                  >
+                    Leggi
+                  </Button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       {totalPages > 1 && (
