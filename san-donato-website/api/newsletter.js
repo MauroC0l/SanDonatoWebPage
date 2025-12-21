@@ -1,7 +1,5 @@
 // File: /api/newsletter.js
 
-// File: /api/newsletter.js
-
 export default async function handler(req, res) {
   console.log(`Richiesta ricevuta: ${req.method}`);
 
@@ -28,15 +26,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Manteniamo first_name e last_name in ingresso (dal Frontend)
     const { email, first_name, last_name } = req.body;
 
     // --- LEGGERE LE VARIABILI D'AMBIENTE ---
-    // NOTA: Nel backend non usiamo "VITE_", usiamo i nomi puri
     const BREVO_API_KEY = process.env.VITE_BREVO_API_KEY;
     const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID); 
-
-    console.log("KEY: ", BREVO_API_KEY);
-    console.log("LIST ID: ", BREVO_LIST_ID);
 
     console.log("--- DEBUG START ---");
     console.log("API Key letta:", BREVO_API_KEY ? "SI" : "NO");
@@ -49,15 +44,11 @@ export default async function handler(req, res) {
     }
 
     // Check configurazione server
-    // (Qui c'era l'errore VITE_VITE_)
     if (!BREVO_API_KEY) {
       console.error("Configurazione mancante API KEY.");
       return res.status(500).json({ 
          error: 'Errore configurazione server (manca API KEY)',
-         debug: {
-           apiKeyExists: !!BREVO_API_KEY,
-           listId: BREVO_LIST_ID
-         }
+         debug: { apiKeyExists: false }
       });
     }
     
@@ -65,10 +56,7 @@ export default async function handler(req, res) {
       console.error("Configurazione mancante LIST ID.");
       return res.status(500).json({ 
          error: 'Errore configurazione server (manca LIST ID)',
-         debug: {
-           apiKeyExists: !!BREVO_API_KEY,
-           listId: BREVO_LIST_ID
-         }
+         debug: { listId: BREVO_LIST_ID }
       });
     }
 
@@ -81,6 +69,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         email: email,
+        // QUI AVVIENE LA MAGIA: Mappiamo le variabili interne (first_name) sugli attributi Brevo (NOME)
         attributes: {
           NOME: first_name,
           COGNOME: last_name
