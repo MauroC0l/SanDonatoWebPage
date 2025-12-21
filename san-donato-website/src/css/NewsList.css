@@ -4,126 +4,149 @@
   padding: 0;
 }
 
-/* --- Griglia Responsive Avanzata --- */
+/* --- Griglia Responsive (3 per riga Orizzontali) --- */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+  /* minmax(380px, 1fr) permette di averne 3 su schermi da 1200px+ 
+     Se lo schermo è più piccolo, scenderanno a 2 o 1 automaticamente.
+  */
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.2rem; /* Spazio tra le card */
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* --- Card Design --- */
+/* --- Card Design (Layout Orizzontale Compatto) --- */
 .news-card {
   background: var(--bg-surface);
   border-radius: var(--radius-md);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: flex;       /* Flexbox */
+  flex-direction: row; /* Orizzontale: Immagine Sx, Testo Dx */
+  height: 100%;        /* Uniforma l'altezza delle card nella stessa riga */
+  min-height: 160px;   /* Altezza minima ridotta per compattezza */
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  height: 100%;
   position: relative;
 }
 
 .news-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
   border-color: rgba(255, 123, 51, 0.3);
 }
 
-/* Wrapper Immagine 16:9 */
+/* Wrapper Immagine (Sinistra) */
 .news-image-wrapper {
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  /* Riduco la larghezza al 32% per lasciare spazio al testo */
+  flex: 0 0 32%; 
+  max-width: 32%;
+  
+  height: auto; /* Segue l'altezza della card */
   overflow: hidden;
-  background-color: #e2e8f0;
+  background-color: #ffffff;
   position: relative;
+  border-right: 1px solid #f1f5f9;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .news-image {
   width: 100%;
   height: 100%;
+  padding: 8px; /* Padding ridotto */
   object-fit: contain;
-  /* <--- MODIFICA QUI: da 'cover' a 'contain' */
   transition: transform 0.6s ease;
 }
 
 .news-card:hover .news-image {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
-/* Contenuto Card */
+/* Contenuto Card (Destra) */
 .news-content {
-  padding: 1.5rem;
+  flex: 1; 
+  padding: 1rem; /* Padding ridotto per guadagnare spazio */
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  justify-content: space-between;
+  min-width: 0; /* Previene bug di overflow flex */
 }
 
 .news-title {
-  font-size: 1.15rem;
-  line-height: 1.4;
+  font-size: 1.05rem; /* Font leggermente più piccolo */
+  line-height: 1.25;
   font-weight: 700;
   color: var(--primary-color);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
+  
+  /* Limita a 2 righe, ma gestisce meglio lo spazio */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2; 
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .news-excerpt {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  line-height: 1.4;
+  margin-bottom: 0.8rem;
+  
+  /* Permette 3 righe di testo */
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3; 
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex-grow: 1;
+  flex-grow: 1; 
 }
 
 /* Footer Card (Autore/Data e Bottone) */
 .news-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* Allinea in basso */
   justify-content: space-between;
-  padding-top: 1rem;
+  padding-top: 0.5rem;
   border-top: 1px solid #f1f5f9;
-  margin-top: auto;
+  margin-top: auto; 
 }
 
 .news-author-date {
   display: flex;
   flex-direction: column;
-  font-size: 0.8rem;
+  font-size: 0.7rem; /* Font footer piccolo */
+  line-height: 1.2;
 }
 
 .news-author {
   font-weight: 700;
   color: var(--primary-light);
   text-transform: capitalize;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .news-date {
   color: #94a3b8;
-  margin-top: 2px;
 }
 
-/* Bottone Leggi "Ghost" */
+/* Bottone ridimensionato */
 .news-btn {
   background: transparent;
   color: var(--accent-color);
   border: 1px solid var(--accent-color);
-  padding: 0.5rem 1.2rem;
-  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem; /* Bottone più compatto */
+  font-size: 0.75rem;
   font-weight: 600;
   border-radius: 50px;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .news-btn:hover {
@@ -132,18 +155,19 @@
   box-shadow: 0 4px 10px rgba(255, 123, 51, 0.3);
 }
 
-/* --- Paginazione Moderna --- */
+/* --- Paginazione --- */
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 0.6rem;
-  margin-top: 4rem;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 }
 
 .page-btn {
-  width: 40px;
-  height: 40px;
+  width: 35px; /* Bottoni paginazione più piccoli */
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +176,7 @@
   border-radius: 50%;
   color: var(--text-muted);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   cursor: pointer;
@@ -171,19 +195,14 @@
   transform: scale(1.1);
 }
 
-/* Stato caricamento/vuoto */
-/* ✅ MODIFICA: Centratura perfetta del loader */
+/* Stati caricamento */
 .loader-container,
 .no-news-message {
   grid-column: 1 / -1;
   display: flex;
-  /* Aggiunto flex */
   justify-content: center;
-  /* Centra orizzontalmente */
   align-items: center;
-  /* Centra verticalmente */
   min-height: 300px;
-  /* Altezza minima per dare spazio */
   width: 100%;
   padding: 4rem 0;
   color: var(--text-muted);
@@ -200,11 +219,43 @@
 }
 
 @keyframes rotation {
-  0% {
-    transform: rotate(0deg);
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =========================================
+   MEDIA QUERIES
+   ========================================= */
+
+/* Tablet (sotto i 1200px): passiamo a 2 colonne per evitare schiacciamento */
+@media (max-width: 1200px) {
+  .news-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  }
+}
+
+/* Mobile (sotto i 768px): Card Verticale (impilata) */
+/* Su mobile la card orizzontale è illeggibile, meglio switchare a verticale qui */
+@media (max-width: 768px) {
+  .news-grid {
+    grid-template-columns: 1fr;
   }
 
-  100% {
-    transform: rotate(360deg);
+  .news-card {
+    flex-direction: column; /* Diventa verticale solo su mobile */
+    height: auto;
+  }
+
+  .news-image-wrapper {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+    height: 180px; 
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .news-content {
+    padding: 1.2rem;
   }
 }
