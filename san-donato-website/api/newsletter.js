@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   }
 
   // 3. Controllo API Key
-  const API_KEY = process.env.MAILERLITE_API_KEY;
+  const API_KEY = process.env.VITE_MAILERLITE_API_KEY;
   if (!API_KEY) {
     console.error("[CRITICAL] MAILERLITE_API_KEY non trovata nelle variabili d'ambiente!");
     return res.status(500).json({ 
