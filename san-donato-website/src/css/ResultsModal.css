@@ -16,7 +16,7 @@
 .rm-container {
     background: #f8fafc;
     width: 100%;
-    max-width: 500px; /* Più stretto per sembrare più mobile-app like */
+    max-width: 480px; /* Leggermente più stretto per un look più mobile-first */
     height: 85vh;
     max-height: 750px;
     border-radius: 24px;
@@ -32,7 +32,7 @@
    HEADER
    ========================================== */
 .rm-header {
-    padding: 1.2rem 1.5rem;
+    padding: 1rem 1.5rem; /* Header leggermente più basso */
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
@@ -49,7 +49,7 @@
 
 .rm-header-title h2 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Titolo leggermente più piccolo */
     font-weight: 800;
     color: #0f172a;
     letter-spacing: -0.5px;
@@ -57,16 +57,16 @@
 }
 
 .rm-trophy-icon {
-    color: #f59e0b; /* Amber 500 */
-    font-size: 1.3rem;
+    color: #f59e0b;
+    font-size: 1.2rem;
 }
 
 .rm-close-btn {
     background: #f1f5f9;
     border: none;
     color: #64748b;
-    width: 32px;
-    height: 32px;
+    width: 30px; /* Bottone leggermente più piccolo */
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -81,41 +81,64 @@
 }
 
 /* ==========================================
-   CONTENT LIST
+   CONTENT LIST & SCROLLBAR
    ========================================== */
 .rm-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 1.5rem;
-    background: #f1f5f9; /* Sfondo leggermente grigio per far risaltare le card bianche */
+    padding: 1rem; /* Meno padding laterale nel contenitore principale */
+    background: #f1f5f9;
+    
+    /* Modern Scrollbar (Firefox) */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Modern Scrollbar (Chrome, Safari, Edge) */
+.rm-content::-webkit-scrollbar {
+    width: 5px; /* Scrollbar ancora più sottile */
+}
+
+.rm-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rm-content::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
 }
 
 .rm-list {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem; /* Spazio tra le card ridotto */
 }
 
 /* ==========================================
-   RESULT CARD STYLE (MODERN)
+   RESULT CARD STYLE (COMPACT & MODERN)
    ========================================== */
 .rm-card {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    padding: 1.5rem;
+    border-radius: 14px; /* Raggio leggermente ridotto */
+    /* Ombra più sofisticata e "layered" */
+    box-shadow: 
+        0 1px 3px 0 rgba(0, 0, 0, 0.05), 
+        0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    padding: 1.2rem 1rem; /* Padding interno ridotto significativamente per compattezza */
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    transition: transform 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
 
 .rm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.07), 
+        0 2px 4px -2px rgba(0, 0, 0, 0.07);
 }
 
 /* HEADER INTERNO CARD */
@@ -124,11 +147,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* Meno spazio sotto l'header */
 }
 
 .rm-date {
-    font-size: 0.75rem;
+    font-size: 0.7rem; /* Data più piccola */
     font-weight: 700;
     text-transform: uppercase;
     color: #94a3b8;
@@ -137,67 +160,70 @@
 
 .rm-category-badge {
     color: white;
-    font-size: 0.65rem;
+    font-size: 0.6rem; /* Badge più piccolo */
     font-weight: 800;
     text-transform: uppercase;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 3px 8px;
+    border-radius: 5px;
     letter-spacing: 0.5px;
 }
 
-/* HERO SCORE (IL RISULTATO) */
+/* HERO SCORE (IL RISULTATO - RIDOTTO) */
 .rm-hero-score {
-    margin: 0.5rem 0 1.5rem 0;
+    /* Margini verticali molto ridotti per avvicinare il risultato */
+    margin: 0.25rem 0 1rem 0; 
 }
 
 .rm-score-display {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    font-family: 'Inter', sans-serif; /* Assicurati di avere un font sans-serif pulito */
+    gap: 8px; /* Gap ridotto tra i numeri */
+    font-family: 'Inter', sans-serif;
 }
 
 .rm-score-num {
-    font-size: 3.5rem;
+    font-size: 2.75rem; /* Dimensione significativamente ridotta (era 3.5rem) */
     font-weight: 900;
     line-height: 1;
     color: #0f172a;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -1px; /* Tracking più stretto per un look moderno */
 }
 
 .rm-score-divider {
-    font-size: 2rem;
+    font-size: 1.5rem; /* Divisore ridotto */
     color: #cbd5e1;
-    margin-top: -6px; /* Aggiustamento visivo verticale */
+    font-weight: 300;
+    margin-top: -4px;
 }
 
 .rm-score-text {
-    font-size: 1.5rem;
+    font-size: 1.25rem; /* Testo fallback ridotto */
     font-weight: 800;
     color: #334155;
 }
 
-/* DETAILS SECTION (Marcatori & Parziali) */
+/* DETAILS SECTION (Compact) */
 .rm-details-container {
     width: 100%;
     border-top: 1px dashed #e2e8f0;
-    padding-top: 1rem;
+    padding-top: 0.8rem; /* Meno padding sopra i dettagli */
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.6rem; /* Meno spazio tra le righe dei dettagli */
 }
 
 .rm-detail-row {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
     text-align: left;
 }
 
 .rm-icon-wrapper {
-    margin-top: 2px;
-    font-size: 1rem;
+    margin-top: 1px;
+    font-size: 0.9rem; /* Icone leggermente più piccole */
     opacity: 0.8;
     flex-shrink: 0;
 }
@@ -208,26 +234,27 @@
 }
 
 .rm-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 700;
     color: #94a3b8;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .rm-value {
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Valori leggermente più piccoli */
     font-weight: 600;
     color: #334155;
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .font-mono {
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     background: #f1f5f9;
-    padding: 2px 6px;
+    padding: 1px 5px;
     border-radius: 4px;
     display: inline-block;
+    font-size: 0.8rem;
 }
 
 /* LOADER & EMPTY STATES */
@@ -242,10 +269,10 @@
 }
 
 .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #e2e8f0;
-    border-top: 4px solid #0f172a;
+    width: 36px; /* Spinner leggermente più piccolo */
+    height: 36px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #0f172a;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -262,11 +289,12 @@
 
 .rm-empty-icon {
     opacity: 0.3;
+    font-size: 3rem; /* Icona empty ridotta */
 }
 
 /* ANIMATIONS */
 @keyframes rm-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rm-slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes rm-slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* MOBILE RESPONSIVE */
@@ -281,7 +309,11 @@
         max-width: 100%;
     }
     
+    .rm-card {
+         padding: 1rem 0.8rem; /* Ancora più compatto su mobile */
+    }
+
     .rm-score-num {
-        font-size: 3rem;
+        font-size: 2.5rem; /* Risultato leggermente più piccolo su mobile */
     }
 }
