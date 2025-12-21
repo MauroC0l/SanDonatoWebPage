@@ -69,10 +69,10 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         email: email,
-        // QUI AVVIENE LA MAGIA: Mappiamo le variabili interne (first_name) sugli attributi Brevo (NOME)
         attributes: {
-          NOME: first_name,
-          COGNOME: last_name
+          // Brevo spesso usa questi internamente anche se mostra "NOME" nella UI
+          FIRSTNAME: first_name,
+          LASTNAME: last_name
         },
         listIds: [BREVO_LIST_ID],
         updateEnabled: true
