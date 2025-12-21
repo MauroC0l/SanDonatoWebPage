@@ -99,8 +99,6 @@ export default function NewsPage() {
             <Form>
               <FilterGroup label="Sport" options={sportsList} selected={sportFilter} toggleFilter={toggleFilter} setFilter={setSportFilter} />
               
-              {/* ✅ RIMOSSO IL FILTRO AUTORE */}
-
               <Form.Group className="form-group">
                 <Form.Label className="form-label">Periodo</Form.Label>
                 <DatePicker

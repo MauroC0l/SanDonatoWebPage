@@ -50,7 +50,6 @@ export default function NewsList({ news }) {
                 <p className="news-excerpt">{p.preview}</p>
 
                 <div className="news-footer">
-                  {/* ✅ RIMOSSO L'AUTORE, SOLO DATA */}
                   <div className="news-date">{p.date}</div>
                   
                   <Button

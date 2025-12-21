@@ -57,10 +57,6 @@ export default function NewsDetail() {
 
           <div className="nd-meta-data">
             <div className="nd-meta-item">
-              <span className="nd-meta-label">Autore</span>
-              <span className="nd-meta-value">{post.author}</span>
-            </div>
-            <div className="nd-meta-item">
               <span className="nd-meta-label">Pubblicato il</span>
               <span className="nd-meta-value">{post.date}</span>
             </div>
