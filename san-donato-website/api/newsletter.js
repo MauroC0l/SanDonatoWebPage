@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
     // --- DEBUG VARIABILI (LOG NELLA CONSOLE DI VERCEL) ---
     const rawApiKey = process.env.BREVO_API_KEY;
-    const rawListId = process.env.BREVO_LIST_ID;
+    const rawListId = process.env.VITE_BREVO_LIST_ID;
     
     console.log("--- DEBUG START ---");
     console.log("API Key letta:", rawApiKey ? "SI (Presente)" : "NO (Undefined)");
@@ -44,10 +44,10 @@ export default async function handler(req, res) {
     }
 
     const BREVO_API_KEY = rawApiKey;
-    const BREVO_LIST_ID = Number(rawListId);
+    const VITE_BREVO_LIST_ID = Number(rawListId);
 
     // Check configurazione server
-    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+    if (!BREVO_API_KEY || !VITE_VITE_BREVO_LIST_ID) {
       console.error("Configurazione mancante. Variabili non lette.");
       // Restituiamo info di debug al frontend per capire cosa succede
       return res.status(500).json({ 
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
          debug: {
            apiKeyExists: !!BREVO_API_KEY,
            listIdRaw: rawListId,
-           listIdParsed: BREVO_LIST_ID
+           listIdParsed: VITE_BREVO_LIST_ID
          }
       });
     }
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
           NOME: first_name,
           COGNOME: last_name
         },
-        listIds: [BREVO_LIST_ID],
+        listIds: [VITE_BREVO_LIST_ID],
         updateEnabled: true
       })
     };
