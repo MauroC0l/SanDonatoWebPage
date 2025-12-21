@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     console.log("KEY: ", BREVO_API_KEY);
     console.log("LIST ID: ", BREVO_LIST_ID);
-    console.log("VITE BESTEMMIA: ", process.env.VITE_BESTEMMIA);
+    console.log("VITE KEY: ", process.env.VITE_CALCIO_U12_CALENDAR_ID);
 
     console.log("--- DEBUG START ---");
     console.log("API Key letta:", BREVO_API_KEY ? "SI" : "NO");
