@@ -1,5 +1,7 @@
 // File: /api/newsletter.js
 
+// File: /api/newsletter.js
+
 export default async function handler(req, res) {
   console.log(`Richiesta ricevuta: ${req.method}`);
 
@@ -17,7 +19,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Rispondi con 200 se apri l'URL nel browser (GET)
   if (req.method === 'GET') {
     return res.status(200).json({ status: 'Online' });
   }
@@ -29,33 +30,30 @@ export default async function handler(req, res) {
   try {
     const { email, first_name, last_name } = req.body;
 
-    // --- DEBUG VARIABILI (LOG NELLA CONSOLE DI VERCEL) ---
-    const rawApiKey = process.env.BREVO_API_KEY;
-    const rawListId = process.env.VITE_BREVO_LIST_ID;
-    
+    // --- LEGGERE LE VARIABILI D'AMBIENTE ---
+    // NOTA: Nel backend non usiamo "VITE_", usiamo i nomi puri
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID); 
+
     console.log("--- DEBUG START ---");
-    console.log("API Key letta:", rawApiKey ? "SI (Presente)" : "NO (Undefined)");
-    console.log("List ID letto:", rawListId);
-    // -----------------------------------------------------
+    console.log("API Key letta:", BREVO_API_KEY ? "SI" : "NO");
+    console.log("List ID letto:", BREVO_LIST_ID);
+    // ------------------------------------
 
     // Check dati frontend
     if (!email || !first_name || !last_name) {
       return res.status(400).json({ error: 'Dati mancanti dal form (email, first_name, last_name)' });
     }
 
-    const BREVO_API_KEY = rawApiKey;
-    const VITE_BREVO_LIST_ID = Number(rawListId);
-
     // Check configurazione server
-    if (!BREVO_API_KEY || !VITE_VITE_BREVO_LIST_ID) {
-      console.error("Configurazione mancante. Variabili non lette.");
-      // Restituiamo info di debug al frontend per capire cosa succede
+    // (Qui c'era l'errore VITE_VITE_)
+    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+      console.error("Configurazione mancante.");
       return res.status(500).json({ 
          error: 'Errore configurazione server (Variabili mancanti)',
          debug: {
            apiKeyExists: !!BREVO_API_KEY,
-           listIdRaw: rawListId,
-           listIdParsed: VITE_BREVO_LIST_ID
+           listId: BREVO_LIST_ID
          }
       });
     }
@@ -73,7 +71,7 @@ export default async function handler(req, res) {
           NOME: first_name,
           COGNOME: last_name
         },
-        listIds: [VITE_BREVO_LIST_ID],
+        listIds: [BREVO_LIST_ID],
         updateEnabled: true
       })
     };
@@ -83,6 +81,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
         const errorData = await response.json();
         console.error("Errore Brevo:", errorData);
+        // Restituiamo l'errore esatto di Brevo
         return res.status(400).json({ error: errorData });
     }
 
