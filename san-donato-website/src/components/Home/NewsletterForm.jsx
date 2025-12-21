@@ -3,9 +3,9 @@ import { useState } from 'react';
 
 export default function NewsletterForm() {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: ''
+    NOME: '',
+    COGNOME: '',
+    EMAIL: ''
   });
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
@@ -27,7 +27,7 @@ export default function NewsletterForm() {
       if (!res.ok) throw new Error('Errore iscrizione');
 
       setStatus('success');
-      setFormData({ first_name: '', last_name: '', email: '' }); // Reset form
+      setFormData({ NOME: '', COGNOME: '', EMAIL: '' }); // Reset form
     } catch (e) {
       setStatus('error');
     }
@@ -45,8 +45,8 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Nome</label>
             <input
               type="text"
-              name="first_name"
-              value={formData.first_name}
+              name="NOME"
+              value={formData.NOME}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -57,8 +57,8 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Cognome</label>
             <input
               type="text"
-              name="last_name"
-              value={formData.last_name}
+              name="COGNOME"
+              value={formData.COGNOME}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
@@ -69,8 +69,8 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Email</label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
+              name="EMAIL"
+              value={formData.EMAIL}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
