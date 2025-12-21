@@ -1,199 +1,210 @@
 /* Container per la lista */
 .news-container {
-    width: 100%;
-    padding: 0; 
+  width: 100%;
+  padding: 0;
+}
+
+/* --- Griglia Responsive Avanzata --- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* --- Card Design --- */
+.news-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  height: 100%;
+  position: relative;
+}
+
+.news-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 123, 51, 0.3);
+}
+
+/* Wrapper Immagine 16:9 */
+.news-image-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: #e2e8f0;
+  position: relative;
+}
+
+.news-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* <--- MODIFICA QUI: da 'cover' a 'contain' */
+  transition: transform 0.6s ease;
+}
+
+.news-card:hover .news-image {
+  transform: scale(1.08);
+}
+
+/* Contenuto Card */
+.news-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.news-title {
+  font-size: 1.15rem;
+  line-height: 1.4;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 0.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news-excerpt {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+/* Footer Card (Autore/Data e Bottone) */
+.news-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.news-author-date {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.news-author {
+  font-weight: 700;
+  color: var(--primary-light);
+  text-transform: capitalize;
+}
+
+.news-date {
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Bottone Leggi "Ghost" */
+.news-btn {
+  background: transparent;
+  color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  padding: 0.5rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all var(--transition-fast);
+}
+
+.news-btn:hover {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(255, 123, 51, 0.3);
+}
+
+/* --- Paginazione Moderna --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 4rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #fff;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  background: #f1f5f9;
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.page-btn.active {
+  background: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(29, 53, 87, 0.4);
+  transform: scale(1.1);
+}
+
+/* Stato caricamento/vuoto */
+/* ✅ MODIFICA: Centratura perfetta del loader */
+.loader-container,
+.no-news-message {
+  grid-column: 1 / -1;
+  display: flex;
+  /* Aggiunto flex */
+  justify-content: center;
+  /* Centra orizzontalmente */
+  align-items: center;
+  /* Centra verticalmente */
+  min-height: 300px;
+  /* Altezza minima per dare spazio */
+  width: 100%;
+  padding: 4rem 0;
+  color: var(--text-muted);
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #e2e8f0;
+  border-bottom-color: var(--accent-color);
+  border-radius: 50%;
+  display: inline-block;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  /* --- Griglia Responsive Avanzata --- */
-  .news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+
+  100% {
+    transform: rotate(360deg);
   }
-  
-  /* --- Card Design --- */
-  .news-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    height: 100%;
-    position: relative;
-  }
-  
-  .news-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(255, 123, 51, 0.3);
-  }
-  
-  /* Wrapper Immagine 16:9 */
-  .news-image-wrapper {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background-color: #e2e8f0;
-    position: relative;
-  }
-  
-  .news-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s ease;
-  }
-  
-  .news-card:hover .news-image {
-    transform: scale(1.08);
-  }
-  
-  /* Contenuto Card */
-  .news-content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-  }
-  
-  .news-title {
-    font-size: 1.15rem;
-    line-height: 1.4;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.8rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .news-excerpt {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    flex-grow: 1;
-  }
-  
-  /* Footer Card (Autore/Data e Bottone) */
-  .news-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 1rem;
-    border-top: 1px solid #f1f5f9;
-    margin-top: auto;
-  }
-  
-  .news-author-date {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.8rem;
-  }
-  
-  .news-author {
-    font-weight: 700;
-    color: var(--primary-light);
-    text-transform: capitalize;
-  }
-  
-  .news-date {
-    color: #94a3b8;
-    margin-top: 2px;
-  }
-  
-  /* Bottone Leggi "Ghost" */
-  .news-btn {
-    background: transparent;
-    color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    padding: 0.5rem 1.2rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 50px;
-    transition: all var(--transition-fast);
-  }
-  
-  .news-btn:hover {
-    background: var(--accent-color);
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(255, 123, 51, 0.3);
-  }
-  
-  /* --- Paginazione Moderna --- */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-top: 4rem;
-    flex-wrap: wrap;
-  }
-  
-  .page-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: #fff;
-    border-radius: 50%;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .page-btn:hover {
-    background: #f1f5f9;
-    color: var(--primary-color);
-    transform: translateY(-2px);
-  }
-  
-  .page-btn.active {
-    background: var(--primary-color);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(29, 53, 87, 0.4);
-    transform: scale(1.1);
-  }
-  
-  /* Stato caricamento/vuoto */
-  /* ✅ MODIFICA: Centratura perfetta del loader */
-  .loader-container, .no-news-message {
-    grid-column: 1 / -1;
-    display: flex;          /* Aggiunto flex */
-    justify-content: center; /* Centra orizzontalmente */
-    align-items: center;     /* Centra verticalmente */
-    min-height: 300px;      /* Altezza minima per dare spazio */
-    width: 100%;
-    padding: 4rem 0;
-    color: var(--text-muted);
-  }
-  
-  .loader {
-    width: 48px;
-    height: 48px;
-    border: 5px solid #e2e8f0;
-    border-bottom-color: var(--accent-color);
-    border-radius: 50%;
-    display: inline-block;
-    animation: rotation 1s linear infinite;
-  }
-  
-  @keyframes rotation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+}

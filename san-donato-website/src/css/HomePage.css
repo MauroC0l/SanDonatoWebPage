@@ -449,8 +449,15 @@
   width: 80px;
   height: 80px;
   border-radius: 10px;
-  background-size: cover;
-  background-position: center;
+  
+  /* --- MODIFICA QUI --- */
+  background-size: contain;      /* Mostra l'immagine intera (come object-fit: contain) */
+  background-repeat: no-repeat;  /* Evita che l'immagine si ripeta negli spazi vuoti */
+  background-position: center;   /* Centra l'immagine nel riquadro */
+  background-color: #ffffff;     /* Sfondo bianco per riempire gli spazi vuoti */
+  border: 1px solid #e2e8f0;     /* Opzionale: un bordo leggero definisce meglio il box */
+  /* -------------------- */
+
   flex-shrink: 0;
 }
 
