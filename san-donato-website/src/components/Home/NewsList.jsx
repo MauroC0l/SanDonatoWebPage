@@ -28,13 +28,10 @@ export default function NewsList({ news }) {
     <div className="news-container container">
       <div className="news-grid">
         {currentNews.map((p) => {
-          // LOGICA IMMAGINE:
-          // Usa l'immagine del post se esiste, altrimenti usa il placeholder
           const displayImage = p.image || "/logo-polisportiva.png";
 
           return (
             <article key={p.id} className="news-card">
-              {/* Wrapper immagine cliccabile per andare al dettaglio */}
               <div 
                 className="news-image-wrapper"
                 onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
@@ -53,10 +50,9 @@ export default function NewsList({ news }) {
                 <p className="news-excerpt">{p.preview}</p>
 
                 <div className="news-footer">
-                  <div className="news-author-date">
-                    <div className="news-author">{p.author}</div>
-                    <div className="news-date">{p.date}</div>
-                  </div>
+                  {/* ✅ RIMOSSO L'AUTORE, SOLO DATA */}
+                  <div className="news-date">{p.date}</div>
+                  
                   <Button
                     className="news-btn"
                     onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}

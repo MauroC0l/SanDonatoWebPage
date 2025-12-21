@@ -1,5 +1,5 @@
 /* =========================================
-   1. SISTEMA DI VARIABILI & RESET
+   1. SISTEMA DI VARIABILI
    ========================================= */
 :root {
   /* Palette Colori */
@@ -7,20 +7,25 @@
   --primary-light: #457b9d;       /* Navy chiaro */
   --accent-color: #ff7b33;        /* Arancione vibrante */
   --accent-hover: #e65a10;        /* Arancione scuro */
+  
   --bg-body: #f8fafc;             /* Grigio ghiaccio */
   --bg-surface: #ffffff;          /* Bianco puro */
   --bg-input: #f1f5f9;            /* Sfondo input default */
+  --bg-input-hover: #e2e8f0;      /* Sfondo input hover */
+  
   --border-input: #cbd5e1;        /* Bordo input */
+  --border-light: rgba(255, 255, 255, 0.6);
+  
   --text-main: #1e293b;
   --text-muted: #64748b;
+  --text-inverse: #ffffff;
   
   /* Spaziature e Forme */
   --radius-sm: 8px;
   --radius-md: 16px;
-  --radius-lg: 24px;
   --shadow-sm: 0 4px 12px rgba(29, 53, 87, 0.05);
   --shadow-md: 0 10px 30px rgba(29, 53, 87, 0.08);
-  --shadow-focus: 0 0 0 4px rgba(255, 123, 51, 0.15); /* Glow arancione */
+  --shadow-focus: 0 0 0 4px rgba(255, 123, 51, 0.15);
   
   --transition-smooth: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -72,12 +77,10 @@
   padding: 2.5rem 2rem;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-light);
   
-  /* ✅ MODIFICA: Margine superiore aumentato per lo sticky */
   position: sticky;
-  top: 100px; /* Aumentato da 2rem a 100px per lasciare spazio dal tetto della pagina */
-  
+  top: 100px;
   z-index: 10;
   transition: top 0.3s ease;
 }
@@ -119,6 +122,12 @@
   display: block;
 }
 
+.no-options-msg {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 /* =========================================
    4. CHECKBOX DESIGN (Custom & Clean)
    ========================================= */
@@ -133,7 +142,7 @@
 }
 
 .custom-checkbox:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-body);
 }
 
 .custom-checkbox .form-check-input {
@@ -144,7 +153,7 @@
   border-radius: 6px;
   margin-right: 0.8rem;
   cursor: pointer;
-  background-color: #fff;
+  background-color: var(--bg-surface);
   transition: all 0.2s ease;
   position: relative;
   flex-shrink: 0;
@@ -163,7 +172,7 @@
   left: 50%;
   width: 6px;
   height: 10px;
-  border: solid white;
+  border: solid var(--text-inverse);
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
 }
@@ -200,7 +209,7 @@
   cursor: pointer;
 }
 
-/* Icona freccia custom */
+/* Nota: I colori dentro le SVG data-uri rimangono hardcoded per necessità tecnica */
 .form-select {
   padding-right: 2.5rem;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231d3557' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
@@ -209,27 +218,25 @@
   background-size: 16px 12px;
 }
 
-/* ✅ MODIFICA: Styling delle opzioni del dropdown (Supporto limitato dai browser) */
 .form-select option {
-  background-color: #fff;
+  background-color: var(--bg-surface);
   color: var(--primary-color);
   padding: 10px;
 }
 
 .form-select:hover, 
 .news-sidebar .form-control:hover {
-  background-color: #e2e8f0;
+  background-color: var(--bg-input-hover);
 }
 
 .form-select:focus, 
 .news-sidebar .form-control:focus {
-  background-color: #fff;
+  background-color: var(--bg-surface);
   border-color: var(--accent-color);
   box-shadow: var(--shadow-focus);
   outline: none;
 }
 
-/* Icona calendario input */
 .react-datepicker-wrapper {
   width: 100%;
 }
@@ -241,21 +248,18 @@
 }
 
 /* =========================================
-   ✅ 6. CUSTOM DATEPICKER OVERRIDE
-   (Stilizzazione del calendario aperto)
+   6. CUSTOM DATEPICKER OVERRIDE
    ========================================= */
 
-/* Contenitore principale */
 .react-datepicker {
   font-family: inherit !important;
   border: none !important;
   border-radius: var(--radius-md) !important;
   box-shadow: var(--shadow-md) !important;
   overflow: hidden;
-  background-color: #fff !important;
+  background-color: var(--bg-surface) !important;
 }
 
-/* Header (Mese e Giorni) */
 .react-datepicker__header {
   background-color: var(--primary-color) !important;
   border-bottom: none !important;
@@ -265,7 +269,7 @@
 .react-datepicker__current-month,
 .react-datepicker-time__header,
 .react-datepicker-year-header {
-  color: #fff !important;
+  color: var(--text-inverse) !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -280,28 +284,26 @@
   line-height: 2.2rem !important;
 }
 
-/* Giorni del calendario */
 .react-datepicker__day {
   color: var(--text-main);
   width: 2.2rem !important;
   line-height: 2.2rem !important;
   margin: 0.2rem !important;
-  border-radius: 50% !important; /* Giorni rotondi */
+  border-radius: 50% !important;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .react-datepicker__day:hover {
-  background-color: #e2e8f0 !important;
+  background-color: var(--bg-input-hover) !important;
   color: var(--primary-color);
 }
 
-/* Giorno Selezionato o nel Range */
 .react-datepicker__day--selected,
 .react-datepicker__day--range-start,
 .react-datepicker__day--range-end {
   background-color: var(--accent-color) !important;
-  color: #fff !important;
+  color: var(--text-inverse) !important;
   box-shadow: 0 4px 10px rgba(255, 123, 51, 0.4);
 }
 
@@ -309,10 +311,9 @@
 .react-datepicker__day--in-range {
   background-color: rgba(255, 123, 51, 0.15) !important;
   color: var(--accent-hover) !important;
-  border-radius: 0 !important; /* Il range intermedio è quadrato */
+  border-radius: 0 !important;
 }
 
-/* Giorno Corrente (Oggi) */
 .react-datepicker__day--today {
   font-weight: 800 !important;
   position: relative;
@@ -329,13 +330,11 @@
   border-radius: 50%;
 }
 
-/* Frecce navigazione mese */
 .react-datepicker__navigation-icon::before {
-  border-color: #fff !important;
+  border-color: var(--text-inverse) !important;
   border-width: 2px 2px 0 0 !important;
 }
 
-/* Rimuovi il triangolo in alto (più pulito) */
 .react-datepicker__triangle {
   display: none !important;
 }
@@ -347,7 +346,7 @@
   width: 100%;
   background-color: transparent;
   color: var(--text-muted);
-  border: 2px dashed #cbd5e1;
+  border: 2px dashed var(--border-input);
   font-weight: 600;
   padding: 0.8rem;
   border-radius: 12px;
@@ -365,7 +364,6 @@
   transform: translateY(-2px);
 }
 
-/* Mobile Toggle */
 .mobile-filters-toggle {
   display: none;
   margin-bottom: 2rem;
@@ -374,7 +372,7 @@
 
 .filter-toggle-btn {
   background: var(--primary-color);
-  color: white;
+  color: var(--text-inverse);
   padding: 0.9rem 2.5rem;
   border-radius: 50px;
   border: none;
@@ -403,12 +401,10 @@
 
   .news-sidebar {
     display: none;
-    background: #fff;
+    background: var(--bg-surface);
     border: none;
     border-top: 4px solid var(--accent-color);
     box-shadow: var(--shadow-md);
-    
-    /* Reset dello sticky su mobile */
     position: static; 
   }
 
