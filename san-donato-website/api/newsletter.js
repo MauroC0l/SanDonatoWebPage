@@ -1,8 +1,9 @@
+// File: /api/newsletter.js
+
 export default async function handler(req, res) {
-  // LOG: Vediamo cosa arriva
   console.log(`Richiesta ricevuta: ${req.method}`);
 
-  // CORS HEADERS
+  // Headers CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -16,40 +17,49 @@ export default async function handler(req, res) {
     return;
   }
 
+  // Rispondi con 200 se apri l'URL nel browser (GET)
+  if (req.method === 'GET') {
+    return res.status(200).json({ status: 'Online' });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    // 1. Estraiamo i dati usando i nomi standard (come da tua regola)
-    // Il frontend deve inviare: { email, first_name, last_name }
     const { email, first_name, last_name } = req.body;
 
-    console.log('Dati estratti:', { email, first_name, last_name });
+    // --- DEBUG VARIABILI (LOG NELLA CONSOLE DI VERCEL) ---
+    const rawApiKey = process.env.BREVO_API_KEY;
+    const rawListId = process.env.BREVO_LIST_ID;
+    
+    console.log("--- DEBUG START ---");
+    console.log("API Key letta:", rawApiKey ? "SI (Presente)" : "NO (Undefined)");
+    console.log("List ID letto:", rawListId);
+    // -----------------------------------------------------
 
-    // 2. Controllo validità
+    // Check dati frontend
     if (!email || !first_name || !last_name) {
-      return res.status(400).json({
-        error: 'Dati mancanti. Assicurati che il frontend invii: email, first_name, last_name'
+      return res.status(400).json({ error: 'Dati mancanti dal form (email, first_name, last_name)' });
+    }
+
+    const BREVO_API_KEY = rawApiKey;
+    const BREVO_LIST_ID = Number(rawListId);
+
+    // Check configurazione server
+    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+      console.error("Configurazione mancante. Variabili non lette.");
+      // Restituiamo info di debug al frontend per capire cosa succede
+      return res.status(500).json({ 
+         error: 'Errore configurazione server (Variabili mancanti)',
+         debug: {
+           apiKeyExists: !!BREVO_API_KEY,
+           listIdRaw: rawListId,
+           listIdParsed: BREVO_LIST_ID
+         }
       });
     }
 
-    const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID);
-
-    console.log("DEBUG VARS:", {
-      keyExists: !!BREVO_API_KEY, // Stampa true se c'è, false se manca
-      listId: BREVO_LIST_ID,      // Stampa il numero (o NaN se errato)
-      env: process.env.NODE_ENV
-    });
-
-    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
-      console.error('Variabili ambiente mancanti!');
-      return res.status(500).json({ error: 'Errore configurazione server' });
-    }
-
-    // 3. Chiamata a Brevo
-    // NOTA: Qui mappiamo le variabili standard sugli attributi ITALIANI di Brevo
     const options = {
       method: 'POST',
       headers: {
@@ -58,10 +68,10 @@ export default async function handler(req, res) {
         'api-key': BREVO_API_KEY,
       },
       body: JSON.stringify({
-        email: email, // L'email va nella root, non negli attributes
+        email: email,
         attributes: {
-          NOME: first_name,    // Mappatura: first_name -> NOME
-          COGNOME: last_name   // Mappatura: last_name -> COGNOME
+          NOME: first_name,
+          COGNOME: last_name
         },
         listIds: [BREVO_LIST_ID],
         updateEnabled: true
@@ -69,18 +79,17 @@ export default async function handler(req, res) {
     };
 
     const response = await fetch('https://api.brevo.com/v3/contacts', options);
-
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Errore Brevo API:", errorData);
-      // Restituiamo l'errore esatto di Brevo per capire se è colpa degli attributi
-      return res.status(400).json({ error: errorData });
+        const errorData = await response.json();
+        console.error("Errore Brevo:", errorData);
+        return res.status(400).json({ error: errorData });
     }
 
-    return res.status(200).json({ message: 'Iscrizione completata con successo' });
+    return res.status(200).json({ message: 'Iscrizione completata' });
 
   } catch (error) {
-    console.error("Errore server:", error);
-    return res.status(500).json({ error: 'Errore interno del server' });
+    console.error("Errore server critico:", error);
+    return res.status(500).json({ error: 'Errore interno del server: ' + error.message });
   }
 }
