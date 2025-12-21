@@ -56,7 +56,7 @@
 }
 
 .highlight-text {
-  color: var(--cnt-accent); /* Cambiato in arancione per risaltare meglio su blu */
+  color: var(--cnt-accent);
 }
 
 .subtitle {
@@ -117,7 +117,7 @@
 .card-header-row {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centrato come richiesto */
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -200,7 +200,7 @@
 .map-link-container:hover .map-overlay { opacity: 1; }
 .map-link-container:hover .map-image { transform: scale(1.05); }
 
-/* --- SEGRETERIA (FIX CONTATTI RAPIDI) --- */
+/* --- SEGRETERIA --- */
 .info-group {
   margin-bottom: 1.5rem;
   width: 100%;
@@ -240,9 +240,8 @@
   align-items: center;
 }
 
-/* FIX: Allineamento Icona e Titolo */
 .sub-title {
-  display: flex; /* Flexbox è la chiave */
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
@@ -342,7 +341,7 @@
   color: var(--cnt-text-light);
 }
 
-/* --- BANCA & IBAN (FIX PULSANTE COPIA) --- */
+/* --- BANCA & IBAN --- */
 .payment-intro {
   margin-bottom: 1rem;
   color: var(--cnt-text-light);
@@ -379,7 +378,6 @@
   margin-bottom: 1rem;
 }
 
-/* Stile del pulsante copia migliorato */
 .copy-btn {
   background: white;
   border: 1px solid var(--cnt-border);
@@ -406,12 +404,11 @@
   transform: translateY(0);
 }
 
-/* Stato "Copiato" */
 .copy-btn.copied {
   background: var(--cnt-success);
   border-color: var(--cnt-success);
   color: white;
-  pointer-events: none; /* Previene click doppi */
+  pointer-events: none;
 }
 
 .bank-logo-wrapper {
@@ -424,13 +421,14 @@
   opacity: 0.8;
 }
 
-/* --- SATISPAY --- */
+/* --- SATISPAY (NUOVO STILE PULSANTE) --- */
 .satispay-card {
-  border-top: 5px solid #ff4e50; /* Brand color Satispay */
+  border-top: 5px solid #ff4e50; /* Satispay Brand Color */
 }
 
 .satispay-content {
   text-align: center;
+  width: 100%;
 }
 
 .satispay-title {
@@ -442,44 +440,67 @@
 
 .shop-name {
   color: var(--cnt-text-light);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.qr-frame {
-  position: relative;
-  width: 180px;
-  height: 180px;
-  background: white;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  margin: 0 auto;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+.satispay-action-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
 }
 
-.qr-image {
-  width: 100%;
-  height: 100%;
-}
-
-.scan-me-badge {
-  position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
+.satispay-btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
   background: #ff4e50;
   color: white;
-  font-size: 0.8rem;
+  text-decoration: none;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
   font-weight: 700;
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(255, 78, 80, 0.4);
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(255, 78, 80, 0.3);
+}
+
+.satispay-btn-link:hover {
+  background: #e63b3d;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 78, 80, 0.4);
+}
+
+.satispay-helper {
+  font-size: 0.85rem;
+  color: #999;
 }
 
 /* --- MOBILE QUERY --- */
 @media (max-width: 600px) {
   .contact-card { padding: 1.5rem; }
-  .phone-btn { width: 100%; flex-direction: column; gap: 0.3rem; padding: 0.8rem; border-radius: 12px; }
-  .name-tag { border-left: none; border-top: 1px solid rgba(255,255,255,0.3); padding-left: 0; padding-top: 0.3rem; width: 100%; text-align: center; }
+  
+  .phone-btn { 
+    width: 100%; 
+    flex-direction: column; 
+    gap: 0.3rem; 
+    padding: 0.8rem; 
+    border-radius: 12px; 
+  }
+  
+  .name-tag { 
+    border-left: none; 
+    border-top: 1px solid rgba(255,255,255,0.3); 
+    padding-left: 0; 
+    padding-top: 0.3rem; 
+    width: 100%; 
+    text-align: center; 
+  }
+  
   .iban-code { font-size: 1rem; }
+  
+  .satispay-btn-link {
+    width: 100%;
+  }
 }

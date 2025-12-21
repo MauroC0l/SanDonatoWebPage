@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   FaMapMarkerAlt, FaPhone, FaEnvelope, 
-  FaClock, FaUniversity, FaMobileAlt, FaCheck 
+  FaClock, FaUniversity, FaMobileAlt, FaCheck, FaExternalLinkAlt 
 } from "react-icons/fa";
 import { FaRegCopy } from "react-icons/fa6";
 import "../css/Contatti.css";
@@ -152,20 +152,22 @@ export default function Contacts() {
             </div>
           </section>
 
-          {/* Card Satispay */}
+          {/* Card Satispay - MODIFICATA */}
           <section className="contact-card satispay-card">
             <div className="satispay-content">
               <h3 className="satispay-title">{pagamenti.satispayTitle}</h3>
               <p className="shop-name">{pagamenti.shopName}</p>
               
-              <div className="qr-frame">
-                <img 
-                  src={pagamenti.qrImage} 
-                  alt="QR Code Satispay" 
-                  className="qr-image" 
-                  loading="lazy"
-                />
-                <div className="scan-me-badge">Inquadra</div>
+              <div className="satispay-action-wrapper">
+                <a 
+                  href={pagamenti.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="satispay-btn-link"
+                >
+                  Paga con Satispay <FaExternalLinkAlt style={{ fontSize: '0.8em' }}/>
+                </a>
+                <p className="satispay-helper">Link diretto al pagamento sicuro</p>
               </div>
             </div>
           </section>
