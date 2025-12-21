@@ -1,5 +1,5 @@
 /* ============================= */
-/* Contatti.css - Refined       */
+/* Contatti.css - Refined        */
 /* ============================= */
 
 /* RESET (Scoped) */
@@ -421,7 +421,7 @@
   opacity: 0.8;
 }
 
-/* --- SATISPAY (NUOVO STILE PULSANTE) --- */
+/* --- SATISPAY & QR CODE --- */
 .satispay-card {
   border-top: 5px solid #ff4e50; /* Satispay Brand Color */
 }
@@ -440,7 +440,29 @@
 
 .shop-name {
   color: var(--cnt-text-light);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Container specifico per il QR Code per evitare stretching */
+.satispay-qr-wrapper {
+  width: 180px;         /* Larghezza fissa contenuta */
+  height: 180px;        /* Altezza fissa quadrata */
+  margin: 0 auto 1.5rem auto; /* Centrato e distanziato dal bottone */
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.satispay-qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* CRUCIALE: Mantiene l'aspect ratio, niente stretching */
+  display: block;
 }
 
 .satispay-action-wrapper {

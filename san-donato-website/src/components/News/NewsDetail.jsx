@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Button from "react-bootstrap/Button";
+import { FaArrowLeft, FaExpand, FaTag } from "react-icons/fa";
 import "../../css/NewsDetail.css";
 
 export default function NewsDetail() {
@@ -14,9 +15,7 @@ export default function NewsDetail() {
   // Gestione tasto ESC per chiudere il lightbox
   useEffect(() => {
     const handleEsc = (event) => {
-      if (event.key === "Escape") {
-        setIsLightboxOpen(false);
-      }
+      if (event.key === "Escape") setIsLightboxOpen(false);
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
@@ -24,14 +23,10 @@ export default function NewsDetail() {
 
   if (!post) {
     return (
-      <div className="news-detail-page" style={{ textAlign: "center" }}>
-        <h3 style={{ color: "#ff4500" }}>Nessun dato disponibile</h3>
+      <div className="nd-error-container">
+        <h3>Nessun dato disponibile</h3>
         <p>Torna alla lista per selezionare una notizia.</p>
-        <Button
-          variant="secondary"
-          onClick={() => navigate("/news")}
-          className="mt-3"
-        >
+        <Button variant="outline-secondary" onClick={() => navigate("/news")}>
           ← Torna alle news
         </Button>
       </div>
@@ -39,70 +34,93 @@ export default function NewsDetail() {
   }
 
   // --- LOGICA IMMAGINE ---
-  // Determina quale immagine mostrare: quella del post o il placeholder
   const placeholderImage = "/logo-poli-sfondo.jpg";
   const displayImage = post.image || placeholderImage;
   const imageAltText = post.image ? post.title : "Placeholder Polisportiva";
+  
+  // --- LOGICA TAG ---
+  const tags = post.tags || ["Polisportiva", "News", "Aggiornamenti"];
 
   return (
     <>
-      <div className="news-detail-page">
-        {/* 1. IMMAGINE HERO (In alto, ora cliccabile e con placeholder se manca l'originale) */}
-        <img 
-          src={displayImage} 
-          alt={imageAltText} 
-          className="news-detail-hero" 
-          onClick={() => setIsLightboxOpen(true)}
-          title="Clicca per ingrandire a tutto schermo"
-          style={{ cursor: "pointer" }} // Indica che è cliccabile
-        />
+      <div className="nd-wrapper nd-fade-in">
+        
+        {/* --- COLONNA TESTO (Sinistra Desktop) --- */}
+        <div className="nd-column-text">
+          
+          {/* Header Notizia */}
+          <header className="nd-header">
+            <div className="nd-tags-wrapper">
+              {tags.map((tag, index) => (
+                <span key={index} className="nd-tag">
+                  <FaTag size={10} /> {tag}
+                </span>
+              ))}
+            </div>
 
-        {/* Titolo e Meta Info */}
-        <h2 
-          className="news-detail-title" 
-          dangerouslySetInnerHTML={{ __html: post.title }} 
-        />
+            <h1 
+              className="nd-title" 
+              dangerouslySetInnerHTML={{ __html: post.title }} 
+            />
 
-        <div className="news-detail-meta">
-          <span>{post.author}</span>
-          <span>•</span>
-          <span>{post.date}</span>
+            {/* Blocco Metadati Moderno */}
+            <div className="nd-meta-data">
+              <div className="nd-meta-item">
+                <span className="nd-meta-label">Autore</span>
+                <span className="nd-meta-value">{post.author}</span>
+              </div>
+              <div className="nd-meta-item">
+                <span className="nd-meta-label">Pubblicato il</span>
+                <span className="nd-meta-value">{post.date}</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Contenuto Articolo */}
+          <article 
+            className="nd-content-body"
+            dangerouslySetInnerHTML={{ __html: post.content || post.preview }}
+          />
+
+          {/* Footer Navigazione */}
+          <footer className="nd-footer-action">
+            <button
+              className="nd-btn-back"
+              onClick={() => navigate("/news")}
+            >
+              <FaArrowLeft /> Torna alla lista
+            </button>
+          </footer>
         </div>
 
-        {/* Contenuto Testuale */}
-        <div
-          className="news-detail-content"
-          dangerouslySetInnerHTML={{ __html: post.content || post.preview }}
-        />
-
-        {/* SEZIONE RIMOSSA:
-           L'allegato cliccabile in fondo alla pagina è stato rimosso come richiesto.
-        */}
-
-        <div className="news-detail-footer">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/news")}
-          >
-            ← Torna alla lista
-          </Button>
+        {/* --- COLONNA VISIVA (Destra Desktop - Ora ridotta) --- */}
+        <div className="nd-column-visual">
+          <div className="nd-image-wrapper" onClick={() => setIsLightboxOpen(true)}>
+            <img 
+              src={displayImage} 
+              alt={imageAltText} 
+              className="nd-main-image"
+            />
+            <div className="nd-image-overlay">
+              <FaExpand /> Ingrandisci
+            </div>
+          </div>
+          <p className="nd-image-caption">Galleria Immagini</p>
         </div>
+
       </div>
 
       {/* --- LIGHTBOX MODAL --- */}
-      {/* Mostra il lightbox se lo stato è true. Usa displayImage. */}
       {isLightboxOpen && (
         <div 
-          className="news-lightbox-overlay" 
+          className="nd-lightbox-overlay" 
           onClick={() => setIsLightboxOpen(false)}
         >
-          <button className="news-lightbox-close" aria-label="Chiudi">
-            ✕
-          </button>
+          <button className="nd-lightbox-close" aria-label="Chiudi">✕</button>
           <img 
             src={displayImage} 
             alt="Ingrandimento notizia" 
-            className="news-lightbox-image"
+            className="nd-lightbox-image"
             onClick={(e) => e.stopPropagation()} 
           />
         </div>

@@ -152,12 +152,22 @@ export default function Contacts() {
             </div>
           </section>
 
-          {/* Card Satispay - MODIFICATA */}
+          {/* Card Satispay */}
           <section className="contact-card satispay-card">
             <div className="satispay-content">
               <h3 className="satispay-title">{pagamenti.satispayTitle}</h3>
               <p className="shop-name">{pagamenti.shopName}</p>
               
+              {/* QR Code Section */}
+              <div className="satispay-qr-wrapper">
+                <img 
+                  src={pagamenti.qrImage} 
+                  alt="QR Code Satispay" 
+                  className="satispay-qr-img" 
+                  loading="lazy"
+                />
+              </div>
+
               <div className="satispay-action-wrapper">
                 <a 
                   href={pagamenti.link} 
