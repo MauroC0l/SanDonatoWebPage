@@ -4,7 +4,7 @@ import News from "./components/News/NewsPage";
 import MyNavbar from "./components/AllPages/MyNavbar";
 import Hero from "./components/AllPages/Hero";
 import TopHeader from "./components/AllPages/TopHeader"; 
-import NewsDetailPage from "./components/NewsDetail";
+import NewsDetailPage from "./components/News/NewsDetail";
 import ChiSiamoPage from "./components/ChiSiamoPage";
 import SubscriptionPage from "./components/SubscriptionPage";
 import CalendarPage from "./components/CalendarPage";

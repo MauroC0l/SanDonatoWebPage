@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Button from "react-bootstrap/Button";
-import "../css/NewsDetail.css";
+import "../../css/NewsDetail.css";
 
 export default function NewsDetail() {
   const navigate = useNavigate();
@@ -38,17 +38,24 @@ export default function NewsDetail() {
     );
   }
 
+  // --- LOGICA IMMAGINE ---
+  // Determina quale immagine mostrare: quella del post o il placeholder
+  const placeholderImage = "/logo-poli-sfondo.jpg";
+  const displayImage = post.image || placeholderImage;
+  const imageAltText = post.image ? post.title : "Placeholder Polisportiva";
+
   return (
     <>
       <div className="news-detail-page">
-        {/* 1. IMMAGINE HERO (In alto, estetica) */}
-        {post.image && (
-          <img 
-            src={post.image} 
-            alt={post.title} 
-            className="news-detail-hero" 
-          />
-        )}
+        {/* 1. IMMAGINE HERO (In alto, ora cliccabile e con placeholder se manca l'originale) */}
+        <img 
+          src={displayImage} 
+          alt={imageAltText} 
+          className="news-detail-hero" 
+          onClick={() => setIsLightboxOpen(true)}
+          title="Clicca per ingrandire a tutto schermo"
+          style={{ cursor: "pointer" }} // Indica che è cliccabile
+        />
 
         {/* Titolo e Meta Info */}
         <h2 
@@ -68,23 +75,9 @@ export default function NewsDetail() {
           dangerouslySetInnerHTML={{ __html: post.content || post.preview }}
         />
 
-        {/* 2. IMMAGINE CLICCABILE (Miniatura al 25%) */}
-        {post.image && (
-          <div 
-            className="news-image-preview-container" 
-            onClick={() => setIsLightboxOpen(true)}
-          >
-            <img 
-              src={post.image} 
-              alt="Clicca per ingrandire" 
-              className="news-detail-image-preview" 
-              title="Clicca per visualizzare a tutto schermo"
-            />
-            <div className="news-image-caption">
-              🔍 Ingrandisci allegato
-            </div>
-          </div>
-        )}
+        {/* SEZIONE RIMOSSA:
+           L'allegato cliccabile in fondo alla pagina è stato rimosso come richiesto.
+        */}
 
         <div className="news-detail-footer">
           <Button
@@ -97,7 +90,8 @@ export default function NewsDetail() {
       </div>
 
       {/* --- LIGHTBOX MODAL --- */}
-      {isLightboxOpen && post.image && (
+      {/* Mostra il lightbox se lo stato è true. Usa displayImage. */}
+      {isLightboxOpen && (
         <div 
           className="news-lightbox-overlay" 
           onClick={() => setIsLightboxOpen(false)}
@@ -106,7 +100,7 @@ export default function NewsDetail() {
             ✕
           </button>
           <img 
-            src={post.image} 
+            src={displayImage} 
             alt="Ingrandimento notizia" 
             className="news-lightbox-image"
             onClick={(e) => e.stopPropagation()} 

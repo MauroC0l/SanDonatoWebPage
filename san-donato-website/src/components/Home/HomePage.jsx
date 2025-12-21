@@ -159,7 +159,7 @@ export default function HomePage() {
       ref.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
     }
   };
-
+  
   return (
     <div className="hp-root">
       <AboutSection />
@@ -333,10 +333,10 @@ export default function HomePage() {
                     <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
                       {showNewBadge && <span className="news-new-badge">NEW</span>}
 
-                      <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/placeholder.jpg"})` }}></div>
+                      <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/logo-poli-sfondo.jpg"})` }}></div>
                       <div className="nic-content">
                         <span className="nic-date">{news.date}</span>
-                        <h4 className="nic-title">{news.title}</h4>
+                        <h4 className="nic-title">{news.title} </h4>
                       </div>
                     </div>
                   );
