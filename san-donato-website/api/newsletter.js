@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
     // --- LEGGERE LE VARIABILI D'AMBIENTE ---
     // NOTA: Nel backend non usiamo "VITE_", usiamo i nomi puri
-    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    const BREVO_API_KEY = process.env.VITE_BREVO_API_KEY;
     const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID); 
 
     console.log("KEY: ", BREVO_API_KEY);
