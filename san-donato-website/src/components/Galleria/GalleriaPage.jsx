@@ -11,7 +11,7 @@ const GalleriaPage = () => {
     <FaFutbol key="calcio" />          
   ];
 
-  // Cambia palla solo quando l'animazione completa un ciclo intero (esce dallo schermo)
+  // Cambia palla quando l'animazione completa ricomincia
   const handleAnimationRepeat = () => {
     setBallIndex((prevIndex) => (prevIndex + 1) % balls.length);
   };
@@ -32,14 +32,19 @@ const GalleriaPage = () => {
         <div className="bounce-loader-container">
           <div className="floor-line"></div>
           
-          {/* Wrapper che gestisce il movimento orizzontale (X) */}
+          {/* Wrapper Movimento Orizzontale (Left -> Right) */}
           <div 
             className="moving-wrapper" 
             onAnimationIteration={handleAnimationRepeat}
           >
-             {/* Icona che gestisce i rimbalzi (Y) e la rotazione */}
-             <div className="bouncing-icon">
-                {balls[ballIndex]}
+             {/* Wrapper Movimento Verticale (3 Rimbalzi continui) */}
+             <div className="bouncing-wrapper">
+                
+                {/* Icona Rotazione */}
+                <div className="spinning-icon">
+                   {balls[ballIndex]}
+                </div>
+
              </div>
           </div>
         </div>

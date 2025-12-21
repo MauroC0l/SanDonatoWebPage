@@ -1,6 +1,5 @@
 /* --- Galleria.css --- */
 
-/* Variabili di fallback se non definite globalmente */
 :root {
   --primary-color: #002b5c; 
   --accent-color: #ff6600;
@@ -8,166 +7,154 @@
 
 /* 1. LAYOUT PAGINA */
 .galleria-page-container {
-    /* Altezza viewport meno l'altezza della navbar (circa 70px) */
-    min-height: calc(100vh - 70px);
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    padding: 2rem;
-    background: #f0f2f5; /* Sfondo grigio neutro */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: #f0f2f5; 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 /* 2. CARD CENTRALE */
 .galleria-card {
-    background: #ffffff;
-    padding: 3rem 2.5rem;
-    
-    /* Stile "Elevated" */
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-    
-    text-align: center;
-    max-width: 450px;
-    width: 100%;
-    position: relative;
-    
-    /* Bordo superiore colorato */
-    border-top: 5px solid var(--accent-color, #ff6600);
+  background: #ffffff;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+  position: relative;
+  border-top: 5px solid var(--accent-color, #ff6600);
 }
 
-/* 3. ICONA REGALO (Surprise) */
+/* 3. ICONA REGALO */
 .icon-wrapper {
-    margin-bottom: 1.5rem;
-    display: inline-block;
-    padding: 1.5rem;
-    border-radius: 50%;
-    background: rgba(255, 102, 0, 0.1); 
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  padding: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 102, 0, 0.1); 
 }
 
 .surprise-icon {
-    font-size: 3.5rem;
-    color: var(--accent-color, #ff6600);
-    animation: pulseIcon 2s infinite ease-in-out;
+  font-size: 3.5rem;
+  color: var(--accent-color, #ff6600);
+  animation: pulseIcon 2s infinite ease-in-out;
 }
 
 /* 4. TESTI */
 .galleria-title {
-    font-size: 2rem;
-    color: var(--primary-color, #002b5c);
-    margin-bottom: 1rem;
-    font-weight: 700;
+  font-size: 2rem;
+  color: var(--primary-color, #002b5c);
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
 
 .galleria-message {
-    font-size: 1.2rem;
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 2.5rem; 
+  font-size: 1.2rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 2.5rem; 
 }
 
-/* 5. ANIMAZIONE PALLA RIMBALZANTE (DX -> SX) */
+/* 5. ANIMAZIONE PALLA RIMBALZANTE */
 
 .bounce-loader-container {
-    position: relative;
-    width: 100%;
-    max-width: 320px;
-    height: 70px; /* Altezza sufficiente per il salto */
-    margin: 0 auto;
-    overflow: hidden; /* Nasconde la palla quando esce ai lati */
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 80px; 
+  margin: 0 auto;
+  overflow: hidden; 
 }
 
-/* Linea del pavimento */
 .floor-line {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 3px;
-    background-color: #e0e0e0;
-    border-radius: 2px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
 }
 
-/* Wrapper per il movimento orizzontale (Traslazione) */
+/* A. Movimento Sinistra -> Destra */
 .moving-wrapper {
-    position: absolute;
-    bottom: 3px; /* Appoggiato sulla linea */
-    right: -50px; /* Parte fuori schermo a DESTRA */
-    width: 2rem;
-    height: 2rem;
-    
-    /* Si muove verso sinistra in 3 secondi in modo lineare */
-    animation: moveRightToLeft 3s linear infinite;
+  position: absolute;
+  bottom: 3px; 
+  left: -50px; 
+  width: 2rem;
+  height: 2rem;
+  /* 2.5s per rendere il tutto un po' più dinamico, o lascia 3s se preferisci più lento */
+  animation: moveLeftToRight 2.5s linear infinite;
 }
 
-/* Icona per il movimento verticale (Rimbalzo + Rotazione) */
-.bouncing-icon {
-    font-size: 2rem; /* Grandezza palla */
-    color: var(--accent-color, #ff6600);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    /* bounceEffect: gestisce la Y (salto). 'alternate' fa su e giù.
-       spinBall: gestisce la rotazione.
-    */
-    animation: 
-        bounceEffect 0.5s cubic-bezier(0.5, 0.05, 1, 0.5) infinite alternate,
-        spinBall 1s linear infinite; 
+/* B. Movimento Alto -> Basso (Rimbalzi Fluidi) */
+.bouncing-wrapper {
+  width: 100%;
+  height: 100%;
+  animation: bounceDecay 2.5s linear infinite;
 }
 
-/* 6. KEYFRAMES */
+/* C. Rotazione */
+.spinning-icon {
+  width: 100%;
+  height: 100%;
+  font-size: 2rem; 
+  color: var(--accent-color, #ff6600);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: spinBallClockwise 2.5s linear infinite;
+}
 
-/* Pulsazione Regalo */
+/* 6. KEYFRAMES AGGIORNATI */
+
 @keyframes pulseIcon {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-/* Spostamento da Destra a Sinistra */
-@keyframes moveRightToLeft {
-    0% {
-        right: -50px; /* Fuori a destra */
-    }
-    100% {
-        right: 100%; /* Fuori a sinistra (oltre il bordo sinistro) */
-    }
+@keyframes moveLeftToRight {
+  0% { left: -50px; }
+  100% { left: 100%; }
 }
 
-/* Effetto Gravità (Rimbalzo) */
-@keyframes bounceEffect {
-    0% {
-        transform: translateY(0); /* A terra */
-    }
-    100% {
-        transform: translateY(-45px); /* In alto (picco del rimbalzo) */
-    }
+/* LOGICA FLUIDA:
+  Non ci sono più step piatti (es. 25%->35% fermo).
+  Appena tocca terra (ease-in), riparte subito (ease-out).
+*/
+@keyframes bounceDecay {
+  /* --- SALTO 1 (Grande) --- Durata: 40% del tempo totale */
+  0%   { transform: translateY(0); animation-timing-function: ease-out; }
+  20%  { transform: translateY(-55px); animation-timing-function: ease-in; }
+  40%  { transform: translateY(0); animation-timing-function: ease-out; } 
+  /* Nota: Al 40% tocca terra e riparte IMMEDIATAMENTE per il salto 2 */
+
+  /* --- SALTO 2 (Medio) --- Durata: 30% del tempo totale */
+  55%  { transform: translateY(-30px); animation-timing-function: ease-in; }
+  70%  { transform: translateY(0); animation-timing-function: ease-out; } 
+  /* Al 70% tocca terra e riparte IMMEDIATAMENTE per il salto 3 */
+
+  /* --- SALTO 3 (Piccolo) --- Durata: 20% del tempo totale */
+  80%  { transform: translateY(-12px); animation-timing-function: ease-in; }
+  90%  { transform: translateY(0); animation-timing-function: linear; }
+  
+  /* --- ROTOLAMENTO FINALE --- Durata: 10% del tempo totale */
+  100% { transform: translateY(0); }
 }
 
-/* Rotazione Antioraria (perché va verso sinistra) */
-@keyframes spinBall {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(-360deg); }
+@keyframes spinBallClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(720deg); }
 }
 
-/* 7. RESPONSIVE MOBILE */
+/* 7. RESPONSIVE */
 @media (max-width: 480px) {
-    .galleria-page-container {
-        padding: 1rem;
-    }
-    
-    .galleria-card {
-        padding: 2rem 1.5rem;
-    }
-
-    .galleria-title {
-        font-size: 1.75rem;
-    }
-    
-    /* Su schermi piccoli riduciamo l'area di animazione */
-    .bounce-loader-container {
-        max-width: 240px; 
-    }
+  .galleria-page-container { padding: 1rem; }
+  .galleria-card { padding: 2rem 1.5rem; }
+  .galleria-title { font-size: 1.75rem; }
+  .bounce-loader-container { max-width: 240px; }
 }
