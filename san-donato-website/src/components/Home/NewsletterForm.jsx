@@ -1,13 +1,13 @@
-"use client"; // Necessario se usi Next.js App Router
 import { useState } from 'react';
 
 export default function NewsletterForm() {
+  // Usiamo i nomi standard come da tua richiesta salvata
   const [formData, setFormData] = useState({
-    NOME: '',
-    COGNOME: '',
-    EMAIL: ''
+    first_name: '',
+    last_name: '',
+    email: ''
   });
-  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [status, setStatus] = useState('idle');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,17 +24,24 @@ export default function NewsletterForm() {
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) throw new Error('Errore iscrizione');
+      const data = await res.json(); // Leggiamo la risposta JSON
+
+      if (!res.ok) {
+        // Logghiamo l'errore specifico che arriva dal backend
+        console.error("Errore API:", data);
+        throw new Error(data.error?.message || 'Errore iscrizione');
+      }
 
       setStatus('success');
-      setFormData({ NOME: '', COGNOME: '', EMAIL: '' }); // Reset form
+      setFormData({ first_name: '', last_name: '', email: '' });
     } catch (e) {
+      console.error(e);
       setStatus('error');
     }
   };
 
   return (
-    <div className="p-4 border rounded shadow-md max-w-md mx-auto">
+    <div className="p-4 border rounded shadow-md max-w-md mx-auto nl-form-box">
       <h3 className="text-lg font-bold mb-4">Iscriviti alla Newsletter</h3>
       
       {status === 'success' ? (
@@ -45,11 +52,12 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Nome</label>
             <input
               type="text"
-              name="NOME"
-              value={formData.NOME}
+              name="first_name" 
+              value={formData.first_name}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
+              placeholder="Il tuo nome"
             />
           </div>
 
@@ -57,11 +65,12 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Cognome</label>
             <input
               type="text"
-              name="COGNOME"
-              value={formData.COGNOME}
+              name="last_name"
+              value={formData.last_name}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
+              placeholder="Il tuo cognome"
             />
           </div>
 
@@ -69,11 +78,12 @@ export default function NewsletterForm() {
             <label className="block text-sm font-medium">Email</label>
             <input
               type="email"
-              name="EMAIL"
-              value={formData.EMAIL}
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               required
               className="w-full p-2 border rounded"
+              placeholder="latua@email.com"
             />
           </div>
 
