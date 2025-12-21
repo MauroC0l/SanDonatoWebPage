@@ -29,13 +29,19 @@ export default async function handler(req, res) {
 
     // 2. Controllo validità
     if (!email || !first_name || !last_name) {
-      return res.status(400).json({ 
-        error: 'Dati mancanti. Assicurati che il frontend invii: email, first_name, last_name' 
+      return res.status(400).json({
+        error: 'Dati mancanti. Assicurati che il frontend invii: email, first_name, last_name'
       });
     }
 
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID);
+
+    console.log("DEBUG VARS:", {
+      keyExists: !!BREVO_API_KEY, // Stampa true se c'è, false se manca
+      listId: BREVO_LIST_ID,      // Stampa il numero (o NaN se errato)
+      env: process.env.NODE_ENV
+    });
 
     if (!BREVO_API_KEY || !BREVO_LIST_ID) {
       console.error('Variabili ambiente mancanti!');
@@ -63,12 +69,12 @@ export default async function handler(req, res) {
     };
 
     const response = await fetch('https://api.brevo.com/v3/contacts', options);
-    
+
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Errore Brevo API:", errorData);
-        // Restituiamo l'errore esatto di Brevo per capire se è colpa degli attributi
-        return res.status(400).json({ error: errorData }); 
+      const errorData = await response.json();
+      console.error("Errore Brevo API:", errorData);
+      // Restituiamo l'errore esatto di Brevo per capire se è colpa degli attributi
+      return res.status(400).json({ error: errorData });
     }
 
     return res.status(200).json({ message: 'Iscrizione completata con successo' });

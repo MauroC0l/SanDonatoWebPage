@@ -129,6 +129,21 @@
   color: var(--text-white); /* Mantengo il testo bianco, non accent */
 }
 
+.dropdown-toggle.clean-toggle {
+  background: transparent; 
+  border-color: transparent;
+  padding-right: 1rem; /* Mantiene lo stesso padding degli altri */
+  color: rgba(255, 255, 255, 0.9); /* Stesso colore base dei link */
+}
+
+.dropdown-toggle.clean-toggle:hover,
+.dropdown-toggle.clean-toggle.active-toggle {
+  background: rgba(255, 255, 255, 0.1); /* Stesso effetto hover degli altri */
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Stessa ombra */
+}
+
 /* 5. Menu a Tendina (Dropdown Menu) */
 .dropdown-menu {
   position: absolute;
@@ -282,20 +297,12 @@
 }
 
 
-/* Classe specifica per il pulsante Documenti senza sfondo/bordo */
-.dropdown-toggle.clean-toggle {
-  background: transparent;
-  border-color: transparent;
-  padding-left: 0.8rem; /* Aggiusto il padding per bilanciare l'assenza di bordo */
-  padding-right: 0.8rem;
+button.nav-link {
+  font-family: inherit; /* Eredita il font 'Inter' del genitore */
+  font-size: 0.9rem;    /* Assicura la stessa dimensione */
+  font-weight: 500;     /* Assicura lo stesso peso */
+  line-height: inherit;
+  letter-spacing: inherit;
 }
 
-/* Manteniamo un leggero effetto hover solo sul testo/icona, 
-   oppure uno sfondo minimalissimo se preferisci */
-.dropdown-toggle.clean-toggle:hover,
-.dropdown-toggle.clean-toggle.active-toggle {
-  background: rgba(255, 255, 255, 0.05); /* Molto più leggero */
-  border-color: transparent; /* Nessun bordo nemmeno in hover */
-  color: var(--text-white);
-  box-shadow: none; /* Rimuove eventuali ombre */
-}
+
