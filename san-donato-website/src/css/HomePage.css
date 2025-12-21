@@ -246,6 +246,8 @@
   background: white;
   border-radius: var(--hp-radius);
   border: 1px dashed var(--hp-border);
+
+  margin-top: 1rem;
 }
 
 .lcs-location-sm {
@@ -303,6 +305,7 @@
   border: 1px solid transparent;
   transition: transform 0.2s, background-color 0.2s;
   min-width: 280px;
+  margin-top: 1rem;
 }
 
 .event-card.clickable-card {

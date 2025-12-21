@@ -267,6 +267,15 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* MODIFICA: Il pulsante ora è mostrato solo se loading è false */}
+            {!loading && (
+              <div className="calendar-actions">
+                <button className="btn-results-week" onClick={() => setShowResults(true)}>
+                  <FaTrophy /> Vedi risultati della settimana
+                </button>
+              </div>
+            )}
+
             {/* NOTA: Qui ho corretto il ref da liveListRef a calendarListRef */}
             <div className="scroll-wrapper" ref={calendarListRef}>
               {loading ? (
@@ -302,15 +311,6 @@ export default function HomePage() {
                 )
               )}
             </div>
-
-            {/* MODIFICA: Il pulsante ora è mostrato solo se loading è false */}
-            {!loading && (
-              <div className="calendar-actions">
-                <button className="btn-results-week" onClick={() => setShowResults(true)}>
-                  <FaTrophy /> Vedi risultati della settimana
-                </button>
-              </div>
-            )}
 
           </aside>
 
