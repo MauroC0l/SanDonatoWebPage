@@ -280,3 +280,22 @@
     max-width: calc(100vw - 1rem);
   }
 }
+
+
+/* Classe specifica per il pulsante Documenti senza sfondo/bordo */
+.dropdown-toggle.clean-toggle {
+  background: transparent;
+  border-color: transparent;
+  padding-left: 0.8rem; /* Aggiusto il padding per bilanciare l'assenza di bordo */
+  padding-right: 0.8rem;
+}
+
+/* Manteniamo un leggero effetto hover solo sul testo/icona, 
+   oppure uno sfondo minimalissimo se preferisci */
+.dropdown-toggle.clean-toggle:hover,
+.dropdown-toggle.clean-toggle.active-toggle {
+  background: rgba(255, 255, 255, 0.05); /* Molto più leggero */
+  border-color: transparent; /* Nessun bordo nemmeno in hover */
+  color: var(--text-white);
+  box-shadow: none; /* Rimuove eventuali ombre */
+}

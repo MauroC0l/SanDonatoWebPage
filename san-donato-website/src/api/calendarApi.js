@@ -14,6 +14,13 @@ const CALENDARS_CONFIG = [
         cssVar: "eventi-psd",
         color: "#6c5ce7"
     },
+    // --- SEGRETERIA ---
+    {
+        id: import.meta.env.VITE_PSD_SEGRETERIA_CALENDAR_ID,
+        label: "Segreteria PSD",
+        cssVar: "segreteria-psd",
+        color: "#402ae0ff"
+    },
     // --- CALCIO ---
     {
         id: import.meta.env.VITE_CALCIO_SECONDA_CATEGORIA_CALENDAR_ID,
