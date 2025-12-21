@@ -1,15 +1,15 @@
 /* =========================================
-   NEWS DETAIL - COMPACT & MODERN THEME
+   NEWS DETAIL - EDITORIAL FLOW THEME
    ========================================= */
 :root {
   --nd-bg: #ffffff;
   --nd-surface: #f8fafc;
-  --nd-text-main: #0f172a;  /* Slate scuro */
-  --nd-text-muted: #64748b; /* Grigio medio */
-  --nd-primary: #002b5c;    /* Blu Polisportiva */
-  --nd-accent: #ff4500;     /* Arancione Polisportiva */
+  --nd-text-main: #0f172a;  
+  --nd-text-muted: #64748b; 
+  --nd-primary: #002b5c;    
+  --nd-accent: #ff4500;     
   --nd-line: #e2e8f0;
-  --nd-radius: 12px;        /* Radius leggermente ridotto per eleganza */
+  --nd-radius: 12px;
   --nd-font-main: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -17,15 +17,14 @@
 .nd-wrapper {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px; /* Max-width leggermente ridotta per leggibilità su singola colonna */
   margin: 0 auto;
-  padding: 3rem 2rem 5rem;
+  padding: 3rem 2rem 6rem;
   background: var(--nd-bg);
   color: var(--nd-text-main);
   font-family: var(--nd-font-main);
 }
 
-/* Animazione */
 .nd-fade-in {
   animation: ndEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -36,86 +35,20 @@
 }
 
 /* =========================================
-   LAYOUT GRID (Desktop > 1024px)
-   ========================================= */
-@media (min-width: 1024px) {
-  .nd-wrapper {
-    display: grid;
-    /* MODIFICA: La colonna immagine (0.35fr) è molto più stretta.
-       Rapporto circa 75% testo / 25% visual 
-    */
-    grid-template-columns: 1fr 0.35fr;
-    gap: 4rem;
-    align-items: start;
-    padding-top: 4rem;
-  }
-
-  .nd-column-text {
-    order: 1;
-  }
-
-  .nd-column-visual {
-    order: 2;
-    /* Sticky position per seguire lo scroll */
-    position: sticky;
-    top: 6rem; 
-    height: auto;
-    /* MODIFICA: Limite larghezza per tenerla piccola */
-    max-width: 350px; 
-    justify-self: end; /* Allinea a destra */
-  }
-
-  .nd-main-image {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: var(--nd-radius);
-    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* =========================================
-   LAYOUT MOBILE / TABLET (< 1024px)
-   ========================================= */
-@media (max-width: 1023px) {
-  .nd-wrapper {
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-  }
-
-  .nd-column-visual {
-    order: 1;
-    margin-bottom: 2rem;
-    max-width: 100%; /* Su mobile riempie la larghezza */
-  }
-
-  .nd-column-text {
-    order: 2;
-  }
-
-  .nd-main-image {
-    width: 100%;
-    max-height: 350px;
-    object-fit: cover;
-    border-radius: var(--nd-radius);
-  }
-}
-
-/* =========================================
-   TYPOGRAPHY & HEADER
+   HEADER SECTION
    ========================================= */
 .nd-header {
-  margin-bottom: 3rem;
-  position: relative;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--nd-line);
 }
 
-/* --- TAGS (MODIFICA: Arancioni) --- */
+/* Tags */
 .nd-tags-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
 }
 
 .nd-tag {
@@ -123,43 +56,32 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  
-  /* MODIFICA: Colore Accent (Arancione) */
   color: var(--nd-accent);
-  background: rgba(255, 69, 0, 0.08); /* Arancio molto trasparente */
-  border: 1px solid rgba(255, 69, 0, 0.15); /* Bordino sottile */
-  
+  background: rgba(255, 69, 0, 0.08);
+  border: 1px solid rgba(255, 69, 0, 0.15);
   padding: 0.4rem 0.9rem;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.2s ease;
 }
 
-.nd-tag:hover {
-  background: var(--nd-accent);
-  color: white;
-  border-color: var(--nd-accent);
-}
-
-/* --- TITOLO (MODIFICA: Ridotto) --- */
+/* Titolo */
 .nd-title {
-  /* Font size ridotto rispetto a prima */
-  font-size: clamp(2rem, 3.5vw, 3rem); 
+  font-size: clamp(2rem, 3.5vw, 3rem);
   font-weight: 800;
   line-height: 1.15;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   color: var(--nd-text-main);
   letter-spacing: -0.02em;
 }
 
-/* --- METADATI --- */
+/* Metadati */
 .nd-meta-data {
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding: 0.5rem 0 0.5rem 1.5rem;
+  padding-left: 1rem;
   border-left: 3px solid var(--nd-accent);
 }
 
@@ -174,7 +96,6 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--nd-text-muted);
-  margin-bottom: 0.2rem;
 }
 
 .nd-meta-value {
@@ -183,20 +104,60 @@
   color: var(--nd-text-main);
 }
 
-/* Separatore verticale opzionale */
-.nd-meta-item + .nd-meta-item {
-  padding-left: 2rem;
-  border-left: 1px solid var(--nd-line);
+/* =========================================
+   CONTENT & FLOATING IMAGE
+   ========================================= */
+
+/* Wrapper principale del contenuto per gestire il clearfix */
+.nd-article-container {
+  display: block; 
+  position: relative;
 }
 
-/* =========================================
-   CONTENUTO ARTICOLO
-   ========================================= */
+/* L'immagine che "galleggia" a destra.
+   Il float permette al testo di avvolgerla.
+*/
+.nd-float-visual {
+  float: right;
+  width: 40%;
+  max-width: 400px;
+  margin-left: 2.5rem; /* Spazio tra testo e immagine */
+  margin-bottom: 1.5rem; /* Spazio sotto l'immagine */
+  clear: right;
+}
+
+.nd-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--nd-radius);
+  cursor: zoom-in;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+  background: var(--nd-surface);
+}
+
+.nd-main-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.nd-image-caption {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--nd-text-muted);
+  text-align: right;
+  display: block;
+}
+
+/* Corpo del testo */
 .nd-content-body {
-  font-size: 1.1rem; /* Leggermente più compatto */
-  line-height: 1.7;
+  font-size: 1.1rem;
+  line-height: 1.75;
   color: #374151;
   font-weight: 400;
+  /* Importante: display block per permettere il wrapping attorno al float */
+  display: block; 
 }
 
 .nd-content-body p {
@@ -208,17 +169,7 @@
   font-weight: 700;
 }
 
-/* =========================================
-   IMMAGINE & WRAPPER
-   ========================================= */
-.nd-image-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--nd-radius);
-  cursor: zoom-in;
-  background: var(--nd-surface);
-}
-
+/* Overlay immagine */
 .nd-image-overlay {
   position: absolute;
   inset: 0;
@@ -234,28 +185,42 @@
   gap: 0.5rem;
   font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .nd-image-wrapper:hover .nd-image-overlay {
   opacity: 1;
 }
 
-.nd-image-caption {
-  margin-top: 0.8rem;
-  font-size: 0.75rem;
-  color: var(--nd-text-muted);
-  text-align: right;
-  display: block;
+/* =========================================
+   RESPONSIVE (Mobile < 768px)
+   ========================================= */
+@media (max-width: 768px) {
+  .nd-wrapper {
+    padding: 1.5rem;
+  }
+
+  /* Su mobile rimuoviamo il float: l'immagine va sopra o sotto, a piena larghezza */
+  .nd-float-visual {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-bottom: 2rem;
+  }
+
+  .nd-title {
+    font-size: 2rem;
+  }
 }
 
 /* =========================================
-   FOOTER BUTTONS
+   FOOTER & LIGHTBOX (Invariati funzionalmente)
    ========================================= */
 .nd-footer-action {
-  margin-top: 3rem;
+  margin-top: 4rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--nd-line);
+  border-top: 1px dashed var(--nd-line);
+  clear: both; /* Assicura che il footer stia sotto a tutto */
 }
 
 .nd-btn-back {
@@ -278,9 +243,6 @@
   transform: translateX(-3px);
 }
 
-/* =========================================
-   LIGHTBOX
-   ========================================= */
 .nd-lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -290,7 +252,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  animation: ndFadeIn 0.3s ease forwards;
+  animation: ndEntry 0.3s ease forwards;
 }
 
 .nd-lightbox-image {
@@ -314,18 +276,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
 }
 
 .nd-lightbox-close:hover {
   background: var(--nd-accent);
-}
-
-.nd-error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  text-align: center;
 }
