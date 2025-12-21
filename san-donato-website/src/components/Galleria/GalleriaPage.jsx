@@ -11,9 +11,10 @@ const GalleriaPage = () => {
     <FaFutbol key="calcio" />          
   ];
 
-  // Cambia palla quando l'animazione completa ricomincia
-  const handleAnimationRepeat = () => {
-    setBallIndex((prevIndex) => (prevIndex + 1) % balls.length);
+  const handleAnimationRepeat = (e) => {
+    if (e.animationName === 'moveLeftToRight') {
+      setBallIndex((prevIndex) => (prevIndex + 1) % balls.length);
+    }
   };
 
   return (
@@ -32,12 +33,12 @@ const GalleriaPage = () => {
         <div className="bounce-loader-container">
           <div className="floor-line"></div>
           
-          {/* Wrapper Movimento Orizzontale (Left -> Right) */}
+          {/* Wrapper Movimento Orizzontale */}
           <div 
             className="moving-wrapper" 
             onAnimationIteration={handleAnimationRepeat}
           >
-             {/* Wrapper Movimento Verticale (3 Rimbalzi continui) */}
+             {/* Wrapper Movimento Verticale */}
              <div className="bouncing-wrapper">
                 
                 {/* Icona Rotazione */}

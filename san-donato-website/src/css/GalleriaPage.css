@@ -86,11 +86,10 @@
   left: -50px; 
   width: 2rem;
   height: 2rem;
-  /* 2.5s per rendere il tutto un po' più dinamico, o lascia 3s se preferisci più lento */
   animation: moveLeftToRight 2.5s linear infinite;
 }
 
-/* B. Movimento Alto -> Basso (Rimbalzi Fluidi) */
+/* B. Movimento Alto -> Basso */
 .bouncing-wrapper {
   width: 100%;
   height: 100%;
@@ -109,7 +108,7 @@
   animation: spinBallClockwise 2.5s linear infinite;
 }
 
-/* 6. KEYFRAMES AGGIORNATI */
+/* 6. KEYFRAMES */
 
 @keyframes pulseIcon {
   0% { transform: scale(1); opacity: 1; }
@@ -122,27 +121,22 @@
   100% { left: 100%; }
 }
 
-/* LOGICA FLUIDA:
-  Non ci sono più step piatti (es. 25%->35% fermo).
-  Appena tocca terra (ease-in), riparte subito (ease-out).
-*/
+/* Logica fluida: tocca terra (ease-in) e riparte subito (ease-out) */
 @keyframes bounceDecay {
-  /* --- SALTO 1 (Grande) --- Durata: 40% del tempo totale */
+  /* Salto 1 */
   0%   { transform: translateY(0); animation-timing-function: ease-out; }
   20%  { transform: translateY(-55px); animation-timing-function: ease-in; }
   40%  { transform: translateY(0); animation-timing-function: ease-out; } 
-  /* Nota: Al 40% tocca terra e riparte IMMEDIATAMENTE per il salto 2 */
 
-  /* --- SALTO 2 (Medio) --- Durata: 30% del tempo totale */
+  /* Salto 2 */
   55%  { transform: translateY(-30px); animation-timing-function: ease-in; }
   70%  { transform: translateY(0); animation-timing-function: ease-out; } 
-  /* Al 70% tocca terra e riparte IMMEDIATAMENTE per il salto 3 */
 
-  /* --- SALTO 3 (Piccolo) --- Durata: 20% del tempo totale */
+  /* Salto 3 */
   80%  { transform: translateY(-12px); animation-timing-function: ease-in; }
   90%  { transform: translateY(0); animation-timing-function: linear; }
   
-  /* --- ROTOLAMENTO FINALE --- Durata: 10% del tempo totale */
+  /* Rotola */
   100% { transform: translateY(0); }
 }
 
