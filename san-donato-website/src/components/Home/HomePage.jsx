@@ -10,6 +10,7 @@ import {
   FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy
 } from "react-icons/fa";
 import "../../css/HomePage.css";
+import NewsletterForm from "./NewsletterForm";
 
 // --- COMPONENTE COUNTDOWN INTERNO ---
 const CountdownTimer = ({ targetDate, onComplete }) => {
@@ -364,6 +365,8 @@ export default function HomePage() {
         <ResultsModal onClose={() => setShowResults(false)} />
       )}
 
+
+      <NewsletterForm />
     </div>
   );
 }
