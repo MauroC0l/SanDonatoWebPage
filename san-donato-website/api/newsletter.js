@@ -35,6 +35,9 @@ export default async function handler(req, res) {
     const BREVO_API_KEY = process.env.BREVO_API_KEY;
     const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID); 
 
+    console.log("KEY: ", BREVO_API_KEY);
+    console.log("LIST ID: ", BREVO_LIST_ID);
+
     console.log("--- DEBUG START ---");
     console.log("API Key letta:", BREVO_API_KEY ? "SI" : "NO");
     console.log("List ID letto:", BREVO_LIST_ID);
