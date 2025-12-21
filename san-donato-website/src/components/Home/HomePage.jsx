@@ -73,13 +73,29 @@ export default function HomePage() {
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   // Helper per badge "New"
-  const isPostNew = (dateString, daysWindow = 7) => {
+  // Helper per badge "New"
+  // ✅ MODIFICA QUI: impostato daysWindow = 2 invece di 7
+  const isPostNew = (dateString, daysWindow = 2) => {
     if (!dateString) return false;
-    const [day, month, year] = dateString.split('/');
-    const postDate = new Date(year, month - 1, day);
+    
+    // Gestione semplice per date formattate dd/mm/yyyy
+    if (dateString.includes('/')) {
+      const [day, month, year] = dateString.split('/');
+      const postDate = new Date(year, month - 1, day);
+      const today = new Date();
+      // Resetta l'orario di oggi per un confronto corretto basato sui giorni
+      today.setHours(0, 0, 0, 0); 
+      
+      const differenceInTime = today.getTime() - postDate.getTime();
+      const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+      
+      return differenceInDays >= 0 && differenceInDays <= daysWindow;
+    }
+    
+    // Fallback per date ISO o altri formati
+    const postDate = new Date(dateString);
     const today = new Date();
-    const differenceInTime = today.getTime() - postDate.getTime();
-    const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+    const differenceInDays = (today - postDate) / (1000 * 3600 * 24);
     return differenceInDays >= 0 && differenceInDays <= daysWindow;
   };
 
