@@ -50,10 +50,21 @@ export default async function handler(req, res) {
 
     // Check configurazione server
     // (Qui c'era l'errore VITE_VITE_)
-    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
-      console.error("Configurazione mancante.");
+    if (!BREVO_API_KEY) {
+      console.error("Configurazione mancante API KEY.");
       return res.status(500).json({ 
-         error: 'Errore configurazione server (Variabili mancanti)',
+         error: 'Errore configurazione server (manca API KEY)',
+         debug: {
+           apiKeyExists: !!BREVO_API_KEY,
+           listId: BREVO_LIST_ID
+         }
+      });
+    }
+    
+    if (!BREVO_LIST_ID) {
+      console.error("Configurazione mancante LIST ID.");
+      return res.status(500).json({ 
+         error: 'Errore configurazione server (manca LIST ID)',
          debug: {
            apiKeyExists: !!BREVO_API_KEY,
            listId: BREVO_LIST_ID
