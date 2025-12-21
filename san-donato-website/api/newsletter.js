@@ -1,25 +1,24 @@
-// Esempio per Next.js API Route / Node.js
 export default async function handler(req, res) {
+  // Questo controllo è fondamentale per evitare l'errore 405
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
   const { email, first_name, last_name } = req.body;
 
   if (!email) {
-    return res.status(400).json({ error: 'Email mancante' });
+    return res.status(400).json({ error: 'Email is required' });
   }
 
-  const API_KEY = process.env.MAILERLITE_API_KEY; // Salva la chiave nel file .env
+  const API_KEY = process.env.MAILERLITE_API_KEY;
 
-  // Struttura dati per MailerLite
   const data = {
     email: email,
     fields: {
-      name: first_name,       // In MailerLite standard, 'name' è solitamente il nome proprio
-      last_name: last_name    // 'last_name' è il cognome
-    },
-    // groups: ['123456789'] // Opzionale: ID del gruppo se vuoi segmentarli subito
+      name: first_name,
+      last_name: last_name
+    }
   };
 
   try {
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Errore MailerLite' });
     }
 
-    return res.status(200).json({ message: 'Success' });
+    return res.status(200).json({ message: 'Iscritto!' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
