@@ -4,6 +4,7 @@
     "color": "#ff6600",
     "iconKey": "basket",
     "description": "Passione, tecnica e gioco di squadra. Dalla formazione Under 19 agli Open.",
+    "extraInfo": " Ricerca atleti per rinforzare organici 2025/26. Contattare: Alessio 347 8248674",
     "groups": [
       {
         "name": "Open Maschile",
@@ -32,6 +33,7 @@
     "color": "#0056d6",
     "iconKey": "calcio",
     "description": "Dai primi calci alla Prima Squadra. Tre sedi dedicate per ogni fascia d'età.",
+    "extraInfo": " Ricerca atleti per rinforzare organici 2025/26. Contattare: Tommaso 380 2042115",
     "groups": [
       {
         "name": "Prima Squadra",
@@ -128,7 +130,7 @@
     "color": "#ff6600",
     "iconKey": "volley",
     "description": "Dal Minivolley alle Eccellenze. Unisciti a noi per la stagione 2025-2026.",
-    "extraInfo": "Ricerca atlete per rinforzare organici 2025/26. Contattare Davide: 328-3922664",
+    "extraInfo": " Ricerca atlete/atleti per rinforzare organici 2025/26. Contattare Davide 328 3922664",
     "groups": [
       {
         "name": "Misto Adulti (UISP/League)",
