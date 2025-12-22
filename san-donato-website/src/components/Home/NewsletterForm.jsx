@@ -163,9 +163,6 @@ const NewsletterForm = ({ onClose }) => {
                 )}
               </button>
               
-              <p className="nl-footer-text">
-                Cliccando su Iscriviti accetti la nostra <strong>Privacy Policy</strong>.
-              </p>
             </form>
           )}
         </div>
