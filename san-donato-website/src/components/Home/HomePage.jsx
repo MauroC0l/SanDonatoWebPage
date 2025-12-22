@@ -3,14 +3,15 @@ import { useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
 import EventDetailsModal from "../../components/EventDetailsModal";
 import ResultsModal from "../../components/ResultsModal";
+import NewsletterForm from "./NewsletterForm"; 
 import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchTodayEvents, fetchWeekEvents } from '../../api/calendarApi';
 import {
   FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper,
-  FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy
+  FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy,
+  FaEnvelopeOpenText, FaPaperPlane
 } from "react-icons/fa";
 import "../../css/HomePage.css";
-import NewsletterForm from "./NewsletterForm";
 
 // --- COMPONENTE COUNTDOWN INTERNO ---
 const CountdownTimer = ({ targetDate, onComplete }) => {
@@ -18,31 +19,25 @@ const CountdownTimer = ({ targetDate, onComplete }) => {
 
   useEffect(() => {
     const target = new Date(targetDate).getTime();
-
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = target - now;
-
       if (distance < 0) {
         clearInterval(interval);
         if (onComplete) onComplete();
         return;
       }
-
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
       setTimeLeft(
         `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
       );
     }, 1000);
-
     return () => clearInterval(interval);
   }, [targetDate, onComplete]);
 
   if (!timeLeft) return null;
-
   return (
     <div className="countdown-box">
       <span className="cb-label">La diretta inizierà tra</span>
@@ -60,6 +55,7 @@ export default function HomePage() {
   // --- STATI MODALI ---
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [showNewsletter, setShowNewsletter] = useState(false);
 
   // Stato dummy per forzare il re-render quando scade il timer
   const [, setTick] = useState(0);
@@ -74,26 +70,17 @@ export default function HomePage() {
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   // Helper per badge "New"
-  // Helper per badge "New"
-  // ✅ MODIFICA QUI: impostato daysWindow = 2 invece di 7
   const isPostNew = (dateString, daysWindow = 2) => {
     if (!dateString) return false;
-    
-    // Gestione semplice per date formattate dd/mm/yyyy
     if (dateString.includes('/')) {
       const [day, month, year] = dateString.split('/');
       const postDate = new Date(year, month - 1, day);
       const today = new Date();
-      // Resetta l'orario di oggi per un confronto corretto basato sui giorni
       today.setHours(0, 0, 0, 0); 
-      
       const differenceInTime = today.getTime() - postDate.getTime();
       const differenceInDays = differenceInTime / (1000 * 3600 * 24);
-      
       return differenceInDays >= 0 && differenceInDays <= daysWindow;
     }
-    
-    // Fallback per date ISO o altri formati
     const postDate = new Date(dateString);
     const today = new Date();
     const differenceInDays = (today - postDate) / (1000 * 3600 * 24);
@@ -105,7 +92,6 @@ export default function HomePage() {
     if (!dateObj) return "UPCOMING";
     const diffMs = new Date(dateObj) - new Date();
     const diffMin = Math.floor(diffMs / 60000);
-
     if (diffMin <= 15 && diffMin > -150) return "LIVE";
     return "UPCOMING";
   };
@@ -168,8 +154,24 @@ export default function HomePage() {
       <div className="hp-main-container">
         <div className="hp-grid-layout">
 
-          {/* 1. LIVE CENTER */}
+          {/* 1. COLONNA SX: NEWSLETTER WIDGET + LIVE CENTER */}
           <aside className="hp-col hp-col-live">
+            
+            {/* --- NUOVO POSIZIONAMENTO NEWSLETTER WIDGET --- */}
+            <div className="newsletter-widget-card" onClick={() => setShowNewsletter(true)}>
+              <div className="nwc-icon">
+                <FaEnvelopeOpenText />
+              </div>
+              <div className="nwc-content">
+                <h4>Resta Aggiornato</h4>
+                <p>Iscriviti per ricevere risultati e news.</p>
+              </div>
+              <div className="nwc-arrow">
+                <FaPaperPlane />
+              </div>
+            </div>
+
+            {/* --- LIVE CENTER --- */}
             <div className="column-header">
               <h3 className="col-title text-danger"><FaCircle className="live-pulse-icon" /> Live Center</h3>
               <div className="mobile-arrows">
@@ -185,7 +187,6 @@ export default function HomePage() {
                 </div>
               ) : (
                 displayedMatches.length > 0 ? displayedMatches.map((match, index) => {
-
                   const status = getMatchStatus(match.start);
                   const hasDirectLink = !!match.diretta && match.diretta !== "";
                   const linkUrl = match.diretta || "https://youtube.com/@PolisportivaSanDonato";
@@ -207,7 +208,6 @@ export default function HomePage() {
 
                   return (
                     <div key={match.id} className={`live-card-simple ${isNextEvent ? "live-card-next" : ""}`}>
-
                       <div className="lcs-header">
                         <div className="lcs-badges-group">
                           {status === "LIVE" ?
@@ -268,7 +268,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* MODIFICA: Il pulsante ora è mostrato solo se loading è false */}
             {!loading && (
               <div className="calendar-actions">
                 <button className="btn-results-week" onClick={() => setShowResults(true)}>
@@ -277,7 +276,6 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* NOTA: Qui ho corretto il ref da liveListRef a calendarListRef */}
             <div className="scroll-wrapper" ref={calendarListRef}>
               {loading ? (
                 <div className="loader-wrapper">
@@ -312,7 +310,6 @@ export default function HomePage() {
                 )
               )}
             </div>
-
           </aside>
 
           {/* 3. NEWS */}
@@ -329,15 +326,13 @@ export default function HomePage() {
               <div className="news-vertical-list">
                 {latestNews.map((news) => {
                   const showNewBadge = isPostNew(news.date) || isPostNew(news.isoDate);
-
                   return (
                     <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
                       {showNewBadge && <span className="news-new-badge">NEW</span>}
-
                       <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/logo-poli-sfondo.jpg"})` }}></div>
                       <div className="nic-content">
-                        <span className="nic-date">{news.date}</span>
-                        <h4 className="nic-title">{news.title} </h4>
+                          <span className="nic-date">{news.date}</span>
+                          <h4 className="nic-title">{news.title} </h4>
                       </div>
                     </div>
                   );
@@ -352,7 +347,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* MODALE DETTAGLI EVENTO */}
+      {/* MODALI */}
       {selectedEvent && (
         <EventDetailsModal
           event={selectedEvent}
@@ -360,13 +355,14 @@ export default function HomePage() {
         />
       )}
 
-      {/* MODALE RISULTATI */}
       {showResults && (
         <ResultsModal onClose={() => setShowResults(false)} />
       )}
+      
+      {showNewsletter && (
+        <NewsletterForm onClose={() => setShowNewsletter(false)} />
+      )}
 
-
-      <NewsletterForm />
     </div>
   );
 }

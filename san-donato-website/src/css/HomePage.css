@@ -1,6 +1,6 @@
 /* =========================================
-   HOME PAGE STYLES - Grid Areas & Mobile Carousel
-   Scoped: hp-, lcs-, ev-, nic-
+   HOME PAGE STYLES - Modern & Avant-garde
+   Scoped: hp-, lcs-, ev-, nic-, nwc-, nm-
    ========================================= */
 
 :root {
@@ -13,6 +13,7 @@
   --hp-border: #e2e8f0;
   --hp-radius: 16px;
   --hp-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08);
+  --hp-gradient: linear-gradient(135deg, #ff6600 0%, #ff8534 100%);
 }
 
 .hp-root {
@@ -54,6 +55,77 @@
     gap: 2.5rem;
     align-items: start;
   }
+}
+
+/* --- NEW NEWSLETTER WIDGET (SIDEBAR) --- */
+.newsletter-widget-card {
+    background: var(--hp-white);
+    border-radius: var(--hp-radius);
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -6px rgba(255, 102, 0, 0.15); /* Orange glow */
+    border: 1px solid rgba(255, 102, 0, 0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 2.5rem; /* Spazio sotto prima del Live Center */
+    position: relative;
+    overflow: hidden;
+}
+
+.newsletter-widget-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px -8px rgba(255, 102, 0, 0.25);
+    border-color: rgba(255, 102, 0, 0.3);
+}
+
+.newsletter-widget-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--hp-accent);
+}
+
+.nwc-icon {
+    font-size: 1.5rem;
+    color: var(--hp-accent);
+    background: #fff0e6;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.nwc-content h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--hp-primary);
+}
+
+.nwc-content p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.2;
+}
+
+.nwc-arrow {
+    margin-left: auto;
+    color: #cbd5e1;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.newsletter-widget-card:hover .nwc-arrow {
+    color: var(--hp-accent);
+    transform: translateX(3px) rotate(-10deg);
 }
 
 /* --- HEADER COLONNE --- */
@@ -175,9 +247,8 @@
 .badge-danger { background: var(--hp-danger); }
 .badge-secondary { background: #64748b; }
 
-/* Category Badge: colore di default (grigio scuro/blu notte) */
 .badge-category {
-    background-color: #f37508; /* Slate 700 */
+    background-color: #f37508;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -197,8 +268,6 @@
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
-
-.lcs-teams .vs { font-size: 0.75rem; color: #94a3b8; font-weight: 500; }
 
 .hp-btn {
   display: flex;
@@ -246,7 +315,6 @@
   background: white;
   border-radius: var(--hp-radius);
   border: 1px dashed var(--hp-border);
-
   margin-top: 1rem;
 }
 
@@ -363,7 +431,6 @@
 
 .ev-meta-row span { display: flex; align-items: center; gap: 4px; }
 
-/* NUOVO: Pulsante Risultati */
 .calendar-actions {
     margin-top: 1rem;
     display: flex;
@@ -418,7 +485,7 @@
   cursor: pointer;
   transition: background 0.2s;
   border: 1px solid transparent;
-  position: relative; /* Necessario per il badge absolute "New" */
+  position: relative; 
 }
 
 .news-item-compact:hover {
@@ -426,12 +493,11 @@
   border-color: var(--hp-border);
 }
 
-/* Badge "New" per le notizie */
 .news-new-badge {
     position: absolute;
     top: -6px;
     right: -6px;
-    background-color: var(--hp-accent); /* Arancio */
+    background-color: var(--hp-accent);
     color: white;
     font-size: 0.6rem;
     font-weight: 800;
@@ -452,15 +518,11 @@
   width: 80px;
   height: 80px;
   border-radius: 10px;
-  
-  /* --- MODIFICA QUI --- */
-  background-size: contain;      /* Mostra l'immagine intera (come object-fit: contain) */
-  background-repeat: no-repeat;  /* Evita che l'immagine si ripeta negli spazi vuoti */
-  background-position: center;   /* Centra l'immagine nel riquadro */
-  background-color: #ffffff;     /* Sfondo bianco per riempire gli spazi vuoti */
-  border: 1px solid #e2e8f0;     /* Opzionale: un bordo leggero definisce meglio il box */
-  /* -------------------- */
-
+  background-size: contain;     
+  background-repeat: no-repeat; 
+  background-position: center;   
+  background-color: #ffffff;     
+  border: 1px solid #e2e8f0;     
   flex-shrink: 0;
 }
 
@@ -488,28 +550,25 @@
 
 .view-all-wrapper { text-align: center; margin-top: 1rem; }
 
-/* Contenitore per centrare perfettamente il loader */
 .loader-wrapper {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem 0;
-  flex-grow: 1; /* Fa sì che occupi lo spazio disponibile se il genitore è flex */
-  min-height: 100px; /* Altezza minima per evitare "salti" di layout */
+  flex-grow: 1; 
+  min-height: 100px;
 }
 
-/* Loader Standard (News) */
 .loader {
-  border: 3px solid #e2e8f0; /* Grigio chiaro */
-  border-top: 3px solid var(--hp-accent); /* Colore accento */
+  border: 3px solid #e2e8f0; 
+  border-top: 3px solid var(--hp-accent); 
   border-radius: 50%;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
 }
 
-/* Loader Piccolo (Live e Calendar) */
 .loader-small {
   border: 2px solid #e2e8f0;
   border-top: 2px solid var(--hp-accent);
@@ -524,11 +583,215 @@
   100% { transform: rotate(360deg); }
 }
 
+
 /* =========================================
-   📱 MOBILE TRANSFORMATION (< 992px)
+   4. NEW MODAL NEWSLETTER STYLES (nm-)
+   ========================================= */
+.newsletter-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.4); /* Dark blue overlay */
+    backdrop-filter: blur(8px); /* Glassmorphism blur */
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeInOverlay 0.3s ease-out;
+}
+
+.newsletter-modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 450px;
+    padding: 2.5rem;
+    border-radius: 24px; /* Super rounded */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    position: relative;
+    text-align: center;
+    animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.nm-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 5px;
+}
+
+.nm-close-btn:hover { color: var(--hp-primary); }
+
+.nm-header { margin-bottom: 2rem; }
+
+.nm-icon-circle {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #fff0e6 0%, #ffe0cc 100%);
+    color: var(--hp-accent);
+    font-size: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 10px 20px -5px rgba(255, 102, 0, 0.2);
+}
+
+.nm-header h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--hp-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.nm-header p {
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.nm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.nm-input-group {
+    position: relative;
+    width: 100%;
+}
+
+.nm-input-group input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    font-size: 1rem;
+    transition: all 0.2s;
+    outline: none;
+    background-color: #f8fafc;
+    color: var(--hp-primary);
+    box-sizing: border-box; /* Cruciale per evitare sforamenti */
+}
+
+.nm-input-group input:focus {
+    border-color: var(--hp-accent);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.05);
+}
+
+.nm-input-group.error input {
+    border-color: var(--hp-danger);
+    color: var(--hp-danger);
+}
+
+.input-error-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--hp-danger);
+}
+
+.nm-error-msg {
+    color: var(--hp-danger);
+    font-size: 0.85rem;
+    text-align: left;
+    margin-top: -0.8rem;
+}
+
+.nm-privacy-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: left;
+    cursor: pointer;
+}
+
+.nm-privacy-label input {
+    margin-top: 3px;
+    cursor: pointer;
+    accent-color: var(--hp-accent);
+}
+
+.nm-privacy-label a {
+    color: var(--hp-primary);
+    text-decoration: underline;
+}
+
+.nm-btn-primary {
+    background: var(--hp-gradient);
+    color: white;
+    font-weight: 700;
+    padding: 1rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(255, 102, 0, 0.3);
+}
+
+.nm-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 102, 0, 0.4);
+}
+
+.nm-btn-primary:disabled, .nm-btn-primary.loading {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Success State Styles */
+.nm-success-state {
+    padding: 1rem 0;
+    animation: fadeInOverlay 0.5s ease;
+}
+
+.nm-icon-success {
+    font-size: 4rem;
+    color: #10b981; /* Emerald 500 */
+    margin-bottom: 1.5rem;
+}
+
+.nm-success-state h3 {
+    font-size: 1.5rem;
+    color: var(--hp-primary);
+    margin-bottom: 0.5rem;
+}
+
+.nm-success-state p {
+    color: #64748b;
+    margin-bottom: 2rem;
+}
+
+/* =========================================
+   MOBILE TRANSFORMATION (< 992px)
    ========================================= */
 @media (max-width: 991px) {
-
   .hp-main-container { padding: 0; }
 
   .column-header {
@@ -561,11 +824,22 @@
     border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  /* Adjust del pulsante risultati su mobile */
+  /* Newsletter Widget su Mobile - MODIFICATO */
+  .newsletter-widget-card {
+      margin: 0.5rem 1.5rem 2.5rem 1.5rem; /* Margine Top ridotto, Bottom aumentato */
+      width: auto;
+  }
+
   .calendar-actions {
       padding: 0 1.5rem;
   }
 
   .hp-col-news { padding: 0 1.5rem; }
   .news-item-compact { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
+  
+  /* Modal responsive adjustments */
+  .newsletter-modal-card {
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+  }
 }
