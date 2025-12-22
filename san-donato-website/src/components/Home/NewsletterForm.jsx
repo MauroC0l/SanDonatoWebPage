@@ -1,59 +1,43 @@
 import React, { useState } from 'react';
-import { FaTimes, FaPaperPlane, FaCheckCircle, FaExclamationCircle, FaArrowRight } from 'react-icons/fa';
+import { FaTimes, FaPaperPlane, FaCheckCircle, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
 import '../../css/NewsletterForm.css';
 
 const NewsletterForm = ({ onClose }) => {
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: ''
-  });
-  
-  // Stato per gestire gli errori di validazione manuale
+  const [formData, setFormData] = useState({ first_name: '', last_name: '', email: '' });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
   const [status, setStatus] = useState(null); // 'loading', 'success', 'error'
 
-  // Funzione di validazione manuale
   const validateForm = () => {
     const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex semplice per email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!formData.first_name.trim()) {
-      newErrors.first_name = 'Il nome è obbligatorio';
-    }
-    if (!formData.last_name.trim()) {
-      newErrors.last_name = 'Il cognome è obbligatorio';
-    }
+    if (!formData.first_name.trim()) newErrors.first_name = 'Nome richiesto';
+    if (!formData.last_name.trim()) newErrors.last_name = 'Cognome richiesto';
     if (!formData.email.trim()) {
-      newErrors.email = "L'email è obbligatoria";
+      newErrors.email = 'Email richiesta';
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Formato email non valido';
+      newErrors.email = 'Formato non valido';
     }
 
     setErrors(newErrors);
-    // Restituisce true se non ci sono errori (l'oggetto keys ha lunghezza 0)
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
-    // Rimuovi l'errore specifico non appena l'utente inizia a scrivere
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
-    }
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
+    if (serverError) setServerError('');
+    if (status === 'error') setStatus(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Esegui validazione manuale prima di inviare
-    if (!validateForm()) {
-      return; // Blocca l'invio se ci sono errori
-    }
+    if (!validateForm()) return;
 
     setStatus('loading');
+    setServerError('');
 
     try {
       const response = await fetch('/api/newsletter', {
@@ -62,19 +46,18 @@ const NewsletterForm = ({ onClose }) => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setStatus('success');
-        setFormData({ first_name: '', last_name: '', email: '' });
-        setErrors({});
-        setTimeout(() => {
-           if(onClose) onClose();
-        }, 3000);
+        setTimeout(() => { if (onClose) onClose(); }, 3500);
       } else {
         setStatus('error');
+        setServerError(data.error || 'Si è verificato un errore.');
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
       setStatus('error');
+      setServerError('Errore di rete. Riprova.');
     }
   };
 
@@ -87,88 +70,56 @@ const NewsletterForm = ({ onClose }) => {
           </button>
           
           <div className="nl-header">
-            <div className="nl-icon-pulse">
-              <FaPaperPlane />
+            <div className={`nl-icon-pulse ${status}`}>
+              {status === 'success' ? <FaCheckCircle /> : status === 'error' ? <FaTimesCircle /> : <FaPaperPlane />}
             </div>
-            <h2>Resta nel Loop</h2>
-            <p>Le notizie migliori, direttamente nella tua casella di posta.</p>
+            <h2>
+              {status === 'success' ? 'Iscrizione Completata' : status === 'error' ? 'Qualcosa è andato storto' : 'Resta nel Loop'}
+            </h2>
+            <p>
+              {status === 'success' 
+                ? `Grazie ${formData.first_name}, sei dei nostri!` 
+                : status === 'error' 
+                ? serverError 
+                : 'Le notizie migliori, direttamente nella tua casella di posta.'}
+            </p>
           </div>
 
           {status === 'success' ? (
             <div className="nl-success-view">
-              <div className="success-animation">
-                <FaCheckCircle />
-              </div>
-              <h3>Benvenuto a bordo!</h3>
-              <p>Grazie {formData.first_name}, controlla la tua email per confermare.</p>
-              <button className="nl-btn-secondary" onClick={onClose}>Torna al sito</button>
+              <div className="success-animation"><FaCheckCircle /></div>
+              <button className="nl-btn-secondary" onClick={onClose}>Chiudi finestra</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="nl-form" noValidate>
-              
               <div className="nl-grid-row">
-                {/* Gruppo First Name */}
                 <div className={`nl-input-group ${errors.first_name ? 'has-error' : ''}`}>
-                  <input
-                    type="text"
-                    name="first_name"
-                    id="first_name"
-                    value={formData.first_name}
-                    onChange={handleChange}
-                    placeholder=" "
-                  />
-                  <label htmlFor="first_name">Nome</label>
+                  <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} placeholder=" " />
+                  <label>Nome</label>
                   {errors.first_name && <span className="nl-error-text">{errors.first_name}</span>}
                 </div>
-
-                {/* Gruppo Last Name */}
                 <div className={`nl-input-group ${errors.last_name ? 'has-error' : ''}`}>
-                  <input
-                    type="text"
-                    name="last_name"
-                    id="last_name"
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    placeholder=" "
-                  />
-                  <label htmlFor="last_name">Cognome</label>
+                  <input type="text" name="last_name" value={formData.last_name} onChange={handleChange} placeholder=" " />
+                  <label>Cognome</label>
                   {errors.last_name && <span className="nl-error-text">{errors.last_name}</span>}
                 </div>
               </div>
 
-              {/* Gruppo Email */}
-              <div className={`nl-input-group ${errors.email ? 'has-error' : ''}`}>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder=" "
-                />
-                <label htmlFor="email">Indirizzo Email</label>
-                {errors.email && <span className="nl-error-text">{errors.email}</span>}
+              <div className={`nl-input-group ${errors.email || serverError ? 'has-error' : ''}`}>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder=" " />
+                <label>Indirizzo Email</label>
+                {(errors.email || serverError) && <span className="nl-error-text">{errors.email || serverError}</span>}
               </div>
 
-              {status === 'error' && (
-                <div className="nl-feedback error">
-                  <FaExclamationCircle /> Errore di connessione. Riprova più tardi.
-                </div>
-              )}
-
-              <button type="submit" className="nl-submit-btn" disabled={status === 'loading'}>
+              <button type="submit" className={`nl-submit-btn ${status}`} disabled={status === 'loading'}>
                 {status === 'loading' ? (
                   <span className="spinner"></span>
                 ) : (
                   <>
-                    Iscriviti Ora <FaArrowRight className="btn-icon" />
+                    {status === 'error' ? 'Riprova' : 'Iscriviti Ora'} <FaArrowRight className="btn-icon" />
                   </>
                 )}
               </button>
-              
-              <p className="nl-footer-text">
-                Cliccando su Iscriviti accetti la nostra Privacy Policy.
-              </p>
             </form>
           )}
         </div>

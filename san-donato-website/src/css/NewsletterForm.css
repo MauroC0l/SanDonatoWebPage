@@ -1,60 +1,52 @@
-/* NewsletterForm.css */
-
 :root {
-  --nl-bg-overlay: rgba(15, 23, 42, 0.75);
+  --nl-bg-overlay: rgba(15, 23, 42, 0.8);
   --nl-bg-surface: #ffffff;
   --nl-primary: #0f172a;
   --nl-accent: #ff6600;
+  --nl-success: #22c55e;
   --nl-error: #ef4444;
   --nl-text-main: #1e293b;
-  --nl-text-muted: #94a3b8; /* Colore label più chiaro a riposo */
+  --nl-text-muted: #64748b;
   --nl-border: #e2e8f0;
-  --nl-radius: 16px;
-  --nl-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --nl-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --nl-radius: 20px;
+  --nl-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  --nl-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nl-modal-overlay {
   position: fixed;
   inset: 0;
   background-color: var(--nl-bg-overlay);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   z-index: 10000;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  animation: nlFadeIn 0.3s ease-out forwards;
+  animation: nlFadeIn 0.3s ease-out;
 }
 
-.nl-modal-container {
-  max-height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  overflow-y: auto;
-}
+.nl-modal-container { width: 100%; display: flex; justify-content: center; }
 
 .nl-modal-content {
   background: var(--nl-bg-surface);
   width: 100%;
-  max-width: 500px;
+  max-width: 480px;
   border-radius: var(--nl-radius);
-  padding: 2.5rem;
+  padding: 3rem 2.5rem;
   position: relative;
   box-shadow: var(--nl-shadow);
-  animation: nlSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  margin: auto;
+  animation: nlSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nl-close-btn {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  background: #f1f5f9;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #f8fafc;
   border: none;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   color: var(--nl-text-muted);
   display: flex;
@@ -65,300 +57,136 @@
 }
 
 .nl-close-btn:hover {
-  background: #e2e8f0;
-  color: var(--nl-primary);
+  background: var(--nl-error);
+  color: white;
   transform: rotate(90deg);
 }
 
-/* --- HEADER --- */
-.nl-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
+/* --- HEADER & DYNAMIC ICON --- */
+.nl-header { text-align: center; margin-bottom: 2.5rem; }
 
 .nl-icon-pulse {
-  width: 64px;
-  height: 64px;
-  background: rgba(255, 102, 0, 0.08);
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 102, 0, 0.1);
   color: var(--nl-accent);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem;
-  margin: 0 auto 1.25rem auto;
+  font-size: 2rem;
+  margin: 0 auto 1.5rem;
   position: relative;
+  transition: var(--nl-transition);
 }
+
+.nl-icon-pulse.success { background: rgba(34, 197, 94, 0.1); color: var(--nl-success); }
+.nl-icon-pulse.error { background: rgba(239, 68, 68, 0.1); color: var(--nl-error); animation: shake 0.4s; }
 
 .nl-icon-pulse::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid var(--nl-accent);
-  opacity: 0;
+  border: 2px solid currentColor;
   animation: nlPulse 2s infinite;
 }
 
-.nl-header h2 {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--nl-primary);
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.025em;
-}
+.nl-header h2 { font-size: 1.8rem; font-weight: 800; color: var(--nl-primary); margin-bottom: 0.5rem; }
+.nl-header p { color: var(--nl-text-muted); font-size: 1rem; line-height: 1.6; }
 
-.nl-header p {
-  color: #64748b;
-  font-size: 1rem;
-  line-height: 1.5;
-  margin: 0;
-}
+/* --- FORM & INPUTS --- */
+.nl-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.nl-grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-/* --- FORM --- */
-.nl-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem; /* Aumentato leggermente il gap per far spazio agli errori */
-}
+.nl-input-group { position: relative; }
 
-.nl-grid-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-/* --- INPUT GROUP & FLOATING LABELS (MODIFICATO) --- */
-.nl-input-group {
-  position: relative;
-  width: 100%;
-}
-
-/* FIX SOVRAPPOSIZIONE:
-   Padding Top: 1.6rem (25.6px) - Crea spazio per la label fluttuante
-   Padding Bottom: 0.6rem - Bilancia visivamente
-*/
 .nl-input-group input {
   width: 100%;
-  padding: 1.6rem 1rem 0.6rem 1rem; 
+  padding: 1.6rem 1rem 0.6rem;
   font-size: 1rem;
-  color: var(--nl-text-main);
-  background-color: #f8fafc;
+  background: #f8fafc;
   border: 2px solid transparent;
-  border-radius: 12px;
-  outline: none;
+  border-radius: 14px;
   transition: var(--nl-transition);
   font-weight: 500;
-  line-height: 1.25;
-}
-
-.nl-input-group input:hover {
-  background-color: #f1f5f9;
 }
 
 .nl-input-group input:focus {
-  background-color: #fff;
+  background: white;
   border-color: var(--nl-accent);
   box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.1);
 }
 
-/* Gestione Errori Visivi */
-.nl-input-group.has-error input {
-  border-color: var(--nl-error);
-  background-color: #fef2f2;
-}
-.nl-input-group.has-error input:focus {
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-}
+.nl-input-group.has-error input { border-color: var(--nl-error); background: #fffafb; }
 
-/* Messaggio di errore sotto l'input */
-.nl-error-text {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--nl-error);
-  margin-top: 4px;
-  margin-left: 4px;
-  font-weight: 600;
-  animation: nlFadeIn 0.2s;
-}
-
-/* STILE LABEL 
-*/
 .nl-input-group label {
   position: absolute;
   left: 1rem;
-  top: 50%; /* Centrato verticalmente nello stato iniziale */
+  top: 50%;
   transform: translateY(-50%);
   color: var(--nl-text-muted);
-  font-size: 0.95rem; /* Dimensione normale quando vuoto */
   pointer-events: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 500;
-  z-index: 1; /* Assicura che sia sopra il background */
+  transition: all 0.2s;
 }
 
-/* LOGICA FLOATING (FIX SIZE E POSIZIONE)
-   Quando c'è focus o testo:
-   1. top: 8px -> Sposta in alto nella zona di padding vuota
-   2. font-size: 0.7rem -> Molto più piccolo per non disturbare
-*/
 .nl-input-group input:focus ~ label,
 .nl-input-group input:not(:placeholder-shown) ~ label {
-  top: 8px; /* Posizione assoluta dall'alto */
-  transform: translateY(0); /* Rimuovi la centratura */
-  font-size: 0.7rem; /* Testo piccolo */
-  color: var(--nl-accent);
+  top: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--nl-accent);
 }
 
-/* Colore rosso per la label se c'è errore */
-.nl-input-group.has-error input:focus ~ label,
-.nl-input-group.has-error input:not(:placeholder-shown) ~ label {
+.nl-error-text {
+  font-size: 0.75rem;
   color: var(--nl-error);
-}
-
-/* Colore neutro per la label se c'è testo ma non focus */
-.nl-input-group input:not(:placeholder-shown):not(:focus) ~ label {
-  color: #64748b;
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
 }
 
 /* --- BUTTONS --- */
 .nl-submit-btn {
-  margin-top: 0.5rem;
   background: var(--nl-primary);
   color: white;
   border: none;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 1rem;
+  padding: 1.1rem;
+  border-radius: 14px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.8rem;
   transition: var(--nl-transition);
 }
 
-.nl-submit-btn:hover {
-  background: #1e293b;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.2);
-}
-
-.nl-submit-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-icon {
-  transition: transform 0.2s;
-}
-.nl-submit-btn:hover .btn-icon {
-  transform: translateX(4px);
-}
-
-.nl-footer-text {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  text-align: center;
-  margin: 0;
-}
-
-.nl-success-view {
-  display: flex;            /* Attiva Flexbox */
-  flex-direction: column;   /* Impila gli elementi verticalmente */
-  align-items: center;      /* <--- QUESTO è il comando che centra orizzontalmente tutto */
-  text-align: center;       /* Mantiene il testo centrato se va a capo */
-  padding: 1rem 0;
-  width: 100%;
-  animation: nlFadeIn 0.4s;
-}
-
-.success-animation {
-  font-size: 4rem;
-  color: #22c55e;
-  margin-bottom: 1rem;
-  animation: nlPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  
-  /* Mantieni questi per centrare l'SVG esattamente dentro al suo bounding box */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.nl-btn-secondary {
-  margin-top: 1.5rem;
-  background: transparent;
-  border: 2px solid #e2e8f0;
-  padding: 0.6rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  color: var(--nl-text-main);
-  cursor: pointer;
-  transition: var(--nl-transition);
-}
-.nl-btn-secondary:hover {
-  border-color: var(--nl-primary);
-  background: var(--nl-primary);
-  color: white;
-}
-
-.nl-feedback.error {
-  background-color: #fee2e2;
-  color: #ef4444;
-  padding: 0.75rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-weight: 600;
-}
+.nl-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+.nl-submit-btn.error { background: var(--nl-error); }
+.nl-submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .spinner {
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255,255,255, 0.3);
-  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
   border-top-color: white;
-  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes nlFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes nlSlideUp { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes nlPulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.6); opacity: 0; } }
-@keyframes nlPop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes nlSlideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes nlPulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* --- MEDIA QUERIES --- */
-@media (max-width: 600px) {
-  .nl-modal-content {
-    padding: 2rem 1.5rem;
-    max-width: 100%;
-    margin: 1rem 0;
-  }
-  .nl-grid-row {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  .nl-header h2 { font-size: 1.5rem; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
-@media (max-width: 380px) {
-  .nl-modal-content { padding: 1.5rem 1rem; }
-  .nl-header h2 { font-size: 1.3rem; }
-}
-
-@media (max-height: 700px) {
-  .nl-modal-container {
-    align-items: flex-start;
-  }
-  .nl-modal-content {
-    margin: 2rem auto;
-  }
+@media (max-width: 500px) {
+  .nl-grid-row { grid-template-columns: 1fr; }
+  .nl-modal-content { padding: 2rem 1.5rem; }
 }
