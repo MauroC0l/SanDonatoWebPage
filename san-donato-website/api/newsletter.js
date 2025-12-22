@@ -31,33 +31,52 @@ export default async function handler(req, res) {
     });
   }
 
-  // 4. Controllo Dati in Arrivo (Debug dei campi)
+  // 4. Controllo Dati in Arrivo
   const { email, first_name, last_name } = req.body;
   
-  console.log("[DEBUG] Dati ricevuti dal Frontend:", { 
-    email, 
-    first_name, 
-    last_name 
-  });
+  console.log("[DEBUG] Dati ricevuti dal Frontend:", { email, first_name, last_name });
 
   if (!email) {
     console.warn("[ERROR] Campo email vuoto");
     return res.status(400).json({ error: 'Email mancante nel body della richiesta' });
   }
 
-  // 5. Preparazione Dati per MailerLite
-  const data = {
-    email: email,
-    fields: {
-      name: first_name || "",     // Evita undefined
-      last_name: last_name || ""  // Evita undefined
-    }
-  };
-
   try {
-    console.log("[DEBUG] Tentativo di invio a MailerLite...");
+    // --- STEP A: VERIFICA ESISTENZA ISCRITTO ---
+    console.log(`[DEBUG] Verifica esistenza email: ${email}`);
     
-    const response = await fetch('https://connect.mailerlite.com/api/subscribers', {
+    const checkResponse = await fetch(`https://connect.mailerlite.com/api/subscribers/${email}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      }
+    });
+
+    // Se la risposta è 200 e troviamo un ID, l'utente esiste già.
+    // Nota: MailerLite ritorna 404 se l'utente NON esiste.
+    if (checkResponse.ok) {
+      const checkData = await checkResponse.json();
+      if (checkData.data && checkData.data.id) {
+        console.warn("[INFO] Utente già registrato. Blocco iscrizione.");
+        return res.status(409).json({ 
+          error: "Questa email risulta già iscritta alla newsletter." 
+        });
+      }
+    }
+
+    // --- STEP B: ISCRIZIONE (SE NON ESISTE) ---
+    console.log("[DEBUG] Email nuova. Tentativo di iscrizione...");
+
+    const data = {
+      email: email,
+      fields: {
+        name: first_name || "",      // Mappatura first_name
+        last_name: last_name || ""   // Mappatura last_name
+      }
+    };
+
+    const subscribeResponse = await fetch('https://connect.mailerlite.com/api/subscribers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,14 +85,12 @@ export default async function handler(req, res) {
       body: JSON.stringify(data),
     });
 
-    // 6. Gestione Risposta MailerLite
-    const responseData = await response.json();
+    const responseData = await subscribeResponse.json();
 
-    if (response.status >= 400) {
+    if (subscribeResponse.status >= 400) {
       console.error("[ERROR] Risposta MailerLite (Errore):", JSON.stringify(responseData, null, 2));
-      // Restituiamo l'errore ESATTO al frontend
       return res.status(400).json({ 
-        message: "Errore da MailerLite", 
+        message: "Errore durante l'iscrizione su MailerLite", 
         details: responseData 
       });
     }

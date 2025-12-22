@@ -269,8 +269,12 @@
 }
 
 .nl-success-view {
-  text-align: center;
+  display: flex;            /* Attiva Flexbox */
+  flex-direction: column;   /* Impila gli elementi verticalmente */
+  align-items: center;      /* <--- QUESTO è il comando che centra orizzontalmente tutto */
+  text-align: center;       /* Mantiene il testo centrato se va a capo */
   padding: 1rem 0;
+  width: 100%;
   animation: nlFadeIn 0.4s;
 }
 
@@ -279,6 +283,11 @@
   color: #22c55e;
   margin-bottom: 1rem;
   animation: nlPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* Mantieni questi per centrare l'SVG esattamente dentro al suo bounding box */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .nl-btn-secondary {
