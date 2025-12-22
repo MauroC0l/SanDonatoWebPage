@@ -2,7 +2,7 @@
 // 📦 api.mjs — API Client Ottimizzato per WordPress/React
 // ==============================
 
-const WP_API_BASE = "https://polisportivasandonato.org/index.php";
+const WP_API_BASE = "https://polisportivasandonato.org/wp/index.php";
 const WP_REST_PATH = "/wp/v2";
 
 // 🔹 Cache in memoria (Singleton pattern)
