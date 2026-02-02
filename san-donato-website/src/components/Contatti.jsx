@@ -146,6 +146,8 @@ export default function Contacts() {
                 </button>
               </div>
 
+              <p style={{ marginTop: '1rem' }}>Intestato a: <strong>POLISPORTIVA SAN DONATO ASD</strong></p>
+
               <div className="bank-logo-wrapper">
                 <img src={pagamenti.logoBanca} alt="Banca" className="bank-img" loading="lazy" />
               </div>
