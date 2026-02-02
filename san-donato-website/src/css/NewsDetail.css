@@ -1,217 +1,283 @@
 /* =========================================
-   NEWS DETAIL - LAYOUT DI LETTURA
+   NEWS DETAIL - EDITORIAL FLOW THEME
    ========================================= */
-
-.news-detail-page {
-  /* Layout centrale focalizzato sul testo */
-  max-width: 840px; 
-  width: 92%;
-  margin: 3rem auto 5rem;
-  background: var(--bg-surface);
-  border-radius: var(--radius-lg);
-  /* Ombra più profonda per staccarlo dallo sfondo */
-  box-shadow: var(--shadow-md); 
-  padding: clamp(2rem, 5vw, 4rem);
-  color: var(--text-main);
-  animation: fadeUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  position: relative;
-  overflow: hidden; /* Per contenere elementi decorativi se necessario */
+:root {
+  --nd-bg: #ffffff;
+  --nd-surface: #f8fafc;
+  --nd-text-main: #0f172a;  
+  --nd-text-muted: #64748b; 
+  --nd-primary: #002b5c;    
+  --nd-accent: #ff4500;     
+  --nd-line: #e2e8f0;
+  --nd-radius: 12px;
+  --nd-font-main: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* --- Hero Image & Header --- */
-.news-detail-hero {
+/* Reset base */
+.nd-wrapper {
+  box-sizing: border-box;
   width: 100%;
-  height: clamp(250px, 40vh, 500px);
-  object-fit: cover;
-  border-radius: var(--radius-md);
-  margin-bottom: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  max-width: 1200px; /* Max-width leggermente ridotta per leggibilità su singola colonna */
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+  background: var(--nd-bg);
+  color: var(--nd-text-main);
+  font-family: var(--nd-font-main);
 }
 
-.news-detail-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  letter-spacing: -0.02em;
+.nd-fade-in {
+  animation: ndEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Meta Data (Autore, Data) Styled as Pills */
-.news-detail-meta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #f1f5f9;
-  font-family: monospace, sans-serif; /* Tocco tecnico moderno */
-}
-
-.news-detail-meta span {
-  background: #f1f5f9;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-.news-detail-meta span:first-child {
-  background: rgba(255, 123, 51, 0.1);
-  color: var(--accent-color);
-}
-
-/* --- Contenuto Tipografico --- */
-.news-detail-content {
-  font-size: 1.125rem; /* 18px base */
-  line-height: 1.8;
-  color: #334155;
-  margin-bottom: 3rem;
-}
-
-.news-detail-content p {
-  margin-bottom: 1.8rem;
-}
-
-.news-detail-content h3, .news-detail-content h4 {
-  color: var(--primary-color);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-/* --- Anteprima Immagine Cliccabile --- */
-.news-image-preview-container {
-  margin: 3rem auto;
-  text-align: center;
-  position: relative;
-  display: inline-block;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.news-detail-image-preview {
-  width: clamp(250px, 30vw, 400px);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  cursor: zoom-in;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 4px solid #fff;
-}
-
-.news-detail-image-preview:hover {
-  transform: scale(1.03) rotate(1deg); /* Leggera rotazione giocosa */
-  box-shadow: var(--shadow-lg);
-}
-
-.news-image-caption {
-  margin-top: 0.8rem;
-  font-size: 0.85rem;
-  color: var(--accent-color);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* --- Footer Navigazione --- */
-.news-detail-footer {
-  display: flex;
-  justify-content: flex-start;
-  padding-top: 2rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-.news-detail-footer .btn {
-  background: white;
-  color: var(--text-main);
-  border: 1px solid #e2e8f0;
-  padding: 0.8rem 1.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
-}
-
-.news-detail-footer .btn:hover {
-  border-color: var(--primary-color);
-  transform: translateX(-5px);
+@keyframes ndEntry {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* =========================================
-   LIGHTBOX AVANZATO (Glassmorphism)
+   HEADER SECTION
    ========================================= */
-.news-lightbox-overlay {
+.nd-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--nd-line);
+}
+
+/* Tags */
+.nd-tags-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.nd-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--nd-accent);
+  background: rgba(255, 69, 0, 0.08);
+  border: 1px solid rgba(255, 69, 0, 0.15);
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Titolo */
+.nd-title {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: var(--nd-text-main);
+  letter-spacing: -0.02em;
+}
+
+/* Metadati */
+.nd-meta-data {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding-left: 1rem;
+  border-left: 3px solid var(--nd-accent);
+}
+
+.nd-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.nd-meta-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--nd-text-muted);
+}
+
+.nd-meta-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--nd-text-main);
+}
+
+/* =========================================
+   CONTENT & FLOATING IMAGE
+   ========================================= */
+
+/* Wrapper principale del contenuto per gestire il clearfix */
+.nd-article-container {
+  display: block; 
+  position: relative;
+}
+
+/* L'immagine che "galleggia" a destra.
+   Il float permette al testo di avvolgerla.
+*/
+.nd-float-visual {
+  float: right;
+  width: 40%;
+  max-width: 400px;
+  margin-left: 2.5rem; /* Spazio tra testo e immagine */
+  margin-bottom: 1.5rem; /* Spazio sotto l'immagine */
+  clear: right;
+}
+
+.nd-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--nd-radius);
+  cursor: zoom-in;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+  background: var(--nd-surface);
+}
+
+.nd-main-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.nd-image-caption {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--nd-text-muted);
+  text-align: right;
+  display: block;
+}
+
+/* Corpo del testo */
+.nd-content-body {
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: #374151;
+  font-weight: 400;
+  /* Importante: display block per permettere il wrapping attorno al float */
+  display: block; 
+}
+
+.nd-content-body p {
+  margin-bottom: 1.5rem;
+}
+
+.nd-content-body strong {
+  color: var(--nd-primary);
+  font-weight: 700;
+}
+
+/* Overlay immagine */
+.nd-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: white;
+  font-weight: 600;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.nd-image-wrapper:hover .nd-image-overlay {
+  opacity: 1;
+}
+
+/* =========================================
+   RESPONSIVE (Mobile < 768px)
+   ========================================= */
+@media (max-width: 768px) {
+  .nd-wrapper {
+    padding: 1.5rem;
+  }
+
+  /* Su mobile rimuoviamo il float: l'immagine va sopra o sotto, a piena larghezza */
+  .nd-float-visual {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-bottom: 2rem;
+  }
+
+  .nd-title {
+    font-size: 2rem;
+  }
+}
+
+/* =========================================
+   FOOTER & LIGHTBOX (Invariati funzionalmente)
+   ========================================= */
+.nd-footer-action {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px dashed var(--nd-line);
+  clear: both; /* Assicura che il footer stia sotto a tutto */
+}
+
+.nd-btn-back {
+  background: white;
+  color: var(--nd-text-main);
+  border: 1px solid var(--nd-line);
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.nd-btn-back:hover {
+  background: var(--nd-surface);
+  border-color: var(--nd-text-muted);
+  transform: translateX(-3px);
+}
+
+.nd-lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.85); /* Dark Blur Background */
-  backdrop-filter: blur(10px); /* Effetto vetro sfocato */
+  background: rgba(0, 0, 0, 0.9);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  animation: fadeIn 0.3s ease forwards;
+  animation: ndEntry 0.3s ease forwards;
 }
 
-.news-lightbox-image {
-  max-width: 95vw;
+.nd-lightbox-image {
+  max-width: 90vw;
   max-height: 90vh;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.news-lightbox-close {
+.nd-lightbox-close {
   position: absolute;
   top: 2rem;
   right: 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.1);
+  border: none;
   color: white;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.news-lightbox-close:hover {
-  background: var(--accent-color);
-  transform: rotate(90deg);
-}
-
-/* Animazioni */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes zoomIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeIn {
-  to { opacity: 1; }
-}
-
-/* Mobile Tweaks */
-@media (max-width: 600px) {
-  .news-detail-page {
-    width: 100%;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 2rem 1.5rem;
-  }
-  
-  .news-detail-title {
-    font-size: 1.8rem;
-  }
+.nd-lightbox-close:hover {
+  background: var(--nd-accent);
 }

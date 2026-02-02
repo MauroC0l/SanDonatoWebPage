@@ -200,7 +200,7 @@
 
 .rm-score-text {
     font-size: 1.25rem; /* Testo fallback ridotto */
-    font-weight: 800;
+    font-weight: 500;
     color: #334155;
 }
 
@@ -250,7 +250,6 @@
 
 .font-mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: #f1f5f9;
     padding: 1px 5px;
     border-radius: 4px;
     display: inline-block;

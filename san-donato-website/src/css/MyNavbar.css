@@ -129,6 +129,21 @@
   color: var(--text-white); /* Mantengo il testo bianco, non accent */
 }
 
+.dropdown-toggle.clean-toggle {
+  background: transparent; 
+  border-color: transparent;
+  padding-right: 1rem; /* Mantiene lo stesso padding degli altri */
+  color: rgba(255, 255, 255, 0.9); /* Stesso colore base dei link */
+}
+
+.dropdown-toggle.clean-toggle:hover,
+.dropdown-toggle.clean-toggle.active-toggle {
+  background: rgba(255, 255, 255, 0.1); /* Stesso effetto hover degli altri */
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Stessa ombra */
+}
+
 /* 5. Menu a Tendina (Dropdown Menu) */
 .dropdown-menu {
   position: absolute;
@@ -280,3 +295,14 @@
     max-width: calc(100vw - 1rem);
   }
 }
+
+
+button.nav-link {
+  font-family: inherit; /* Eredita il font 'Inter' del genitore */
+  font-size: 0.9rem;    /* Assicura la stessa dimensione */
+  font-weight: 500;     /* Assicura lo stesso peso */
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+

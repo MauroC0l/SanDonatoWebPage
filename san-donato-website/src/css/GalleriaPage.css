@@ -1,0 +1,154 @@
+/* --- Galleria.css --- */
+
+:root {
+  --primary-color: #002b5c; 
+  --accent-color: #ff6600;
+}
+
+/* 1. LAYOUT PAGINA */
+.galleria-page-container {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background: #f0f2f5; 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* 2. CARD CENTRALE */
+.galleria-card {
+  background: #ffffff;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+  position: relative;
+  border-top: 5px solid var(--accent-color, #ff6600);
+}
+
+/* 3. ICONA REGALO */
+.icon-wrapper {
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  padding: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 102, 0, 0.1); 
+}
+
+.surprise-icon {
+  font-size: 3.5rem;
+  color: var(--accent-color, #ff6600);
+  animation: pulseIcon 2s infinite ease-in-out;
+}
+
+/* 4. TESTI */
+.galleria-title {
+  font-size: 2rem;
+  color: var(--primary-color, #002b5c);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.galleria-message {
+  font-size: 1.2rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 2.5rem; 
+}
+
+/* 5. ANIMAZIONE PALLA RIMBALZANTE */
+
+.bounce-loader-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 80px; 
+  margin: 0 auto;
+  overflow: hidden; 
+}
+
+.floor-line {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+}
+
+/* A. Movimento Sinistra -> Destra */
+.moving-wrapper {
+  position: absolute;
+  bottom: 3px; 
+  left: -50px; 
+  width: 2rem;
+  height: 2rem;
+  animation: moveLeftToRight 2.5s linear infinite;
+}
+
+/* B. Movimento Alto -> Basso */
+.bouncing-wrapper {
+  width: 100%;
+  height: 100%;
+  animation: bounceDecay 2.5s linear infinite;
+}
+
+/* C. Rotazione */
+.spinning-icon {
+  width: 100%;
+  height: 100%;
+  font-size: 2rem; 
+  color: var(--accent-color, #ff6600);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: spinBallClockwise 2.5s linear infinite;
+}
+
+/* 6. KEYFRAMES */
+
+@keyframes pulseIcon {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes moveLeftToRight {
+  0% { left: -50px; }
+  100% { left: 100%; }
+}
+
+/* Logica fluida: tocca terra (ease-in) e riparte subito (ease-out) */
+@keyframes bounceDecay {
+  /* Salto 1 */
+  0%   { transform: translateY(0); animation-timing-function: ease-out; }
+  20%  { transform: translateY(-55px); animation-timing-function: ease-in; }
+  40%  { transform: translateY(0); animation-timing-function: ease-out; } 
+
+  /* Salto 2 */
+  55%  { transform: translateY(-30px); animation-timing-function: ease-in; }
+  70%  { transform: translateY(0); animation-timing-function: ease-out; } 
+
+  /* Salto 3 */
+  80%  { transform: translateY(-12px); animation-timing-function: ease-in; }
+  90%  { transform: translateY(0); animation-timing-function: linear; }
+  
+  /* Rotola */
+  100% { transform: translateY(0); }
+}
+
+@keyframes spinBallClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(720deg); }
+}
+
+/* 7. RESPONSIVE */
+@media (max-width: 480px) {
+  .galleria-page-container { padding: 1rem; }
+  .galleria-card { padding: 2rem 1.5rem; }
+  .galleria-title { font-size: 1.75rem; }
+  .bounce-loader-container { max-width: 240px; }
+}

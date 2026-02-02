@@ -4,7 +4,7 @@ import News from "./components/News/NewsPage";
 import MyNavbar from "./components/AllPages/MyNavbar";
 import Hero from "./components/AllPages/Hero";
 import TopHeader from "./components/AllPages/TopHeader"; 
-import NewsDetailPage from "./components/NewsDetail";
+import NewsDetailPage from "./components/News/NewsDetail";
 import ChiSiamoPage from "./components/ChiSiamoPage";
 import SubscriptionPage from "./components/SubscriptionPage";
 import CalendarPage from "./components/CalendarPage";
@@ -15,7 +15,8 @@ import ContributiPage from "./components/ContributiPage";
 import CinquePerMillePage from "./components/CinquePerMillePage";
 import SponsorPage from "./components/SponsorPage";
 import SportPage from "./components/SportPage";
-import NotFoundPage from "./components/NotFoundPage"; // <--- 1. Importa la pagina 404
+import NotFoundPage from "./components/NotFoundPage"; 
+import GalleriaPage from "./components/Galleria/GalleriaPage";
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/news" element={<News />} />
           <Route path="/chi-siamo" element={<ChiSiamoPage />} />
+          <Route path="/galleria" element={<GalleriaPage />} />
           <Route path="/news/:id" element={<NewsDetailPage />} />
           <Route path="/iscrizione" element={<SubscriptionPage />} /> 
           <Route path="/sports" element={<SportPage />} />

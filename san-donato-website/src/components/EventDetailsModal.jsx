@@ -79,7 +79,7 @@ export default function EventDetailsModal({ event, onClose }) {
             
             {event.result && (
                 <div className="cp-detail-row">
-                    <div className="cp-icon-box" style={{color: event.color, backgroundColor: '#fff', border: `1px solid ${event.color}`}}>
+                    <div className="cp-icon-box" >
                         <IconTrophy />
                     </div>
                     <div className="cp-detail-content">

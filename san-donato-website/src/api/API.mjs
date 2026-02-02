@@ -2,7 +2,7 @@
 // 📦 api.mjs — API Client Ottimizzato per WordPress/React
 // ==============================
 
-const WP_API_BASE = "https://polisportivasandonato.org/index.php";
+const WP_API_BASE = "https://polisportivasandonato.org/wp/index.php";
 const WP_REST_PATH = "/wp/v2";
 
 // 🔹 Cache in memoria (Singleton pattern)
@@ -132,8 +132,12 @@ function normalizePost(post, authorMap) {
   return {
     id: post.id,
     title: title,
-    // Passiamo il limite caratteri a cleanExcerpt
+    // Questo è il riassunto per la lista (NewsList)
     preview: cleanExcerpt(post.excerpt?.rendered || "", 200),
+    
+    // ✅ AGGIUNGI QUESTA RIGA: Salva il contenuto completo HTML
+    content: post.content?.rendered || "", 
+
     image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null,
     sport: detectSport(title),
     author: authorMap.get(post.author) || post._embedded?.author?.[0]?.name || "Staff",

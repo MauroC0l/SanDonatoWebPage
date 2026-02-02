@@ -10,10 +10,7 @@ import "../../css/NewsPage.css";
 export default function NewsPage() {
   const [news, setNews] = useState([]);
   const [sportFilter, setSportFilter] = useState([]);
-  const [authorFilter, setAuthorFilter] = useState([]);
   const [dateRange, setDateRange] = useState([null, null]);
-  
-  // ✅ MODIFICA QUI: Impostato su "desc" per avere di default "Dalla più recente"
   const [sortOrder, setSortOrder] = useState("desc");
   
   const [loading, setLoading] = useState(true);
@@ -36,22 +33,29 @@ export default function NewsPage() {
     fetchNews();
   }, []);
 
-  const sportsList = useMemo(() => [...new Set(news.map(n => n.sport))], [news]);
-  const authorsList = useMemo(() => [...new Set(news.map(n => n.author))], [news]);
+  // ✅ MODIFICA: Creazione lista Sport
+  // Mappa 'Minivolley' in 'Pallavolo' per evitare che compaia come filtro separato
+  const sportsList = useMemo(() => {
+    const sports = news.map(n => n.sport === 'Minivolley' ? 'Pallavolo' : n.sport);
+    return [...new Set(sports)].sort();
+  }, [news]);
 
   const toggleFilter = useCallback((value, setFilter) => {
     setFilter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }, []);
 
-  // Funzione helper per parsare le date in modo sicuro
   const parseDate = (str) => str ? new Date(str) : new Date(0);
 
   const filteredNews = useMemo(() => {
     return news
-      .filter(n =>
-        (!sportFilter.length || sportFilter.includes(n.sport)) &&
-        (!authorFilter.length || authorFilter.includes(n.author))
-      )
+      .filter(n => {
+        // ✅ MODIFICA LOGICA FILTRO SPORT:
+        // Se la news è Minivolley, la trattiamo come Pallavolo ai fini del filtro
+        const effectiveSport = n.sport === 'Minivolley' ? 'Pallavolo' : n.sport;
+        
+        // Se non ci sono filtri, mostra tutto. Altrimenti controlla se lo sport (normalizzato) è incluso.
+        return !sportFilter.length || sportFilter.includes(effectiveSport);
+      })
       .filter(n => {
         const newsDate = parseDate(n.date);
         return (!startDate || newsDate >= startDate) && (!endDate || newsDate <= endDate);
@@ -59,20 +63,14 @@ export default function NewsPage() {
       .sort((a, b) => {
         const dateA = parseDate(a.date);
         const dateB = parseDate(b.date);
-        // ✅ LOGICA DI ORDINAMENTO:
-        // Se "desc": dateB - dateA (La data più recente ha un timestamp più alto, quindi viene prima)
-        // Se "asc": dateA - dateB (La data più vecchia viene prima)
-        return sortOrder === "desc" 
-          ? dateB - dateA 
-          : dateA - dateB;
+        return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
       });
-  }, [news, sportFilter, authorFilter, startDate, endDate, sortOrder]);
+  }, [news, sportFilter, startDate, endDate, sortOrder]);
 
   const handleResetFilters = useCallback(() => {
     setSportFilter([]);
-    setAuthorFilter([]);
     setDateRange([null, null]);
-    setSortOrder("desc"); // Reset riporta a discendente
+    setSortOrder("desc");
   }, []);
 
   return (
@@ -85,7 +83,7 @@ export default function NewsPage() {
         </div>
       ) : (
         <div className="news-layout">
-          {/* 🔸 Pulsante visibile solo su smartphone */}
+          {/* Pulsante Mobile */}
           <div className="mobile-filters-toggle">
             <Button
               className="filter-toggle-btn"
@@ -95,13 +93,12 @@ export default function NewsPage() {
             </Button>
           </div>
 
-          {/* 🔸 Sidebar desktop + dropdown mobile */}
+          {/* Sidebar */}
           <aside className={`news-sidebar ${showMobileFilters ? "show-mobile" : ""}`}>
             <h4>Filtri</h4>
             <Form>
               <FilterGroup label="Sport" options={sportsList} selected={sportFilter} toggleFilter={toggleFilter} setFilter={setSportFilter} />
-              <FilterGroup label="Pubblicatore" options={authorsList} selected={authorFilter} toggleFilter={toggleFilter} setFilter={setAuthorFilter} />
-
+              
               <Form.Group className="form-group">
                 <Form.Label className="form-label">Periodo</Form.Label>
                 <DatePicker
@@ -112,7 +109,7 @@ export default function NewsPage() {
                   className="form-control custom-datepicker"
                   placeholderText="Seleziona intervallo"
                   isClearable
-                  dateFormat="dd/MM/yyyy" // Formato italiano per il DatePicker
+                  dateFormat="dd/MM/yyyy"
                 />
               </Form.Group>
 
@@ -134,7 +131,7 @@ export default function NewsPage() {
             </Form>
           </aside>
 
-          {/* 🔸 Lista notizie */}
+          {/* Lista notizie */}
           <div className="news-list-wrapper section-spacing">
             <NewsList news={filteredNews} />
           </div>
