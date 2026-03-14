@@ -224,51 +224,106 @@ function transformEvent(item, config) {
 }
 
 // ====================================================
-// LOGICA CORE (Privata)
+// LOGICA CORE (Privata) // AGGIORNATA
 // ====================================================
+
+// Funzione Helper per eseguire una singola richiesta con Retry
+async function fetchCalendarWithRetry(config, timeMin, timeMax) {
+    if (!config.id || config.id.includes("INSERISCI_QUI")) return [];
+    
+    // NOTA: maxResults aumentato a 2500 per evitare che Google tronchi i risultati (di default sono 250 o 100)
+    // Questo risolve il problema degli eventi mancanti.
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(config.id)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=2500`;
+
+    // Tentativo singolo con timeout semplice se fallisce la rete, o gestione errori API.
+    // 2 tentativi totali (1 tentativo + 1 retry)
+    const MAX_RETRIES = 1;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per evitare hang infiniti
+
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                return (data.items || []).map(item => transformEvent(item, config));
+            } else {
+                // Se è 429 (Too Many Requests) o 403 (Rate Limit), aspettiamo e riproviamo
+                if (response.status === 429 || response.status === 403) {
+                     // Backoff esponenziale semplice (1s, 2s...)
+                     await new Promise(res => setTimeout(res, 1000 * (attempt + 1))); 
+                     if (attempt === MAX_RETRIES) {
+                        console.warn(`Rate Limit persistente per ${config.label}.`);
+                     }
+                     continue; // Riprova il ciclo
+                }
+                // Altri errori (404, 500) -> non ha senso riprovare subito
+                console.error(`Errore HTTP ${response.status} per ${config.label}`);
+                return []; 
+            }
+        } catch (error) {
+             console.error(`Eccezione fetch ${config.label} (tentativo ${attempt+1}):`, error);
+             if (attempt === MAX_RETRIES) return []; // Fallito dopo tutti i tentativi
+             await new Promise(res => setTimeout(res, 1000)); // Attesa prima del retry
+        }
+    }
+    return [];
+}
 
 async function fetchEventsInternal(timeMin, timeMax) {
     if (!GOOGLE_API_KEY) throw new Error("Chiave API Google mancante (.env).");
 
-    const fetchPromises = CALENDARS_CONFIG.map(async (config) => {
-        if (!config.id || config.id.includes("INSERISCI_QUI")) return [];
+    const allEvents = [];
+    const CHUNK_SIZE = 5; // Eseguiamo 5 richieste in parallelo alla volta per non saturare la rete/API
+
+    // Divide i calendari in gruppi (chunks)
+    for (let i = 0; i < CALENDARS_CONFIG.length; i += CHUNK_SIZE) {
+        const chunk = CALENDARS_CONFIG.slice(i, i + CHUNK_SIZE);
         
-        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(config.id)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=100`;
+        // Esegue il chunk in parallelo gestendo le promise
+        const chunkPromises = chunk.map(config => fetchCalendarWithRetry(config, timeMin, timeMax));
+        
+        // Attendiamo che questo blocco finisca prima di passare al prossimo
+        const results = await Promise.all(chunkPromises);
+        
+        // Aggiungiamo i risultati validi all'array principale
+        results.forEach(events => {
+            if (Array.isArray(events)) {
+                allEvents.push(...events);
+            }
+        });
+    }
 
-        try {
-            const response = await fetch(url);
-            if (!response.ok) return [];
-            const data = await response.json();
-            return (data.items || []).map(item => transformEvent(item, config));
-        } catch (error) {
-            console.error(`Errore fetch ${config.label}:`, error);
-            return [];
-        }
-    });
-
-    const results = await Promise.all(fetchPromises);
-    const allEvents = results.flat();
-    
     // Ordinamento cronologico
     allEvents.sort((a, b) => a.start - b.start);
 
-    // --- CORREZIONE: Generiamo l'array delle categorie per i filtri ---
-    // Il componente si aspetta che 'id' sia uguale alla 'label' dell'evento (es. "Calcio Open")
+    // Generiamo l'array delle categorie per i filtri
     const categories = CALENDARS_CONFIG
         .filter(c => c.id && !c.id.includes("INSERISCI_QUI"))
         .map(c => ({
-            id: c.label,   // Fondamentale: deve corrispondere a ev.category
+            id: c.label,
             label: c.label,
             color: c.color
         }));
 
-    // Restituiamo sia gli eventi che le categorie
     return { events: allEvents, categories }; 
 }
 
 // ====================================================
 // API PUBBLICHE
 // ====================================================
+
+/** 
+ * NUOVA API: Range personalizzato.
+ * Fondamentale per il CalendarPage che carica mese per mese.
+ */
+export async function fetchEventsByRange(start, end) {
+    if (!start || !end) return { events: [], categories: [] };
+    return fetchEventsInternal(start.toISOString(), end.toISOString());
+}
 
 /** 1. Range ampio (-6 mesi, +1 anno) */
 export async function fetchCalendarEvents() {
@@ -297,7 +352,6 @@ export async function fetchWeekEvents() {
     const sunday = new Date(now);
     sunday.setDate(now.getDate() + daysUntilSunday);
     sunday.setHours(23, 59, 59, 999);
-
     return fetchEventsInternal(now.toISOString(), sunday.toISOString());
 }
 
@@ -318,15 +372,14 @@ export async function fetchPastResults() {
     monday.setDate(now.getDate() - diffToMonday);
     monday.setHours(0, 0, 0, 0);
 
-    // Calcolo della Domenica della settimana corrente
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     sunday.setHours(23, 59, 59, 999);
 
-    // Eseguiamo la fetch su tutto il range Lunedì-Domenica
+    // Recuperiamo tutti gli eventi della settimana (passati e futuri)
     const data = await fetchEventsInternal(monday.toISOString(), sunday.toISOString());
-    
-    // Filtriamo solo eventi che hanno un risultato parsato
+
+    // Filtriamo solo quelli che hanno un risultato (field "result" o "partials")
     // (Opcionale: se vuoi mostrare TUTTI gli eventi passati della settimana anche senza risultato, rimuovi il filtro)
     const resultsEvents = data.events
         .filter(ev => ev.result || ev.partials) 

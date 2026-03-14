@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
 import EventDetailsModal from "./EventDetailsModal"; 
-import { fetchCalendarEvents } from '../api/calendarApi';
+import { fetchCalendarEvents, fetchEventsByRange } from '../api/calendarApi';
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -96,11 +96,27 @@ export default function CalendarPage() {
     const loadEvents = async () => {
       try {
         setLoading(true);
-        const { events: mappedEvents, categories: categoriesArray } = await fetchCalendarEvents();
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        // MODIFICA: Carica SOLO dal 1° all'ultimo giorno del mese esatto
+        // Questo evita di caricare e conteggiare eventi dei giorni "grigi" (mese prec/succ)
+        const startOfMonth = new Date(year, month, 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        
+        const endOfMonth = new Date(year, month + 1, 0); // Giorno 0 del mese dopo = ultimo del mese corrente
+        endOfMonth.setHours(23, 59, 59, 999);
+
+        // API Call stretta sul mese corrente
+        const { events: mappedEvents, categories: categoriesArray } = await fetchEventsByRange(startOfMonth, endOfMonth);
 
         setEvents(mappedEvents);
-        setAvailableCategories(categoriesArray);
-        setActiveFilters(categoriesArray.map(cat => cat.id));
+        
+        // Inizializza categorie/filtri solo al primo caricamento
+        setAvailableCategories(prev => prev.length === 0 ? categoriesArray : prev);
+        setActiveFilters(prev => prev.length === 0 ? categoriesArray.map(cat => cat.id) : prev);
+        
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -108,8 +124,10 @@ export default function CalendarPage() {
         setLoading(false);
       }
     };
+    
+    // Ricarica quando cambia il mese/anno visualizzato
     loadEvents();
-  }, []);
+  }, [currentDate.getFullYear(), currentDate.getMonth()]);
 
   // GESTIONE SCROLLBAR SENZA GLITCH
   useEffect(() => {
@@ -222,7 +240,7 @@ export default function CalendarPage() {
                 <div className="cp-stat-icon">🏆</div>
                 <div>
                   <div className="cp-stat-value">{loading ? "..." : filteredEvents.length}</div>
-                  <div className="cp-stat-label">Match Totali</div>
+                  <div className="cp-stat-label">Incontri per questo mese</div>
                 </div>
               </div>
             </div>
