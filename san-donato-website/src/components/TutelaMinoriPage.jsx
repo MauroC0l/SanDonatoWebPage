@@ -28,8 +28,54 @@ export default function TutelaMinoriPage() {
           <p>{intro.text}</p>
         </section>
 
-        {/* GRIGLIA DOCUMENTI */}
-        <section className="tml-docs-section">
+        {/* GRIGLIA DOCUMENTI SAFEGUARDING (Aggiunta sotto) */}
+        {safeguarding.documents && safeguarding.documents.length > 0 && (
+          <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
+            <h3 className="tml-section-title">Documentazione Safeguarding</h3>
+            <div className="tml-docs-grid">
+              {safeguarding.documents.map((doc) => (
+                <div key={doc.id} className="tml-doc-card">
+                  <div className="tml-doc-icon">
+                    <FaFileContract />
+                  </div>
+                  <div className="tml-doc-content">
+                    <h4>{doc.title}</h4>
+                    <p>{doc.description}</p>
+                    <a 
+                      href={doc.fileUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="tml-download-btn"
+                    >
+                      Scarica PDF <FaDownload />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        
+        {/* SAFEGUARDING OFFICER */}
+        <section className="tml-safeguarding-block">
+          <div className="tml-sg-icon">
+            <FaUserShield />
+          </div>
+          <div className="tml-sg-content">
+            <h3>{safeguarding.title}</h3>
+            <p>{safeguarding.description}</p>
+            
+            <div className="tml-officer-box">
+               <span className="tml-officer-role">Contatto Ufficiale: {safeguarding.officerName}</span>
+               <a href={`mailto:${safeguarding.contactEmail}`} className="tml-officer-email">
+                 {safeguarding.contactEmail} <FaChevronRight />
+               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* GRIGLIA DOCUMENTI UFFICIALI */}
+        <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
           <h3 className="tml-section-title">Documenti Ufficiali</h3>
           <div className="tml-docs-grid">
             {documents.map((doc) => (
@@ -51,25 +97,6 @@ export default function TutelaMinoriPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* SAFEGUARDING OFFICER */}
-        <section className="tml-safeguarding-block">
-          <div className="tml-sg-icon">
-            <FaUserShield />
-          </div>
-          <div className="tml-sg-content">
-            <h3>{safeguarding.title}</h3>
-            <p>{safeguarding.description}</p>
-            
-            <div className="tml-officer-box">
-               {/* Sostituire con dati reali se disponibili, altrimenti lasciare generico */}
-               <span className="tml-officer-role">Contatto Ufficiale:</span>
-               <a href={`mailto:${safeguarding.contactEmail}`} className="tml-officer-email">
-                 {safeguarding.contactEmail} <FaChevronRight />
-               </a>
-            </div>
           </div>
         </section>
 

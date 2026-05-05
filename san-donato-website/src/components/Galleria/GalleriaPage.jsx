@@ -26,7 +26,7 @@ const GalleriaPage = () => {
         <h1 className="galleria-title">Galleria</h1>
         <p className="galleria-message">
           Questa pagina non è ancora pronta.. <br />
-          sarà una sorpresa per il 2026!
+          sarà una sorpresa per il 2027!
         </p>
         
         {/* --- LOADER PALLA CHE RIMBALZA --- */}

@@ -50,5 +50,28 @@
       "Il tuo 5XMILLE è fondamentale per promuovere lo <strong>sport di base nel quartiere</strong> e per sostenere attività di incontro e relazione tra persone di tutte le età.",
       "<strong>Polisportiva San Donato</strong> (CF 97699790016) trasforma la tua firma in progetti concreti di inclusione e crescita per le nuove generazioni."
     ]
+  },
+  "reportsSection": {
+    "title": "Rendiconti 5x1000",
+    "description": "In ottemperanza agli obblighi di trasparenza, pubblichiamo i rendiconti relativi ai fondi del 5x1000 percepiti negli anni passati.",
+    "tableHeaders": ["Anno", "Importo", "Data Percezione", "Documento"],
+    "reports": [
+      { "id": "rep-2025", "year": "2025", "amount": "€ 2.973,00", "date": "03/12/2025", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2025.pdf" },
+      { "id": "rep-2024", "year": "2024", "amount": "€ 2.973,00", "date": "03/12/2025", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2024.pdf" },
+      { "id": "rep-2023", "year": "2023", "amount": "€ 3.218,00", "date": "06/09/2024", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2023.pdf" },
+      { "id": "rep-2022", "year": "2022", "amount": "€ 2.729,00", "date": "08/12/2023", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2022.pdf" },
+      { "id": "rep-2021", "year": "2021", "amount": "€ 2.746,00", "date": "09/09/2022", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2021.pdf" },
+      { "id": "rep-2020", "year": "2020", "amount": "€ 2.696,00", "date": "12/05/2022", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2020.pdf" },
+      { "id": "rep-2019", "year": "2019", "amount": "€ 2.431,00", "date": "05/02/2021", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2019.pdf" },
+      { "id": "rep-2018", "year": "2018", "amount": "€ 2.472,00", "date": "15/10/2020", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2018.pdf" },
+      { "id": "rep-2017", "year": "2017", "amount": "€ 2.815,00", "date": "24/12/2019", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2017.pdf" },
+      { "id": "rep-2016", "year": "2016", "amount": "€ 2.374,00", "date": "17/12/2018", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2016.pdf" },
+      { "id": "rep-2015", "year": "2015", "amount": "€ 2.285,00", "date": "12/12/2017", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2015.pdf" },
+      { "id": "rep-2014", "year": "2014", "amount": "€ 1.875,00", "date": "12/12/2017", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2014.pdf" },
+      { "id": "rep-2013", "year": "2013", "amount": "€ 1.441,00", "date": "01/08/2016", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2013.pdf" },
+      { "id": "rep-2012", "year": "2012", "amount": "€ 1.528,00", "date": "01/08/2016", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2012.pdf" },
+      { "id": "rep-2011", "year": "2011", "amount": "€ 0,00", "date": "05/02/2015", "fileUrl": "/documenti/rendiconti/PSD_rendiconto_5x1000_2011.pdf" },
+      { "id": "rep-2010", "year": "2010", "amount": "€ 1.758,00", "date": "12/12/2014", "fileUrl": "/documenti//rendiconti/PSD_rendiconto_5x1000_2010.pdf" }
+    ]
   }
 }
