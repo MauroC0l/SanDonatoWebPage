@@ -33,7 +33,9 @@ body.cp-modal-open {
 
 /* --- LAYOUT GENERALE --- */
 .cp-dashboard-container {
-  height: 100vh; 
+  height: 100vh;
+
+  height: 100svh; 
   padding: clamp(1rem, 1.5vw, 1.5rem); 
   background-color: var(--cp-bg-app);
   color: var(--cp-text-main);
@@ -252,7 +254,7 @@ body.cp-modal-open {
    MOBILE & RESPONSIVE
    ========================================== */
 @media (max-width: 1024px) {
-  .cp-dashboard-container { padding: 0; height: 100vh; display: block; overflow: hidden; }
+  .cp-dashboard-container { padding: 0; height: 100vh; height: 100svh; display: block; overflow: hidden; }
   .cp-main-grid { flex-direction: column; gap: 0; height: 100%; }
   
   .cp-mobile-drag-handle { display: flex; /* ... */ }

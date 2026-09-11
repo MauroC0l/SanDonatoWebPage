@@ -31,6 +31,8 @@
 .sponsor-page {
   width: 100%;
   min-height: 100vh;
+
+  min-height: 100svh;
   color: var(--spn-text-primary);
   /* Padding fluido con clamp */
   padding: clamp(20px, 4vw, 40px) 16px; 
@@ -203,7 +205,7 @@
 
   .sponsor-grid {
     /* Uso di auto-fit per permettere più colonne se lo spazio lo consente */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); 
     gap: 32px;
   }
   

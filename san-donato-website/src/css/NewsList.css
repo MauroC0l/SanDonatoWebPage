@@ -7,7 +7,7 @@
 /* --- Griglia Responsive --- */
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
   gap: 1.5rem;
   list-style: none;
   padding: 0;
@@ -203,7 +203,7 @@
 /* Media Queries */
 @media (max-width: 1200px) {
   .news-grid {
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(450px, 100%), 1fr));
   }
 }
 

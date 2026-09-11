@@ -132,7 +132,7 @@
 .csp-values-grid {
   display: grid;
   /* Griglia fluida: minimo 300px per colonna */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 2rem;
 }
 
@@ -180,7 +180,7 @@
 .csp-org-grid-modern {
   display: grid;
   /* Griglia fluida: min 260px, fino a 4 colonne */
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
   gap: 2rem;
 }
 
@@ -226,7 +226,7 @@
 
 .csp-staff-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 2rem;
   margin-top: 2rem;
 }
@@ -279,7 +279,7 @@
 .csp-pricing-grid {
   display: grid;
   /* Griglia fluida: min 280px, fino a 3 colonne */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 2rem;
   margin-top: 3rem;
   align-items: center;
@@ -387,7 +387,7 @@
   .csp-pricing-card.csp-popular:hover { transform: scale(1) translateY(-5px); }
   /* La griglia pricing torna ad 1 colonna se la minmax è superata */
   .csp-pricing-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   }
 }
 

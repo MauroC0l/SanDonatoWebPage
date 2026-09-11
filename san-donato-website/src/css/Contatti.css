@@ -33,6 +33,8 @@
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--cnt-bg);
   min-height: 100vh;
+
+  min-height: 100svh;
   width: 100%;
   padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem) 4rem;
   color: var(--cnt-text-main);

@@ -19,6 +19,8 @@
 .hp-root {
   background-color: var(--hp-bg);
   min-height: 100vh;
+
+  min-height: 100svh;
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--hp-text);
   padding-bottom: 5rem;

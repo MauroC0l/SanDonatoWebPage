@@ -30,6 +30,8 @@
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--tml-bg);
   min-height: 100vh;
+
+  min-height: 100svh;
   /* Padding fluido */
   padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem) clamp(3rem, 8vw, 5rem); 
   color: var(--tml-text-main);
@@ -115,7 +117,7 @@
 .tml-docs-grid {
   display: grid;
   /* Griglia fluida: min 280px */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 1.5rem;
 }
 

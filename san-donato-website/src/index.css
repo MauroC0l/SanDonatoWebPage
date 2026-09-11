@@ -142,3 +142,19 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   z-index: 10;
 }
+
+/* ============================= */
+/* 9. Campi di testo su mobile */
+/* ============================= */
+/* Safari su iPhone ingrandisce la pagina quando si tocca un campo il cui
+   testo è sotto i 16px, e poi tocca all'utente rimpicciolirla a mano.
+   Sotto i 768px tutti i campi salgono a 16px; sul desktop restano come
+   sono stati disegnati. Il selettore è volutamente più specifico delle
+   classi dei componenti, altrimenti verrebbe sovrascritto. */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

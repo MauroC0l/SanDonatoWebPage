@@ -36,6 +36,8 @@
 .news-section {
   background-color: var(--bg-body);
   min-height: 100vh;
+
+  min-height: 100svh;
   padding: clamp(2rem, 5vw, 4rem) 1rem;
   color: var(--text-main);
   animation: fadeInPage 0.6s ease-out forwards;

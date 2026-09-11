@@ -33,6 +33,7 @@
 
 .adm-shell {
   min-height: 100vh;
+  min-height: 100svh;
   background: var(--adm-bg);
 }
 
@@ -292,14 +293,12 @@
 
 .alg-page {
   min-height: 100vh;
+  min-height: 100svh;
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   background: var(--adm-bg);
 }
 
-@supports (height: 100svh) {
-  .alg-page { min-height: 100svh; }
-}
 
 /* ---------- Lato identità ---------- */
 
@@ -710,32 +709,50 @@
 
 /* ---------- Responsive ---------- */
 
-/* Sotto i 900px il pannello identità diventa una fascia compatta in alto */
+/* Sotto i 900px il pannello identità sparisce e resta il solo modulo.
+   Le misure si stringono per far stare tutto in una schermata: su telefono
+   una pagina di accesso che obbliga a scorrere è solo un fastidio. */
 @media (max-width: 900px) {
   .alg-page { grid-template-columns: 1fr; }
 
   .alg-brand { display: none; }
 
+  /* Il contenitore ha min-height, non height: se il contenuto cresce la
+     colonna cresce con lui, quindi centrare non taglia mai nulla. */
   .alg-form-side {
-    justify-content: flex-start;
-    padding-top: clamp(2.5rem, 9vw, 4rem);
+    justify-content: center;
+    padding: 1.75rem 1.25rem;
   }
 
   .alg-mobile-logo {
     display: block;
-    width: 92px;
+    width: 78px;
     height: auto;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 1rem;
   }
 
   .alg-card { text-align: center; }
-  .alg-form, .alg-help-block { text-align: left; }
-  .alg-check { text-align: left; }
+  .alg-form, .alg-help-block, .alg-check { text-align: left; }
+
+  .alg-title { font-size: 1.65rem; }
+  .alg-lead { margin-bottom: 1.35rem; }
+  .alg-help-block { margin-top: 1.25rem; }
+  .alg-footer { margin-top: 1.5rem; }
 }
 
+/* Telefoni piccoli: si recupera altezza togliendo il superfluo */
 @media (max-width: 400px) {
-  .alg-title { font-size: 1.7rem; }
-  .alg-mobile-logo { width: 76px; }
+  .alg-mobile-logo { width: 68px; margin-bottom: 0.85rem; }
+  .alg-title { font-size: 1.5rem; }
+  .alg-lead { font-size: 0.87rem; margin-bottom: 1.15rem; }
+  .alg-form { gap: 0.85rem; }
+}
+
+/* Telefono in orizzontale: pochissima altezza, il logo ruberebbe tutto */
+@media (max-height: 520px) and (orientation: landscape) {
+  .alg-form-side { justify-content: flex-start; padding-block: 1.25rem; }
+  .alg-mobile-logo { display: none; }
+  .alg-lead { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
