@@ -84,6 +84,12 @@ const CALENDARS_CONFIG = [
         color: "#e84393"
     },
     {
+        id: import.meta.env.VITE_VOLLEY_U13_CALENDAR_ID,
+        label: "Volley U13",
+        cssVar: "volley-u13",
+        color: "#a569bd"
+    },
+    {
         id: import.meta.env.VITE_VOLLEY_U14_CALENDAR_ID,
         label: "Volley U14",
         cssVar: "volley-u14",
@@ -127,6 +133,15 @@ const CALENDARS_CONFIG = [
         color: "#d35400"
     }
 ];
+
+// Un calendario dichiarato qui ma senza ID nel .env viene ignorato in silenzio:
+// è così che l'Under 13 e la Segreteria erano spariti senza alcun errore.
+if (import.meta.env.DEV) {
+    const missing = CALENDARS_CONFIG.filter(c => !c.id).map(c => c.label);
+    if (missing.length) {
+        console.warn(`⚠️ Calendari senza ID nel .env (ignorati): ${missing.join(", ")}`);
+    }
+}
 
 // ====================================================
 // HELPERS DI PARSING
@@ -325,34 +340,41 @@ export async function fetchEventsByRange(start, end) {
     return fetchEventsInternal(start.toISOString(), end.toISOString());
 }
 
-/** 1. Range ampio (-6 mesi, +1 anno) */
-export async function fetchCalendarEvents() {
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    const nextYear = new Date();
-    nextYear.setFullYear(nextYear.getFullYear() + 1);
-    return fetchEventsInternal(sixMonthsAgo.toISOString(), nextYear.toISOString());
-}
+/**
+ * 2. Eventi per la HOME (Live Center + Questa Settimana).
+ *
+ * Una sola passata sui calendari, da mezzanotte di oggi a domenica sera.
+ * Prima erano due chiamate distinte (oggi + settimana) su range sovrapposti:
+ * il doppio delle richieste a Google per gli stessi dati.
+ */
+export async function fetchHomeEvents() {
+    const now = new Date();
 
-/** 2. Eventi di OGGI */
-export async function fetchTodayEvents() {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-    return fetchEventsInternal(start.toISOString(), end.toISOString());
-}
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
 
-/** 3. Eventi della SETTIMANA CORRENTE (Futuri per la Home) */
-export async function fetchWeekEvents() {
-    // Da "Adesso" fino a Domenica sera
-    const now = new Date(); 
-    const currentDay = now.getDay(); 
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    // Domenica di questa settimana (getDay(): 0 = domenica)
+    const currentDay = now.getDay();
     const daysUntilSunday = currentDay === 0 ? 0 : 7 - currentDay;
     const sunday = new Date(now);
     sunday.setDate(now.getDate() + daysUntilSunday);
     sunday.setHours(23, 59, 59, 999);
-    return fetchEventsInternal(now.toISOString(), sunday.toISOString());
+
+    const { events, categories } = await fetchEventsInternal(
+        startOfToday.toISOString(),
+        sunday.toISOString()
+    );
+
+    return {
+        categories,
+        // Il Live Center mostra anche le partite già iniziate oggi
+        todayEvents: events.filter(ev => ev.start >= startOfToday && ev.start <= endOfToday),
+        // Il riquadro "Questa Settimana" mostra solo ciò che deve ancora iniziare
+        weekEvents: events.filter(ev => ev.start >= now)
+    };
 }
 
 /** * 4. NUOVA: Risultati della SETTIMANA CORRENTE (Lunedì - Domenica)

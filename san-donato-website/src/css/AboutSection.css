@@ -1,36 +1,78 @@
 /* ===========================
-   🏞️ About Section Full Width (compatta)
+   🏞️ About Section — prima schermata della home
    =========================== */
 
+/*
+  Occupa esattamente lo spazio che resta sotto l'intestazione, così la prima
+  schermata (contatti + hero + navbar + questa sezione) finisce al bordo
+  inferiore dello schermo su qualsiasi dispositivo.
+
+  --site-header-h è pubblicata da PublicLayout misurando l'intestazione vera:
+  in CSS quell'altezza non è calcolabile, cambia con larghezza, font e
+  orientamento. Il valore di riserva copre il primo istante prima della misura.
+*/
 .about-section {
+  --about-fill: calc(100vh - var(--site-header-h, 260px));
+
   position: relative;
   width: 100%;
-  min-height: clamp(29vh, 39vw, 54vh);
+  /* Il minimo evita che su schermi molto bassi (telefono in orizzontale)
+     la sezione si riduca a una striscia illeggibile. */
+  min-height: max(260px, var(--about-fill));
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
+  background-color: #0b1b2b; /* si vede finché le immagini caricano */
+}
+
+/* svh esclude le barre del browser mobile, che con vh fanno sbordare la pagina */
+@supports (height: 100svh) {
+  .about-section {
+    --about-fill: calc(100svh - var(--site-header-h, 260px));
+  }
+}
+
+/* --- Livelli del carosello --- */
+
+.about-layers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.about-layer {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: background-image 1s ease-in-out;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
 }
+
+.about-layer.is-active { opacity: 1; }
 
 /* overlay semitrasparente */
 .about-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.5) 55%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  z-index: 1;
 }
 
 /* contenuto in primo piano */
 .about-content {
   position: relative;
-  z-index: 1;
-  max-width: clamp(500px, 80%, 1000px);
-  padding: clamp(0.8rem, 2vw, 1.5rem);
+  z-index: 2;
+  width: min(92%, 1000px);
+  padding: clamp(1rem, 3vw, 2rem);
   color: #fff;
 }
 
@@ -39,33 +81,33 @@
   font-weight: 700;
   margin-bottom: clamp(0.6rem, 1.5vw, 1rem);
   color: #ffe5b4;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  text-wrap: balance;
 }
 
 .about-text {
-  font-size: clamp(0.85rem, 1.8vw, 1.2rem);
-  line-height: 1.5;
-  max-width: 90%;
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+  line-height: 1.6;
+  max-width: 60ch;
   margin: 0 auto;
   color: #fff;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+  text-wrap: pretty;
 }
 
 /* --- Responsività --- */
-@media (max-width: 1024px) {
-  .about-section {
-    min-height: clamp(22vh, 40vw, 40vh);
-  }
-}
 
 @media (max-width: 768px) {
-  .about-section {
-    min-height: clamp(20vh, 45vw, 35vh);
-  }
-  .about-subtitle {
-    font-size: clamp(1rem, 4.5vw, 1.6rem);
-  }
-  .about-text {
-    font-size: clamp(0.8rem, 3.5vw, 1rem);
-  }
+  .about-subtitle { font-size: clamp(1rem, 4.5vw, 1.6rem); }
+  .about-text { font-size: clamp(0.85rem, 3.5vw, 1rem); }
+}
+
+/* Schermi bassi e larghi (telefono in orizzontale): riempire tutta l'altezza
+   spingerebbe fuori il resto della pagina senza aggiungere nulla. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .about-section { min-height: 260px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-layer { transition: none; }
 }

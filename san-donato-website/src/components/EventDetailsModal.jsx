@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../css/EventDetailsModal.css";
 
 // --- UTILITIES INTERNE ---
@@ -17,6 +17,14 @@ const IconBall = () => <svg width="16" height="16" fill="none" stroke="currentCo
 const IconList = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>;
 
 export default function EventDetailsModal({ event, onClose }) {
+  // Esc chiude la scheda, come ci si aspetta da una finestra modale
+  useEffect(() => {
+    if (!event) return;
+    const handleEsc = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [event, onClose]);
+
   if (!event) return null;
 
   // Controllo fine evento per decidere tra Live o Replay

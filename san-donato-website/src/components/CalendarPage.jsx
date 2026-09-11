@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
 import EventDetailsModal from "./EventDetailsModal"; 
-import { fetchCalendarEvents, fetchEventsByRange } from '../api/calendarApi';
+import { fetchEventsByRange } from '../api/calendarApi';
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -48,25 +48,31 @@ const IconFilter = () => <svg width="20" height="20" fill="none" stroke="current
 // --- COMPONENTI UI ---
 
 const FilterToggle = ({ label, color, checked, onChange }) => (
-  <div onClick={onChange} className={`cp-filter-item ${checked ? 'cp-active' : 'cp-inactive'}`}>
+  <button
+    type="button"
+    onClick={onChange}
+    aria-pressed={checked}
+    className={`cp-filter-item ${checked ? 'cp-active' : 'cp-inactive'}`}
+  >
     <div className="cp-filter-label">
       {checked && (
-        <span 
-          className="cp-dot" 
+        <span
+          className="cp-dot"
           style={{ backgroundColor: color }}
         ></span>
       )}
       <span>{label}</span>
     </div>
     {checked && <IconCheck />}
-  </div>
+  </button>
 );
 
 const EventPill = ({ event, onClick }) => {
   const isPast = isEventPast(event.start);
 
   return (
-    <div
+    <button
+      type="button"
       onClick={(e) => { e.stopPropagation(); onClick(event); }}
       className={`cp-event-pill ${isPast ? 'cp-event-past' : ''}`}
       style={{
@@ -77,7 +83,7 @@ const EventPill = ({ event, onClick }) => {
       title={event.title}
     >
       <span className="cp-pill-text">{event.title}</span>
-    </div>
+    </button>
   );
 };
 
@@ -92,14 +98,19 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Estratti dallo stato: il calendario ricarica quando cambia il mese
+  // visualizzato, non a ogni cambio di giorno selezionato.
+  const visibleYear = currentDate.getFullYear();
+  const visibleMonth = currentDate.getMonth();
+
   useEffect(() => {
     const loadEvents = async () => {
       try {
         setLoading(true);
 
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        
+        const year = visibleYear;
+        const month = visibleMonth;
+
         // MODIFICA: Carica SOLO dal 1° all'ultimo giorno del mese esatto
         // Questo evita di caricare e conteggiare eventi dei giorni "grigi" (mese prec/succ)
         const startOfMonth = new Date(year, month, 1);
@@ -127,7 +138,7 @@ export default function CalendarPage() {
     
     // Ricarica quando cambia il mese/anno visualizzato
     loadEvents();
-  }, [currentDate.getFullYear(), currentDate.getMonth()]);
+  }, [visibleYear, visibleMonth]);
 
   // GESTIONE SCROLLBAR SENZA GLITCH
   useEffect(() => {
@@ -344,14 +355,19 @@ export default function CalendarPage() {
                   {calendarDays.map((dayObj, idx) => {
                     const dayEvents = filteredEvents.filter(ev => isSameDay(ev.start, dayObj.date));
                     const isToday = isSameDay(new Date(), dayObj.date);
+                    const openDay = () => {
+                      setCurrentDate(dayObj.date);
+                      setView('list');
+                    };
                     return (
                       <div
                         key={idx}
                         className={`cp-day-cell ${dayObj.isCurrentMonth ? 'cp-current-month' : 'cp-other-month'} ${isToday ? 'cp-today' : ''}`}
-                        onClick={() => {
-                          setCurrentDate(dayObj.date);
-                          setView('list');
-                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={formatDayHeader(dayObj.date)}
+                        onClick={openDay}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDay(); } }}
                       >
                         <div className="cp-day-header">
                           <span className="cp-day-number">{dayObj.date.getDate()}</span>
@@ -377,9 +393,12 @@ export default function CalendarPage() {
                   dailyEvents.map(ev => {
                     const isPast = isEventPast(ev.start);
                     return (
-                      <div 
-                        key={ev.id} 
-                        onClick={() => setSelectedEvent(ev)} 
+                      <div
+                        key={ev.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setSelectedEvent(ev)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedEvent(ev); } }}
                         className={`cp-list-view-item ${isPast ? 'cp-event-past' : ''}`}
                       >
                         <div className="cp-date-box" style={{

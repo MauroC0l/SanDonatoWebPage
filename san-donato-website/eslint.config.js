@@ -6,11 +6,24 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   globalIgnores(['dist']),
+  // Le serverless function girano su Node, non nel browser:
+  // hanno i loro globali (process) e nessuna regola React.
   {
-    files: ['**/*.{js,jsx}'],
+    files: ['api/**/*.js'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+    },
+  },
+  {
+    files: ['src/**/*.{js,jsx,mjs}'],
     extends: [
       js.configs.recommended,
-      reactHooks.configs['recommended-latest'],
+      // In eslint-plugin-react-hooks v7 la variante compatibile con la
+      // flat config sta sotto .flat (quella vecchia dichiara i plugin come array)
+      reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     languageOptions: {

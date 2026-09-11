@@ -98,8 +98,13 @@ export default function SportPage() {
               style={{ borderTopColor: activeData.color }}
             >
               <div className="sp-card-header">
-                <h3 className="sp-group-name">{group.name}</h3>
-                <span className="sp-group-badge">{group.years}</span>
+                <div className="sp-card-heading">
+                  <h3 className="sp-group-name">{group.name}</h3>
+                  {group.years && <p className="sp-group-years">{group.years}</p>}
+                </div>
+                {group.category && (
+                  <span className="sp-group-badge">{group.category}</span>
+                )}
               </div>
 
               <div className="sp-location-block">
@@ -117,13 +122,21 @@ export default function SportPage() {
 
               <div className="sp-times-list">
                 {group.times.map((time, tIndex) => (
-                  <div className="sp-time-row" key={tIndex}>
-                    <div className="sp-day">
-                      <FaCalendarAlt className="sp-icon-tiny" /> {time.day}
+                  <div className="sp-time-entry" key={tIndex}>
+                    <div className="sp-time-row">
+                      <div className="sp-day">
+                        <FaCalendarAlt className="sp-icon-tiny" /> {time.day}
+                      </div>
+                      <div className="sp-hour">
+                        <FaClock className="sp-icon-tiny" /> {time.hours}
+                      </div>
                     </div>
-                    <div className="sp-hour">
-                      <FaClock className="sp-icon-tiny" /> {time.hours}
-                    </div>
+                    {/* Sede diversa da quella principale del gruppo */}
+                    {time.place && (
+                      <div className="sp-time-place">
+                        <FaMapMarkerAlt className="sp-icon-tiny" /> {time.place}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

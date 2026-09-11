@@ -63,7 +63,7 @@ const NewsletterForm = ({ onClose }) => {
         setStatus('error');
         setApiMessage(data.error || 'Errore di connessione.');
       }
-    } catch (error) {
+    } catch {
       setStatus('error');
       setApiMessage('Errore di sistema. Riprova più tardi.');
     }

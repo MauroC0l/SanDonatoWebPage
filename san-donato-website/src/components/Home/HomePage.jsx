@@ -5,13 +5,27 @@ import EventDetailsModal from "../../components/EventDetailsModal";
 import ResultsModal from "../../components/ResultsModal";
 import NewsletterForm from "./NewsletterForm"; 
 import { getLatestPostsByCategory } from "../../api/API.mjs";
-import { fetchTodayEvents, fetchWeekEvents } from '../../api/calendarApi';
+import { fetchHomeEvents } from '../../api/calendarApi';
 import {
   FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper,
   FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy,
   FaEnvelopeOpenText, FaPaperPlane
 } from "react-icons/fa";
 import "../../css/HomePage.css";
+
+// Per quanti giorni una notizia resta marcata come "NEW"
+const NEW_BADGE_DAYS = 2;
+
+// Si basa sul campo ISO, l'unico confrontabile in modo affidabile:
+// post.date è già formattato "gg/mm/aaaa" e new Date() lo interpreterebbe male.
+// Sta fuori dal componente e riceve "now" perché il calcolo va fatto al
+// caricamento dei dati, non a ogni render.
+function isPostNew(post, now, daysWindow = NEW_BADGE_DAYS) {
+  const postDate = new Date(post?.dateISO ?? "");
+  if (isNaN(postDate.getTime())) return false;
+  const differenceInDays = (now - postDate.getTime()) / (1000 * 3600 * 24);
+  return differenceInDays >= 0 && differenceInDays <= daysWindow;
+}
 
 // --- COMPONENTE COUNTDOWN INTERNO ---
 const CountdownTimer = ({ targetDate, onComplete }) => {
@@ -51,6 +65,7 @@ export default function HomePage() {
   const [weekEvents, setWeekEvents] = useState([]);
   const [todayEvents, setTodayEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newsError, setNewsError] = useState("");
 
   // --- STATI MODALI ---
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -69,24 +84,6 @@ export default function HomePage() {
   const getShortDate = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
   const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // Helper per badge "New"
-  const isPostNew = (dateString, daysWindow = 2) => {
-    if (!dateString) return false;
-    if (dateString.includes('/')) {
-      const [day, month, year] = dateString.split('/');
-      const postDate = new Date(year, month - 1, day);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); 
-      const differenceInTime = today.getTime() - postDate.getTime();
-      const differenceInDays = differenceInTime / (1000 * 3600 * 24);
-      return differenceInDays >= 0 && differenceInDays <= daysWindow;
-    }
-    const postDate = new Date(dateString);
-    const today = new Date();
-    const differenceInDays = (today - postDate) / (1000 * 3600 * 24);
-    return differenceInDays >= 0 && differenceInDays <= daysWindow;
-  };
-
   // --- LOGICA STATUS ---
   const getMatchStatus = (dateObj) => {
     if (!dateObj) return "UPCOMING";
@@ -103,31 +100,45 @@ export default function HomePage() {
   // --- FETCH DATA ---
   useEffect(() => {
     let mounted = true;
-    async function loadAllData() {
-      try {
-        setLoading(true);
-        const [newsData, todayData, weekData] = await Promise.all([
-          getLatestPostsByCategory(),
-          fetchTodayEvents(),
-          fetchWeekEvents()
-        ]);
 
-        if (mounted) {
-          let allNews = [];
-          if (newsData) {
-            Object.values(newsData).forEach(cat => { if (Array.isArray(cat)) allNews.push(...cat); });
-          }
-          allNews.sort((a, b) => b.id - a.id);
-          setLatestNews(allNews.slice(0, 5));
-          setTodayEvents(todayData.events || []);
-          setWeekEvents(weekData.events || []);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error("Errore caricamento HomePage:", err);
-        if (mounted) setLoading(false);
+    async function loadAllData() {
+      // allSettled e non all: se WordPress non risponde il calendario deve
+      // comunque comparire, e viceversa. Un guasto solo non svuota la home.
+      const [newsResult, calendarResult] = await Promise.allSettled([
+        getLatestPostsByCategory(),
+        fetchHomeEvents()
+      ]);
+
+      if (!mounted) return;
+
+      if (newsResult.status === "fulfilled") {
+        const allNews = [];
+        Object.values(newsResult.value || {}).forEach(cat => {
+          if (Array.isArray(cat)) allNews.push(...cat);
+        });
+        allNews.sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO));
+
+        // Il badge "NEW" viene deciso una volta sola, qui: la finestra è
+        // di giorni, ricalcolarlo a ogni render non servirebbe a nulla.
+        const now = Date.now();
+        setLatestNews(
+          allNews.slice(0, 5).map(post => ({ ...post, isNew: isPostNew(post, now) }))
+        );
+      } else {
+        console.error("Errore caricamento notizie:", newsResult.reason);
+        setNewsError(newsResult.reason?.message || "Notizie non disponibili.");
       }
+
+      if (calendarResult.status === "fulfilled") {
+        setTodayEvents(calendarResult.value.todayEvents || []);
+        setWeekEvents(calendarResult.value.weekEvents || []);
+      } else {
+        console.error("Errore caricamento calendario:", calendarResult.reason);
+      }
+
+      setLoading(false);
     }
+
     loadAllData();
     return () => { mounted = false; };
   }, []);
@@ -193,7 +204,7 @@ export default function HomePage() {
                   const isNextEvent = index === 0 && status === "UPCOMING";
                   const isLocked = isNextEvent;
 
-                  let btnText = "Canale YT";
+                  let btnText;
                   let btnClass = "btn-outline";
 
                   if (isLocked) {
@@ -286,7 +297,10 @@ export default function HomePage() {
                   <div
                     key={event.id}
                     className="event-card clickable-card"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedEvent(event)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedEvent(event); } }}
                   >
                     <div className="event-date-badge" style={{ backgroundColor: event.color }}>
                       <span className="ed-day">{getDayName(event.start)}</span>
@@ -322,13 +336,24 @@ export default function HomePage() {
               <div className="loader-wrapper">
                 <div className="loader"></div>
               </div>
+            ) : newsError ? (
+              <div className="empty-state-box">{newsError}</div>
+            ) : latestNews.length === 0 ? (
+              <div className="empty-state-box">Nessuna notizia pubblicata</div>
             ) : (
               <div className="news-vertical-list">
                 {latestNews.map((news) => {
-                  const showNewBadge = isPostNew(news.date) || isPostNew(news.isoDate);
+                  const openNews = () => navigate(`/news/${news.id}`, { state: { post: news } });
                   return (
-                    <div key={news.id} className="news-item-compact" onClick={() => navigate(`/news/${news.id}`, { state: { post: news } })}>
-                      {showNewBadge && <span className="news-new-badge">NEW</span>}
+                    <div
+                      key={news.id}
+                      className="news-item-compact"
+                      role="link"
+                      tabIndex={0}
+                      onClick={openNews}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openNews(); } }}
+                    >
+                      {news.isNew && <span className="news-new-badge">NEW</span>}
                       <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/logo-poli-sfondo.jpg"})` }}></div>
                       <div className="nic-content">
                           <span className="nic-date">{news.date}</span>

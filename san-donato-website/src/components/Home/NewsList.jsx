@@ -29,12 +29,16 @@ export default function NewsList({ news }) {
       <div className="news-grid">
         {currentNews.map((p) => {
           const displayImage = p.image || "/logo-polisportiva.png";
+          const openNews = () => navigate(`/news/${p.id}`, { state: { post: p } });
 
           return (
             <article key={p.id} className="news-card">
-              <div 
+              <div
                 className="news-image-wrapper"
-                onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
+                role="link"
+                tabIndex={0}
+                onClick={openNews}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openNews(); } }}
                 style={{ cursor: "pointer" }}
                 title="Leggi la notizia"
               >
@@ -52,10 +56,7 @@ export default function NewsList({ news }) {
                 <div className="news-footer">
                   <div className="news-date">{p.date}</div>
                   
-                  <Button
-                    className="news-btn"
-                    onClick={() => navigate(`/news/${p.id}`, { state: { post: p } })}
-                  >
+                  <Button className="news-btn" onClick={openNews}>
                     Leggi
                   </Button>
                 </div>

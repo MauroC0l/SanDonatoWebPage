@@ -104,7 +104,8 @@ body.cp-modal-open {
   color: #1E40AF;
 }
 
-.cp-filter-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; border-radius: 10px; cursor: pointer; border: 1px solid transparent; margin-bottom: 0.25rem; transition: all 0.2s; }
+/* È un <button>: servono i reset degli stili nativi */
+.cp-filter-item { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.6rem 0.75rem; border-radius: 10px; cursor: pointer; border: 1px solid transparent; background: transparent; font: inherit; color: inherit; text-align: left; margin-bottom: 0.25rem; transition: all 0.2s; }
 .cp-filter-item:hover { background: var(--cp-bg-hover); }
 .cp-filter-item.cp-active { background: white; border-color: var(--cp-border-color); box-shadow: var(--cp-shadow-sm); }
 .cp-filter-item.cp-inactive { opacity: 0.6; }
@@ -188,7 +189,9 @@ body.cp-modal-open {
 
 .cp-events-container { display: flex; flex-direction: column; gap: 2px; overflow-y: hidden; flex: 1; }
 
+/* È un <button>: servono i reset degli stili nativi */
 .cp-event-pill {
+    display: block; width: 100%; border: none; font-family: inherit; text-align: left;
     font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }

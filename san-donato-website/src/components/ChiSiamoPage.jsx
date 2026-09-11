@@ -34,7 +34,7 @@ const ICON_MAP = {
 };
 
 export default function ChiSiamoPage() {
-  const { hero, manifesto, organigramma, staff, kits, impact, footer } = chiSiamoData;
+  const { hero, manifesto, organigramma, staff, kits, impact } = chiSiamoData;
 
   return (
     // Aggiunto "csp-fade-in" per animazione d'ingresso

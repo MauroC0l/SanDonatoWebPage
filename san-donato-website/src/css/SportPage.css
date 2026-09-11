@@ -21,12 +21,14 @@
   color: var(--sp-text-main);
 }
 
-/* --- Animazioni --- */
-.fade-in { animation: fadeIn 0.5s ease-out; }
-.fade-in-up { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; transform: translateY(15px); }
+/* --- Animazioni ---
+   I nomi erano .fade-in / .fade-in-up mentre il JSX usa sp-fade-in:
+   le classi non combaciavano e l'animazione non partiva mai. */
+.sp-fade-in { animation: sp-fadeIn 0.5s ease-out; }
+.sp-fade-in-up { animation: sp-fadeInUp 0.4s ease-out forwards; opacity: 0; transform: translateY(15px); }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes sp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sp-fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
 /* --- Header --- */
 .sp-header {
@@ -135,10 +137,12 @@
   max-width: 500px;
 }
 
-/* --- Schedule Grid --- */
+/* --- Schedule Grid ---
+   min(300px, 100%) evita che la colonna resti larga 300px su schermi
+   più stretti, cosa che faceva sbordare le card sui telefoni piccoli. */
 .sp-schedule-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: 1.5rem;
 }
 
@@ -162,8 +166,12 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
+/* Titolo + annate restano insieme, la pillola sta sempre in alto a destra */
+.sp-card-heading { min-width: 0; }
 
 .sp-group-name {
   font-size: 1.25rem;
@@ -173,15 +181,22 @@
   line-height: 1.2;
 }
 
+.sp-group-years {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  color: var(--sp-text-muted);
+  line-height: 1.3;
+}
+
 .sp-group-badge {
   font-size: 0.75rem;
   background: #f3f4f6;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 6px;
   font-weight: 600;
   color: #555;
   white-space: nowrap;
-  margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .sp-location-block {
@@ -212,13 +227,25 @@
   padding: 1rem;
 }
 
+.sp-time-entry { margin-bottom: 0.5rem; }
+.sp-time-entry:last-child { margin-bottom: 0; }
+
 .sp-time-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  align-items: baseline;
+  gap: 0.75rem;
   font-size: 0.95rem;
 }
-.sp-time-row:last-child { margin-bottom: 0; }
+
+.sp-time-place {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--sp-text-muted);
+}
 
 .sp-day { font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px; }
 .sp-hour { font-family: monospace, sans-serif; color: #666; display: flex; align-items: center; gap: 6px; }
@@ -236,24 +263,70 @@
   opacity: 0.8;
 }
 
-/* RESPONSIVE */
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
 @media (max-width: 600px) {
+  .sp-page-wrapper { padding: 1.25rem 0.85rem 3rem; }
+
+  .sp-header { margin-bottom: 1.75rem; }
+  .sp-subtitle { font-size: 1rem; }
+  .sp-tabs-container { margin-bottom: 2rem; }
+
   .sp-tabs-wrapper {
     width: 100%;
-    overflow-x: auto; /* Scroll orizzontale se necessario */
     justify-content: space-between;
   }
-  
+
   .sp-tab-button {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
     flex: 1;
     justify-content: center;
   }
-  
-  .sp-tab-label { display: none; } /* Su schermi piccolissimi mostra solo icona */
+
+  /* La scala ingrandiva la pillola attiva facendola uscire dal contenitore */
+  .sp-tab-button.active { transform: none; }
+
+  .sp-sport-intro h2 { font-size: 1.6rem; }
+
+  .sp-alert-banner { width: 100%; }
+
+  .sp-schedule-grid { gap: 1rem; }
+  .sp-card { padding: 1.25rem; }
+
+  /* Su touch l'effetto hover resta "incollato" dopo il tap */
+  .sp-card:hover { transform: none; }
+
+  .sp-footer-note {
+    margin-top: 2.5rem;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
-@media (min-width: 400px) {
-  .sp-tab-label { display: inline; } /* Ripristina etichetta se c'è spazio */
+/* Sotto i 400px l'etichetta non ci sta: restano le sole icone */
+@media (max-width: 399px) {
+  .sp-tab-label { display: none; }
+
+  .sp-group-badge {
+    white-space: normal;
+    text-align: right;
+  }
+}
+
+@media (hover: none) {
+  .sp-card:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-fade-in,
+  .sp-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .sp-card,
+  .sp-tab-button { transition: none; }
 }

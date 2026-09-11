@@ -281,3 +281,35 @@
 .nd-lightbox-close:hover {
   background: var(--nd-accent);
 }
+/* --- Stati di caricamento / notizia inesistente ---
+   Spinner locale: la pagina può essere aperta da link diretto,
+   senza che il CSS della lista notizie sia stato caricato. */
+.nd-status-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 5rem 1.5rem;
+  min-height: 45vh;
+  color: #4b5563;
+}
+
+.nd-status-wrapper h3 { color: #111; }
+.nd-status-wrapper p { max-width: 420px; }
+
+.nd-loader {
+  width: 42px;
+  height: 42px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #0056d6;
+  border-radius: 50%;
+  animation: nd-spin 0.8s linear infinite;
+}
+
+@keyframes nd-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-loader { animation-duration: 2s; }
+}

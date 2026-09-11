@@ -74,6 +74,13 @@ export default function ResultsModal({ onClose }) {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Esc chiude la finestra, come ci si aspetta da una modale
+    useEffect(() => {
+        const handleEsc = (e) => { if (e.key === "Escape") onClose(); };
+        window.addEventListener("keydown", handleEsc);
+        return () => window.removeEventListener("keydown", handleEsc);
+    }, [onClose]);
+
     useEffect(() => {
         let mounted = true;
         async function load() {

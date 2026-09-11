@@ -22,3 +22,6 @@ node_modules
 *.sw?
 
 .env
+# Output di build: lo genera la piattaforma di hosting a ogni deploy,
+# tenerlo in git crea solo conflitti a ogni commit
+dist

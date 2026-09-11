@@ -1,7 +1,11 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Form, Button } from "react-bootstrap";
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { it } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
+
+// Calendario in italiano (giorni, mesi e settimana che parte da lunedì)
+registerLocale("it", it);
 
 import { getAllPosts } from "../../api/API.mjs";
 import NewsList from "../Home/NewsList";
@@ -14,23 +18,28 @@ export default function NewsPage() {
   const [sortOrder, setSortOrder] = useState("desc");
   
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const [startDate, endDate] = dateRange;
 
   useEffect(() => {
-    const fetchNews = async () => {
-      setLoading(true);
-      try {
-        const posts = await getAllPosts();
+    let mounted = true;
+
+    getAllPosts()
+      .then(posts => {
+        if (!mounted) return;
         setNews(posts);
-      } catch (error) {
-        console.error("Errore nel recupero delle notizie:", error);
-      } finally {
         setLoading(false);
-      }
-    };
-    fetchNews();
+      })
+      .catch(error => {
+        if (!mounted) return;
+        console.error("Errore nel recupero delle notizie:", error);
+        setLoadError(error.message || "Non è stato possibile caricare le notizie.");
+        setLoading(false);
+      });
+
+    return () => { mounted = false; };
   }, []);
 
   // ✅ MODIFICA: Creazione lista Sport
@@ -44,7 +53,21 @@ export default function NewsPage() {
     setFilter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
   }, []);
 
-  const parseDate = (str) => str ? new Date(str) : new Date(0);
+  // ATTENZIONE: n.date è già formattato in italiano ("07/09/2026") e new Date()
+  // lo leggerebbe come mese/giorno (o Invalid Date sopra il giorno 12).
+  // Per confronti e ordinamenti va usato sempre il campo ISO originale.
+  const parseDate = (post) => {
+    const date = new Date(post?.dateISO ?? "");
+    return isNaN(date.getTime()) ? new Date(0) : date;
+  };
+
+  // Il DatePicker restituisce la data di fine a mezzanotte: senza portarla
+  // a fine giornata le notizie dell'ultimo giorno scelto verrebbero escluse.
+  const endOfDay = (date) => {
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+    return end;
+  };
 
   const filteredNews = useMemo(() => {
     return news
@@ -57,12 +80,12 @@ export default function NewsPage() {
         return !sportFilter.length || sportFilter.includes(effectiveSport);
       })
       .filter(n => {
-        const newsDate = parseDate(n.date);
-        return (!startDate || newsDate >= startDate) && (!endDate || newsDate <= endDate);
+        const newsDate = parseDate(n);
+        return (!startDate || newsDate >= startDate) && (!endDate || newsDate <= endOfDay(endDate));
       })
       .sort((a, b) => {
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
+        const dateA = parseDate(a);
+        const dateB = parseDate(b);
         return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
       });
   }, [news, sportFilter, startDate, endDate, sortOrder]);
@@ -80,6 +103,11 @@ export default function NewsPage() {
       {loading ? (
         <div className="loader-container">
           <div className="loader"></div>
+        </div>
+      ) : loadError ? (
+        <div className="no-news-message" role="alert">
+          <h4>{loadError}</h4>
+          <p>Riprova fra qualche minuto o ricarica la pagina.</p>
         </div>
       ) : (
         <div className="news-layout">
@@ -103,6 +131,7 @@ export default function NewsPage() {
                 <Form.Label className="form-label">Periodo</Form.Label>
                 <DatePicker
                   selectsRange
+                  locale="it"
                   startDate={startDate}
                   endDate={endDate}
                   onChange={setDateRange}
@@ -110,6 +139,7 @@ export default function NewsPage() {
                   placeholderText="Seleziona intervallo"
                   isClearable
                   dateFormat="dd/MM/yyyy"
+                  maxDate={new Date()}
                 />
               </Form.Group>
 
