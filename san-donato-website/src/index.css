@@ -30,7 +30,11 @@ html {
 }
 
 body {
+  /* 100vh su mobile comprende la barra degli indirizzi: il body resterebbe
+     piu alto dell'area visibile e la pagina si scrollerebbe a vuoto, anche
+     quando il contenuto ci sta tutto. 100svh usa l'altezza reale. */
   min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
   background: white;
   position: relative;
