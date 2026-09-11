@@ -60,7 +60,7 @@ export default function PostEditorPage() {
         if (!mounted) return;
         if (err instanceof AuthError) {
           sessionExpired();
-          navigate("/admin/accedi", { replace: true });
+          navigate("/login", { replace: true });
           return;
         }
         setError(err.message || "Impossibile caricare la notizia.");
@@ -106,7 +106,7 @@ export default function PostEditorPage() {
     } catch (err) {
       if (err instanceof AuthError) {
         sessionExpired();
-        navigate("/admin/accedi", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
       setError(err.message || "Caricamento dell'immagine non riuscito.");
@@ -162,7 +162,7 @@ export default function PostEditorPage() {
     } catch (err) {
       if (err instanceof AuthError) {
         sessionExpired();
-        navigate("/admin/accedi", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
       setError(err.message || "Salvataggio non riuscito.");

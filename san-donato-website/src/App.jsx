@@ -104,7 +104,8 @@ export default function App() {
           </Route>
 
           {/* ---------- Area riservata ---------- */}
-          <Route path="/admin/*" element={<AdminRoot />} />
+          <Route path="/login" element={<AdminRoot section="login" />} />
+          <Route path="/admin/*" element={<AdminRoot section="admin" />} />
 
         </Routes>
       </Suspense>

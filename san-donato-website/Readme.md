@@ -29,7 +29,7 @@ variabile `VITE_WP_API_BASE`.
 Il valore predefinito nel codice è già l'indirizzo definitivo:
 
 ```
-https://wp.polisportivasandonato.org/wp/index.php
+https://wp.polisportivasandonato.org/index.php
 ```
 
 Non serve impostare la variabile: si usa solo per puntare altrove, ad esempio
@@ -40,13 +40,12 @@ verso un ambiente di prova.
 Deve restituire testo JSON che inizia con `[{"id":`
 
 ```
-https://wp.polisportivasandonato.org/wp/index.php?rest_route=/wp/v2/posts&per_page=1
+https://wp.polisportivasandonato.org/index.php?rest_route=/wp/v2/posts&per_page=1
 ```
 
-Se risponde una pagina vuota, un errore di certificato o "Not Found", manca
-uno dei tre interventi lato server: il record DNS `A` verso l'IP dell'hosting,
-il sottodominio creato in cPanel sulla stessa cartella del sito, o il
-certificato AutoSSL.
+Nota sul percorso: il sottodominio è stato configurato puntando direttamente
+alla cartella `wp`, non a quella che la contiene. Per questo WordPress
+risponde alla radice del sottodominio e NON sotto `/wp/`.
 
 ### Perché le immagini vengono riscritte
 
@@ -65,7 +64,7 @@ digitando l'indirizzo o da un segnalibro.
 
 | Percorso | Cosa fa |
 |---|---|
-| `/admin/accedi` | accesso |
+| `/login` | accesso |
 | `/admin` | elenco notizie, ricerca, filtri, cestino |
 | `/admin/nuova` | scrivi una nuova notizia |
 | `/admin/modifica/:id` | modifica una notizia esistente |

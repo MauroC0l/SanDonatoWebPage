@@ -65,7 +65,7 @@ export default function PostsListPage() {
         if (!mounted) return;
         if (err instanceof AuthError) {
           sessionExpired();
-          navigate("/admin/accedi", { replace: true });
+          navigate("/login", { replace: true });
           return;
         }
         setData({
@@ -104,7 +104,7 @@ export default function PostsListPage() {
     } catch (err) {
       if (err instanceof AuthError) {
         sessionExpired();
-        navigate("/admin/accedi", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
       setData(prev => ({

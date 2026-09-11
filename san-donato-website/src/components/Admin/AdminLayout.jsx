@@ -23,12 +23,12 @@ export default function AdminLayout() {
 
   if (!isAuthenticated) {
     // Ricordiamo dove voleva andare, per riportarcelo dopo il login
-    return <Navigate to="/admin/accedi" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   const handleLogout = () => {
     logout();
-    navigate("/admin/accedi", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   return (

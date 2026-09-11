@@ -19,16 +19,27 @@ function EditorFallback() {
 }
 
 /**
- * Radice dell'area riservata.
+ * Radice dell'area riservata, montata su due percorsi:
  *
- * Autenticazione e chiamate di scrittura vivono tutte qui dentro: chi visita
- * il sito pubblico non scarica una riga di questo codice.
+ *   /login     la schermata di accesso
+ *   /admin/*   il pannello vero e proprio
+ *
+ * Entrambi passano da qui perché condividono lo stato della sessione, e
+ * perché così autenticazione e chiamate di scrittura restano in un bundle
+ * unico: chi visita il sito pubblico non ne scarica una riga.
  */
-export default function AdminRoot() {
+export default function AdminRoot({ section }) {
+  if (section === "login") {
+    return (
+      <AuthProvider>
+        <LoginPage />
+      </AuthProvider>
+    );
+  }
+
   return (
     <AuthProvider>
       <Routes>
-        <Route path="accedi" element={<LoginPage />} />
         <Route element={<AdminLayout />}>
           <Route index element={<PostsListPage />} />
           <Route
