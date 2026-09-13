@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUser, FaKey, FaEye, FaEyeSlash, FaExclamationCircle,
   FaArrowRight, FaFutbol, FaVolleyballBall, FaBasketballBall,
-  FaChevronDown
+  FaChevronDown, FaArrowLeft
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
@@ -88,6 +88,15 @@ export default function LoginPage() {
 
       {/* ---------- Pannello accesso ---------- */}
       <main className="alg-form-side">
+
+        {/* Via d'uscita: chi arriva qui dal lucchetto e ha sbagliato porta
+            deve poter tornare indietro senza il tasto del browser. */}
+        <div className="alg-back-row">
+          <Link to="/" className="alg-back">
+            <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
+            Torna al sito
+          </Link>
+        </div>
         <div className="alg-card">
 
           {/* Su schermi stretti il pannello identità si riduce a questo */}
