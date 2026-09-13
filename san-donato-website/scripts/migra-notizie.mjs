@@ -16,7 +16,7 @@
  * ora quelli di WordPress. Il trasferimento su R2 è il passo successivo.
  */
 
-import { getDb } from "../db/client.js";
+import { getDb, chiudiDb } from "../db/client.js";
 import { notizie } from "../db/schema.js";
 import { sql } from "drizzle-orm";
 import { readFile } from "node:fs/promises";
@@ -193,7 +193,11 @@ async function main() {
   console.log(`\n✅ Importati ${inseriti} articoli. Nel database ora ce ne sono ${totale}.`);
 }
 
-main().catch((e) => {
-  console.error("\n❌", e.message);
-  process.exit(1);
-});
+main()
+  .catch((e) => {
+    console.error("\n❌", e.message);
+    process.exitCode = 1;
+  })
+  // Il pool di pg tiene vivo il processo: senza questa chiusura lo script
+  // finisce il lavoro e poi resta appeso senza terminare.
+  .finally(() => chiudiDb());

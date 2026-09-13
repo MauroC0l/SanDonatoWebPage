@@ -1,0 +1,30 @@
+# Postgres per lo sviluppo in locale.
+#
+#   docker compose up -d      avvia
+#   docker compose down       ferma (i dati restano)
+#   docker compose down -v    ferma e CANCELLA i dati
+#
+# Le credenziali sono volutamente banali: questo database non esce da
+# questo computer e non contiene dati veri.
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: psd-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: psd
+      POSTGRES_PASSWORD: psd
+      POSTGRES_DB: psd
+    ports:
+      - "5432:5432"
+    volumes:
+      - dati-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U psd -d psd"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dati-postgres:
