@@ -7,25 +7,32 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:genera": "drizzle-kit generate",
+    "db:applica": "node --env-file=.env node_modules/drizzle-kit/bin.cjs migrate",
+    "db:studio": "node --env-file=.env node_modules/drizzle-kit/bin.cjs studio"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
     "bootstrap": "^5.3.8",
     "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.45.2",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.10",
     "react-datepicker": "^8.7.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^6.14.1"
+    "react-router-dom": "^6.14.1",
+    "zod": "^4.6.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@vitejs/plugin-react": "^5.0.3",
     "baseline-browser-mapping": "^2.9.11",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",

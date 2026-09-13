@@ -17,6 +17,17 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+  // Schema, connessione al database e script di manutenzione: anche questi
+  // girano su Node, fuori dal browser.
+  {
+    files: ['db/**/*.js', 'scripts/**/*.{js,mjs}'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+    },
+  },
   {
     files: ['src/**/*.{js,jsx,mjs}'],
     extends: [
