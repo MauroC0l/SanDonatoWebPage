@@ -1,362 +1,277 @@
 // ==============================
-// 🔐 adminApi.js — Scrittura su WordPress dall'area riservata
-// ==============================
+// Area riservata — dialogo con il nostro back-end.
 //
-// L'area admin non usa l'interfaccia di WordPress: parla direttamente con la
-// sua REST API. L'autenticazione avviene con le "Application Password" native
-// di WordPress (dal 5.6), cioè password dedicate e revocabili che si generano
-// dal profilo utente e non espongono mai la password vera dell'account.
+// Prima questo file parlava con la REST API di WordPress usando le
+// Application Password in Basic auth, memorizzate nel browser. Ora l'accesso
+// avviene con email e password e la sessione vive in un cookie httpOnly:
+// il JavaScript di pagina non può leggerla, quindi una falla XSS non
+// consegna più le credenziali a nessuno.
+//
+// I nomi delle funzioni sono rimasti quelli di prima, così i componenti del
+// pannello non sono stati riscritti. La traduzione fra il vocabolario di
+// WordPress ("draft", "publish", "pending") e il nostro ("bozza",
+// "pubblicata", "in_revisione") avviene qui dentro.
+// ==============================
 
-import { wpUrl, wpMediaUrl, wpRewriteMediaUrls } from "./wpConfig";
-import { clearPostsCache, cleanExcerpt } from "./API.mjs";
-
-const STORAGE_KEY = "psd_wp_credential";
+const BASE = "/api";
 
 /* =====================================================
-   🔑 Gestione della credenziale
+   Vocabolario
    ===================================================== */
 
-// Copia in memoria: evita di rileggere lo storage a ogni richiesta e
-// permette il funzionamento anche se lo storage è bloccato dal browser.
-let memoryCredential = null;
+const STATO_VERSO_NOI = {
+  draft: "bozza",
+  pending: "in_revisione",
+  publish: "pubblicata",
+  trash: "cestino"
+};
 
-function toBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  let binary = "";
-  bytes.forEach(byte => { binary += String.fromCharCode(byte); });
-  return btoa(binary);
-}
+const STATO_VERSO_PANNELLO = {
+  bozza: "draft",
+  in_revisione: "pending",
+  pubblicata: "publish",
+  cestino: "trash"
+};
 
-// Le Application Password di WordPress non scadono da sole: se restassero
-// nello storage per sempre, un accesso fatto una volta su un computer
-// condiviso resterebbe valido a tempo indeterminato.
-const REMEMBER_DAYS = 14;
+/* =====================================================
+   Errori
+   ===================================================== */
 
-function readStoredCredential() {
-  try {
-    const perSession = sessionStorage.getItem(STORAGE_KEY);
-    if (perSession) return perSession;
-
-    const persisted = localStorage.getItem(STORAGE_KEY);
-    if (!persisted) return null;
-
-    const { credential, expiresAt } = JSON.parse(persisted);
-    if (!credential || !expiresAt || Date.now() > expiresAt) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-
-    return credential;
-  } catch {
-    // Storage non disponibile o contenuto illeggibile
-    return null;
-  }
-}
-
-export function getCredential() {
-  if (memoryCredential) return memoryCredential;
-  memoryCredential = readStoredCredential();
-  return memoryCredential;
-}
-
-function storeCredential(credential, remember) {
-  memoryCredential = credential;
-  try {
-    // Di default la sessione muore con la scheda: la credenziale vale come
-    // una password, e su un computer condiviso non deve sopravvivere.
-    sessionStorage.setItem(STORAGE_KEY, credential);
-
-    if (remember) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        credential,
-        expiresAt: Date.now() + REMEMBER_DAYS * 24 * 60 * 60 * 1000
-      }));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch {
-    // Nessuno storage: resta valida solo la copia in memoria
-  }
-}
-
-export function clearCredential() {
-  memoryCredential = null;
-  try {
-    sessionStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // niente da fare
-  }
-}
-
-function authHeaders(extra = {}) {
-  const credential = getCredential();
-  if (!credential) throw new AuthError("Sessione scaduta. Effettua di nuovo l'accesso.");
-  return { Authorization: `Basic ${credential}`, ...extra };
-}
-
+/** Sessione assente o scaduta: il pannello reagisce riportando al login. */
 export class AuthError extends Error {}
 
-/* =====================================================
-   🌐 Helper di richiesta
-   ===================================================== */
+async function chiedi(percorso, opzioni = {}) {
+  const risposta = await fetch(`${BASE}${percorso}`, {
+    // Il cookie di sessione viaggia da solo, ma solo se lo chiediamo
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      ...(opzioni.body ? { "Content-Type": "application/json" } : {}),
+      ...opzioni.headers
+    },
+    ...opzioni
+  });
 
-async function request(url, options = {}) {
-  let response;
-  try {
-    response = await fetch(url, options);
-  } catch {
-    throw new Error("Impossibile contattare il server. Controlla la connessione.");
+  if (risposta.status === 401) {
+    throw new AuthError("Sessione scaduta. Effettua di nuovo l'accesso.");
   }
 
-  if (response.status === 401 || response.status === 403) {
-    throw new AuthError(
-      "Credenziali non valide o permessi insufficienti. Effettua di nuovo l'accesso."
-    );
+  const dati = await risposta.json().catch(() => ({}));
+
+  if (!risposta.ok) {
+    throw new Error(dati.errore || `Errore ${risposta.status}`);
   }
-
-  if (!response.ok) {
-    // WordPress restituisce { code, message } sugli errori
-    let detail = "";
-    try {
-      const body = await response.json();
-      detail = body?.message ? ` ${stripTags(body.message)}` : "";
-    } catch {
-      // corpo non leggibile
-    }
-    throw new Error(`Errore ${response.status}.${detail}`);
-  }
-
-  return response;
-}
-
-function stripTags(html = "") {
-  return html.replace(/<[^>]+>/g, "").trim();
+  return dati;
 }
 
 /* =====================================================
-   👤 Autenticazione
+   Sessione
    ===================================================== */
 
 /**
- * Verifica la credenziale corrente interrogando WordPress.
- * Restituisce il profilo dell'utente, oppure lancia AuthError.
+ * Chi è connesso adesso.
+ *
+ * Prima esisteva getCredential(), che leggeva la credenziale dal browser.
+ * Ora la sessione è un cookie che il JavaScript non vede: l'unico modo di
+ * sapere se c'è è chiederlo al server.
  */
 export async function fetchCurrentUser() {
-  const response = await request(wpUrl("/users/me", { context: "edit" }), {
-    headers: authHeaders()
-  });
-
-  const user = await response.json();
-  const capabilities = user.capabilities || {};
+  const { utente } = await chiedi("/io");
+  if (!utente) return null;
 
   return {
-    id: user.id,
-    name: user.name,
-    username: user.slug,
-    email: user.email,
-    roles: user.roles || [],
-    // I ruoli sono quelli di WordPress: non inventiamo un secondo sistema
-    // di permessi che potrebbe divergere da quello vero.
-    canPublish: !!capabilities.publish_posts,
-    canDeleteOthers: !!capabilities.delete_others_posts,
-    canEditOthers: !!capabilities.edit_others_posts,
-    isAdmin: !!capabilities.manage_options
+    id: utente.id,
+    email: utente.email,
+    username: utente.email,
+    name: [utente.nome, utente.cognome].filter(Boolean).join(" ") || utente.email,
+    role: utente.ruolo,
+    capabilities: utente.capacita ?? [],
+    canPublish: (utente.capacita ?? []).includes("notizie.pubblica")
   };
 }
 
-/**
- * Accesso con nome utente e Application Password.
- * Non memorizza nulla se le credenziali non sono valide.
- */
-export async function login(username, applicationPassword, remember = false) {
-  // Le Application Password si copiano da WordPress con gli spazi:
-  // WordPress li ignora, ma li togliamo per evitare falsi errori.
-  const password = applicationPassword.replace(/\s+/g, "");
-  const credential = toBase64(`${username.trim()}:${password}`);
+export async function login(email, password, remember = false) {
+  const { utente } = await chiedi("/accesso", {
+    method: "POST",
+    body: JSON.stringify({ email: String(email).trim(), password, ricordami: !!remember })
+  });
 
-  const previous = memoryCredential;
-  memoryCredential = credential;
+  return {
+    id: utente.id,
+    email: utente.email,
+    username: utente.email,
+    name: [utente.nome, utente.cognome].filter(Boolean).join(" ") || utente.email,
+    role: utente.ruolo,
+    capabilities: utente.capacita ?? [],
+    canPublish: (utente.capacita ?? []).includes("notizie.pubblica")
+  };
+}
 
+export async function logout() {
   try {
-    const user = await fetchCurrentUser();
-    storeCredential(credential, remember);
-    return user;
-  } catch (error) {
-    memoryCredential = previous;
-    throw error;
+    await chiedi("/uscita", { method: "POST" });
+  } catch {
+    // Se la sessione era già caduta, l'uscita è comunque riuscita
   }
 }
 
-export function logout() {
-  clearCredential();
-}
-
 /* =====================================================
-   📝 Post
+   Notizie
    ===================================================== */
 
-const EDIT_FIELDS = "id,date,modified,status,title,content,excerpt,featured_media,author,link";
+function versoPannello(n) {
+  return {
+    id: n.id,
+    slug: n.slug,
+    title: n.titolo,
+    excerpt: n.sommario ?? "",
+    content: n.contenuto ?? "",
+    sport: n.sport,
+    status: STATO_VERSO_PANNELLO[n.stato] ?? n.stato,
+    image: n.copertina || null,
+    featuredMediaId: n.copertinaId ?? 0,
+    author: n.autore,
+    date: n.pubblicataIl,
+    modified: n.aggiornataIl
+  };
+}
 
-/**
- * Elenco per l'area admin: comprende bozze e cestino, che l'API pubblica
- * non restituisce.
- */
-export async function listPosts({ search = "", status = "publish,draft,pending", page = 1, perPage = 20 } = {}) {
-  const response = await request(
-    wpUrl("/posts", {
-      context: "edit",
-      status,
-      search,
-      page,
-      per_page: perPage,
-      orderby: "date",
-      order: "desc",
-      _embed: "true",
-      _fields: `${EDIT_FIELDS},_links,_embedded`
-    }),
-    { headers: authHeaders() }
-  );
+export async function listPosts({ search = "", status = "", page = 1, perPage = 20 } = {}) {
+  const parametri = new URLSearchParams({ pagina: String(page), perPagina: String(perPage) });
+  if (search) parametri.set("cerca", search);
 
-  const raw = await response.json();
+  // Il pannello chiede più stati insieme ("publish,draft,pending") per dire
+  // "tutte tranne il cestino": è già il comportamento predefinito del
+  // back-end, quindi si traduce solo il caso di uno stato singolo.
+  const stati = String(status).split(",").filter(Boolean);
+  if (stati.length === 1) {
+    parametri.set("stato", STATO_VERSO_NOI[stati[0]] ?? stati[0]);
+  }
+
+  const risultato = await chiedi(`/admin/notizie?${parametri}`);
 
   return {
-    posts: raw.map(toAdminPost),
-    totalPages: parseInt(response.headers.get("X-WP-TotalPages") || "1", 10),
-    total: parseInt(response.headers.get("X-WP-Total") || "0", 10)
+    posts: risultato.notizie.map(versoPannello),
+    total: risultato.totale,
+    totalPages: risultato.pagine
   };
 }
 
 export async function getPost(id) {
-  const response = await request(
-    wpUrl(`/posts/${id}`, { context: "edit", _embed: "true" }),
-    { headers: authHeaders() }
-  );
-  return toAdminPost(await response.json());
+  const { notizia } = await chiedi(`/admin/notizie/${id}`);
+  return versoPannello(notizia);
 }
 
-/**
- * In contesto "edit" WordPress restituisce sia .rendered sia .raw:
- * per l'editor serve .raw, cioè il contenuto come è stato salvato.
- */
-function toAdminPost(post) {
+function versoBackend(dati) {
+  const corpo = {};
+
+  if (dati.title !== undefined) corpo.titolo = dati.title;
+  if (dati.content !== undefined) corpo.contenuto = dati.content;
+  if (dati.excerpt !== undefined) corpo.sommario = dati.excerpt;
+  if (dati.sport !== undefined) corpo.sport = dati.sport;
+  if (dati.status !== undefined) corpo.stato = STATO_VERSO_NOI[dati.status] ?? dati.status;
+  // Il pannello parla ancora di "featuredMediaId", parola di WordPress:
+  // la traduzione sta qui, non nei componenti.
+  if (dati.featuredMediaId !== undefined) corpo.copertinaId = dati.featuredMediaId || null;
+  if (dati.copertinaId !== undefined) corpo.copertinaId = dati.copertinaId;
+
+  return corpo;
+}
+
+export async function createPost(dati) {
+  const { notizia, inviataInRevisione } = await chiedi("/admin/notizie", {
+    method: "POST",
+    body: JSON.stringify(versoBackend(dati))
+  });
+
   return {
-    id: post.id,
-    title: post.title?.raw ?? stripTags(post.title?.rendered || ""),
-    content: wpRewriteMediaUrls(post.content?.raw ?? post.content?.rendered ?? ""),
-    excerpt: post.excerpt?.raw ?? cleanExcerpt(post.excerpt?.rendered || "", 300),
-    status: post.status,
-    dateISO: post.date,
-    modifiedISO: post.modified,
-    featuredMediaId: post.featured_media || 0,
-    image: wpMediaUrl(post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null),
-    authorId: post.author,
-    authorName: post._embedded?.author?.[0]?.name || "",
-    link: post.link || ""
+    id: notizia.id,
+    slug: notizia.slug,
+    status: STATO_VERSO_PANNELLO[notizia.stato] ?? notizia.stato,
+    inviataInRevisione
   };
 }
 
-function buildPayload({ title, content, excerpt, status, featuredMediaId }) {
-  const payload = { title, content, excerpt, status };
-  // 0 è un valore valido: significa "nessuna immagine in evidenza"
-  if (featuredMediaId !== undefined && featuredMediaId !== null) {
-    payload.featured_media = featuredMediaId;
-  }
-  return payload;
-}
-
-export async function createPost(data) {
-  const response = await request(wpUrl("/posts"), {
-    method: "POST",
-    headers: authHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify(buildPayload(data))
+export async function updatePost(id, dati) {
+  const { notizia, inviataInRevisione } = await chiedi(`/admin/notizie/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(versoBackend(dati))
   });
 
-  clearPostsCache();
-  return toAdminPost(await response.json());
+  return {
+    id: notizia.id,
+    slug: notizia.slug,
+    status: STATO_VERSO_PANNELLO[notizia.stato] ?? notizia.stato,
+    inviataInRevisione
+  };
 }
 
-export async function updatePost(id, data) {
-  const response = await request(wpUrl(`/posts/${id}`), {
-    method: "POST", // WordPress accetta POST anche per gli aggiornamenti
-    headers: authHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify(buildPayload(data))
-  });
-
-  clearPostsCache();
-  return toAdminPost(await response.json());
-}
-
-/**
- * Sposta nel cestino di WordPress: recuperabile.
- * La cancellazione definitiva richiede force=true e resta volutamente fuori
- * dall'area admin, per non trasformare un click distratto in una perdita.
- */
+/** Sposta nel cestino. Non cancella: si recupera rimettendola in bozza. */
 export async function trashPost(id) {
-  await request(wpUrl(`/posts/${id}`), {
-    method: "DELETE",
-    headers: authHeaders()
-  });
-
-  clearPostsCache();
+  const { notizia } = await chiedi(`/admin/notizie/${id}`, { method: "DELETE" });
+  return { id: notizia.id, status: STATO_VERSO_PANNELLO[notizia.stato] };
 }
 
 /* =====================================================
-   🖼 Immagini
+   Media
    ===================================================== */
 
+/** Larghezza e altezza di un'immagine, per salvarle insieme al file. */
+async function misura(file) {
+  if (!file.type?.startsWith("image/")) return {};
+
+  try {
+    const immagine = await createImageBitmap(file);
+    const misure = { larghezza: immagine.width, altezza: immagine.height };
+    immagine.close();
+    return misure;
+  } catch {
+    // Le misure sono un di più: se il browser non ce la fa, si prosegue
+    return {};
+  }
+}
+
 /**
- * Carica un file nella libreria media di WordPress.
- * Il nome file viene ripulito: WordPress rifiuta caratteri non ASCII.
+ * Caricamento di un'immagine di copertina, in due tempi.
+ *
+ * Il file non passa dal nostro server: si chiede un permesso di scrittura a
+ * scadenza breve e lo si carica direttamente nell'archivio. Così un video di
+ * una partita non sbatte contro il limite di corpo di una funzione
+ * serverless, e i byte non attraversano il nostro codice.
+ *
+ * La registrazione avviene solo dopo che il caricamento è andato a buon
+ * fine: in tabella non finiscono file che non esistono.
  */
 export async function uploadMedia(file, { title } = {}) {
-  const safeName = buildSafeFileName(file.name || "immagine.jpg");
+  const mime = file.type;
+  const byte = file.size;
 
-  const response = await request(wpUrl("/media"), {
+  const { chiave, urlDiCaricamento } = await chiedi("/admin/media", {
     method: "POST",
-    headers: authHeaders({
-      "Content-Disposition": `attachment; filename="${safeName}"`,
-      "Content-Type": file.type || "application/octet-stream"
-    }),
+    body: JSON.stringify({ fase: "permesso", mime, byte })
+  });
+
+  const caricamento = await fetch(urlDiCaricamento, {
+    method: "PUT",
+    headers: { "Content-Type": mime },
     body: file
   });
 
-  const media = await response.json();
-
-  // Il titolo alternativo aiuta l'accessibilità e la ricerca interna
-  if (title) {
-    try {
-      await request(wpUrl(`/media/${media.id}`), {
-        method: "POST",
-        headers: authHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ title, alt_text: title })
-      });
-    } catch {
-      // Non bloccante: l'immagine è comunque caricata
-    }
+  if (!caricamento.ok) {
+    throw new Error(`Caricamento del file non riuscito (${caricamento.status}).`);
   }
 
-  return {
-    id: media.id,
-    url: wpMediaUrl(media.source_url),
-    rawUrl: media.source_url
-  };
+  const misure = await misura(file);
+
+  const { media } = await chiedi("/admin/media", {
+    method: "POST",
+    body: JSON.stringify({
+      fase: "registra",
+      chiave, mime, byte,
+      titolo: title || null,
+      ...misure
+    })
+  });
+
+  return { id: media.id, url: media.url };
 }
-
-function buildSafeFileName(name) {
-  const dot = name.lastIndexOf(".");
-  const base = dot > 0 ? name.slice(0, dot) : name;
-  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : "jpg";
-
-  const cleanBase = base
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")   // toglie gli accenti
-    .replace(/[^a-zA-Z0-9-_]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase()
-    .slice(0, 60) || "immagine";
-
-  const cleanExt = /^[a-z0-9]{2,5}$/.test(ext) ? ext : "jpg";
-  return `${cleanBase}-${Date.now()}.${cleanExt}`;
-}
-

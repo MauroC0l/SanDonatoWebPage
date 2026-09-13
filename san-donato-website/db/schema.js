@@ -100,7 +100,11 @@ export const media = pgTable("media", {
   // Percorso dell'oggetto dentro il bucket R2. L'URL pubblico si compone
   // a partire da questa: se un giorno cambia il dominio dei file, si cambia
   // in un punto solo invece che in 96 articoli.
-  chiave: text("chiave").notNull().unique(),
+  //
+  // Facoltativa durante la transizione: un file ancora su WordPress ha
+  // chiave vuota e si serve da urlOriginaleWp. Quando passera' su R2 la
+  // chiave si riempie e l'indirizzo cambia da solo.
+  chiave: text("chiave").unique(),
 
   mime: text("mime").notNull(),
   byte: integer("byte"),
@@ -156,4 +160,29 @@ export const notizie = pgTable("notizie", {
   // L'elenco pubblico chiede sempre "le pubblicate, dalla più recente"
   index("idx_notizie_elenco").on(t.stato, t.pubblicataIl),
   index("idx_notizie_sport").on(t.sport)
+]);
+
+/* =====================================================
+   Freno ai tentativi di accesso
+   ===================================================== */
+
+/**
+ * Un tentativo di accesso fallito per riga.
+ *
+ * Senza questo, un'API di accesso è una porta su cui si può bussare
+ * all'infinito: scrypt rallenta chi prova a indovinare, ma non lo ferma.
+ * La tabella sta nel database e non in memoria perché in ambiente
+ * serverless ogni richiesta può toccare un processo diverso, e un
+ * contatore in memoria non conterebbe quasi nulla.
+ */
+export const tentativiAccesso = pgTable("tentativi_accesso", {
+  id: serial("id").primaryKey(),
+
+  // Email tentata oppure indirizzo del chiamante: si frena su entrambi,
+  // così né un account singolo né una sorgente singola possono insistere.
+  chiave: text("chiave").notNull(),
+
+  quando: timestamp("quando", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  index("idx_tentativi_chiave").on(t.chiave, t.quando)
 ]);

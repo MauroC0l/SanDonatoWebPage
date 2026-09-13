@@ -5,7 +5,7 @@ import {
   FaExclamationCircle, FaCheckCircle, FaInfoCircle, FaExternalLinkAlt
 } from "react-icons/fa";
 import { getPost, createPost, updatePost, uploadMedia, AuthError } from "../../api/adminApi";
-import { detectSport } from "../../api/API.mjs";
+import { SPORT } from "../../api/API.mjs";
 import { prepareImage, formatSize } from "../../utils/prepareImage";
 import { useAuth } from "../../context/auth";
 import RichTextEditor from "./RichTextEditor";
@@ -15,6 +15,7 @@ const EMPTY = {
   title: "",
   content: "",
   excerpt: "",
+  sport: "Altro",
   status: "draft",
   featuredMediaId: 0,
   image: null
@@ -50,6 +51,7 @@ export default function PostEditorPage() {
           title: post.title,
           content: post.content,
           excerpt: post.excerpt,
+          sport: post.sport || "Altro",
           status: post.status,
           featuredMediaId: post.featuredMediaId,
           image: post.image
@@ -133,6 +135,7 @@ export default function PostEditorPage() {
       title: form.title.trim(),
       content: form.content,
       excerpt: form.excerpt.trim(),
+      sport: form.sport,
       status,
       featuredMediaId: form.featuredMediaId
     };
@@ -187,7 +190,6 @@ export default function PostEditorPage() {
     );
   }
 
-  const sport = detectSport(form.title);
   const isPublished = form.status === "publish";
   const busy = saving || uploading;
 
@@ -260,17 +262,27 @@ export default function PostEditorPage() {
             />
           </label>
 
-          <div className={`adm-sport-hint ${sport === "Altro" ? "is-warning" : ""}`}>
+          {/* Lo sport era dedotto dal titolo, perché su WordPress non
+              esisteva un campo: chi scriveva doveva infilare la parola
+              "volley" nel titolo per finire nella sezione giusta. Ora si
+              sceglie, e il titolo torna a essere solo un titolo. */}
+          <label className="adm-field">
+            <span className="adm-label">Sezione del sito</span>
+            <select
+              className="adm-input adm-select"
+              value={form.sport}
+              onChange={(e) => update({ sport: e.target.value })}
+              disabled={busy}
+            >
+              {SPORT.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+
+          <div className="adm-sport-hint">
             <FaInfoCircle />
-            {sport === "Altro" ? (
-              <span>
-                Questa notizia finirà nella sezione <strong>Altro</strong>. Per farla comparire
-                fra quelle di uno sport, scrivi <em>calcio</em>, <em>volley</em> (o <em>pallavolo</em>),
-                <em> minivolley</em> o <em>basket</em> nel titolo.
-              </span>
-            ) : (
-              <span>Comparirà nella sezione <strong>{sport}</strong> del sito.</span>
-            )}
+            <span>Comparirà nella sezione <strong>{form.sport}</strong> del sito.</span>
           </div>
 
           <div className="adm-field">

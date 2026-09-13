@@ -41,7 +41,7 @@ export default function LoginPage() {
     setError("");
 
     if (!username.trim() || !password.trim()) {
-      setError("Inserisci nome utente e password applicativa.");
+      setError("Inserisci email e password.");
       return;
     }
 
@@ -112,18 +112,18 @@ export default function LoginPage() {
               <FaUser className="alg-field-icon" aria-hidden="true" />
               <input
                 id="alg-user"
-                type="text"
+                type="email"
                 className="alg-input"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder=" "
-                autoComplete="username"
+                autoComplete="email"
                 autoCapitalize="none"
                 autoFocus
                 spellCheck="false"
                 disabled={submitting}
               />
-              <label htmlFor="alg-user" className="alg-label">Nome utente</label>
+              <label htmlFor="alg-user" className="alg-label">Email</label>
             </div>
 
             <div className="alg-field">
@@ -139,9 +139,9 @@ export default function LoginPage() {
                 spellCheck="false"
                 disabled={submitting}
               />
-              <label htmlFor="alg-pw" className="alg-label">Password applicativa</label>
-              {/* Il codice è lungo e si incolla: poterlo rileggere evita
-                  di sbattere contro un errore per un incollaggio a metà. */}
+              <label htmlFor="alg-pw" className="alg-label">Password</label>
+              {/* Rileggere quel che si è digitato evita di sbattere contro un
+                  errore per un tasto premuto male, soprattutto da telefono. */}
               <button
                 type="button"
                 className="alg-reveal"
@@ -187,25 +187,29 @@ export default function LoginPage() {
               onClick={() => setShowHelp(v => !v)}
               aria-expanded={showHelp}
             >
-              Come ottengo la password applicativa?
+              Non riesco a entrare
               <FaChevronDown className="alg-help-arrow" />
             </button>
 
             {showHelp && (
               <div className="alg-help">
                 <p>
-                  Non è la password del tuo account: è un codice separato, che si
-                  può revocare in qualsiasi momento senza cambiare la tua.
+                  Si entra con la propria <strong>email</strong> e la password
+                  ricevuta dalla società. Non esiste una registrazione libera:
+                  gli account li crea chi amministra il sito.
                 </p>
-                <ol>
-                  <li>Chiedi all&apos;amministratore del sito di aprire il tuo profilo utente.</li>
-                  <li>In fondo alla pagina, sezione <strong>Password d&apos;applicazione</strong>, inserire un nome (es. &quot;Pannello notizie&quot;).</li>
-                  <li>Copiare il codice generato, fatto di quattro gruppi di lettere.</li>
-                  <li>Incollarlo qui sopra assieme al proprio nome utente.</li>
-                </ol>
+                <ul>
+                  <li>Controlla che l&apos;email sia quella comunicata alla società.</li>
+                  <li>La password distingue maiuscole e minuscole.</li>
+                  <li>
+                    Dopo alcuni tentativi sbagliati l&apos;accesso si blocca per
+                    un quarto d&apos;ora, anche con la password giusta: è una
+                    difesa contro chi prova a indovinarla.
+                  </li>
+                </ul>
                 <p className="alg-help-note">
-                  Il codice compare una sola volta. Se lo perdi, se ne genera
-                  semplicemente uno nuovo e il vecchio si elimina.
+                  Password dimenticata o account che non funziona: scrivi a chi
+                  amministra il sito, che può reimpostarla.
                 </p>
               </div>
             )}

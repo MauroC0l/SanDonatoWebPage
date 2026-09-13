@@ -1,259 +1,177 @@
 // ==============================
-// 📦 api.mjs — API Client Ottimizzato per WordPress/React
+// Lettura delle notizie dal nostro back-end.
+//
+// Prima questo file parlava con la REST API di WordPress. Ora parla con
+// /api/notizie, sulla stessa origine del sito: niente CORS, niente
+// riscrittura degli indirizzi delle immagini a ogni lettura, niente
+// deduzione dello sport dal titolo.
+//
+// La forma degli oggetti restituiti è rimasta identica a prima, così i
+// componenti che li usano non sono stati toccati.
 // ==============================
 
-import { wpUrl, wpMediaUrl, wpRewriteMediaUrls } from "./wpConfig";
+const BASE = "/api";
 
-// Quante notizie tenere per ogni sport in getLatestPostsByCategory()
-const MAX_POSTS_PER_CATEGORY = 4;
-
-// 🔹 Cache in memoria (Singleton pattern)
-let cachedPosts = null;
-let cachedAuthors = null;
+// Cache in memoria: la stessa pagina non richiede due volte le stesse cose
+let cacheElenco = null;
+let cachePerSport = null;
 
 /**
- * Svuota la cache. Va chiamata dopo ogni scrittura dall'area admin,
+ * Svuota la cache. Va chiamata dopo ogni scrittura dall'area riservata,
  * altrimenti il sito continuerebbe a mostrare la versione precedente
  * finché l'utente non ricarica la pagina.
  */
 export function clearPostsCache() {
-  cachedPosts = null;
+  cacheElenco = null;
+  cachePerSport = null;
 }
 
 /* =====================================================
-   🔹 Recupera tutti i post (Paginazione Automatica)
+   Normalizzazione
    ===================================================== */
-export async function getAllPosts(perPage = 100) {
-  if (cachedPosts) return cachedPosts;
 
-  try {
-    // 1. Recupera autori per la mappa (necessario per normalizzare)
-    const authorMap = await getAuthorMap();
-
-    // 2. Costruisci URL per la prima pagina
-    const buildUrl = (page) =>
-      wpUrl("/posts", { per_page: perPage, page, _embed: "true" });
-
-    // 3. Fetch Prima Pagina
-    const firstRes = await fetch(buildUrl(1));
-    if (!firstRes.ok) throw new Error(`Errore HTTP ${firstRes.status} recuperando pagina 1`);
-
-    const firstPosts = await firstRes.json();
-    const totalPages = parseInt(firstRes.headers.get("X-WP-TotalPages") || "1", 10);
-
-    // 4. Fetch parallelo delle pagine successive (se esistono)
-    const promises = [];
-    for (let page = 2; page <= totalPages; page++) {
-      promises.push(
-        fetch(buildUrl(page)).then(res => {
-          if (!res.ok) throw new Error(`Errore Pagina ${page}`);
-          return res.json();
-        })
-      );
-    }
-
-    const otherPages = await Promise.all(promises);
-
-    // 5. Unifica e Normalizza
-    const rawPosts = [firstPosts, ...otherPages].flat();
-    cachedPosts = rawPosts.map(p => normalizePost(p, authorMap));
-
-    return cachedPosts;
-
-  } catch (error) {
-    console.error("❌ Errore critico nel recupero post:", error);
-    // Rilanciamo: le pagine devono poter distinguere "nessuna notizia"
-    // da "non sono riuscito a raggiungere WordPress". Con un array vuoto
-    // il sito è rimasto senza notizie per mesi senza segnalare nulla.
-    throw new Error(
-      "Non è stato possibile caricare le notizie. Il servizio potrebbe essere temporaneamente non raggiungibile.",
-      { cause: error }
-    );
-  }
+/** Dalla forma del nostro back-end a quella che usano i componenti. */
+export function normalizePost(n) {
+  return {
+    id: n.id,
+    wpId: n.wpId ?? null,
+    slug: n.slug,
+    title: n.titolo,
+    preview: n.sommario || "",
+    content: n.contenuto ?? "",
+    image: n.copertina || null,
+    imageAlt: n.copertinaAlt || "",
+    sport: n.sport,
+    author: n.autore || "Staff",
+    date: formatDate(n.pubblicataIl),
+    dateISO: n.pubblicataIl,
+    status: n.stato
+  };
 }
 
-/* =====================================================
-   🔹 Recupera Autori
-   ===================================================== */
-export async function getAuthors() {
-  if (cachedAuthors) return cachedAuthors;
-
-  try {
-    const response = await fetch(wpUrl("/users"));
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const data = await response.json();
-    cachedAuthors = data.map(a => ({ id: a.id, name: a.name }));
-
-    return cachedAuthors;
-  } catch (error) {
-    console.warn("⚠️ Impossibile recuperare autori, uso fallback:", error);
-    return [];
-  }
-}
-
-/* =====================================================
-   🔹 Ultime notizie per categoria (Ottimizzata)
-   ===================================================== */
-export async function getLatestPostsByCategory() {
-  const posts = await getAllPosts();
-  if (!posts.length) return {};
-
-  // Raggruppa per sport
-  const grouped = {};
-  for (const post of posts) {
-    const category = post.sport; // Già calcolato in normalizePost
-    if (!grouped[category]) grouped[category] = [];
-    grouped[category].push(post);
-  }
-
-  // Ordina e taglia (il risultato di slice va riassegnato, non è in-place)
-  Object.keys(grouped).forEach(cat => {
-    grouped[cat] = grouped[cat]
-      .sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO))
-      .slice(0, MAX_POSTS_PER_CATEGORY);
+async function chiedi(percorso) {
+  const risposta = await fetch(`${BASE}${percorso}`, {
+    headers: { Accept: "application/json" }
   });
 
-  return grouped;
+  if (!risposta.ok) {
+    const dettaglio = await risposta.json().catch(() => ({}));
+    throw new Error(dettaglio.errore || `Errore HTTP ${risposta.status}`);
+  }
+  return risposta.json();
 }
 
 /* =====================================================
-   🔹 Singolo post per ID
-   Serve alle pagine /news/:id aperte da link diretto,
-   preferito o refresh, quando non arriva nulla dal router.
+   Elenco completo
    ===================================================== */
-export async function getPostById(id) {
-  if (!id) return null;
 
-  // Se la lista completa è già in cache evitiamo del tutto la rete
-  if (cachedPosts) {
-    const cached = cachedPosts.find(p => String(p.id) === String(id));
-    if (cached) return cached;
+/**
+ * Tutte le notizie pubblicate.
+ *
+ * La pagina /news filtra e impagina lato browser, quindi le vuole tutte.
+ * Il contenuto completo non viene scaricato: serve solo nella pagina di
+ * dettaglio, e per 97 articoli sarebbe qualche centinaio di kilobyte
+ * trasferiti per niente.
+ */
+export async function getAllPosts() {
+  if (cacheElenco) return cacheElenco;
+
+  const tutte = [];
+  let pagina = 1;
+  let pagine;
+
+  do {
+    const risultato = await chiedi(`/notizie?pagina=${pagina}&perPagina=50`);
+    tutte.push(...risultato.notizie.map(normalizePost));
+    pagine = risultato.pagine;
+    pagina++;
+  } while (pagina <= pagine);
+
+  cacheElenco = tutte;
+  return tutte;
+}
+
+/* =====================================================
+   Ultime notizie per sport
+   ===================================================== */
+
+/**
+ * Le ultime notizie di ogni disciplina, per la home.
+ *
+ * Una sola richiesta al posto dello scaricamento dell'intero archivio:
+ * prima la home caricava tutti gli articoli per poi tenerne quattro per
+ * sport e buttare il resto.
+ */
+export async function getLatestPostsByCategory() {
+  if (cachePerSport) return cachePerSport;
+
+  const { perSport } = await chiedi("/notizie/ultime-per-sport?quante=4");
+
+  const raggruppate = {};
+  for (const [sport, notizie] of Object.entries(perSport)) {
+    raggruppate[sport] = notizie.map(normalizePost);
   }
 
+  cachePerSport = raggruppate;
+  return raggruppate;
+}
+
+/* =====================================================
+   Singola notizia
+   ===================================================== */
+
+/**
+ * Una notizia sola, per /news/:id.
+ *
+ * L'identificativo può essere lo slug o un numero. I collegamenti già
+ * condivisi contengono il vecchio id di WordPress: il back-end li risolve
+ * lo stesso, quindi non si rompono.
+ */
+export async function getPostById(identificativo) {
+  if (!identificativo) return null;
+
   try {
-    const authorMap = await getAuthorMap();
-
-    const response = await fetch(wpUrl(`/posts/${id}`, { _embed: "true" }));
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    return normalizePost(await response.json(), authorMap);
-  } catch (error) {
-    console.error(`❌ Errore nel recupero del post ${id}:`, error);
+    const { notizia } = await chiedi(`/notizie/${encodeURIComponent(identificativo)}`);
+    return normalizePost(notizia);
+  } catch (errore) {
+    console.error(`Notizia ${identificativo} non recuperata:`, errore.message);
     return null;
   }
 }
 
 /* =====================================================
-   🧩 Utility e Normalizzazione
+   Utilità
    ===================================================== */
 
-async function getAuthorMap() {
-  const authors = await getAuthors();
-  return new Map(authors.map(a => [a.id, a.name]));
-}
+export function formatDate(iso) {
+  if (!iso) return "";
 
-export function normalizePost(post, authorMap = new Map()) {
-  const title = decodeHTML(post.title?.rendered || "");
-
-  return {
-    id: post.id,
-    title: title,
-    // Questo è il riassunto per la lista (NewsList)
-    preview: cleanExcerpt(post.excerpt?.rendered || "", 200),
-
-    // Contenuto completo HTML, con le immagini riportate sull'indirizzo giusto
-    content: wpRewriteMediaUrls(post.content?.rendered || ""),
-
-    image: wpMediaUrl(post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null),
-    sport: detectSport(title),
-    author: authorMap.get(post.author) || post._embedded?.author?.[0]?.name || "Staff",
-    date: formatDate(post.date),
-    dateISO: post.date,
-    status: post.status || "publish",
-    link: post.link || "",
-  };
+  return new Date(iso).toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
 }
 
 /**
- * Lo sport di una notizia è dedotto dal titolo: non esiste un campo dedicato
- * in WordPress. È esportata perché l'editor mostra all'operatore, mentre
- * scrive, in quale sezione del sito finirà la notizia.
+ * Gli sport previsti, nell'ordine in cui si mostrano.
+ *
+ * Prima questo elenco non esisteva e lo sport si indovinava dal titolo con
+ * detectSport(): una notizia di pallavolo il cui titolo non conteneva la
+ * parola "volley" finiva in "Altro". Ora è un campo scelto da chi scrive.
  */
-export function detectSport(title = "") {
-  const t = title.toLowerCase();
-  if (t.includes("minivolley")) return "Minivolley";
-  if (t.includes("calcio")) return "Calcio";
-  if (t.includes("pallavolo") || t.includes("volley")) return "Pallavolo";
-  if (t.includes("basket")) return "Basket";
-  return "Altro";
-}
+export const SPORT = ["Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"];
 
-export function cleanExcerpt(html = "", limit = 200) {
-  if (!html) return "";
+/** Testo semplice da un frammento HTML, per anteprime e ricerche. */
+export function cleanExcerpt(html = "", limite = 200) {
+  const testo = String(html)
+    .replace(/<\s*br\s*\/?\s*>/gi, " ")
+    .replace(/<\/\s*(p|div|li|h[1-6]|blockquote)\s*>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  let text = html;
-
-  // 1. Rimuovi specifici artefatti di WordPress PRIMA di togliere i tag
-  text = text.replace(/\[&hellip;\]/g, ""); // Rimuove "[...]" di WP
-  text = text.replace(/&#8230;/g, "");      // Rimuove i tre puntini se sono alla fine
-
-  // 2. Rimuovi tutti i tag HTML (<p>, <br>, ecc.)
-  text = text.replace(/<[^>]+>/g, "");
-
-  // 3. Decodifica le entità (es. virgolette, accenti)
-  text = decodeHTML(text);
-
-  // 4. Pulisci spazi doppi e trim
-  text = text.replace(/\s+/g, " ").trim();
-
-  // 5. Taglia se troppo lungo
-  if (text.length > limit) {
-    return text.slice(0, limit - 3) + "...";
-  }
-
-  return text;
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Data non valida";
-  return new Intl.DateTimeFormat("it-IT", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  }).format(date);
-}
-
-// ✅ Decodificatore HTML Sicuro (Senza DOM/Textarea per compatibilità SSR)
-function decodeHTML(str) {
-  if (!str) return "";
-
-  const map = {
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&quot;': '"',
-    '&apos;': "'",
-    '&nbsp;': ' ',
-
-    // WordPress Specific entities (Smart Quotes & Typography)
-    '&#038;': '&',
-    '&#039;': "'",
-    '&#8211;': '-',  // En dash
-    '&#8212;': '—',  // Em dash
-    '&#8216;': "'",  // Left single quote
-    '&#8217;': "'",  // Right single quote (apostrophe)
-    '&#8218;': ",",  // Single low-9 quotation mark
-    '&#8220;': '"',  // Left double quote
-    '&#8221;': '"',  // Right double quote
-    '&#8222;': '"',  // Double low-9 quotation mark
-    '&#8230;': '...', // Ellipsis (...)
-    '&hellip;': '...',
-    '&copy;': '©',
-    '&reg;': '®',
-    '&euro;': '€'
-  };
-
-  return str.replace(/&[#\w]+;/g, (match) => map[match] || match);
+  if (testo.length <= limite) return testo;
+  const tagliato = testo.slice(0, limite);
+  return tagliato.slice(0, tagliato.lastIndexOf(" ")).trimEnd() + "…";
 }

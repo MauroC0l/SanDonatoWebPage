@@ -1137,3 +1137,16 @@
   .adm-spinner { animation-duration: 2s; }
   .adm-btn { transition: none; }
 }
+
+/* Menu a tendina della sezione, nell'editor delle notizie.
+   Eredita .adm-input: qui basta togliere l'aspetto nativo e rimettere
+   una freccia, così somiglia agli altri campi invece che al sistema. */
+.adm-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235b6a80'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem;
+  padding-right: 2.2rem;
+  cursor: pointer;
+}

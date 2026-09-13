@@ -5,7 +5,6 @@ import {
   FaExclamationCircle, FaInbox, FaImage
 } from "react-icons/fa";
 import { listPosts, trashPost, AuthError } from "../../api/adminApi";
-import { detectSport } from "../../api/API.mjs";
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
 
@@ -202,7 +201,7 @@ export default function PostsListPage() {
                   <span className={`adm-status adm-status-${post.status}`}>
                     {STATUS_LABEL[post.status] || post.status}
                   </span>
-                  <span className="adm-sport-tag">{detectSport(post.title)}</span>
+                  <span className="adm-sport-tag">{post.sport}</span>
                   <span className="adm-post-date">{formatDate(post.dateISO)}</span>
                   {post.authorName && <span className="adm-post-author">di {post.authorName}</span>}
                 </div>
