@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUserPlus, FaExclamationCircle, FaCheckCircle, FaUsers,
-  FaTimes, FaPlus, FaClock
+  FaTimes, FaPlus, FaClock, FaSearch
 } from "react-icons/fa";
 import {
   listUtenti, createUtente, updateUtente, listSquadre,
@@ -67,6 +67,13 @@ function quandoAccesso(iso) {
   return { testo: `${data} (${Math.floor(giorni / 30)} mesi fa)`, allarme: true };
 }
 
+const STATI = [
+  { valore: "", etichetta: "Tutti" },
+  { valore: "attivo", etichetta: "Attivi" },
+  { valore: "in_attesa", etichetta: "In attesa" },
+  { valore: "sospeso", etichetta: "Sospesi" }
+];
+
 export default function PersonePage() {
   const navigate = useNavigate();
   const { user, sessionExpired } = useAuth();
@@ -77,6 +84,13 @@ export default function PersonePage() {
   const [errore, setErrore] = useState("");
   const [avviso, setAvviso] = useState("");
   const [nuovo, setNuovo] = useState(null);
+
+  // Ricerca e filtri lavorano sui dati già scaricati: con qualche centinaio
+  // di persone chiedere al server a ogni lettera sarebbe uno spreco, e la
+  // risposta arriverebbe più lenta di quanto si digita.
+  const [ricerca, setRicerca] = useState("");
+  const [filtroRuolo, setFiltroRuolo] = useState("");
+  const [filtroStato, setFiltroStato] = useState("");
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -190,13 +204,34 @@ export default function PersonePage() {
     );
   }
 
+  const cercato = ricerca.trim().toLowerCase();
+
+  const visibili = persone.filter((p) => {
+    if (filtroRuolo && p.ruolo !== filtroRuolo) return false;
+    if (filtroStato && p.stato !== filtroStato) return false;
+    if (!cercato) return true;
+
+    // Si cerca anche fra le squadre: "chi c'è negli Allievi" è una domanda
+    // che ci si fa più spesso di quanto sembri.
+    return (
+      p.nomeCompleto.toLowerCase().includes(cercato) ||
+      p.email.toLowerCase().includes(cercato) ||
+      p.squadre.some((s) => s.nome.toLowerCase().includes(cercato))
+    );
+  });
+
+  const filtrato = Boolean(cercato || filtroRuolo || filtroStato);
+
   return (
     <div className="adm-page">
       <div className="adm-page-head">
         <div className="adm-head-left">
           <h1 className="adm-page-title">Persone</h1>
           <p className="adm-page-sub">
-            Account, ruoli e squadre. In fondo all&apos;elenco chi non entra da tempo.
+            {filtrato
+              ? `${visibili.length} di ${persone.length}`
+              : `${persone.length} account`}
+            {" "}· ruoli e squadre. In fondo all&apos;elenco chi non entra da tempo.
           </p>
         </div>
 
@@ -305,14 +340,59 @@ export default function PersonePage() {
         </form>
       )}
 
-      {persone.length === 0 ? (
+      {/* Con centocinquanta righe, trovare una persona scorrendo è una
+          piccola tortura. La ricerca lavora sui dati già in pagina. */}
+      <div className="adm-filters">
+        <div className="adm-search">
+          <FaSearch className="adm-search-icon" aria-hidden="true" />
+          <input
+            type="search"
+            className="adm-input"
+            value={ricerca}
+            onChange={(e) => setRicerca(e.target.value)}
+            placeholder="Cerca per nome, email o squadra…"
+            aria-label="Cerca fra le persone"
+          />
+        </div>
+
+        <select
+          className="adm-input adm-select adm-filter-select"
+          value={filtroRuolo}
+          onChange={(e) => setFiltroRuolo(e.target.value)}
+          aria-label="Filtra per ruolo"
+        >
+          <option value="">Tutti i ruoli</option>
+          {RUOLI.map((r) => (
+            <option key={r.valore} value={r.valore}>{r.etichetta}</option>
+          ))}
+        </select>
+
+        <div className="adm-chip-group">
+          {STATI.map((s) => (
+            <button
+              key={s.valore}
+              type="button"
+              className={`adm-chip ${filtroStato === s.valore ? "is-active" : ""}`}
+              onClick={() => setFiltroStato(s.valore)}
+            >
+              {s.etichetta}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {visibili.length === 0 ? (
         <div className="adm-empty">
           <FaUsers className="adm-empty-icon" />
-          <p>Nessun account.</p>
+          <p>
+            {persone.length === 0
+              ? "Nessun account."
+              : "Nessuno corrisponde a questa ricerca."}
+          </p>
         </div>
       ) : (
         <ul className="adm-post-list">
-          {persone.map((persona) => {
+          {visibili.map((persona) => {
             const accesso = quandoAccesso(persona.ultimoAccesso);
             const seStesso = persona.id === user?.id;
             const puoAvereSquadre = GESTISCE_SQUADRE.includes(persona.ruolo);

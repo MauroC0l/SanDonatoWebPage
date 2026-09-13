@@ -19,9 +19,15 @@ const scryptAsync = promisify(scrypt);
 // N=2^16 è il compromesso consigliato: circa 64 MB di memoria per verifica.
 const PARAMETRI = { N: 65536, r: 8, p: 1, lunghezza: 32 };
 
-export async function creaHashPassword(password) {
-  if (typeof password !== "string" || password.length < 10) {
-    throw new Error("La password deve avere almeno 10 caratteri.");
+/**
+ * `minimoCaratteri` esiste per un solo motivo: lo script che riempie il
+ * database locale di dati di prova, dove serve una password banale da
+ * digitare cento volte. Non va usato da nessun endpoint — quelli hanno la
+ * loro validazione, che non guarda qui.
+ */
+export async function creaHashPassword(password, { minimoCaratteri = 10 } = {}) {
+  if (typeof password !== "string" || password.length < minimoCaratteri) {
+    throw new Error(`La password deve avere almeno ${minimoCaratteri} caratteri.`);
   }
 
   const { N, r, p, lunghezza } = PARAMETRI;

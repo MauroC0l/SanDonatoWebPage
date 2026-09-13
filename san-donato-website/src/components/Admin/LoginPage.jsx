@@ -74,8 +74,7 @@ export default function LoginPage() {
           </h1>
 
           <p className="alg-brand-text">
-            Da qui si scrivono e si pubblicano le notizie della società.
-            Il sito si aggiorna da solo.
+            Chi gioca divertendosi vince sempre!
           </p>
 
           <ul className="alg-sports" aria-label="Le nostre discipline">
@@ -104,7 +103,7 @@ export default function LoginPage() {
 
           <p className="alg-eyebrow">Area riservata</p>
           <h2 className="alg-title">Accedi</h2>
-          <p className="alg-lead">Pagina di accesso per gli operatori del sito</p>
+          <p className="alg-lead">Pagina di accesso per atleti e operatori della PSD</p>
 
           <form onSubmit={handleSubmit} noValidate className="alg-form">
 
@@ -194,9 +193,10 @@ export default function LoginPage() {
             {showHelp && (
               <div className="alg-help">
                 <p>
-                  Si entra con la propria <strong>email</strong> e la password
-                  ricevuta dalla società. Non esiste una registrazione libera:
-                  gli account li crea chi amministra il sito.
+                  Si entra con la propria <strong>email</strong> e la password.
+                  Gli atleti se la scelgono registrandosi; per allenatori,
+                  redattori e segreteria l&apos;account lo crea chi amministra
+                  il sito, e la password si cambia al primo accesso.
                 </p>
                 <ul>
                   <li>Controlla che l&apos;email sia quella comunicata alla società.</li>
@@ -216,6 +216,11 @@ export default function LoginPage() {
           </div>
 
         </div>
+
+        <p className="alg-footer">
+          Sei un atleta e non hai un account?{" "}
+          <Link to="/registrati" className="adm-inline-link">Registrati</Link>
+        </p>
 
         <p className="alg-footer">A.S.D. Polisportiva San Donato — Torino</p>
       </main>
