@@ -1,411 +1,191 @@
-// src/api/calendarApi.js
+// ==============================
+// Calendario ed eventi, dal nostro back-end.
+//
+// Prima questo file interrogava venti calendari Google, uno per squadra,
+// con la chiave API esposta nel bundle del browser, e ricostruiva risultati
+// e marcatori leggendo righe di testo dentro alla descrizione degli eventi
+// ("Partita: 3 - 1", "Marcatori: Rossi, Bianchi").
+//
+// Ora gli eventi stanno nel nostro database: una richiesta sola, i dati
+// sportivi sono colonne, e l'elenco delle squadre non è più scritto nel
+// codice ma in tabella.
+//
+// La forma degli oggetti restituiti è rimasta quella di prima, così i
+// componenti che li usano non sono stati riscritti.
+// ==============================
 
-// Variabili d'ambiente VITE
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY; 
+const BASE = "/api";
 
-// ====================================================
-// CONFIGURAZIONE CALENDARI (Multi-Calendar)
-// ====================================================
-const CALENDARS_CONFIG = [
-    // --- GENERALE ---
-    {
-        id: import.meta.env.VITE_PSD_CALENDAR_ID,
-        label: "Eventi PSD",
-        cssVar: "eventi-psd",
-        color: "#6c5ce7"
-    },
-    // --- SEGRETERIA ---
-    {
-        id: import.meta.env.VITE_PSD_SEGRETERIA_CALENDAR_ID,
-        label: "Segreteria PSD",
-        cssVar: "segreteria-psd",
-        color: "#402ae0ff"
-    },
-    // --- CALCIO ---
-    {
-        id: import.meta.env.VITE_CALCIO_SECONDA_CATEGORIA_CALENDAR_ID,
-        label: "Calcio Seconda Categoria",
-        cssVar: "calcio-seconda-categoria",
-        color: "#27ae60"
-    },
-    {
-        id: import.meta.env.VITE_CALCIO_ALLIEVI_CALENDAR_ID,
-        label: "Calcio Allievi",
-        cssVar: "calcio-allievi",
-        color: "#2ecc71"
-    },
-    {
-        id: import.meta.env.VITE_CALCIO_JUNIORES_CALENDAR_ID,
-        label: "Calcio Juniores",
-        cssVar: "calcio-juniores",
-        color: "#16a085"
-    },
-    {
-        id: import.meta.env.VITE_CALCIO_OPEN_CALENDAR_ID,
-        label: "Calcio Open",
-        cssVar: "calcio-open",
-        color: "#1abc9c"
-    },
-    {
-        id: import.meta.env.VITE_CALCIO_RAGAZZI_CALENDAR_ID,
-        label: "Calcio Ragazzi",
-        cssVar: "calcio-ragazzi",
-        color: "#e67e22"
-    },
-    {
-        id: import.meta.env.VITE_CALCIO_U12_CALENDAR_ID,
-        label: "Calcio U12",
-        cssVar: "calcio-u12",
-        color: "#f39c12"
-    },
-    // --- VOLLEY ---
-    {
-        id: import.meta.env.VITE_VOLLEY_ECCELLENZA_B_CALENDAR_ID,
-        label: "Volley Eccellenza B",
-        cssVar: "volley-eccellenza-b",
-        color: "#d63031"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_ECCELLENZA_C_CALENDAR_ID,
-        label: "Volley Eccellenza C",
-        cssVar: "volley-eccellenza-c",
-        color: "#e17055"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_MISTA_CALENDAR_ID,
-        label: "Volley Mista",
-        cssVar: "volley-mista",
-        color: "#fd79a8"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_MISTA_LIGHT_CALENDAR_ID,
-        label: "Volley Mista Light",
-        cssVar: "volley-mista-light",
-        color: "#e84393"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U13_CALENDAR_ID,
-        label: "Volley U13",
-        cssVar: "volley-u13",
-        color: "#a569bd"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U14_CALENDAR_ID,
-        label: "Volley U14",
-        cssVar: "volley-u14",
-        color: "#8e44ad"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U15_CALENDAR_ID,
-        label: "Volley U15",
-        cssVar: "volley-u15",
-        color: "#9b59b6"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U16_CALENDAR_ID,
-        label: "Volley U16",
-        cssVar: "volley-u16",
-        color: "#74b9ff"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U17_CALENDAR_ID,
-        label: "Volley U17",
-        cssVar: "volley-u17",
-        color: "#0984e3"
-    },
-    {
-        id: import.meta.env.VITE_VOLLEY_U18_CALENDAR_ID,
-        label: "Volley U18",
-        cssVar: "volley-u18",
-        color: "#2980b9"
-    },
-    // --- BASKET ---
-    {
-        id: import.meta.env.VITE_BASKET_OPEN_CALENDAR_ID,
-        label: "Basket Open",
-        cssVar: "basket-open",
-        color: "#c0392b"
-    },
-    {
-        id: import.meta.env.VITE_BASKET_U19_CALENDAR_ID,
-        label: "Basket U19",
-        cssVar: "basket-u19",
-        color: "#d35400"
-    }
-];
+// Le squadre cambiano di rado: si chiedono una volta per sessione
+let cacheSquadre = null;
 
-// Un calendario dichiarato qui ma senza ID nel .env viene ignorato in silenzio:
-// è così che l'Under 13 e la Segreteria erano spariti senza alcun errore.
-if (import.meta.env.DEV) {
-    const missing = CALENDARS_CONFIG.filter(c => !c.id).map(c => c.label);
-    if (missing.length) {
-        console.warn(`⚠️ Calendari senza ID nel .env (ignorati): ${missing.join(", ")}`);
-    }
+async function chiedi(percorso) {
+  const risposta = await fetch(`${BASE}${percorso}`, {
+    headers: { Accept: "application/json" }
+  });
+
+  if (!risposta.ok) {
+    const dettaglio = await risposta.json().catch(() => ({}));
+    throw new Error(dettaglio.errore || `Errore HTTP ${risposta.status}`);
+  }
+  return risposta.json();
 }
 
-// ====================================================
-// HELPERS DI PARSING
-// ====================================================
+/* =====================================================
+   Squadre (le "categorie" dei filtri)
+   ===================================================== */
 
-const stripHtml = (html) => {
-    if (!html) return "";
-    let text = html.replace(/<br\s*\/?>/gi, '\n');
-    text = text.replace(/<\/p>/gi, '\n');
-    text = text.replace(/<[^>]+>/g, '');
-    const txt = document.createElement("textarea");
-    txt.innerHTML = text;
-    return txt.value;
-};
+async function categorie() {
+  if (cacheSquadre) return cacheSquadre;
 
-/**
- * Estrae i metadati sportivi (Risultato, Marcatori, Parziali)
- * dalla descrizione testuale.
- */
-const parseEventDetails = (description = "") => {
-    const cleanDesc = stripHtml(description);
-    const lines = cleanDesc.split('\n');
-    
-    let result = null;
-    let scorers = [];
-    let partials = null;
-    let directLink = null;
-    let displayLines = [];
+  const { squadre } = await chiedi("/squadre");
 
-    lines.forEach(line => {
-        const trimmed = line.trim();
-        const lower = trimmed.toLowerCase();
-        
-        if (lower.startsWith('partita:') || lower.startsWith('risultato:')) {
-            // Es: "Partita: 3 - 1" -> "3 - 1"
-            result = trimmed.substring(trimmed.indexOf(':') + 1).trim(); 
-        } 
-        else if (lower.startsWith('marcatori:')) {
-            const raw = trimmed.substring(10).trim();
-            if (raw) scorers = raw.split(',').map(s => s.trim()).filter(Boolean);
-        }
-        else if (lower.startsWith('parziali:')) {
-            partials = trimmed.substring(9).trim(); 
-        }
-        else if (lower.startsWith('diretta:') || lower.startsWith('streaming:')) {
-            const linkPart = trimmed.substring(trimmed.indexOf(':') + 1).trim();
-            if (linkPart) {
-                directLink = /^https?:\/\//i.test(linkPart) ? linkPart : 'https://' + linkPart;
-            }
-        }
-        else if (trimmed !== "") {
-            displayLines.push(trimmed);
-        }
-    });
+  cacheSquadre = squadre.map((s) => ({
+    id: s.nome,
+    label: s.nome,
+    color: s.colore,
+    cssVar: s.cssVar,
+    sport: s.sport
+  }));
 
-    return {
-        displayDescription: displayLines.join('\n').trim(),
-        result,
-        scorers,
-        partials,
-        directLink
-    };
-};
-
-/**
- * Trasforma l'evento Google grezzo nel formato interno.
- */
-function transformEvent(item, config) {
-    const hasTime = !!item.start.dateTime;
-    const startDate = new Date(item.start.dateTime || item.start.date);
-    const endDate = new Date(item.end.dateTime || item.end.date);
-    
-    // Parsing avanzato descrizione
-    const details = parseEventDetails(item.description);
-
-    return {
-        id: item.id,
-        title: item.summary || "Evento senza titolo",
-        start: startDate,
-        end: endDate,
-        location: item.location || "", 
-        description: details.displayDescription, // Descrizione pulita
-        
-        // Metadati Parsati
-        result: details.result,
-        scorers: details.scorers,
-        partials: details.partials,
-        diretta: details.directLink,
-
-        category: config.label,
-        color: config.color,
-        cssVar: config.cssVar,
-        hasTime: hasTime 
-    };
+  return cacheSquadre;
 }
 
-// ====================================================
-// LOGICA CORE (Privata) // AGGIORNATA
-// ====================================================
-
-// Funzione Helper per eseguire una singola richiesta con Retry
-async function fetchCalendarWithRetry(config, timeMin, timeMax) {
-    if (!config.id || config.id.includes("INSERISCI_QUI")) return [];
-    
-    // NOTA: maxResults aumentato a 2500 per evitare che Google tronchi i risultati (di default sono 250 o 100)
-    // Questo risolve il problema degli eventi mancanti.
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(config.id)}/events?key=${GOOGLE_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=2500`;
-
-    // Tentativo singolo con timeout semplice se fallisce la rete, o gestione errori API.
-    // 2 tentativi totali (1 tentativo + 1 retry)
-    const MAX_RETRIES = 1;
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout per evitare hang infiniti
-
-            const response = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-                const data = await response.json();
-                return (data.items || []).map(item => transformEvent(item, config));
-            } else {
-                // Se è 429 (Too Many Requests) o 403 (Rate Limit), aspettiamo e riproviamo
-                if (response.status === 429 || response.status === 403) {
-                     // Backoff esponenziale semplice (1s, 2s...)
-                     await new Promise(res => setTimeout(res, 1000 * (attempt + 1))); 
-                     if (attempt === MAX_RETRIES) {
-                        console.warn(`Rate Limit persistente per ${config.label}.`);
-                     }
-                     continue; // Riprova il ciclo
-                }
-                // Altri errori (404, 500) -> non ha senso riprovare subito
-                console.error(`Errore HTTP ${response.status} per ${config.label}`);
-                return []; 
-            }
-        } catch (error) {
-             console.error(`Eccezione fetch ${config.label} (tentativo ${attempt+1}):`, error);
-             if (attempt === MAX_RETRIES) return []; // Fallito dopo tutti i tentativi
-             await new Promise(res => setTimeout(res, 1000)); // Attesa prima del retry
-        }
-    }
-    return [];
+export function svuotaCacheCalendario() {
+  cacheSquadre = null;
 }
 
-async function fetchEventsInternal(timeMin, timeMax) {
-    if (!GOOGLE_API_KEY) throw new Error("Chiave API Google mancante (.env).");
+/* =====================================================
+   Normalizzazione
+   ===================================================== */
 
-    const allEvents = [];
-    const CHUNK_SIZE = 5; // Eseguiamo 5 richieste in parallelo alla volta per non saturare la rete/API
+/** Dalla forma del back-end a quella che usano i componenti. */
+function normalizza(e) {
+  return {
+    id: e.id,
+    title: e.titolo,
+    start: new Date(e.inizio),
+    end: e.fine ? new Date(e.fine) : new Date(e.inizio),
+    location: e.luogo || "",
+    description: e.descrizione || "",
 
-    // Divide i calendari in gruppi (chunks)
-    for (let i = 0; i < CALENDARS_CONFIG.length; i += CHUNK_SIZE) {
-        const chunk = CALENDARS_CONFIG.slice(i, i + CHUNK_SIZE);
-        
-        // Esegue il chunk in parallelo gestendo le promise
-        const chunkPromises = chunk.map(config => fetchCalendarWithRetry(config, timeMin, timeMax));
-        
-        // Attendiamo che questo blocco finisca prima di passare al prossimo
-        const results = await Promise.all(chunkPromises);
-        
-        // Aggiungiamo i risultati validi all'array principale
-        results.forEach(events => {
-            if (Array.isArray(events)) {
-                allEvents.push(...events);
-            }
-        });
-    }
+    // Erano dedotti da un testo libero, ora arrivano già separati
+    result: e.risultato || null,
+    scorers: e.marcatori ?? [],
+    partials: e.parziali || null,
+    diretta: e.diretta || null,
 
-    // Ordinamento cronologico
-    allEvents.sort((a, b) => a.start - b.start);
+    category: e.squadra,
+    color: e.colore,
+    cssVar: e.cssVar,
+    sport: e.sport,
+    tipo: e.tipo,
+    avversario: e.avversario || null,
 
-    // Generiamo l'array delle categorie per i filtri
-    const categories = CALENDARS_CONFIG
-        .filter(c => c.id && !c.id.includes("INSERISCI_QUI"))
-        .map(c => ({
-            id: c.label,
-            label: c.label,
-            color: c.color
-        }));
-
-    return { events: allEvents, categories }; 
+    // Un evento "tutto il giorno" non ha un'ora da mostrare
+    hasTime: !e.tuttoIlGiorno
+  };
 }
 
-// ====================================================
-// API PUBBLICHE
-// ====================================================
+async function eventiTra(inizio, fine) {
+  const parametri = new URLSearchParams({
+    da: inizio.toISOString(),
+    a: fine.toISOString(),
+    limite: "1000"
+  });
 
-/** 
- * NUOVA API: Range personalizzato.
- * Fondamentale per il CalendarPage che carica mese per mese.
- */
+  const [{ eventi }, elencoCategorie] = await Promise.all([
+    chiedi(`/eventi?${parametri}`),
+    categorie()
+  ]);
+
+  return {
+    events: eventi.map(normalizza).sort((a, b) => a.start - b.start),
+    categories: elencoCategorie
+  };
+}
+
+/* =====================================================
+   API pubbliche
+   ===================================================== */
+
+/** Intervallo qualsiasi: la pagina del calendario carica mese per mese. */
 export async function fetchEventsByRange(start, end) {
-    if (!start || !end) return { events: [], categories: [] };
-    return fetchEventsInternal(start.toISOString(), end.toISOString());
+  if (!start || !end) return { events: [], categories: [] };
+
+  try {
+    return await eventiTra(start, end);
+  } catch (errore) {
+    console.error("Calendario non caricato:", errore.message);
+    return { events: [], categories: [] };
+  }
 }
 
 /**
- * 2. Eventi per la HOME (Live Center + Questa Settimana).
+ * Eventi per la home: quelli di oggi e quelli che restano nella settimana.
  *
- * Una sola passata sui calendari, da mezzanotte di oggi a domenica sera.
- * Prima erano due chiamate distinte (oggi + settimana) su range sovrapposti:
- * il doppio delle richieste a Google per gli stessi dati.
+ * Una sola passata da mezzanotte a domenica sera, come prima: erano due
+ * richieste su intervalli sovrapposti.
  */
 export async function fetchHomeEvents() {
-    const now = new Date();
+  const adesso = new Date();
 
-    const startOfToday = new Date(now);
-    startOfToday.setHours(0, 0, 0, 0);
+  const inizioOggi = new Date(adesso);
+  inizioOggi.setHours(0, 0, 0, 0);
 
-    const endOfToday = new Date(now);
-    endOfToday.setHours(23, 59, 59, 999);
+  const fineOggi = new Date(adesso);
+  fineOggi.setHours(23, 59, 59, 999);
 
-    // Domenica di questa settimana (getDay(): 0 = domenica)
-    const currentDay = now.getDay();
-    const daysUntilSunday = currentDay === 0 ? 0 : 7 - currentDay;
-    const sunday = new Date(now);
-    sunday.setDate(now.getDate() + daysUntilSunday);
-    sunday.setHours(23, 59, 59, 999);
+  // getDay(): 0 = domenica
+  const giorno = adesso.getDay();
+  const domenica = new Date(adesso);
+  domenica.setDate(adesso.getDate() + (giorno === 0 ? 0 : 7 - giorno));
+  domenica.setHours(23, 59, 59, 999);
 
-    const { events, categories } = await fetchEventsInternal(
-        startOfToday.toISOString(),
-        sunday.toISOString()
-    );
+  try {
+    const { events, categories } = await eventiTra(inizioOggi, domenica);
 
     return {
-        categories,
-        // Il Live Center mostra anche le partite già iniziate oggi
-        todayEvents: events.filter(ev => ev.start >= startOfToday && ev.start <= endOfToday),
-        // Il riquadro "Questa Settimana" mostra solo ciò che deve ancora iniziare
-        weekEvents: events.filter(ev => ev.start >= now)
+      categories,
+      // Comprende anche le partite già iniziate oggi
+      todayEvents: events.filter((e) => e.start >= inizioOggi && e.start <= fineOggi),
+      // Qui invece solo ciò che deve ancora cominciare
+      weekEvents: events.filter((e) => e.start >= adesso)
     };
+  } catch (errore) {
+    console.error("Eventi della home non caricati:", errore.message);
+    return { categories: [], todayEvents: [], weekEvents: [] };
+  }
 }
 
-/** * 4. NUOVA: Risultati della SETTIMANA CORRENTE (Lunedì - Domenica)
- * Carica gli eventi della settimana corrente che hanno un risultato.
+/**
+ * I risultati della settimana in corso, dal lunedì alla domenica.
+ *
+ * Il filtro "ha un risultato" lo applica il back-end: una partita passata
+ * senza punteggio non è un risultato, è un esito che nessuno ha aggiornato.
  */
 export async function fetchPastResults() {
-    const now = new Date();
-    
-    // Calcolo del Lunedì della settimana corrente
-    // getDay(): 0 = Domenica, 1 = Lunedì, ..., 6 = Sabato
-    const currentDay = now.getDay();
-    // Se è domenica (0), dobbiamo tornare indietro di 6 giorni per arrivare a lunedì.
-    // Altrimenti torniamo indietro di (currentDay - 1) giorni.
-    const diffToMonday = currentDay === 0 ? 6 : currentDay - 1;
-    
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - diffToMonday);
-    monday.setHours(0, 0, 0, 0);
+  const adesso = new Date();
 
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
+  const giorno = adesso.getDay();
+  const lunedi = new Date(adesso);
+  lunedi.setDate(adesso.getDate() - (giorno === 0 ? 6 : giorno - 1));
+  lunedi.setHours(0, 0, 0, 0);
 
-    // Recuperiamo tutti gli eventi della settimana (passati e futuri)
-    const data = await fetchEventsInternal(monday.toISOString(), sunday.toISOString());
+  const domenica = new Date(lunedi);
+  domenica.setDate(lunedi.getDate() + 6);
+  domenica.setHours(23, 59, 59, 999);
 
-    // Filtriamo solo quelli che hanno un risultato (field "result" o "partials")
-    // (Opcionale: se vuoi mostrare TUTTI gli eventi passati della settimana anche senza risultato, rimuovi il filtro)
-    const resultsEvents = data.events
-        .filter(ev => ev.result || ev.partials) 
-        .sort((a, b) => b.start - a.start); // I più recenti in alto
+  try {
+    const { events } = await eventiTra(lunedi, domenica);
 
-    return { events: resultsEvents };
+    return {
+      events: events
+        .filter((e) => e.result || e.partials)
+        .sort((a, b) => b.start - a.start)
+    };
+  } catch (errore) {
+    console.error("Risultati non caricati:", errore.message);
+    return { events: [] };
+  }
 }

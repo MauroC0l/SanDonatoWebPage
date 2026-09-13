@@ -1,19 +1,47 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "../../context/AuthProvider";
+import { useAuth } from "../../context/auth";
 import AdminLayout from "./AdminLayout";
 import LoginPage from "./LoginPage";
 import PostsListPage from "./PostsListPage";
+import EventiListPage from "./EventiListPage";
 
-// L'editor porta con sé TipTap: si carica solo quando si apre davvero
-// una notizia, non all'ingresso nell'area riservata.
+// L'editor delle notizie porta con sé TipTap: si carica solo quando si apre
+// davvero una notizia, non all'ingresso nell'area riservata.
 const PostEditorPage = lazy(() => import("./PostEditorPage"));
+const EventoEditorPage = lazy(() => import("./EventoEditorPage"));
+const PersonePage = lazy(() => import("./PersonePage"));
 
-function EditorFallback() {
+function Attesa({ cosa }) {
   return (
     <div className="adm-loading">
       <div className="adm-spinner" />
-      <p>Apertura dell&apos;editor…</p>
+      <p>Apertura {cosa}…</p>
+    </div>
+  );
+}
+
+/**
+ * Dove si atterra entrando.
+ *
+ * Non è uguale per tutti: un allenatore non gestisce notizie, e mandarlo su
+ * un elenco che gli risponderebbe "non hai i permessi" sarebbe un benvenuto
+ * bizzarro. Ognuno entra dalla porta che gli serve.
+ */
+function Ingresso() {
+  const { user } = useAuth();
+  const capacita = user?.capabilities ?? [];
+
+  if (capacita.includes("notizie.leggi_bozze")) return <PostsListPage />;
+  if (capacita.includes("eventi.gestisci_proprie")) return <Navigate to="/admin/eventi" replace />;
+
+  return (
+    <div className="adm-empty">
+      <p>
+        Il tuo account non ha ancora sezioni assegnate. Chiedi a chi amministra
+        il sito di collegarti a una squadra.
+      </p>
     </div>
   );
 }
@@ -41,15 +69,36 @@ export default function AdminRoot({ section }) {
     <AuthProvider>
       <Routes>
         <Route element={<AdminLayout />}>
-          <Route index element={<PostsListPage />} />
+          <Route index element={<Ingresso />} />
+
+          {/* Notizie */}
           <Route
             path="nuova"
-            element={<Suspense fallback={<EditorFallback />}><PostEditorPage /></Suspense>}
+            element={<Suspense fallback={<Attesa cosa="dell'editor" />}><PostEditorPage /></Suspense>}
           />
           <Route
             path="modifica/:id"
-            element={<Suspense fallback={<EditorFallback />}><PostEditorPage /></Suspense>}
+            element={<Suspense fallback={<Attesa cosa="dell'editor" />}><PostEditorPage /></Suspense>}
           />
+
+          {/* Eventi */}
+          <Route path="eventi" element={<EventiListPage />} />
+          <Route
+            path="eventi/nuovo"
+            element={<Suspense fallback={<Attesa cosa="dell'evento" />}><EventoEditorPage /></Suspense>}
+          />
+          <Route
+            path="eventi/:id"
+            element={<Suspense fallback={<Attesa cosa="dell'evento" />}><EventoEditorPage /></Suspense>}
+          />
+
+          {/* Persone */}
+          <Route
+            path="persone"
+            element={<Suspense fallback={<Attesa cosa="dell'elenco" />}><PersonePage /></Suspense>}
+          />
+
+          <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>
     </AuthProvider>

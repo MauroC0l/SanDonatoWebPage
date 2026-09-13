@@ -76,3 +76,75 @@ export function valida(schema, dati) {
   const campo = primo.path.join(".");
   throw new ErroreHttp(400, campo ? `${campo}: ${primo.message}` : primo.message);
 }
+
+/* =====================================================
+   Eventi
+   ===================================================== */
+
+export const TIPI_EVENTO = ["partita", "allenamento", "torneo", "riunione", "altro"];
+
+const CAMPI_EVENTO = {
+  squadraId: z.coerce.number().int().positive(),
+  tipo: z.enum(TIPI_EVENTO),
+  titolo: z.string().trim().min(2, "Il titolo è troppo corto.").max(200),
+  avversario: z.string().trim().max(160).nullable(),
+  inizio: z.coerce.date(),
+  fine: z.coerce.date().nullable(),
+  tuttoIlGiorno: z.boolean(),
+  luogo: z.string().trim().max(240).nullable(),
+  descrizione: z.string().trim().max(4000).nullable(),
+  risultato: z.string().trim().max(60).nullable(),
+  parziali: z.string().trim().max(160).nullable(),
+  marcatori: z.array(z.string().trim().max(120)).max(40).nullable(),
+  diretta: z.string().trim().url("Il collegamento alla diretta non è un indirizzo valido.").max(500).nullable()
+};
+
+export const schemaEventoNuovo = z.object({
+  squadraId: CAMPI_EVENTO.squadraId,
+  tipo: CAMPI_EVENTO.tipo.optional().default("partita"),
+  titolo: CAMPI_EVENTO.titolo,
+  avversario: CAMPI_EVENTO.avversario.optional(),
+  inizio: CAMPI_EVENTO.inizio,
+  fine: CAMPI_EVENTO.fine.optional(),
+  tuttoIlGiorno: CAMPI_EVENTO.tuttoIlGiorno.optional().default(false),
+  luogo: CAMPI_EVENTO.luogo.optional(),
+  descrizione: CAMPI_EVENTO.descrizione.optional(),
+  risultato: CAMPI_EVENTO.risultato.optional(),
+  parziali: CAMPI_EVENTO.parziali.optional(),
+  marcatori: CAMPI_EVENTO.marcatori.optional(),
+  diretta: CAMPI_EVENTO.diretta.optional()
+}).refine(
+  (e) => !e.fine || e.fine >= e.inizio,
+  { message: "La fine non può precedere l'inizio.", path: ["fine"] }
+);
+
+/* Stessa avvertenza dello schema delle notizie: niente .partial() su uno
+   schema con valori predefiniti, o ogni modifica riporterebbe tipo
+   "partita" e tuttoIlGiorno false anche a chi non li ha toccati. */
+export const schemaEventoModifica = z.object({
+  squadraId: CAMPI_EVENTO.squadraId.optional(),
+  tipo: CAMPI_EVENTO.tipo.optional(),
+  titolo: CAMPI_EVENTO.titolo.optional(),
+  avversario: CAMPI_EVENTO.avversario.optional(),
+  inizio: CAMPI_EVENTO.inizio.optional(),
+  fine: CAMPI_EVENTO.fine.optional(),
+  tuttoIlGiorno: CAMPI_EVENTO.tuttoIlGiorno.optional(),
+  luogo: CAMPI_EVENTO.luogo.optional(),
+  descrizione: CAMPI_EVENTO.descrizione.optional(),
+  risultato: CAMPI_EVENTO.risultato.optional(),
+  parziali: CAMPI_EVENTO.parziali.optional(),
+  marcatori: CAMPI_EVENTO.marcatori.optional(),
+  diretta: CAMPI_EVENTO.diretta.optional()
+});
+
+export const schemaElencoEventi = z.object({
+  da: z.coerce.date().optional(),
+  a: z.coerce.date().optional(),
+  squadraId: z.coerce.number().int().positive().optional(),
+  limite: z.coerce.number().int().min(1).max(1000).optional().default(500)
+});
+
+export const schemaAssociazione = z.object({
+  utenteId: z.coerce.number().int().positive(),
+  squadraId: z.coerce.number().int().positive()
+});

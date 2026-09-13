@@ -11,7 +11,7 @@
  */
 
 import {
-  pgTable, pgEnum, serial, integer, text, boolean, timestamp, index
+  pgTable, pgEnum, serial, integer, text, boolean, timestamp, index, uniqueIndex
 } from "drizzle-orm/pg-core";
 
 /* =====================================================
@@ -185,4 +185,133 @@ export const tentativiAccesso = pgTable("tentativi_accesso", {
   quando: timestamp("quando", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
   index("idx_tentativi_chiave").on(t.chiave, t.quando)
+]);
+
+/* =====================================================
+   FASE 3 — Squadre ed eventi
+   ===================================================== */
+
+export const sportSquadra = pgEnum("sport_squadra", [
+  "Calcio", "Pallavolo", "Basket", "Societa"
+]);
+
+export const tipoEvento = pgEnum("tipo_evento", [
+  "partita", "allenamento", "torneo", "riunione", "altro"
+]);
+
+/**
+ * Le squadre, più i due calendari di società ("Eventi PSD", "Segreteria PSD")
+ * che squadre non sono: hanno sport "Societa".
+ *
+ * calendarioGoogleId conserva l'origine, come wp_id per le notizie: serve
+ * all'importazione dello storico e a non reimportare due volte lo stesso
+ * evento. Dopo il passaggio non viene più letto.
+ */
+export const squadre = pgTable("squadre", {
+  id: serial("id").primaryKey(),
+
+  nome: text("nome").notNull(),
+  slug: text("slug").notNull().unique(),
+  sport: sportSquadra("sport").notNull(),
+
+  // Colore e variabile CSS erano già nel codice del calendario: portarli in
+  // tabella permette di aggiungere una squadra senza toccare il codice.
+  colore: text("colore"),
+  cssVar: text("css_var"),
+
+  ordine: integer("ordine").notNull().default(0),
+
+  // Una squadra che non esiste più si disattiva: i suoi eventi passati
+  // devono restare consultabili.
+  attiva: boolean("attiva").notNull().default(true),
+
+  calendarioGoogleId: text("calendario_google_id"),
+
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  index("idx_squadre_sport").on(t.sport, t.ordine)
+]);
+
+/**
+ * Chi può gestire quale squadra.
+ *
+ * Vale sia per i coach sia per gli editor: la richiesta diceva che un editor
+ * "eventualmente, se associato a una squadra" può gestirne gli eventi. Una
+ * tabella sola invece di due identiche.
+ */
+export const associazioniSquadra = pgTable("associazioni_squadra", {
+  id: serial("id").primaryKey(),
+
+  utenteId: integer("utente_id").notNull()
+    .references(() => utenti.id, { onDelete: "cascade" }),
+
+  squadraId: integer("squadra_id").notNull()
+    .references(() => squadre.id, { onDelete: "cascade" }),
+
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  uniqueIndex("idx_associazione_unica").on(t.utenteId, t.squadraId),
+  index("idx_associazioni_squadra").on(t.squadraId)
+]);
+
+/**
+ * Gli eventi delle squadre.
+ *
+ * Risultato, parziali, marcatori e link alla diretta erano scritti dentro
+ * al testo della descrizione dell'evento Google, in righe tipo
+ * "Partita: 3 - 1" o "Marcatori: Rossi, Bianchi", e ri-estratti da un
+ * parser a ogni caricamento della pagina. Qui sono colonne: chi inserisce
+ * compila dei campi, e nessuno deve più ricordare la formula esatta.
+ */
+export const eventi = pgTable("eventi", {
+  id: serial("id").primaryKey(),
+
+  squadraId: integer("squadra_id").notNull()
+    .references(() => squadre.id, { onDelete: "cascade" }),
+
+  tipo: tipoEvento("tipo").notNull().default("partita"),
+  titolo: text("titolo").notNull(),
+  avversario: text("avversario"),
+
+  inizio: timestamp("inizio", { withTimezone: true }).notNull(),
+  fine: timestamp("fine", { withTimezone: true }),
+
+  // Un evento "tutto il giorno" non ha un'ora da mostrare
+  tuttoIlGiorno: boolean("tutto_il_giorno").notNull().default(false),
+
+  luogo: text("luogo"),
+  descrizione: text("descrizione"),
+
+  risultato: text("risultato"),
+  parziali: text("parziali"),
+  marcatori: text("marcatori").array(),
+  diretta: text("diretta"),
+
+  creatoDa: integer("creato_da").references(() => utenti.id, { onDelete: "set null" }),
+
+  googleEventId: text("google_event_id").unique(),
+
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow(),
+  aggiornatoIl: timestamp("aggiornato_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  // L'interrogazione più frequente: "gli eventi fra due date"
+  index("idx_eventi_periodo").on(t.inizio),
+  index("idx_eventi_squadra").on(t.squadraId, t.inizio)
+]);
+
+/** Foto e video di una partita, caricati dal coach. */
+export const mediaEvento = pgTable("media_evento", {
+  id: serial("id").primaryKey(),
+
+  eventoId: integer("evento_id").notNull()
+    .references(() => eventi.id, { onDelete: "cascade" }),
+
+  mediaId: integer("media_id").notNull()
+    .references(() => media.id, { onDelete: "cascade" }),
+
+  ordine: integer("ordine").notNull().default(0),
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  uniqueIndex("idx_media_evento_unico").on(t.eventoId, t.mediaId),
+  index("idx_media_evento").on(t.eventoId, t.ordine)
 ]);

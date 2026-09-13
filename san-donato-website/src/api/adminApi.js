@@ -275,3 +275,122 @@ export async function uploadMedia(file, { title } = {}) {
 
   return { id: media.id, url: media.url };
 }
+
+/* =====================================================
+   Squadre ed eventi
+   ===================================================== */
+
+/** Le squadre, per i menu a tendina. */
+export async function listSquadre() {
+  const { squadre } = await chiedi("/squadre");
+  return squadre;
+}
+
+/**
+ * Gli eventi che questa persona può gestire.
+ *
+ * Il back-end restituisce anche `squadreAmmesse`: null se le gestisce
+ * tutte, altrimenti l'elenco. Serve al pannello per proporre solo le
+ * squadre giuste nel modulo di inserimento.
+ */
+export async function listEventi({ da, a, squadraId } = {}) {
+  const parametri = new URLSearchParams();
+  if (da) parametri.set("da", new Date(da).toISOString());
+  if (a) parametri.set("a", new Date(a).toISOString());
+  if (squadraId) parametri.set("squadraId", String(squadraId));
+
+  const risposta = await chiedi(`/admin/eventi?${parametri}`);
+  return { eventi: risposta.eventi, squadreAmmesse: risposta.squadreAmmesse };
+}
+
+export async function getEvento(id) {
+  const { evento } = await chiedi(`/admin/eventi/${id}`);
+  return evento;
+}
+
+export async function createEvento(dati) {
+  const { evento } = await chiedi("/admin/eventi", {
+    method: "POST",
+    body: JSON.stringify(dati)
+  });
+  return evento;
+}
+
+export async function updateEvento(id, dati) {
+  const { evento } = await chiedi(`/admin/eventi/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dati)
+  });
+  return evento;
+}
+
+/** Elimina davvero: un evento sbagliato nel calendario va tolto, non archiviato. */
+export async function deleteEvento(id) {
+  return chiedi(`/admin/eventi/${id}`, { method: "DELETE" });
+}
+
+/* ---------- Foto e video di un evento ---------- */
+
+export async function listMediaEvento(eventoId) {
+  const { media } = await chiedi(`/admin/eventi/${eventoId}/media`);
+  return media;
+}
+
+export async function collegaMediaEvento(eventoId, mediaId) {
+  const { media } = await chiedi(`/admin/eventi/${eventoId}/media`, {
+    method: "POST",
+    body: JSON.stringify({ mediaId })
+  });
+  return media;
+}
+
+export async function scollegaMediaEvento(eventoId, mediaId) {
+  const { media } = await chiedi(`/admin/eventi/${eventoId}/media?mediaId=${mediaId}`, {
+    method: "DELETE"
+  });
+  return media;
+}
+
+/* =====================================================
+   Amministrazione: squadre e persone
+   ===================================================== */
+
+/** Le squadre con chi le gestisce. Solo per gli amministratori. */
+export async function listSquadreConGestori() {
+  const { squadre } = await chiedi("/admin/squadre");
+  return squadre;
+}
+
+export async function associaSquadra(utenteId, squadraId) {
+  return chiedi("/admin/squadre", {
+    method: "POST",
+    body: JSON.stringify({ utenteId, squadraId })
+  });
+}
+
+export async function dissociaSquadra(utenteId, squadraId) {
+  return chiedi(`/admin/squadre?utenteId=${utenteId}&squadraId=${squadraId}`, {
+    method: "DELETE"
+  });
+}
+
+export async function listUtenti() {
+  const { utenti } = await chiedi("/admin/utenti");
+  return utenti;
+}
+
+export async function createUtente(dati) {
+  const { utente } = await chiedi("/admin/utenti", {
+    method: "POST",
+    body: JSON.stringify(dati)
+  });
+  return utente;
+}
+
+export async function updateUtente(dati) {
+  const { utente } = await chiedi("/admin/utenti", {
+    method: "PATCH",
+    body: JSON.stringify(dati)
+  });
+  return utente;
+}

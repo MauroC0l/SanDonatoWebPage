@@ -1,5 +1,8 @@
 import { NavLink, Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { FaNewspaper, FaPlus, FaSignOutAlt, FaUserCircle, FaExternalLinkAlt } from "react-icons/fa";
+import {
+  FaNewspaper, FaPlus, FaSignOutAlt, FaUserCircle, FaExternalLinkAlt,
+  FaCalendarAlt, FaUsers
+} from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
 
@@ -26,6 +29,9 @@ export default function AdminLayout() {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
+  /** Scorciatoia: le capacità arrivano dal server insieme all'utente. */
+  const puo = (capacita) => (user?.capabilities ?? []).includes(capacita);
+
   const handleLogout = () => {
     logout();
     navigate("/login", { replace: true });
@@ -40,19 +46,40 @@ export default function AdminLayout() {
             <span className="adm-brand-text">Area riservata</span>
           </div>
 
+          {/* Ognuno vede le proprie sezioni: a un allenatore non serve la
+              voce "Notizie", che gli risponderebbe comunque di no. Non è un
+              controllo di sicurezza — quello sta sul server — ma il modo di
+              non proporre a qualcuno una porta chiusa. */}
           <nav className="adm-nav">
-            <NavLink to="/admin" end className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
-              <FaNewspaper /> <span>Notizie</span>
-            </NavLink>
-            <NavLink to="/admin/nuova" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
-              <FaPlus /> <span>Nuova</span>
-            </NavLink>
+            {puo("notizie.leggi_bozze") && (
+              <NavLink to="/admin" end className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
+                <FaNewspaper /> <span>Notizie</span>
+              </NavLink>
+            )}
+
+            {puo("notizie.scrivi") && (
+              <NavLink to="/admin/nuova" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
+                <FaPlus /> <span>Nuova</span>
+              </NavLink>
+            )}
+
+            {(puo("eventi.gestisci_proprie") || puo("eventi.gestisci_tutte")) && (
+              <NavLink to="/admin/eventi" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
+                <FaCalendarAlt /> <span>Eventi</span>
+              </NavLink>
+            )}
+
+            {puo("utenti.gestisci") && (
+              <NavLink to="/admin/persone" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
+                <FaUsers /> <span>Persone</span>
+              </NavLink>
+            )}
           </nav>
 
           <div className="adm-user">
             <span className="adm-user-name">
               <FaUserCircle /> {user?.name}
-              {user?.isAdmin && <span className="adm-role-tag">admin</span>}
+              {user?.role && <span className="adm-role-tag">{user.role}</span>}
             </span>
             <a href="/" className="adm-ghost-btn" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
               <FaExternalLinkAlt /> <span className="adm-hide-sm">Vedi il sito</span>
