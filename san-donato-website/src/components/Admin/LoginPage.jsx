@@ -95,7 +95,7 @@ export default function LoginPage() {
 
           <p className="alg-eyebrow">Area riservata</p>
           <h2 className="alg-title">Accedi</h2>
-          <p className="alg-lead">Inserisci le credenziali che ti sono state fornite.</p>
+          <p className="alg-lead">Pagina di accesso per gli operatori del sito</p>
 
           <form onSubmit={handleSubmit} noValidate className="alg-form">
 

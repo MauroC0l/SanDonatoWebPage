@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
-import { FiMapPin, FiMail } from "react-icons/fi";
+import { FiMapPin, FiMail, FiLock } from "react-icons/fi";
 import "../../css/TopHeader.css";
 
 // IMPORT DATI JSON
@@ -28,6 +29,21 @@ export default function TopHeader() {
                     <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok">
                         <SiTiktok />
                     </a>
+
+                    {/* Accesso all'area riservata.
+                        Sta accanto ai social ma non è un social: il separatore e il
+                        lucchetto col bordo vuoto servono a non farlo scambiare per
+                        l'ennesimo profilo della società. */}
+                    <span className="th-sep" aria-hidden="true" />
+
+                    <Link
+                        to="/login"
+                        className="th-login"
+                        title="Area riservata"
+                        aria-label="Area riservata: accesso per chi aggiorna il sito"
+                    >
+                        <FiLock />
+                    </Link>
                 </div>
 
                 {/* Contatti (Destra) */}
