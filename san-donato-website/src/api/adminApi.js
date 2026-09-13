@@ -85,6 +85,8 @@ export async function fetchCurrentUser() {
     username: utente.email,
     name: [utente.nome, utente.cognome].filter(Boolean).join(" ") || utente.email,
     role: utente.ruolo,
+    stato: utente.stato,
+    mustChangePassword: !!utente.deveCambiarePassword,
     capabilities: utente.capacita ?? [],
     canPublish: (utente.capacita ?? []).includes("notizie.pubblica")
   };
@@ -102,6 +104,8 @@ export async function login(email, password, remember = false) {
     username: utente.email,
     name: [utente.nome, utente.cognome].filter(Boolean).join(" ") || utente.email,
     role: utente.ruolo,
+    stato: utente.stato,
+    mustChangePassword: !!utente.deveCambiarePassword,
     capabilities: utente.capacita ?? [],
     canPublish: (utente.capacita ?? []).includes("notizie.pubblica")
   };
@@ -393,4 +397,60 @@ export async function updateUtente(dati) {
     body: JSON.stringify(dati)
   });
   return utente;
+}
+
+/* =====================================================
+   Registrazione e password
+   ===================================================== */
+
+/**
+ * Registrazione di un atleta.
+ *
+ * L'account nasce attivo: il calendario della squadra è pubblico, quindi
+ * non c'è niente da sbloccare. La squadra scelta resta registrata come
+ * dichiarazione di appartenenza, che allenatore e segreteria confermano.
+ */
+export async function registrati(dati) {
+  const { utente, squadra } = await chiedi("/registrazione", {
+    method: "POST",
+    body: JSON.stringify(dati)
+  });
+
+  return {
+    utente: {
+      id: utente.id,
+      email: utente.email,
+      username: utente.email,
+      name: [utente.nome, utente.cognome].filter(Boolean).join(" ") || utente.email,
+      role: utente.ruolo,
+      stato: utente.stato,
+      capabilities: utente.capacita ?? [],
+      canPublish: false,
+      mustChangePassword: false
+    },
+    squadra
+  };
+}
+
+export async function cambiaPassword(attuale, nuova) {
+  return chiedi("/cambia-password", {
+    method: "POST",
+    body: JSON.stringify({ attuale, nuova })
+  });
+}
+
+/* =====================================================
+   Richieste di appartenenza alle squadre
+   ===================================================== */
+
+export async function listIscrizioni({ tutte = false } = {}) {
+  const { richieste } = await chiedi(`/admin/iscrizioni${tutte ? "?stato=tutte" : ""}`);
+  return richieste;
+}
+
+export async function decidiIscrizione(id, approvata, motivo) {
+  return chiedi("/admin/iscrizioni", {
+    method: "POST",
+    body: JSON.stringify({ id, approvata, motivo })
+  });
 }

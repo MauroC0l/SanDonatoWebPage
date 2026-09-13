@@ -1326,3 +1326,45 @@
   .adm-post-row .adm-post-actions { flex-wrap: wrap; }
   .adm-filter-select { max-width: none; width: 100%; }
 }
+
+/* =========================================
+   Registrazione, richieste, cambio password
+   ========================================= */
+
+/* Campi senza icona a sinistra: l'etichetta parte dal bordo */
+.alg-input-senza-icona { padding-left: 0.9rem; }
+
+/* L'etichetta di un menu a tendina non può "galleggiare": il campo non è
+   mai vuoto, quindi resta sempre in alto. */
+.alg-label-fissa {
+  top: 0.55rem;
+  font-size: 0.72rem;
+  transform: none;
+}
+
+.alg-card-esito { text-align: center; }
+
+.alg-esito-icona {
+  font-size: 2.5rem;
+  color: var(--adm-ok);
+  margin-bottom: 0.75rem;
+}
+
+.adm-tag-ok { background: var(--adm-ok-soft); color: var(--adm-ok); }
+
+/* Quello che la persona ha scritto di sé: si distingue dal resto, perché
+   è una sua frase e non un dato del sistema. */
+.adm-nota-richiesta {
+  margin: 0.5rem 0 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--adm-line);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--adm-muted);
+}
+
+.adm-nota-rifiuto {
+  border-left-color: var(--adm-danger);
+  font-style: normal;
+  color: var(--adm-danger);
+}

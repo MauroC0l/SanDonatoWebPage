@@ -1,9 +1,12 @@
+import { lazy, Suspense } from "react";
 import { NavLink, Outlet, Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   FaNewspaper, FaPlus, FaSignOutAlt, FaUserCircle, FaExternalLinkAlt,
-  FaCalendarAlt, FaUsers
+  FaCalendarAlt, FaUsers, FaUserCheck, FaKey
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
+const CambioPasswordPage = lazy(() => import("./CambioPasswordPage"));
+
 import "../../css/Admin.css";
 
 /**
@@ -11,7 +14,7 @@ import "../../css/Admin.css";
  * Tutto ciò che sta sotto /admin passa da qui.
  */
 export default function AdminLayout() {
-  const { user, isAuthenticated, isChecking, logout } = useAuth();
+  const { user, isAuthenticated, isChecking, logout, deveCambiarePassword } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -27,6 +30,17 @@ export default function AdminLayout() {
   if (!isAuthenticated) {
     // Ricordiamo dove voleva andare, per riportarcelo dopo il login
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  // Prima di qualunque altra cosa: chi ha una password provvisoria deve
+  // sceglierne una sua. Il controllo sta qui e non nelle singole pagine,
+  // così non si può aggirare aprendo un indirizzo diverso.
+  if (deveCambiarePassword) {
+    return (
+      <Suspense fallback={<div className="adm-boot"><div className="adm-spinner" /></div>}>
+        <CambioPasswordPage obbligatorio />
+      </Suspense>
+    );
   }
 
   /** Scorciatoia: le capacità arrivano dal server insieme all'utente. */
@@ -69,6 +83,12 @@ export default function AdminLayout() {
               </NavLink>
             )}
 
+            {(puo("iscrizioni.decidi_tutte") || puo("iscrizioni.decidi_proprie")) && (
+              <NavLink to="/admin/iscrizioni" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
+                <FaUserCheck /> <span>Richieste</span>
+              </NavLink>
+            )}
+
             {puo("utenti.gestisci") && (
               <NavLink to="/admin/persone" className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}>
                 <FaUsers /> <span>Persone</span>
@@ -81,6 +101,9 @@ export default function AdminLayout() {
               <FaUserCircle /> {user?.name}
               {user?.role && <span className="adm-role-tag">{user.role}</span>}
             </span>
+            <NavLink to="/admin/password" className="adm-ghost-btn" title="Cambia la password">
+              <FaKey /> <span className="adm-hide-sm">Password</span>
+            </NavLink>
             <a href="/" className="adm-ghost-btn" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
               <FaExternalLinkAlt /> <span className="adm-hide-sm">Vedi il sito</span>
             </a>

@@ -105,6 +105,9 @@ export default function App() {
 
           {/* ---------- Area riservata ---------- */}
           <Route path="/login" element={<AdminRoot section="login" />} />
+          {/* La registrazione degli atleti passa dallo stesso bundle
+              dell'area riservata: il sito pubblico non se la porta dietro. */}
+          <Route path="/registrati" element={<AdminRoot section="registrazione" />} />
           <Route path="/admin/*" element={<AdminRoot section="admin" />} />
 
         </Routes>

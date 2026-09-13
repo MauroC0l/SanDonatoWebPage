@@ -19,10 +19,24 @@ import {
    ===================================================== */
 
 export const ruoloUtente = pgEnum("ruolo_utente", [
-  "admin",    // gestisce tutto: notizie, coach, atleti
-  "editor",   // solo notizie, più gli eventi della squadra a cui è associato
-  "coach",    // eventi e materiale delle proprie squadre
-  "atleta"    // i propri dati, il proprio calendario
+  "admin",      // gestisce tutto: notizie, eventi, persone
+  "segreteria", // vede gli iscritti e i loro dati, approva le iscrizioni
+  "editor",     // notizie, più gli eventi della squadra a cui è associato
+  "coach",      // eventi e materiale delle proprie squadre
+  "atleta"      // i propri dati, il proprio calendario
+]);
+
+/**
+ * Stato di un account.
+ *
+ * Sostituisce il booleano "attivo", che non sapeva distinguere fra chi si è
+ * appena registrato e aspetta il via libera, e chi è stato sospeso: due
+ * situazioni che richiedono schermate diverse e decisioni diverse.
+ */
+export const statoUtente = pgEnum("stato_utente", [
+  "in_attesa",  // registrato da solo, in attesa di approvazione
+  "attivo",
+  "sospeso"     // non entra più, ma ciò che ha scritto resta al suo posto
 ]);
 
 export const statoNotizia = pgEnum("stato_notizia", [
@@ -58,9 +72,17 @@ export const utenti = pgTable("utenti", {
   nome: text("nome"),
   cognome: text("cognome"),
 
-  // Disattivare invece di cancellare: le notizie scritte da questa persona
+  // Sospendere invece di cancellare: le notizie scritte da questa persona
   // devono continuare ad avere un autore.
-  attivo: boolean("attivo").notNull().default(true),
+  stato: statoUtente("stato").notNull().default("in_attesa"),
+
+  /**
+   * Gli account creati dall'amministratore nascono con una password
+   * provvisoria, che lui stesso conosce perché deve consegnarla. Finché non
+   * viene cambiata, chi amministra può entrare come quella persona: al primo
+   * accesso il cambio è obbligatorio.
+   */
+  deveCambiarePassword: boolean("deve_cambiare_password").notNull().default(false),
 
   // Richiesto esplicitamente: monitorare gli accessi al sito.
   ultimoAccesso: timestamp("ultimo_accesso", { withTimezone: true }),
@@ -115,13 +137,27 @@ export const media = pgTable("media", {
   alt: text("alt"),
   titolo: text("titolo"),
 
+  /**
+   * Etichette libere, per ritrovare un file fra centinaia.
+   *
+   * Un elenco di testi invece di una tabella a parte: con qualche centinaio
+   * di file non serve un vocabolario controllato, e una colonna sola evita
+   * due join per mostrare tre parole. Se un giorno le etichette andranno
+   * rinominate o unite, si passera' a una tabella dedicata.
+   */
+  tag: text("tag").array(),
+
   caricatoDa: integer("caricato_da").references(() => utenti.id, { onDelete: "set null" }),
   creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow(),
 
   // Tracce dell'origine: rendono la migrazione ripetibile senza duplicare
   wpId: integer("wp_id").unique(),
   urlOriginaleWp: text("url_originale_wp")
-});
+}, (t) => [
+  // GIN e non btree: su un elenco l'indice deve poter rispondere a
+  // "quali file hanno questa etichetta", non a "ordinali tutti".
+  index("idx_media_tag").using("gin", t.tag)
+]);
 
 /* =====================================================
    Notizie
@@ -196,7 +232,7 @@ export const sportSquadra = pgEnum("sport_squadra", [
 ]);
 
 export const tipoEvento = pgEnum("tipo_evento", [
-  "partita", "allenamento", "torneo", "riunione", "altro"
+  "partita", "allenamento", "torneo", "riunione", "evento", "altro"
 ]);
 
 /**
@@ -270,6 +306,17 @@ export const eventi = pgTable("eventi", {
     .references(() => squadre.id, { onDelete: "cascade" }),
 
   tipo: tipoEvento("tipo").notNull().default("partita"),
+
+  /**
+   * Sport dell'evento, di norma VUOTO.
+   *
+   * Lo sport si ricava dalla squadra, ed è così che lo restituisce l'API:
+   * duplicarlo qui vorrebbe dire tenere allineati due posti. Questa colonna
+   * serve solo a scavalcare la derivazione nei casi in cui non basta — per
+   * esempio un evento del calendario di società (sport "Societa") che
+   * riguarda in realtà il calcio.
+   */
+  sport: sportSquadra("sport"),
   titolo: text("titolo").notNull(),
   avversario: text("avversario"),
 
@@ -314,4 +361,57 @@ export const mediaEvento = pgTable("media_evento", {
 }, (t) => [
   uniqueIndex("idx_media_evento_unico").on(t.eventoId, t.mediaId),
   index("idx_media_evento").on(t.eventoId, t.ordine)
+]);
+
+/* =====================================================
+   Richieste di iscrizione a una squadra
+   ===================================================== */
+
+export const statoRichiesta = pgEnum("stato_richiesta", [
+  "in_attesa", "approvata", "rifiutata"
+]);
+
+/**
+ * Un atleta che si registra da solo dichiara di quale squadra fa parte.
+ *
+ * NON è un lucchetto: l'account è attivo da subito, perché il calendario
+ * della squadra è già pubblico. La conferma da parte dell'allenatore o
+ * della segreteria serve a sapere chi è chi, e servirà a dare accesso ai
+ * dati personali e ai certificati quando arriveranno (Fase 4).
+ *
+ * ATTENZIONE, per non confondersi più avanti: questa NON è l'iscrizione
+ * ufficiale alla società, né il tesseramento. Quelli vivono nel gestionale
+ * uffwebsm e non vanno duplicati qui. Questa tabella dice soltanto "questa
+ * persona può vedere il calendario e i propri dati di questa squadra sul
+ * sito".
+ *
+ * Tabella separata da associazioni_squadra perché dicono cose diverse:
+ * là "gestisce la squadra", qui "ne fa parte".
+ */
+export const richiesteIscrizione = pgTable("richieste_iscrizione", {
+  id: serial("id").primaryKey(),
+
+  utenteId: integer("utente_id").notNull()
+    .references(() => utenti.id, { onDelete: "cascade" }),
+
+  squadraId: integer("squadra_id").notNull()
+    .references(() => squadre.id, { onDelete: "cascade" }),
+
+  stato: statoRichiesta("stato").notNull().default("in_attesa"),
+
+  // Quello che la persona ha scritto di sé al momento della richiesta:
+  // serve a chi decide per riconoscerla ("sono il papà di Luca Rossi").
+  note: text("note"),
+
+  richiestaIl: timestamp("richiesta_il", { withTimezone: true }).notNull().defaultNow(),
+
+  // Chi ha deciso e quando: una domanda respinta senza sapere da chi
+  // diventa impossibile da discutere.
+  decisaDa: integer("decisa_da").references(() => utenti.id, { onDelete: "set null" }),
+  decisaIl: timestamp("decisa_il", { withTimezone: true }),
+  motivoRifiuto: text("motivo_rifiuto")
+}, (t) => [
+  index("idx_richieste_stato").on(t.stato, t.richiestaIl),
+  index("idx_richieste_squadra").on(t.squadraId, t.stato),
+  index("idx_richieste_utente").on(t.utenteId)
 ]);

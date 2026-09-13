@@ -110,7 +110,8 @@ export async function utenteDallaSessione(req) {
       ruolo: utenti.ruolo,
       nome: utenti.nome,
       cognome: utenti.cognome,
-      attivo: utenti.attivo
+      stato: utenti.stato,
+      deveCambiarePassword: utenti.deveCambiarePassword
     })
     .from(sessioni)
     .innerJoin(utenti, eq(utenti.id, sessioni.utenteId))
@@ -125,8 +126,10 @@ export async function utenteDallaSessione(req) {
     return null;
   }
 
-  // Un account disattivato non deve poter usare una sessione già aperta
-  if (!riga.attivo) {
+  // Un account sospeso non deve poter usare una sessione già aperta.
+  // Chi è "in_attesa" invece entra: vedrà una schermata che gli spiega
+  // che manca l'approvazione, che è più utile di un accesso negato.
+  if (riga.stato === "sospeso") {
     await db.delete(sessioni).where(eq(sessioni.id, id));
     return null;
   }
@@ -135,7 +138,8 @@ export async function utenteDallaSessione(req) {
 
   return {
     id: riga.id, email: riga.email, ruolo: riga.ruolo,
-    nome: riga.nome, cognome: riga.cognome
+    nome: riga.nome, cognome: riga.cognome,
+    stato: riga.stato, deveCambiarePassword: riga.deveCambiarePassword
   };
 }
 
@@ -151,4 +155,16 @@ export async function chiudiSessione(req, res) {
 export async function pulisciSessioniScadute() {
   const risultato = await getDb().delete(sessioni).where(lt(sessioni.scadeIl, new Date()));
   return risultato.rowCount ?? 0;
+}
+
+/**
+ * L'identificativo in tabella della sessione con cui arriva questa
+ * richiesta, oppure null.
+ *
+ * Serve a chi deve chiudere "tutte le sessioni tranne questa": restituisce
+ * l'hash, non il token, perché è quello che sta nel database.
+ */
+export function improntaSessioneCorrente(req) {
+  const token = leggiCookie(req, NOME_COOKIE);
+  return token ? impronta(token) : null;
 }

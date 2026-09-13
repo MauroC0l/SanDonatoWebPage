@@ -32,7 +32,10 @@ export default conGestioneErrori(async (req, res) => {
   // Stesso messaggio e stesso percorso sia che l'email non esista sia che la
   // password sia sbagliata: distinguere permetterebbe di scoprire quali
   // indirizzi sono registrati.
-  const valida_ = utente && utente.attivo
+  // Un account sospeso non entra. Uno "in_attesa" sì: vedrà una schermata
+  // che gli spiega che manca l'approvazione, il che è più utile di un
+  // rifiuto senza motivo.
+  const valida_ = utente && utente.stato !== "sospeso"
     ? await verificaPassword(dati.password, utente.passwordHash)
     : false;
 
@@ -59,6 +62,8 @@ export default conGestioneErrori(async (req, res) => {
       nome: utente.nome,
       cognome: utente.cognome,
       ruolo: utente.ruolo,
+      stato: utente.stato,
+      deveCambiarePassword: utente.deveCambiarePassword,
       capacita: capacitaDi(utente.ruolo)
     }
   });

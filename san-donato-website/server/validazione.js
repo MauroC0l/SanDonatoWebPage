@@ -81,11 +81,14 @@ export function valida(schema, dati) {
    Eventi
    ===================================================== */
 
-export const TIPI_EVENTO = ["partita", "allenamento", "torneo", "riunione", "altro"];
+export const TIPI_EVENTO = ["partita", "allenamento", "torneo", "riunione", "evento", "altro"];
+export const SPORT_SQUADRA = ["Calcio", "Pallavolo", "Basket", "Societa"];
 
 const CAMPI_EVENTO = {
   squadraId: z.coerce.number().int().positive(),
   tipo: z.enum(TIPI_EVENTO),
+  // Vuoto significa "quello della squadra": si valorizza solo per derogare
+  sport: z.enum(SPORT_SQUADRA).nullable(),
   titolo: z.string().trim().min(2, "Il titolo è troppo corto.").max(200),
   avversario: z.string().trim().max(160).nullable(),
   inizio: z.coerce.date(),
@@ -102,6 +105,7 @@ const CAMPI_EVENTO = {
 export const schemaEventoNuovo = z.object({
   squadraId: CAMPI_EVENTO.squadraId,
   tipo: CAMPI_EVENTO.tipo.optional().default("partita"),
+  sport: CAMPI_EVENTO.sport.optional(),
   titolo: CAMPI_EVENTO.titolo,
   avversario: CAMPI_EVENTO.avversario.optional(),
   inizio: CAMPI_EVENTO.inizio,
@@ -124,6 +128,7 @@ export const schemaEventoNuovo = z.object({
 export const schemaEventoModifica = z.object({
   squadraId: CAMPI_EVENTO.squadraId.optional(),
   tipo: CAMPI_EVENTO.tipo.optional(),
+  sport: CAMPI_EVENTO.sport.optional(),
   titolo: CAMPI_EVENTO.titolo.optional(),
   avversario: CAMPI_EVENTO.avversario.optional(),
   inizio: CAMPI_EVENTO.inizio.optional(),
@@ -147,4 +152,42 @@ export const schemaElencoEventi = z.object({
 export const schemaAssociazione = z.object({
   utenteId: z.coerce.number().int().positive(),
   squadraId: z.coerce.number().int().positive()
+});
+
+/* =====================================================
+   Registrazione, password, iscrizioni
+   ===================================================== */
+
+/**
+ * Requisito minimo della password.
+ *
+ * Dieci caratteri e nient'altro: nessun obbligo di maiuscole, numeri e
+ * simboli. Quelle regole spingono la gente verso "Password1!" e verso il
+ * foglietto attaccato al monitor; la lunghezza conta molto di più.
+ */
+export const schemaPassword = z.string()
+  .min(10, "La password deve avere almeno 10 caratteri.")
+  .max(200, "La password è troppo lunga.");
+
+export const schemaRegistrazione = z.object({
+  email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255),
+  password: schemaPassword,
+  nome: z.string().trim().min(1, "Indica il nome.").max(80),
+  cognome: z.string().trim().min(1, "Indica il cognome.").max(80),
+  squadraId: z.coerce.number().int().positive("Scegli la squadra."),
+  note: z.string().trim().max(500).optional()
+});
+
+export const schemaCambioPassword = z.object({
+  attuale: z.string().min(1, "Inserisci la password attuale.").max(200),
+  nuova: schemaPassword
+}).refine((d) => d.attuale !== d.nuova, {
+  message: "La nuova password deve essere diversa da quella attuale.",
+  path: ["nuova"]
+});
+
+export const schemaDecisione = z.object({
+  id: z.coerce.number().int().positive(),
+  approvata: z.boolean(),
+  motivo: z.string().trim().max(300).optional()
 });

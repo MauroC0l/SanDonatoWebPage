@@ -3,7 +3,7 @@
  *
  *   GET    elenco con ruolo e ultimo accesso
  *   POST   crea un account          { email, ruolo, nome?, cognome?, password? }
- *   PATCH  modifica                 { id, ruolo?, attivo?, nome?, cognome?, password? }
+ *   PATCH  modifica                 { id, ruolo?, stato?, nome?, cognome?, password? }
  *
  * L'ultimo accesso era una richiesta esplicita: serve a capire chi usa
  * davvero il sito e chi ha un account fermo da mesi.
@@ -22,7 +22,8 @@ import { leggiCorpo } from "../../server/richiesta.js";
 import { z } from "zod";
 import { valida } from "../../server/validazione.js";
 
-const RUOLI = ["admin", "editor", "coach", "atleta"];
+const RUOLI = ["admin", "segreteria", "editor", "coach", "atleta"];
+const STATI = ["in_attesa", "attivo", "sospeso"];
 
 const schemaNuovo = z.object({
   email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255),
@@ -35,7 +36,7 @@ const schemaNuovo = z.object({
 const schemaModifica = z.object({
   id: z.coerce.number().int().positive(),
   ruolo: z.enum(RUOLI).optional(),
-  attivo: z.boolean().optional(),
+  stato: z.enum(STATI).optional(),
   nome: z.string().trim().max(80).optional(),
   cognome: z.string().trim().max(80).optional(),
   password: z.string().min(10, "La password deve avere almeno 10 caratteri.").max(200).optional()
@@ -51,7 +52,8 @@ async function elenco(req, res) {
       nome: utenti.nome,
       cognome: utenti.cognome,
       ruolo: utenti.ruolo,
-      attivo: utenti.attivo,
+      stato: utenti.stato,
+      deveCambiarePassword: utenti.deveCambiarePassword,
       ultimoAccesso: utenti.ultimoAccesso,
       creatoIl: utenti.creatoIl
     })
@@ -106,7 +108,15 @@ async function crea(req, res) {
     passwordHash: await creaHashPassword(dati.password),
     ruolo: dati.ruolo,
     nome: dati.nome ?? null,
-    cognome: dati.cognome ?? null
+    cognome: dati.cognome ?? null,
+
+    // Creato da chi amministra: è già approvato, non deve aspettare nessuno
+    stato: "attivo",
+
+    // La password provvisoria la conosce chi l'ha creata, perché deve
+    // consegnarla. Finché resta quella, chi amministra può entrare come
+    // questa persona: il cambio al primo accesso chiude la finestra.
+    deveCambiarePassword: true
   }).returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo });
 
   return json(res, { utente: creato }, 201);
@@ -121,14 +131,14 @@ async function modifica(req, res) {
     if (dati.ruolo && dati.ruolo !== "admin") {
       throw new ErroreHttp(400, "Non puoi cambiare il tuo stesso ruolo.");
     }
-    if (dati.attivo === false) {
-      throw new ErroreHttp(400, "Non puoi disattivare il tuo stesso account.");
+    if (dati.stato && dati.stato !== "attivo") {
+      throw new ErroreHttp(400, "Non puoi sospendere il tuo stesso account.");
     }
   }
 
   const modifiche = { aggiornatoIl: new Date() };
   if (dati.ruolo !== undefined) modifiche.ruolo = dati.ruolo;
-  if (dati.attivo !== undefined) modifiche.attivo = dati.attivo;
+  if (dati.stato !== undefined) modifiche.stato = dati.stato;
   if (dati.nome !== undefined) modifiche.nome = dati.nome;
   if (dati.cognome !== undefined) modifiche.cognome = dati.cognome;
   if (dati.password !== undefined) modifiche.passwordHash = await creaHashPassword(dati.password);
@@ -137,7 +147,7 @@ async function modifica(req, res) {
     .update(utenti)
     .set(modifiche)
     .where(eq(utenti.id, dati.id))
-    .returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo, attivo: utenti.attivo });
+    .returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo, stato: utenti.stato });
 
   if (!aggiornato) throw new ErroreHttp(404, "Utente non trovato.");
   return json(res, { utente: aggiornato });

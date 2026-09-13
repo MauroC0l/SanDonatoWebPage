@@ -4,6 +4,7 @@ import { AuthProvider } from "../../context/AuthProvider";
 import { useAuth } from "../../context/auth";
 import AdminLayout from "./AdminLayout";
 import LoginPage from "./LoginPage";
+import RegistrazionePage from "./RegistrazionePage";
 import PostsListPage from "./PostsListPage";
 import EventiListPage from "./EventiListPage";
 
@@ -12,6 +13,8 @@ import EventiListPage from "./EventiListPage";
 const PostEditorPage = lazy(() => import("./PostEditorPage"));
 const EventoEditorPage = lazy(() => import("./EventoEditorPage"));
 const PersonePage = lazy(() => import("./PersonePage"));
+const IscrizioniPage = lazy(() => import("./IscrizioniPage"));
+const CambioPasswordPage = lazy(() => import("./CambioPasswordPage"));
 
 function Attesa({ cosa }) {
   return (
@@ -35,13 +38,17 @@ function Ingresso() {
 
   if (capacita.includes("notizie.leggi_bozze")) return <PostsListPage />;
   if (capacita.includes("eventi.gestisci_proprie")) return <Navigate to="/admin/eventi" replace />;
+  if (capacita.includes("iscritti.leggi")) return <Navigate to="/admin/iscrizioni" replace />;
 
+  // Un atleta non ha sezioni da amministrare: il suo posto è il
+  // calendario della squadra, che sta sul sito pubblico.
   return (
     <div className="adm-empty">
       <p>
-        Il tuo account non ha ancora sezioni assegnate. Chiedi a chi amministra
-        il sito di collegarti a una squadra.
+        Il tuo account è attivo, ma non hai sezioni da gestire.
+        Il calendario della tua squadra lo trovi sul sito.
       </p>
+      <a href="/calendario" className="adm-btn adm-btn-primary">Vai al calendario</a>
     </div>
   );
 }
@@ -61,6 +68,14 @@ export default function AdminRoot({ section }) {
     return (
       <AuthProvider>
         <LoginPage />
+      </AuthProvider>
+    );
+  }
+
+  if (section === "registrazione") {
+    return (
+      <AuthProvider>
+        <RegistrazionePage />
       </AuthProvider>
     );
   }
@@ -90,6 +105,19 @@ export default function AdminRoot({ section }) {
           <Route
             path="eventi/:id"
             element={<Suspense fallback={<Attesa cosa="dell'evento" />}><EventoEditorPage /></Suspense>}
+          />
+
+          {/* Richieste di appartenenza */}
+          <Route
+            path="iscrizioni"
+            element={<Suspense fallback={<Attesa cosa="delle richieste" />}><IscrizioniPage /></Suspense>}
+          />
+
+          {/* Cambio password volontario: quello obbligatorio lo impone
+              AdminLayout prima di mostrare qualunque altra cosa. */}
+          <Route
+            path="password"
+            element={<Suspense fallback={<Attesa cosa="della schermata" />}><CambioPasswordPage /></Suspense>}
           />
 
           {/* Persone */}

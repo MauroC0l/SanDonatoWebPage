@@ -17,7 +17,7 @@ import { getDb, chiudiDb } from "../db/client.js";
 import { utenti } from "../db/schema.js";
 import { creaHashPassword } from "../server/password.js";
 
-const RUOLI = ["admin", "editor", "coach", "atleta"];
+const RUOLI = ["admin", "segreteria", "editor", "coach", "atleta"];
 
 function argomento(nome) {
   const i = process.argv.indexOf(`--${nome}`);
@@ -53,10 +53,12 @@ async function main() {
 
   const [utente] = await db
     .insert(utenti)
-    .values({ email, passwordHash, ruolo, nome, cognome })
+    // Creato da riga di comando: attivo subito. È la via con cui nasce il
+    // primo amministratore, che non ha nessuno che possa approvarlo.
+    .values({ email, passwordHash, ruolo, nome, cognome, stato: "attivo" })
     .onConflictDoUpdate({
       target: utenti.email,
-      set: { passwordHash, ruolo, aggiornatoIl: new Date() }
+      set: { passwordHash, ruolo, stato: "attivo", aggiornatoIl: new Date() }
     })
     .returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo });
 

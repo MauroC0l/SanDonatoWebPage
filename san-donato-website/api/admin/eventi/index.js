@@ -48,6 +48,8 @@ async function crea(req, res) {
   const [creato] = await getDb().insert(eventi).values({
     squadraId: dati.squadraId,
     tipo: dati.tipo,
+    // Vuoto = lo sport della squadra. Si valorizza solo per derogare.
+    sport: dati.sport ?? null,
     titolo: dati.titolo,
     avversario: dati.avversario ?? null,
     inizio: dati.inizio,

@@ -39,6 +39,20 @@ export function AuthProvider({ children }) {
     return profilo;
   }, []);
 
+  /**
+   * Rilegge dal server chi è connesso.
+   *
+   * Serve dopo un'operazione che cambia l'utente senza passare dal login:
+   * la registrazione, che apre già la sessione lato server, e il cambio
+   * password, dopo il quale l'obbligo di cambiarla deve sparire.
+   */
+  const ricarica = useCallback(async () => {
+    const profilo = await fetchCurrentUser();
+    setUser(profilo);
+    setStatus(profilo ? "authenticated" : "anonymous");
+    return profilo;
+  }, []);
+
   const endSession = useCallback(() => {
     // L'uscita va detta anche al server: il cookie da solo non basta,
     // la sessione va tolta dalla tabella o resterebbe valida altrove.
@@ -55,6 +69,9 @@ export function AuthProvider({ children }) {
         isChecking: status === "checking",
         isAuthenticated: status === "authenticated",
         login,
+        ricarica,
+        // Chi deve cambiare la password prima di poter fare altro
+        deveCambiarePassword: !!user?.mustChangePassword,
         logout: endSession,
         // Chiamata quando una richiesta fallisce con AuthError: la sessione
         // va chiusa ovunque, non solo nella schermata che se n'è accorta.

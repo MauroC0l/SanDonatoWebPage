@@ -18,12 +18,17 @@ const TIPI = [
   { valore: "allenamento", etichetta: "Allenamento" },
   { valore: "torneo", etichetta: "Torneo" },
   { valore: "riunione", etichetta: "Riunione" },
+  { valore: "evento", etichetta: "Evento" },
   { valore: "altro", etichetta: "Altro" }
 ];
+
+const SPORT_SQUADRA = ["Calcio", "Pallavolo", "Basket", "Societa"];
 
 const VUOTO = {
   squadraId: "",
   tipo: "partita",
+  // Vuoto significa "quello della squadra"
+  sport: "",
   titolo: "",
   avversario: "",
   inizio: "",
@@ -110,6 +115,7 @@ export default function EventoEditorPage() {
         setForm({
           squadraId: String(evento.squadraId),
           tipo: evento.tipo,
+          sport: evento.sportProprio ?? "",
           titolo: evento.titolo,
           avversario: evento.avversario ?? "",
           inizio: versoInput(evento.inizio, evento.tuttoIlGiorno),
@@ -155,6 +161,7 @@ export default function EventoEditorPage() {
     const dati = {
       squadraId: Number(form.squadraId),
       tipo: form.tipo,
+      sport: form.sport || null,
       titolo: form.titolo.trim(),
       avversario: form.avversario.trim() || null,
       inizio: daInput(form.inizio),
@@ -309,6 +316,26 @@ export default function EventoEditorPage() {
               </select>
             </label>
           </div>
+
+          {/* Lo sport di norma viene dalla squadra. Questo campo serve solo
+              quando non basta: un evento del calendario di società che
+              riguarda una disciplina precisa. */}
+          <label className="adm-field">
+            <span className="adm-label">
+              Sport <em>(solo se diverso da quello della squadra)</em>
+            </span>
+            <select
+              className="adm-input adm-select"
+              value={form.sport}
+              onChange={(e) => aggiorna({ sport: e.target.value })}
+              disabled={occupato}
+            >
+              <option value="">Quello della squadra</option>
+              {SPORT_SQUADRA.map((s) => (
+                <option key={s} value={s}>{s === "Societa" ? "Società" : s}</option>
+              ))}
+            </select>
+          </label>
 
           <label className="adm-field">
             <span className="adm-label">Titolo</span>

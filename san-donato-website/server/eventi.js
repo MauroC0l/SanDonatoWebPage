@@ -57,6 +57,7 @@ const COLONNE = {
   squadraNome: squadre.nome,
   squadraColore: squadre.colore,
   squadraCssVar: squadre.cssVar,
+  eventoSport: eventi.sport,
   squadraSport: squadre.sport
 };
 
@@ -67,7 +68,11 @@ function daRiga(riga) {
     squadra: riga.squadraNome,
     colore: riga.squadraColore,
     cssVar: riga.squadraCssVar,
-    sport: riga.squadraSport,
+    // Lo sport viene dalla squadra; la colonna sull'evento serve solo a
+    // scavalcarla nei casi in cui non basta (un evento del calendario di
+    // società che riguarda una disciplina precisa).
+    sport: riga.eventoSport ?? riga.squadraSport,
+    sportProprio: riga.eventoSport ?? null,
     tipo: riga.tipo,
     titolo: riga.titolo,
     avversario: riga.avversario,

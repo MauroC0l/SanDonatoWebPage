@@ -70,7 +70,7 @@ async function modifica(req, res) {
 
   const modifiche = { aggiornatoIl: new Date() };
   for (const campo of [
-    "squadraId", "tipo", "titolo", "avversario", "inizio", "fine",
+    "squadraId", "tipo", "sport", "titolo", "avversario", "inizio", "fine",
     "tuttoIlGiorno", "luogo", "descrizione", "risultato", "parziali",
     "marcatori", "diretta"
   ]) {

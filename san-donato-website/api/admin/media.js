@@ -60,6 +60,10 @@ async function registra(req, res, dati) {
     larghezza: Number.isInteger(dati.larghezza) ? dati.larghezza : null,
     altezza: Number.isInteger(dati.altezza) ? dati.altezza : null,
     alt: dati.alt ? String(dati.alt).slice(0, 300) : null,
+    // Etichette per ritrovare il file fra centinaia: ripulite e senza doppioni
+    tag: Array.isArray(dati.tag)
+      ? [...new Set(dati.tag.map((t) => String(t).trim().toLowerCase()).filter(Boolean))].slice(0, 20)
+      : null,
     titolo: dati.titolo ? String(dati.titolo).slice(0, 300) : null,
     caricatoDa: req.utente.id
   }).returning({ id: media.id, chiave: media.chiave });
