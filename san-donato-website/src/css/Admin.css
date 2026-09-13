@@ -1368,3 +1368,82 @@
   font-style: normal;
   color: var(--adm-danger);
 }
+
+/* ---------- Scelta dello sport in registrazione ---------- */
+
+/* Tre pulsanti invece di un menu a tendina: le voci sono tre, si vedono
+   tutte insieme e si toccano bene anche da telefono. */
+.alg-sport-scelta {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.alg-sport-opzioni {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.alg-sport-opzione {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.8rem 0.4rem;
+  border: 1.5px solid var(--adm-line);
+  border-radius: 10px;
+  background: var(--adm-surface);
+  color: var(--adm-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+
+.alg-sport-opzione svg { font-size: 1.4rem; }
+
+.alg-sport-opzione:hover:not(:disabled) {
+  border-color: var(--adm-blue);
+  color: var(--adm-blue);
+}
+
+.alg-sport-opzione.is-scelto {
+  border-color: var(--adm-blue);
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+}
+
+.alg-sport-opzione:focus-visible {
+  outline: 2px solid var(--adm-blue);
+  outline-offset: 2px;
+}
+
+/* ---------- Attesa della squadra ---------- */
+
+.alg-icona-attesa { color: var(--adm-warn); }
+
+.alg-attesa-azioni {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
+
+/* ---------- Decisione su una richiesta ---------- */
+
+/* Scelta della squadra e pulsanti sulla stessa riga finché ci stanno:
+   assegnare è un gesto solo, non due schermate. */
+.adm-azioni-iscrizione {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .adm-azioni-iscrizione { width: 100%; }
+  .adm-azioni-iscrizione .adm-select-mini { width: 100%; }
+}

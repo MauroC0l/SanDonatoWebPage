@@ -406,12 +406,11 @@ export async function updateUtente(dati) {
 /**
  * Registrazione di un atleta.
  *
- * L'account nasce attivo: il calendario della squadra è pubblico, quindi
- * non c'è niente da sbloccare. La squadra scelta resta registrata come
- * dichiarazione di appartenenza, che allenatore e segreteria confermano.
+ * Si sceglie lo SPORT, non la squadra. L'account resta in attesa finché
+ * l'allenatore o la segreteria non lo assegnano a una squadra vera.
  */
 export async function registrati(dati) {
-  const { utente, squadra } = await chiedi("/registrazione", {
+  const { utente, sport } = await chiedi("/registrazione", {
     method: "POST",
     body: JSON.stringify(dati)
   });
@@ -428,7 +427,7 @@ export async function registrati(dati) {
       canPublish: false,
       mustChangePassword: false
     },
-    squadra
+    sport
   };
 }
 
@@ -444,13 +443,15 @@ export async function cambiaPassword(attuale, nuova) {
    ===================================================== */
 
 export async function listIscrizioni({ tutte = false } = {}) {
-  const { richieste } = await chiedi(`/admin/iscrizioni${tutte ? "?stato=tutte" : ""}`);
-  return richieste;
+  // Insieme alle richieste arrivano le squadre fra cui si può scegliere:
+  // sono già filtrate su ciò che questa persona può decidere.
+  return chiedi(`/admin/iscrizioni${tutte ? "?stato=tutte" : ""}`);
 }
 
-export async function decidiIscrizione(id, approvata, motivo) {
+/** Accogliere significa assegnare una squadra: senza, il server rifiuta. */
+export async function decidiIscrizione({ id, approvata, squadraId, motivo }) {
   return chiedi("/admin/iscrizioni", {
     method: "POST",
-    body: JSON.stringify({ id, approvata, motivo })
+    body: JSON.stringify({ id, approvata, squadraId, motivo })
   });
 }

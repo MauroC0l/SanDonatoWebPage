@@ -372,12 +372,14 @@ export const statoRichiesta = pgEnum("stato_richiesta", [
 ]);
 
 /**
- * Un atleta che si registra da solo dichiara di quale squadra fa parte.
+ * Un atleta che si registra sceglie lo SPORT, non la squadra: quale sia la
+ * sua squadra non lo sa lui, lo decide chi la compone.
  *
- * NON è un lucchetto: l'account è attivo da subito, perché il calendario
- * della squadra è già pubblico. La conferma da parte dell'allenatore o
- * della segreteria serve a sapere chi è chi, e servirà a dare accesso ai
- * dati personali e ai certificati quando arriveranno (Fase 4).
+ * Finché la richiesta non viene accolta assegnandogli una squadra, il suo
+ * account resta in stato "in_attesa".
+ *
+ * Per questo "sport" è obbligatorio e "squadra_id" no: il primo è la
+ * domanda, il secondo è la risposta, e arriva dopo.
  *
  * ATTENZIONE, per non confondersi più avanti: questa NON è l'iscrizione
  * ufficiale alla società, né il tesseramento. Quelli vivono nel gestionale
@@ -394,8 +396,12 @@ export const richiesteIscrizione = pgTable("richieste_iscrizione", {
   utenteId: integer("utente_id").notNull()
     .references(() => utenti.id, { onDelete: "cascade" }),
 
-  squadraId: integer("squadra_id").notNull()
-    .references(() => squadre.id, { onDelete: "cascade" }),
+  // Lo sport chiesto in fase di registrazione
+  sport: sportSquadra("sport").notNull(),
+
+  // La squadra assegnata da chi decide. Vuota finché non si decide.
+  squadraId: integer("squadra_id")
+    .references(() => squadre.id, { onDelete: "set null" }),
 
   stato: statoRichiesta("stato").notNull().default("in_attesa"),
 
@@ -412,6 +418,9 @@ export const richiesteIscrizione = pgTable("richieste_iscrizione", {
   motivoRifiuto: text("motivo_rifiuto")
 }, (t) => [
   index("idx_richieste_stato").on(t.stato, t.richiestaIl),
+  // Un allenatore cerca le richieste del proprio sport, non della propria
+  // squadra: quando arrivano, una squadra non ce l'hanno ancora.
+  index("idx_richieste_sport").on(t.sport, t.stato),
   index("idx_richieste_squadra").on(t.squadraId, t.stato),
   index("idx_richieste_utente").on(t.utenteId)
 ]);

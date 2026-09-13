@@ -1,41 +1,40 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
   FaUser, FaKey, FaEye, FaEyeSlash, FaExclamationCircle, FaArrowRight,
-  FaArrowLeft, FaEnvelope, FaUsers, FaCheckCircle
+  FaArrowLeft, FaEnvelope, FaCheckCircle, FaFutbol, FaVolleyballBall,
+  FaBasketballBall
 } from "react-icons/fa";
-import { registrati, listSquadre } from "../../api/adminApi";
+import { registrati } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
 
 const LOGO = "/logo-polisportiva.png";
+
+/**
+ * Si sceglie lo sport, non la squadra.
+ *
+ * Quale sia la propria squadra non lo sa chi si iscrive: dipende dall'età,
+ * dal campionato e da come la società compone le formazioni. Chiederglielo
+ * porterebbe risposte sbagliate da correggere a mano.
+ */
+const SPORT = [
+  { valore: "Calcio", icona: FaFutbol },
+  { valore: "Pallavolo", icona: FaVolleyballBall },
+  { valore: "Basket", icona: FaBasketballBall }
+];
 
 export default function RegistrazionePage() {
   const { isAuthenticated, isChecking, ricarica } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    nome: "", cognome: "", email: "", password: "", squadraId: "", note: ""
+    nome: "", cognome: "", email: "", password: "", sport: ""
   });
-  const [squadre, setSquadre] = useState([]);
   const [mostraPassword, setMostraPassword] = useState(false);
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
   const [fatta, setFatta] = useState(null);
-
-  useEffect(() => {
-    let attivo = true;
-    listSquadre()
-      .then((elenco) => {
-        if (!attivo) return;
-        // I due calendari di società non sono squadre a cui ci si iscrive
-        setSquadre(elenco.filter((s) => s.sport !== "Societa"));
-      })
-      .catch(() => {
-        if (attivo) setErrore("Non riesco a caricare l'elenco delle squadre.");
-      });
-    return () => { attivo = false; };
-  }, []);
 
   if (isChecking) {
     return (
@@ -61,7 +60,7 @@ export default function RegistrazionePage() {
     if (!form.nome.trim() || !form.cognome.trim()) return setErrore("Servono nome e cognome.");
     if (!form.email.trim()) return setErrore("Serve l'email.");
     if (form.password.length < 10) return setErrore("La password deve avere almeno 10 caratteri.");
-    if (!form.squadraId) return setErrore("Scegli la squadra.");
+    if (!form.sport) return setErrore("Scegli lo sport.");
 
     setInvio(true);
     try {
@@ -70,8 +69,7 @@ export default function RegistrazionePage() {
         cognome: form.cognome.trim(),
         email: form.email.trim(),
         password: form.password,
-        squadraId: Number(form.squadraId),
-        note: form.note.trim() || undefined
+        sport: form.sport
       });
 
       // La sessione è già aperta lato server: il contesto va riallineato,
@@ -94,14 +92,15 @@ export default function RegistrazionePage() {
             <img src={LOGO} alt="Polisportiva San Donato" className="alg-mobile-logo" />
             <FaCheckCircle className="alg-esito-icona" aria-hidden="true" />
 
-            <h2 className="alg-title">Ci sei</h2>
+            <h2 className="alg-title">Registrazione inviata</h2>
             <p className="alg-lead">
-              Benvenuto {fatta.utente.name}. Il tuo account è attivo:
-              puoi già vedere il calendario di <strong>{fatta.squadra}</strong>.
+              Benvenuto {fatta.utente.name}. Hai chiesto di entrare
+              nel <strong>{fatta.sport.toLowerCase()}</strong>.
             </p>
             <p className="adm-hint">
-              L&apos;allenatore o la segreteria confermeranno che fai parte
-              della squadra. Non devi aspettare per usare il sito.
+              Adesso l&apos;allenatore o la segreteria ti assegneranno a una
+              squadra. Fino ad allora il tuo account è in attesa: riceverai
+              accesso quando la squadra sarà decisa.
             </p>
 
             <button
@@ -109,7 +108,7 @@ export default function RegistrazionePage() {
               className="alg-submit"
               onClick={() => navigate("/admin", { replace: true })}
             >
-              Vai alla tua area <FaArrowRight className="alg-btn-arrow" />
+              Ho capito <FaArrowRight className="alg-btn-arrow" />
             </button>
           </div>
         </main>
@@ -132,8 +131,8 @@ export default function RegistrazionePage() {
           <img src={LOGO} alt="" className="alg-brand-logo" />
           <h1 className="alg-brand-title">Polisportiva<br />San Donato</h1>
           <p className="alg-brand-text">
-            Registrandoti trovi il calendario della tua squadra sempre
-            aggiornato, senza cercarlo fra i messaggi.
+            Registrati e la società ti assegnerà alla tua squadra.
+            Da lì avrai il calendario sempre a portata di mano.
           </p>
         </div>
       </aside>
@@ -231,38 +230,32 @@ export default function RegistrazionePage() {
                 "Password1!" e al foglietto sul monitor. La lunghezza conta di più. */}
             <p className="adm-hint">Almeno 10 caratteri. Va bene anche una frase.</p>
 
-            <div className="alg-field">
-              <FaUsers className="alg-field-icon" aria-hidden="true" />
-              <select
-                id="reg-squadra"
-                className="alg-input adm-select"
-                value={form.squadraId}
-                onChange={(e) => aggiorna({ squadraId: e.target.value })}
-                disabled={invio}
-              >
-                <option value="">Scegli la squadra…</option>
-                {squadre.map((s) => (
-                  <option key={s.id} value={s.id}>{s.nome}</option>
-                ))}
-              </select>
-              <label htmlFor="reg-squadra" className="alg-label alg-label-fissa">Squadra</label>
-            </div>
+            {/* Tre pulsanti invece di un menu a tendina: le voci sono tre e
+                si vedono tutte insieme, senza aprire niente. */}
+            <fieldset className="alg-sport-scelta">
+              <legend className="adm-label">Che sport pratichi?</legend>
 
-            <div className="alg-field">
-              <textarea
-                id="reg-note"
-                className="alg-input adm-textarea alg-input-senza-icona"
-                rows={2}
-                value={form.note}
-                onChange={(e) => aggiorna({ note: e.target.value })}
-                placeholder=" "
-                maxLength={500}
-                disabled={invio}
-              />
-              <label htmlFor="reg-note" className="alg-label">
-                Qualcosa per farti riconoscere <em>(facoltativo)</em>
-              </label>
-            </div>
+              <div className="alg-sport-opzioni">
+                {SPORT.map(({ valore, icona: Icona }) => (
+                  <button
+                    key={valore}
+                    type="button"
+                    className={`alg-sport-opzione ${form.sport === valore ? "is-scelto" : ""}`}
+                    onClick={() => aggiorna({ sport: valore })}
+                    disabled={invio}
+                    aria-pressed={form.sport === valore}
+                  >
+                    <Icona aria-hidden="true" />
+                    <span>{valore}</span>
+                  </button>
+                ))}
+              </div>
+
+              <span className="adm-hint">
+                La squadra te la assegna la società: dipende dall&apos;età e
+                dal campionato.
+              </span>
+            </fieldset>
 
             {errore && (
               <div className="alg-alert" role="alert">

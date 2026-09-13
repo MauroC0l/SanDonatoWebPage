@@ -169,12 +169,17 @@ export const schemaPassword = z.string()
   .min(10, "La password deve avere almeno 10 caratteri.")
   .max(200, "La password è troppo lunga.");
 
+/* Gli sport a cui ci si può iscrivere: "Societa" non è uno sport, è il
+   calendario degli appuntamenti sociali. */
+export const SPORT_ISCRIVIBILI = ["Calcio", "Pallavolo", "Basket"];
+
 export const schemaRegistrazione = z.object({
   email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255),
   password: schemaPassword,
   nome: z.string().trim().min(1, "Indica il nome.").max(80),
   cognome: z.string().trim().min(1, "Indica il cognome.").max(80),
-  squadraId: z.coerce.number().int().positive("Scegli la squadra."),
+  // Lo sport, non la squadra: quale sia la squadra lo decide chi la compone
+  sport: z.enum(SPORT_ISCRIVIBILI, { message: "Scegli lo sport." }),
   note: z.string().trim().max(500).optional()
 });
 
@@ -189,5 +194,11 @@ export const schemaCambioPassword = z.object({
 export const schemaDecisione = z.object({
   id: z.coerce.number().int().positive(),
   approvata: z.boolean(),
+  // Obbligatoria quando si accoglie: accogliere SIGNIFICA assegnare una
+  // squadra, non esiste un "sì" senza destinazione.
+  squadraId: z.coerce.number().int().positive().optional(),
   motivo: z.string().trim().max(300).optional()
+}).refine((d) => !d.approvata || d.squadraId, {
+  message: "Scegli in quale squadra inserirlo.",
+  path: ["squadraId"]
 });

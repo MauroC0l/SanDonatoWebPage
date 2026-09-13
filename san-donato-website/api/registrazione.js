@@ -8,24 +8,23 @@
  *   - vale lo stesso freno dell'accesso, per non lasciare aperta una porta
  *     da cui si possono creare mille account in un minuto
  *
- * L'account nasce ATTIVO e non in attesa: il calendario della squadra è
- * già pubblico, quindi farlo aspettare non proteggerebbe nulla e gli
- * negherebbe soltanto una comodità.
+ * Si sceglie lo SPORT, non la squadra: quale sia la propria squadra non lo
+ * decide chi si iscrive, lo decide chi la compone. L'account resta in
+ * attesa finché l'allenatore o la segreteria non lo assegnano a una
+ * squadra vera; quell'assegnazione è ciò che lo sblocca.
  *
- * La squadra scelta viene comunque registrata in richieste_iscrizione, ma
- * come dichiarazione di appartenenza da confermare, non come lucchetto:
- * l'allenatore e la segreteria vedono chi dice di far parte della loro
- * squadra. Servirà quando arriveranno i dati personali e i certificati,
- * che pubblici non sono.
+ * La sessione viene aperta subito: chi si registra atterra sulla schermata
+ * che gli spiega che deve aspettare, invece di ritrovarsi al modulo di
+ * accesso senza capire se la registrazione sia andata a buon fine.
  */
 
 import { eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { utenti, squadre, richiesteIscrizione } from "../db/schema.js";
+import { utenti, richiesteIscrizione } from "../db/schema.js";
 import { creaHashPassword } from "../server/password.js";
 import { creaSessione } from "../server/sessioni.js";
 import { capacitaDi } from "../server/autorizzazioni.js";
-import { json, errore, conGestioneErrori, soloMetodi, ErroreHttp } from "../server/risposte.js";
+import { json, errore, conGestioneErrori, soloMetodi } from "../server/risposte.js";
 import { leggiCorpo, indirizzoChiamante } from "../server/richiesta.js";
 import { schemaRegistrazione, valida } from "../server/validazione.js";
 import { verificaFreno, registraFallimento } from "../server/freno.js";
@@ -39,16 +38,6 @@ export default conGestioneErrori(async (req, res) => {
   await verificaFreno(chiave);
 
   const db = getDb();
-
-  const [squadra] = await db
-    .select({ id: squadre.id, nome: squadre.nome, attiva: squadre.attiva })
-    .from(squadre)
-    .where(eq(squadre.id, dati.squadraId))
-    .limit(1);
-
-  if (!squadra || !squadra.attiva) {
-    throw new ErroreHttp(400, "La squadra scelta non esiste.");
-  }
 
   const [esistente] = await db
     .select({ id: utenti.id })
@@ -71,9 +60,9 @@ export default conGestioneErrori(async (req, res) => {
     nome: dati.nome,
     cognome: dati.cognome,
 
-    // Attivo subito: gli eventi della squadra sono già pubblici, tenerlo
-    // fuori non proteggerebbe niente.
-    stato: "attivo",
+    // In attesa finché non gli viene assegnata una squadra
+    stato: "in_attesa",
+
     // La password se l'è scelta lui: non c'è niente da cambiare al primo giro
     deveCambiarePassword: false
   }).returning({
@@ -83,7 +72,9 @@ export default conGestioneErrori(async (req, res) => {
 
   await db.insert(richiesteIscrizione).values({
     utenteId: utente.id,
-    squadraId: squadra.id,
+    sport: dati.sport,
+    // La squadra la riempie chi decide
+    squadraId: null,
     note: dati.note ?? null
   });
 
@@ -98,6 +89,6 @@ export default conGestioneErrori(async (req, res) => {
       capacita: capacitaDi(utente.ruolo),
       deveCambiarePassword: false
     },
-    squadra: squadra.nome
+    sport: dati.sport
   }, 201);
 });

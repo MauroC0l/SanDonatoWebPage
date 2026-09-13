@@ -6,6 +6,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 const CambioPasswordPage = lazy(() => import("./CambioPasswordPage"));
+const AttesaSquadraPage = lazy(() => import("./AttesaSquadraPage"));
 
 import "../../css/Admin.css";
 
@@ -39,6 +40,16 @@ export default function AdminLayout() {
     return (
       <Suspense fallback={<div className="adm-boot"><div className="adm-spinner" /></div>}>
         <CambioPasswordPage obbligatorio />
+      </Suspense>
+    );
+  }
+
+  // Chi si è registrato e non ha ancora una squadra non entra nel
+  // pannello: non c'è nulla che possa fare finché qualcuno non decide.
+  if (user?.stato === "in_attesa") {
+    return (
+      <Suspense fallback={<div className="adm-boot"><div className="adm-spinner" /></div>}>
+        <AttesaSquadraPage />
       </Suspense>
     );
   }

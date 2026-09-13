@@ -8,7 +8,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { associazioniSquadra } from "../db/schema.js";
+import { associazioniSquadra, squadre } from "../db/schema.js";
 
 const CAPACITA = {
   admin: [
@@ -106,26 +106,38 @@ export async function squadreGestibili(utente) {
 }
 
 /**
- * Può decidere sulle richieste di iscrizione a QUESTA squadra?
+ * Gli sport delle squadre che questa persona gestisce, o null se le
+ * gestisce tutte.
  *
- * Segreteria e amministratori decidono su tutte; un allenatore solo sulle
- * proprie. La logica è la stessa di puoGestireSquadra, ma le capacità sono
- * diverse: si può allenare una squadra senza poterne approvare gli
- * iscritti, e viceversa.
+ * Serve per le richieste di iscrizione: chi si registra sceglie lo sport,
+ * non la squadra, quindi una richiesta appena arrivata NON ha una squadra
+ * su cui filtrare. Un allenatore di Calcio Allievi vede le richieste di
+ * chi ha chiesto "Calcio" e poi decide in quale squadra metterlo.
  */
-export async function puoDecidereIscrizione(utente, squadraId) {
-  if (!utente) return false;
-  if (puo(utente, "iscrizioni.decidi_tutte")) return true;
-  if (!puo(utente, "iscrizioni.decidi_proprie")) return false;
+export async function sportGestibili(utente) {
+  if (puo(utente, "iscrizioni.decidi_tutte")) return null;
+  if (!puo(utente, "iscrizioni.decidi_proprie")) return [];
 
   const righe = await getDb()
-    .select({ id: associazioniSquadra.id })
+    .select({ sport: squadre.sport })
     .from(associazioniSquadra)
-    .where(and(
-      eq(associazioniSquadra.utenteId, utente.id),
-      eq(associazioniSquadra.squadraId, Number(squadraId))
-    ))
-    .limit(1);
+    .innerJoin(squadre, eq(squadre.id, associazioniSquadra.squadraId))
+    .where(eq(associazioniSquadra.utenteId, utente.id));
 
-  return righe.length > 0;
+  return [...new Set(righe.map((r) => r.sport))];
+}
+
+/**
+ * Può decidere su una richiesta di questo sport?
+ *
+ * Segreteria e amministratori su tutte; un allenatore solo sugli sport
+ * che allena. La squadra vera la sceglie al momento della decisione, e
+ * che sia una delle sue lo verifica puoGestireSquadra.
+ */
+export async function puoDecidereSport(utente, sport) {
+  if (!utente) return false;
+  if (puo(utente, "iscrizioni.decidi_tutte")) return true;
+
+  const sportSuoi = await sportGestibili(utente);
+  return Array.isArray(sportSuoi) && sportSuoi.includes(sport);
 }
