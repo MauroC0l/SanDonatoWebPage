@@ -1,4 +1,5 @@
-import { FaHourglassHalf, FaSignOutAlt, FaExternalLinkAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaHourglassHalf, FaSignOutAlt, FaHome } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
 
@@ -38,9 +39,9 @@ export default function AttesaSquadraPage() {
           </p>
 
           <div className="alg-attesa-azioni">
-            <a href="/" className="adm-btn adm-btn-primary">
-              <FaExternalLinkAlt /> Vai al sito
-            </a>
+            <Link to="/" className="adm-btn adm-btn-primary">
+              <FaHome /> Vai alla home
+            </Link>
             <button type="button" className="adm-btn adm-btn-ghost" onClick={logout}>
               <FaSignOutAlt /> Esci
             </button>

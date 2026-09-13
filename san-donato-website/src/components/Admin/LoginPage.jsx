@@ -94,7 +94,7 @@ export default function LoginPage() {
         <div className="alg-back-row">
           <Link to="/" className="alg-back">
             <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
-            Torna al sito
+            Torna alla home
           </Link>
         </div>
         <div className="alg-card">

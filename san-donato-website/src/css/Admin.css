@@ -299,6 +299,23 @@
   background: var(--adm-bg);
 }
 
+/* Le pagine senza il pannello di sinistra — cambio password, attesa di una
+   squadra, esito della registrazione — sono una colonna sola, centrata.
+   Con la griglia a due colonne la scheda finiva a sinistra, spostata di
+   lato senza motivo apparente.
+
+   :has() invece di una classe da ricordare: la regola si applica da sé a
+   qualunque pagina non abbia il pannello, comprese quelle future. */
+.alg-page:not(:has(.alg-brand)) {
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+}
+
+.alg-page:not(:has(.alg-brand)) .alg-form-side {
+  width: 100%;
+  max-width: 30rem;
+}
+
 
 /* ---------- Lato identità ---------- */
 

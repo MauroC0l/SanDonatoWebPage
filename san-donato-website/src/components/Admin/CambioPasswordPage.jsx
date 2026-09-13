@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  FaKey, FaEye, FaEyeSlash, FaExclamationCircle, FaArrowRight, FaShieldAlt
+  FaKey, FaEye, FaEyeSlash, FaExclamationCircle, FaArrowRight, FaShieldAlt,
+  FaArrowLeft
 } from "react-icons/fa";
 import { cambiaPassword } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -50,6 +51,15 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
   return (
     <div className="alg-page">
       <main className="alg-form-side">
+        {/* Una via d'uscita c'è sempre, anche quando il cambio è obbligatorio:
+            non si può usare il pannello, ma il sito sì. */}
+        <div className="alg-back-row">
+          <Link to="/" className="alg-back">
+            <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
+            Torna alla home
+          </Link>
+        </div>
+
         <div className="alg-card">
           <img src={LOGO} alt="Polisportiva San Donato" className="alg-mobile-logo" />
 

@@ -11,13 +11,43 @@ import {
 import { useAuth } from "../../context/auth";
 import "../../css/Admin.css";
 
+/**
+ * Tutti i ruoli che si possono assegnare dal pannello.
+ *
+ * L'elenco deve restare allineato a quello del server
+ * (server/autorizzazioni.js): un ruolo che compare qui ma non lì viene
+ * accettato dal modulo e poi rifiutato al salvataggio.
+ */
 const RUOLI = [
-  { valore: "admin", etichetta: "Amministratore", spiegazione: "Gestisce tutto: notizie, eventi, persone." },
-  { valore: "editor", etichetta: "Redattore", spiegazione: "Notizie, più gli eventi delle squadre a cui è associato." },
-  { valore: "coach", etichetta: "Allenatore", spiegazione: "Eventi e materiale delle proprie squadre." },
-  { valore: "atleta", etichetta: "Atleta", spiegazione: "I propri dati e il calendario della squadra." }
+  {
+    valore: "admin",
+    etichetta: "Amministratore",
+    spiegazione: "Gestisce tutto: notizie, eventi, persone e ruoli."
+  },
+  {
+    valore: "segreteria",
+    etichetta: "Segreteria",
+    spiegazione: "Vede tutti gli iscritti e assegna le squadre. Non tocca notizie ed eventi."
+  },
+  {
+    valore: "editor",
+    etichetta: "Redattore",
+    spiegazione: "Notizie, più gli eventi delle squadre a cui è associato."
+  },
+  {
+    valore: "coach",
+    etichetta: "Allenatore",
+    spiegazione: "Eventi e materiale delle proprie squadre, e decide chi ci entra."
+  },
+  {
+    valore: "atleta",
+    etichetta: "Atleta",
+    spiegazione: "I propri dati e il calendario della squadra."
+  }
 ];
 
+// Chi può essere associato a una squadra: la segreteria no, decide su
+// tutte senza gestirne alcuna.
 const GESTISCE_SQUADRE = ["admin", "editor", "coach"];
 
 function quandoAccesso(iso) {
@@ -92,11 +122,13 @@ export default function PersonePage() {
   const cambiaStato = async (persona) => {
     setErrore("");
     try {
-      await updateUtente({ id: persona.id, attivo: !persona.attivo });
+      const sospeso = persona.stato === "sospeso";
+
+      await updateUtente({ id: persona.id, stato: sospeso ? "attivo" : "sospeso" });
       setAvviso(
-        persona.attivo
-          ? `${persona.nomeCompleto} non può più entrare. Le sue notizie restano.`
-          : `${persona.nomeCompleto} può entrare di nuovo.`
+        sospeso
+          ? `${persona.nomeCompleto} può entrare di nuovo.`
+          : `${persona.nomeCompleto} non può più entrare. Le sue notizie restano.`
       );
       await ricarica();
     } catch (err) {
@@ -286,12 +318,17 @@ export default function PersonePage() {
             const puoAvereSquadre = GESTISCE_SQUADRE.includes(persona.ruolo);
 
             return (
-              <li key={persona.id} className={`adm-post-row ${persona.attivo ? "" : "is-disattivato"}`}>
+              <li key={persona.id} className={`adm-post-row ${persona.stato === "sospeso" ? "is-disattivato" : ""}`}>
                 <div className="adm-post-main">
                   <span className="adm-post-title">
                     {persona.nomeCompleto}
                     {seStesso && <span className="adm-role-tag">tu</span>}
-                    {!persona.attivo && <span className="adm-role-tag adm-tag-spento">disattivato</span>}
+                    {persona.stato === "sospeso" && (
+                      <span className="adm-role-tag adm-tag-spento">sospeso</span>
+                    )}
+                    {persona.stato === "in_attesa" && (
+                      <span className="adm-role-tag">aspetta una squadra</span>
+                    )}
                   </span>
 
                   <div className="adm-post-meta">
@@ -352,7 +389,7 @@ export default function PersonePage() {
                     disabled={seStesso}
                     title={seStesso ? "Non puoi disattivare il tuo account" : ""}
                   >
-                    {persona.attivo ? "Disattiva" : "Riattiva"}
+                    {persona.stato === "sospeso" ? "Riammetti" : "Sospendi"}
                   </button>
                 </div>
               </li>

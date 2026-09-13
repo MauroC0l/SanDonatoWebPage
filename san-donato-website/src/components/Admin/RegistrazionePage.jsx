@@ -88,14 +88,21 @@ export default function RegistrazionePage() {
     return (
       <div className="alg-page">
         <main className="alg-form-side">
+          <div className="alg-back-row">
+            <Link to="/" className="alg-back">
+              <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
+              Torna alla home
+            </Link>
+          </div>
+
           <div className="alg-card alg-card-esito">
             <img src={LOGO} alt="Polisportiva San Donato" className="alg-mobile-logo" />
             <FaCheckCircle className="alg-esito-icona" aria-hidden="true" />
 
             <h2 className="alg-title">Registrazione inviata</h2>
             <p className="alg-lead">
-              Benvenuto {fatta.utente.name}. Hai chiesto di entrare
-              nel <strong>{fatta.sport.toLowerCase()}</strong>.
+              Benvenuto {fatta.utente.name}. Hai chiesto di entrare nella
+              squadra di <strong>{fatta.sport.toLowerCase()}</strong>.
             </p>
             <p className="adm-hint">
               Adesso l&apos;allenatore o la segreteria ti assegneranno a una
@@ -141,7 +148,7 @@ export default function RegistrazionePage() {
         <div className="alg-back-row">
           <Link to="/" className="alg-back">
             <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
-            Torna al sito
+            Torna alla home
           </Link>
         </div>
 
