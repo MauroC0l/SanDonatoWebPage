@@ -1,0 +1,69 @@
+/*
+ * La targhetta "versione di prova".
+ *
+ * In basso a sinistra e non una fascia in cima: una barra piena larghezza
+ * avrebbe spostato in giù l'intestazione del sito e la barra dell'area
+ * riservata, cioè avrebbe fatto vedere al cliente un sito diverso da quello
+ * che gli si sta mostrando. Qui galleggia sopra a tutto senza spostare una
+ * riga.
+ *
+ * Non si chiude: serve proprio a chi se ne dimentica.
+ */
+.fdim {
+  position: fixed;
+  left: .75rem;
+  bottom: .75rem;
+  z-index: 9000;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: min(22rem, calc(100vw - 1.5rem));
+  margin: 0;
+
+  padding: .5rem .75rem;
+  border: 1px solid #f0c987;
+  border-left: 4px solid #d98324;
+  border-radius: 10px;
+  background: #fff8ec;
+  box-shadow: 0 10px 30px -12px rgba(16, 32, 56, .45);
+
+  color: #6b4408;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: .78rem;
+  line-height: 1.35;
+
+  /* Non deve rubare un clic a chi sta guardando la pagina sotto: si legge,
+     e l'unico pezzo cliccabile è il collegamento al sito vero. */
+  pointer-events: none;
+}
+
+.fdim strong {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.fdim a {
+  pointer-events: auto;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Sul telefono la targhetta starebbe sopra ai pulsanti in fondo alla
+   pagina: si stringe a una riga sola. */
+@media (max-width: 560px) {
+  .fdim {
+    left: .5rem;
+    right: .5rem;
+    bottom: .5rem;
+    max-width: none;
+    font-size: .74rem;
+  }
+}
+
+@media print {
+  .fdim { display: none; }
+}

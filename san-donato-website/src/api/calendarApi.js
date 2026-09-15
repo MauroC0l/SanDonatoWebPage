@@ -67,6 +67,11 @@ function normalizza(e) {
     start: new Date(e.inizio),
     end: e.fine ? new Date(e.fine) : new Date(e.inizio),
     location: e.luogo || "",
+    // Il punto esatto, quando chi ha inserito l'evento l'ha scelto sulla
+    // mappa: serve al collegamento "Apri su Maps", che così porta lì invece
+    // che al primo omonimo che Google trova.
+    lat: e.latitudine ?? null,
+    lng: e.longitudine ?? null,
     description: e.descrizione || "",
 
     // Erano dedotti da un testo libero, ora arrivano già separati

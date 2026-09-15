@@ -1,393 +1,431 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AboutSection from "./AboutSection";
 import EventDetailsModal from "../../components/EventDetailsModal";
 import ResultsModal from "../../components/ResultsModal";
-import NewsletterForm from "./NewsletterForm"; 
-import { getLatestPostsByCategory } from "../../api/API.mjs";
-import { fetchHomeEvents } from '../../api/calendarApi';
+import NewsletterForm from "./NewsletterForm";
+import { getLatestPostsByCategory, NOME_CATEGORIA } from "../../api/API.mjs";
+import { fetchHomeEvents } from "../../api/calendarApi";
 import {
-  FaCalendarAlt, FaClock, FaYoutube, FaCircle, FaNewspaper,
-  FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaLock, FaTrophy,
-  FaEnvelopeOpenText, FaPaperPlane
+  FaCalendarAlt, FaClock, FaYoutube, FaNewspaper, FaArrowRight,
+  FaMapMarkerAlt, FaLock, FaTrophy, FaEnvelopeOpenText, FaPlay
 } from "react-icons/fa";
 import "../../css/HomePage.css";
 
-// Per quanti giorni una notizia resta marcata come "NEW"
-const NEW_BADGE_DAYS = 2;
+// Per quanti giorni una notizia resta marcata come "NUOVA"
+const GIORNI_BADGE_NUOVA = 2;
 
 // Si basa sul campo ISO, l'unico confrontabile in modo affidabile:
 // post.date è già formattato "gg/mm/aaaa" e new Date() lo interpreterebbe male.
-// Sta fuori dal componente e riceve "now" perché il calcolo va fatto al
+// Sta fuori dal componente e riceve "adesso" perché il calcolo va fatto al
 // caricamento dei dati, non a ogni render.
-function isPostNew(post, now, daysWindow = NEW_BADGE_DAYS) {
-  const postDate = new Date(post?.dateISO ?? "");
-  if (isNaN(postDate.getTime())) return false;
-  const differenceInDays = (now - postDate.getTime()) / (1000 * 3600 * 24);
-  return differenceInDays >= 0 && differenceInDays <= daysWindow;
+function eRecente(post, adesso, finestra = GIORNI_BADGE_NUOVA) {
+  const data = new Date(post?.dateISO ?? "");
+  if (isNaN(data.getTime())) return false;
+
+  const giorni = (adesso - data.getTime()) / (1000 * 3600 * 24);
+  return giorni >= 0 && giorni <= finestra;
 }
 
-// --- COMPONENTE COUNTDOWN INTERNO ---
-const CountdownTimer = ({ targetDate, onComplete }) => {
-  const [timeLeft, setTimeLeft] = useState("");
+/** Quanto manca alla diretta, aggiornato ogni secondo. */
+function ContoAllaRovescia({ quando, alTermine }) {
+  const [mancano, setMancano] = useState("");
 
   useEffect(() => {
-    const target = new Date(targetDate).getTime();
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = target - now;
-      if (distance < 0) {
-        clearInterval(interval);
-        if (onComplete) onComplete();
+    const obiettivo = new Date(quando).getTime();
+
+    const battito = setInterval(() => {
+      const distanza = obiettivo - Date.now();
+
+      if (distanza < 0) {
+        clearInterval(battito);
+        if (alTermine) alTermine();
         return;
       }
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      setTimeLeft(
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      );
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [targetDate, onComplete]);
 
-  if (!timeLeft) return null;
+      const ore = Math.floor((distanza % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minuti = Math.floor((distanza % (1000 * 60 * 60)) / (1000 * 60));
+      const secondi = Math.floor((distanza % (1000 * 60)) / 1000);
+
+      setMancano([ore, minuti, secondi].map((n) => String(n).padStart(2, "0")).join(":"));
+    }, 1000);
+
+    return () => clearInterval(battito);
+  }, [quando, alTermine]);
+
+  if (!mancano) return null;
+
   return (
-    <div className="countdown-box">
-      <span className="cb-label">La diretta inizierà tra</span>
-      <div className="cb-timer">{timeLeft}</div>
+    <div className="hs-conto">
+      <span className="hs-conto-etichetta">Si comincia fra</span>
+      <span className="hs-conto-cifre">{mancano}</span>
     </div>
   );
-};
+}
 
 export default function HomePage() {
-  const [latestNews, setLatestNews] = useState([]);
-  const [weekEvents, setWeekEvents] = useState([]);
-  const [todayEvents, setTodayEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [newsError, setNewsError] = useState("");
+  const [ultimeNotizie, setUltimeNotizie] = useState([]);
+  const [eventiSettimana, setEventiSettimana] = useState([]);
+  const [eventiOggi, setEventiOggi] = useState([]);
+  const [caricamento, setCaricamento] = useState(true);
+  const [erroreNotizie, setErroreNotizie] = useState("");
 
-  // --- STATI MODALI ---
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showResults, setShowResults] = useState(false);
-  const [showNewsletter, setShowNewsletter] = useState(false);
+  const [eventoScelto, setEventoScelto] = useState(null);
+  const [mostraRisultati, setMostraRisultati] = useState(false);
+  const [mostraNewsletter, setMostraNewsletter] = useState(false);
 
-  // Stato dummy per forzare il re-render quando scade il timer
-  const [, setTick] = useState(0);
+  // Serve solo a ridisegnare quando il conto alla rovescia arriva a zero:
+  // da quel momento "fra poco" diventa "in onda".
+  const [, setBattito] = useState(0);
 
   const navigate = useNavigate();
-  const liveListRef = useRef(null);
-  const calendarListRef = useRef(null);
 
-  // --- HELPER DATE ---
-  const getDayName = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
-  const getShortDate = (dateObj) => new Date(dateObj).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-  const formatTime = (dateObj) => new Date(dateObj).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const nomeGiorno = (d) => new Date(d)
+    .toLocaleDateString("it-IT", { weekday: "short" })
+    .toUpperCase()
+    .replace(".", "");
 
-  // --- LOGICA STATUS ---
-  const getMatchStatus = (dateObj) => {
-    if (!dateObj) return "UPCOMING";
-    const diffMs = new Date(dateObj) - new Date();
-    const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin <= 15 && diffMin > -150) return "LIVE";
-    return "UPCOMING";
+  const giornoMese = (d) => new Date(d).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" });
+  const oraDi = (d) => new Date(d).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+
+  /** In onda da un quarto d'ora prima fino a due ore e mezza dopo l'inizio. */
+  const eInOnda = (quando) => {
+    if (!quando) return false;
+    const minuti = Math.floor((new Date(quando) - new Date()) / 60000);
+    return minuti <= 15 && minuti > -150;
   };
 
-  const handleTimerComplete = useCallback(() => {
-    setTick(t => t + 1);
-  }, []);
+  const finitoIlConto = useCallback(() => setBattito((b) => b + 1), []);
 
-  // --- FETCH DATA ---
   useEffect(() => {
-    let mounted = true;
+    let attivo = true;
 
-    async function loadAllData() {
-      // allSettled e non all: se WordPress non risponde il calendario deve
+    async function carica() {
+      // allSettled e non all: se le notizie non rispondono il calendario deve
       // comunque comparire, e viceversa. Un guasto solo non svuota la home.
-      const [newsResult, calendarResult] = await Promise.allSettled([
+      const [notizie, calendario] = await Promise.allSettled([
         getLatestPostsByCategory(),
         fetchHomeEvents()
       ]);
 
-      if (!mounted) return;
+      if (!attivo) return;
 
-      if (newsResult.status === "fulfilled") {
-        const allNews = [];
-        Object.values(newsResult.value || {}).forEach(cat => {
-          if (Array.isArray(cat)) allNews.push(...cat);
+      if (notizie.status === "fulfilled") {
+        const tutte = [];
+        Object.values(notizie.value || {}).forEach((perSport) => {
+          if (Array.isArray(perSport)) tutte.push(...perSport);
         });
-        allNews.sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO));
+        tutte.sort((a, b) => new Date(b.dateISO) - new Date(a.dateISO));
 
-        // Il badge "NEW" viene deciso una volta sola, qui: la finestra è
-        // di giorni, ricalcolarlo a ogni render non servirebbe a nulla.
-        const now = Date.now();
-        setLatestNews(
-          allNews.slice(0, 5).map(post => ({ ...post, isNew: isPostNew(post, now) }))
+        // "Nuova" si decide una volta sola, qui: la finestra è di giorni, e
+        // ricalcolarla a ogni ridisegno non cambierebbe mai niente.
+        const adesso = Date.now();
+        setUltimeNotizie(
+          tutte.slice(0, 5).map((post) => ({ ...post, recente: eRecente(post, adesso) }))
         );
       } else {
-        console.error("Errore caricamento notizie:", newsResult.reason);
-        setNewsError(newsResult.reason?.message || "Notizie non disponibili.");
+        console.error("Errore caricamento notizie:", notizie.reason);
+        setErroreNotizie(notizie.reason?.message || "Notizie non disponibili.");
       }
 
-      if (calendarResult.status === "fulfilled") {
-        setTodayEvents(calendarResult.value.todayEvents || []);
-        setWeekEvents(calendarResult.value.weekEvents || []);
+      if (calendario.status === "fulfilled") {
+        setEventiOggi(calendario.value.todayEvents || []);
+        setEventiSettimana(calendario.value.weekEvents || []);
       } else {
-        console.error("Errore caricamento calendario:", calendarResult.reason);
+        console.error("Errore caricamento calendario:", calendario.reason);
       }
 
-      setLoading(false);
+      setCaricamento(false);
     }
 
-    loadAllData();
-    return () => { mounted = false; };
+    carica();
+    return () => { attivo = false; };
   }, []);
 
-  // --- FILTRO LIVE MATCHES ---
-  const displayedMatches = todayEvents.filter(ev => {
+  /* Le dirette che ha senso mostrare adesso: da due ore fa alle prossime
+     dodici. Più indietro è finita, più avanti non interessa ancora. */
+  const dirette = eventiOggi.filter((ev) => {
     if (!ev.hasTime) return false;
-    const now = new Date();
-    const diffHours = (ev.start - now) / (1000 * 60 * 60);
-    return diffHours >= -2 && diffHours <= 12;
+    const ore = (ev.start - new Date()) / (1000 * 60 * 60);
+    return ore >= -2 && ore <= 12;
   });
 
-  const scrollContainer = (ref, direction) => {
-    if (ref.current) {
-      const scrollAmount = 280;
-      ref.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-    }
-  };
-  
+  /* La prima notizia fa da copertina, le altre le stanno sotto in fila.
+     Dare a tutte e cinque lo stesso peso vuol dire non dire quale conta. */
+  const [inEvidenza, ...altreNotizie] = ultimeNotizie;
+
   return (
     <div className="hp-root">
       <AboutSection />
 
-      <div className="hp-main-container">
-        <div className="hp-grid-layout">
+      <section className="hs-sezione">
+        <div className="hs-contenitore">
 
-          {/* 1. COLONNA SX: NEWSLETTER WIDGET + LIVE CENTER */}
-          <aside className="hp-col hp-col-live">
-            
-            {/* --- NUOVO POSIZIONAMENTO NEWSLETTER WIDGET --- */}
-            <div className="newsletter-widget-card" onClick={() => setShowNewsletter(true)}>
-              <div className="nwc-icon">
-                <FaEnvelopeOpenText />
-              </div>
-              <div className="nwc-content">
-                <h4>Resta Aggiornato</h4>
-                <p>Iscriviti per ricevere risultati e news.</p>
-              </div>
-              <div className="nwc-arrow">
-                <FaPaperPlane />
-              </div>
-            </div>
+          <header className="hs-intestazione">
+            <span className="hs-occhiello">In Polisportiva</span>
+            <h2 className="hs-titolo">Cosa succede in questi giorni</h2>
+            <p className="hs-sottotitolo">
+              Le ultime notizie, le partite in diretta e gli appuntamenti della settimana.
+            </p>
+          </header>
 
-            {/* --- LIVE CENTER --- */}
-            <div className="column-header">
-              <h3 className="col-title text-danger"><FaCircle className="live-pulse-icon" /> Live Center</h3>
-              <div className="mobile-arrows">
-                <button onClick={() => scrollContainer(liveListRef, 'left')}><FaChevronLeft /></button>
-                <button onClick={() => scrollContainer(liveListRef, 'right')}><FaChevronRight /></button>
-              </div>
-            </div>
+          <div className="hs-griglia">
 
-            <div className="scroll-wrapper" ref={liveListRef}>
-              {loading ? (
-                <div className="loader-wrapper">
-                  <div className="loader-small"></div>
-                </div>
-              ) : (
-                displayedMatches.length > 0 ? displayedMatches.map((match, index) => {
-                  const status = getMatchStatus(match.start);
-                  const hasDirectLink = !!match.diretta && match.diretta !== "";
-                  const linkUrl = match.diretta || "https://youtube.com/@PolisportivaSanDonato";
-                  const isNextEvent = index === 0 && status === "UPCOMING";
-                  const isLocked = isNextEvent;
-
-                  let btnText;
-                  let btnClass = "btn-outline";
-
-                  if (isLocked) {
-                    btnText = "In attesa dell'inizio";
-                    btnClass = "btn-locked";
-                  } else if (status === "LIVE") {
-                    btnText = hasDirectLink ? "Guarda ora" : "Vai al Canale";
-                    btnClass = "btn-danger";
-                  } else {
-                    btnText = "Vai al Canale";
-                  }
-
-                  return (
-                    <div key={match.id} className={`live-card-simple ${isNextEvent ? "live-card-next" : ""}`}>
-                      <div className="lcs-header">
-                        <div className="lcs-badges-group">
-                          {status === "LIVE" ?
-                            <span className="hp-badge badge-danger">IN ONDA</span> :
-                            <span className="hp-badge badge-secondary">OGGI {formatTime(match.start)}</span>
-                          }
-                          <span className="hp-badge badge-category">
-                            {match.category}
-                          </span>
-                        </div>
-                        <FaYoutube className="yt-icon" />
-                      </div>
-
-                      <div className="lcs-match-info">
-                        <div className="lcs-teams">
-                          <span className="team-full">{match.title}</span>
-                        </div>
-                        <div className="lcs-location-sm">
-                          <FaMapMarkerAlt />
-                          <span>{match.location || "Sede non definita"}</span>
-                        </div>
-                      </div>
-
-                      {isLocked && (
-                        <div className="lcs-lock-overlay">
-                          <CountdownTimer targetDate={match.start} onComplete={handleTimerComplete} />
-                        </div>
-                      )}
-
-                      <a
-                        href={isLocked ? null : linkUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`hp-btn ${btnClass}`}
-                        onClick={(e) => { if (isLocked) e.preventDefault(); }}
-                      >
-                        {isLocked && <FaLock style={{ marginRight: '6px', fontSize: '0.8em' }} />}
-                        {btnText}
-                      </a>
-                    </div>
-                  );
-                }) : (
-                  <div className="empty-state-box">
-                    Nessuna diretta programmata per oggi
-                  </div>
-                )
-              )}
-            </div>
-          </aside>
-
-          {/* 2. CALENDARIO */}
-          <aside className="hp-col hp-col-calendar">
-            <div className="column-header">
-              <h3 className="col-title"><FaCalendarAlt /> Questa Settimana</h3>
-              <div className="mobile-arrows">
-                <button onClick={() => scrollContainer(calendarListRef, 'left')}><FaChevronLeft /></button>
-                <button onClick={() => scrollContainer(calendarListRef, 'right')}><FaChevronRight /></button>
-              </div>
-            </div>
-
-            {!loading && (
-              <div className="calendar-actions">
-                <button className="btn-results-week" onClick={() => setShowResults(true)}>
-                  <FaTrophy /> Vedi risultati della settimana
+            {/* ---------- Notizie ---------- */}
+            <div className="hs-notizie">
+              <div className="hs-blocco-testa">
+                <h3 className="hs-blocco-titolo">
+                  <FaNewspaper aria-hidden="true" /> Ultime notizie
+                </h3>
+                <button type="button" className="hs-vedi-tutte" onClick={() => navigate("/news")}>
+                  Vedi tutte <FaArrowRight aria-hidden="true" />
                 </button>
               </div>
-            )}
 
-            <div className="scroll-wrapper" ref={calendarListRef}>
-              {loading ? (
-                <div className="loader-wrapper">
-                  <div className="loader-small"></div>
+              {caricamento ? (
+                /* Rettangoli grigi della forma giusta invece di una rotella:
+                   la pagina non salta quando i dati arrivano, perché lo
+                   spazio è già quello definitivo. */
+                <div className="hs-notizie-griglia">
+                  <div className="hs-scheletro hs-scheletro-grande" />
+                  <div className="hs-scheletro" />
+                  <div className="hs-scheletro" />
                 </div>
+              ) : erroreNotizie ? (
+                <p className="hs-vuoto">{erroreNotizie}</p>
+              ) : ultimeNotizie.length === 0 ? (
+                <p className="hs-vuoto">Nessuna notizia pubblicata.</p>
               ) : (
-                weekEvents.length > 0 ? weekEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="event-card clickable-card"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelectedEvent(event)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedEvent(event); } }}
-                  >
-                    <div className="event-date-badge" style={{ backgroundColor: event.color }}>
-                      <span className="ed-day">{getDayName(event.start)}</span>
-                      <span className="ed-date">{getShortDate(event.start)}</span>
-                    </div>
-                    <div className="event-info">
-                      <span className="ev-tag" style={{ color: event.color, borderColor: event.color }}>
-                        {event.category}
-                      </span>
-                      <h4 className="ev-title">{event.title}</h4>
-                      <div className="ev-meta-row">
-                        <span><FaClock /> {event.hasTime ? formatTime(event.start) : "Tutto il giorno"}</span>
-                        <span><FaMapMarkerAlt /> {event.location || "N.D."}</span>
-                      </div>
-                    </div>
+                <div className="hs-notizie-griglia">
+                  <NotiziaGrande notizia={inEvidenza} />
+
+                  <div className="hs-notizie-fila">
+                    {altreNotizie.map((n) => (
+                      <NotiziaPiccola key={n.id} notizia={n} />
+                    ))}
                   </div>
-                )) : (
-                  <div className="empty-state-box">
-                    Nessun evento in programma
-                  </div>
-                )
+                </div>
               )}
             </div>
-          </aside>
 
-          {/* 3. NEWS */}
-          <main className="hp-col hp-col-news">
-            <div className="column-header">
-              <h3 className="col-title"><FaNewspaper /> Ultime Notizie</h3>
-            </div>
+            {/* ---------- Colonna di fianco ---------- */}
+            <aside className="hs-lato">
 
-            {loading ? (
-              <div className="loader-wrapper">
-                <div className="loader"></div>
-              </div>
-            ) : newsError ? (
-              <div className="empty-state-box">{newsError}</div>
-            ) : latestNews.length === 0 ? (
-              <div className="empty-state-box">Nessuna notizia pubblicata</div>
-            ) : (
-              <div className="news-vertical-list">
-                {latestNews.map((news) => {
-                  const openNews = () => navigate(`/news/${news.id}`, { state: { post: news } });
-                  return (
-                    <div
-                      key={news.id}
-                      className="news-item-compact"
-                      role="link"
-                      tabIndex={0}
-                      onClick={openNews}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openNews(); } }}
+              <section className="hs-scheda">
+                <div className="hs-scheda-testa">
+                  <h3 className="hs-blocco-titolo">
+                    <span className="hs-pulsante-live" aria-hidden="true" /> Live center
+                  </h3>
+                  <FaYoutube className="hs-youtube" aria-hidden="true" />
+                </div>
+
+                {caricamento ? (
+                  <div className="hs-scheletro hs-scheletro-riga" />
+                ) : dirette.length === 0 ? (
+                  <p className="hs-vuoto hs-vuoto-piccolo">
+                    Nessuna diretta in programma per oggi.
+                  </p>
+                ) : (
+                  <ul className="hs-dirette">
+                    {dirette.map((diretta, posizione) => {
+                      const inOnda = eInOnda(diretta.start);
+                      // La prossima resta chiusa finché non comincia: un
+                      // collegamento che porta a una diretta non ancora
+                      // aperta è solo un vicolo cieco.
+                      const chiusa = posizione === 0 && !inOnda;
+                      const dove = diretta.diretta || "https://youtube.com/@PolisportivaSanDonato";
+
+                      return (
+                        <li key={diretta.id} className={`hs-diretta ${inOnda ? "is-onda" : ""}`}>
+                          <div className="hs-diretta-alto">
+                            {inOnda
+                              ? <span className="hs-targhetta hs-targhetta-onda">In onda</span>
+                              : <span className="hs-targhetta">Oggi {oraDi(diretta.start)}</span>}
+                            <span className="hs-targhetta hs-targhetta-categoria">{diretta.category}</span>
+                          </div>
+
+                          <p className="hs-diretta-titolo">{diretta.title}</p>
+
+                          <p className="hs-diretta-dove">
+                            <FaMapMarkerAlt aria-hidden="true" />
+                            {diretta.location || "Sede da definire"}
+                          </p>
+
+                          {chiusa && (
+                            <ContoAllaRovescia quando={diretta.start} alTermine={finitoIlConto} />
+                          )}
+
+                          {chiusa ? (
+                            <span className="hs-bottone hs-bottone-chiuso">
+                              <FaLock aria-hidden="true" /> In attesa dell&apos;inizio
+                            </span>
+                          ) : (
+                            <a
+                              href={dove}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={`hs-bottone ${inOnda ? "hs-bottone-onda" : "hs-bottone-vuoto"}`}
+                            >
+                              <FaPlay aria-hidden="true" />
+                              {inOnda ? "Guarda ora" : "Vai al canale"}
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+
+              <section className="hs-scheda">
+                <div className="hs-scheda-testa">
+                  <h3 className="hs-blocco-titolo">
+                    <FaCalendarAlt aria-hidden="true" /> Questa settimana
+                  </h3>
+                  {!caricamento && (
+                    <button
+                      type="button"
+                      className="hs-risultati"
+                      onClick={() => setMostraRisultati(true)}
                     >
-                      {news.isNew && <span className="news-new-badge">NEW</span>}
-                      <div className="nic-image" style={{ backgroundImage: `url(${news.image || "/logo-poli-sfondo.jpg"})` }}></div>
-                      <div className="nic-content">
-                          <span className="nic-date">{news.date}</span>
-                          <h4 className="nic-title">{news.title} </h4>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            <div className="view-all-wrapper">
-              <button className="hp-btn btn-link" onClick={() => navigate('/news')}>Vedi tutte</button>
-            </div>
-          </main>
+                      <FaTrophy aria-hidden="true" /> Risultati
+                    </button>
+                  )}
+                </div>
 
+                {caricamento ? (
+                  <div className="hs-scheletro hs-scheletro-riga" />
+                ) : eventiSettimana.length === 0 ? (
+                  <p className="hs-vuoto hs-vuoto-piccolo">Nessun appuntamento in programma.</p>
+                ) : (
+                  <ul className="hs-agenda">
+                    {eventiSettimana.map((evento) => (
+                      <li key={evento.id}>
+                        <button
+                          type="button"
+                          className="hs-appuntamento"
+                          onClick={() => setEventoScelto(evento)}
+                        >
+                          <span className="hs-quando" style={{ backgroundColor: evento.color }}>
+                            <span className="hs-quando-giorno">{nomeGiorno(evento.start)}</span>
+                            <span className="hs-quando-data">{giornoMese(evento.start)}</span>
+                          </span>
+
+                          <span className="hs-appuntamento-testi">
+                            <span className="hs-appuntamento-titolo">{evento.title}</span>
+                            <span className="hs-appuntamento-meta">
+                              <span>
+                                <FaClock aria-hidden="true" />
+                                {evento.hasTime ? oraDi(evento.start) : "tutto il giorno"}
+                              </span>
+                              <span className="hs-appuntamento-luogo">
+                                <FaMapMarkerAlt aria-hidden="true" />
+                                {evento.location || "da definire"}
+                              </span>
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <button
+                type="button"
+                className="hs-newsletter"
+                onClick={() => setMostraNewsletter(true)}
+              >
+                <FaEnvelopeOpenText className="hs-newsletter-icona" aria-hidden="true" />
+                <span className="hs-newsletter-testi">
+                  <strong>Resta aggiornato</strong>
+                  <span>Risultati e notizie nella tua posta.</span>
+                </span>
+                <FaArrowRight className="hs-newsletter-freccia" aria-hidden="true" />
+              </button>
+
+            </aside>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* MODALI */}
-      {selectedEvent && (
-        <EventDetailsModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-        />
+      {eventoScelto && (
+        <EventDetailsModal event={eventoScelto} onClose={() => setEventoScelto(null)} />
       )}
 
-      {showResults && (
-        <ResultsModal onClose={() => setShowResults(false)} />
-      )}
-      
-      {showNewsletter && (
-        <NewsletterForm onClose={() => setShowNewsletter(false)} />
-      )}
-
+      {mostraRisultati && <ResultsModal onClose={() => setMostraRisultati(false)} />}
+      {mostraNewsletter && <NewsletterForm onClose={() => setMostraNewsletter(false)} />}
     </div>
+  );
+}
+
+/* =====================================================
+   Le schede delle notizie
+   ===================================================== */
+
+/**
+ * L'etichetta della categoria, quando dice qualcosa.
+ *
+ * "altro" è il valore di chi non ha ancora scelto: mostrarlo lo farebbe
+ * sembrare una scelta, e riempirebbe la home di targhette che non
+ * distinguono niente.
+ */
+function Categoria({ valore }) {
+  if (!valore || valore === "altro") return null;
+  return <span className="hs-categoria">{NOME_CATEGORIA[valore] ?? valore}</span>;
+}
+
+function NotiziaGrande({ notizia }) {
+  if (!notizia) return null;
+
+  const sfondo = notizia.image || "/logo-poli-sfondo.jpg";
+
+  return (
+    /* La scheda È il collegamento, invece di contenerne uno che si allarga
+       con un riempimento trasparente: così tutta l'area è cliccabile, si
+       raggiunge con il tabulatore e si può aprire in una scheda nuova col
+       tasto centrale — cosa che un div con onClick non permette. */
+    <Link
+      to={`/news/${notizia.id}`}
+      state={{ post: notizia }}
+      className="hs-notizia hs-notizia-grande"
+    >
+      <span className="hs-foto" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
+      <span className="hs-velo" aria-hidden="true" />
+
+      <span className="hs-notizia-testi">
+        <span className="hs-notizia-etichette">
+          {notizia.recente && <span className="hs-nuova">Nuova</span>}
+          <Categoria valore={notizia.categoria} />
+          <span className="hs-data">{notizia.date}</span>
+        </span>
+
+        <span className="hs-notizia-titolo">{notizia.title}</span>
+      </span>
+    </Link>
+  );
+}
+
+function NotiziaPiccola({ notizia }) {
+  const sfondo = notizia.image || "/logo-poli-sfondo.jpg";
+
+  return (
+    <Link
+      to={`/news/${notizia.id}`}
+      state={{ post: notizia }}
+      className="hs-notizia hs-notizia-piccola"
+    >
+      <span className="hs-miniatura" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
+
+      <span className="hs-notizia-testi">
+        <span className="hs-notizia-etichette">
+          {notizia.recente && <span className="hs-nuova">Nuova</span>}
+          <Categoria valore={notizia.categoria} />
+          <span className="hs-data">{notizia.date}</span>
+        </span>
+
+        <span className="hs-notizia-titolo">{notizia.title}</span>
+      </span>
+    </Link>
   );
 }

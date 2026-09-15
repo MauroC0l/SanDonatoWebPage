@@ -14,9 +14,13 @@
 
 import { asc, eq, sql } from "drizzle-orm";
 import { getDb } from "../../db/client.js";
-import { utenti, associazioniSquadra, squadre } from "../../db/schema.js";
+import {
+  utenti, associazioniSquadra, squadre, media, richiesteIscrizione
+} from "../../db/schema.js";
+import { urlFile } from "../../server/file.js";
 import { creaHashPassword } from "../../server/password.js";
 import { richiedeCapacita } from "../../server/autenticazione.js";
+import { annota } from "../../server/registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../server/risposte.js";
 import { leggiCorpo } from "../../server/richiesta.js";
 import { z } from "zod";
@@ -39,6 +43,9 @@ const schemaModifica = z.object({
   stato: z.enum(STATI).optional(),
   nome: z.string().trim().max(80).optional(),
   cognome: z.string().trim().max(80).optional(),
+  // Correggere un indirizzo sbagliato era impossibile: si vedeva e basta.
+  // È anche il nome con cui si entra, quindi l'unicità va ricontrollata.
+  email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255).optional(),
   password: z.string().min(10, "La password deve avere almeno 10 caratteri.").max(200).optional()
 });
 
@@ -55,9 +62,12 @@ async function elenco(req, res) {
       stato: utenti.stato,
       deveCambiarePassword: utenti.deveCambiarePassword,
       ultimoAccesso: utenti.ultimoAccesso,
-      creatoIl: utenti.creatoIl
+      creatoIl: utenti.creatoIl,
+      immagineChiave: media.chiave,
+      immagineUrlWp: media.urlOriginaleWp
     })
     .from(utenti)
+    .leftJoin(media, eq(media.id, utenti.immagineId))
     // Chi non è mai entrato va in fondo: è l'informazione che si cerca
     // quando si controlla se un account è stato consegnato davvero.
     //
@@ -65,6 +75,35 @@ async function elenco(req, res) {
     // avvolgere con desc() un frammento che contiene già "nulls last"
     // produce "... nulls last desc", che Postgres rifiuta.
     .orderBy(sql`${utenti.ultimoAccesso} desc nulls last`, asc(utenti.cognome));
+
+  /*
+   * Lo stato dell'ULTIMA richiesta di iscrizione, per ciascuno.
+   *
+   * Serve a distinguere due account che in tabella sono identici — stato
+   * "in_attesa" tutti e due — ma che per chi guarda sono cose opposte:
+   * uno aspetta una risposta, l'altro se l'è già sentita dire di no e non
+   * ha modo di riprovare. Senza questa colonna, in elenco sono la stessa
+   * riga e nessuno se ne accorge.
+   *
+   * La più recente e non tutte: chi è stato respinto una volta e poi
+   * accolto deve risultare accolto.
+   */
+  const richieste = await db
+    .select({
+      utenteId: richiesteIscrizione.utenteId,
+      id: richiesteIscrizione.id,
+      stato: richiesteIscrizione.stato,
+      sport: richiesteIscrizione.sport,
+      motivoRifiuto: richiesteIscrizione.motivoRifiuto,
+      decisaIl: richiesteIscrizione.decisaIl,
+      richiestaIl: richiesteIscrizione.richiestaIl
+    })
+    .from(richiesteIscrizione)
+    .orderBy(asc(richiesteIscrizione.richiestaIl), asc(richiesteIscrizione.id));
+
+  // L'ultima vince: si scorre dalla più vecchia e si sovrascrive.
+  const richiestaPerUtente = new Map();
+  for (const r of richieste) richiestaPerUtente.set(r.utenteId, r);
 
   const squadrePerUtente = await db
     .select({
@@ -83,9 +122,13 @@ async function elenco(req, res) {
 
   res.setHeader("Cache-Control", "no-store");
   return json(res, {
-    utenti: persone.map((p) => ({
+    utenti: persone.map(({ immagineChiave, immagineUrlWp, ...p }) => ({
       ...p,
       nomeCompleto: [p.nome, p.cognome].filter(Boolean).join(" ") || p.email,
+      // Solo l'indirizzo, non la chiave: come sia fatto l'archivio non
+      // riguarda chi disegna un elenco.
+      immagineUrl: urlFile(immagineChiave, immagineUrlWp),
+      richiesta: richiestaPerUtente.get(p.id) ?? null,
       squadre: perUtente.get(p.id) ?? []
     }))
   });
@@ -119,6 +162,13 @@ async function crea(req, res) {
     deveCambiarePassword: true
   }).returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo });
 
+  await annota(req.utente, {
+    azione: "utenti.crea",
+    tipo: "utente",
+    id: creato.id,
+    descrizione: `Ha creato l'account ${creato.email} come ${creato.ruolo}`
+  });
+
   return json(res, { utente: creato }, 201);
 }
 
@@ -136,20 +186,61 @@ async function modifica(req, res) {
     }
   }
 
+  const db = getDb();
+
   const modifiche = { aggiornatoIl: new Date() };
   if (dati.ruolo !== undefined) modifiche.ruolo = dati.ruolo;
   if (dati.stato !== undefined) modifiche.stato = dati.stato;
-  if (dati.nome !== undefined) modifiche.nome = dati.nome;
-  if (dati.cognome !== undefined) modifiche.cognome = dati.cognome;
-  if (dati.password !== undefined) modifiche.passwordHash = await creaHashPassword(dati.password);
+  if (dati.nome !== undefined) modifiche.nome = dati.nome || null;
+  if (dati.cognome !== undefined) modifiche.cognome = dati.cognome || null;
 
-  const [aggiornato] = await getDb()
+  if (dati.email !== undefined) {
+    const [occupata] = await db
+      .select({ id: utenti.id })
+      .from(utenti)
+      .where(eq(utenti.email, dati.email))
+      .limit(1);
+
+    // L'indirizzo che ha già lui non è "occupato": salvare senza cambiarlo
+    // non deve diventare un errore.
+    if (occupata && occupata.id !== dati.id) {
+      throw new ErroreHttp(409, "Esiste già un account con questa email.");
+    }
+    modifiche.email = dati.email;
+  }
+
+  if (dati.password !== undefined) {
+    modifiche.passwordHash = await creaHashPassword(dati.password);
+    // Una password decisa da un amministratore la conosce anche lui: vale la
+    // stessa regola della creazione, va cambiata al primo accesso.
+    modifiche.deveCambiarePassword = true;
+  }
+
+  const [aggiornato] = await db
     .update(utenti)
     .set(modifiche)
     .where(eq(utenti.id, dati.id))
     .returning({ id: utenti.id, email: utenti.email, ruolo: utenti.ruolo, stato: utenti.stato });
 
   if (!aggiornato) throw new ErroreHttp(404, "Utente non trovato.");
+
+  /* Cosa è cambiato, detto in italiano. La password non compare mai nel
+     dettaglio, nemmeno per dire che è stata cambiata con quale valore. */
+  const cosa = [];
+  if (dati.ruolo !== undefined) cosa.push(`ruolo → ${dati.ruolo}`);
+  if (dati.stato !== undefined) cosa.push(`stato → ${dati.stato}`);
+  if (dati.email !== undefined) cosa.push(`email → ${dati.email}`);
+  if (dati.nome !== undefined || dati.cognome !== undefined) cosa.push("nome");
+  if (dati.password !== undefined) cosa.push("password reimpostata");
+
+  await annota(req.utente, {
+    azione: dati.password !== undefined ? "utenti.password" : "utenti.modifica",
+    tipo: "utente",
+    id: aggiornato.id,
+    descrizione: `Ha modificato ${aggiornato.email}: ${cosa.join(", ") || "nulla"}`,
+    dettaglio: { cambi: cosa }
+  });
+
   return json(res, { utente: aggiornato });
 }
 

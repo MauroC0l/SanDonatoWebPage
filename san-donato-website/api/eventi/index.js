@@ -19,7 +19,9 @@ export default conGestioneErrori(async (req, res) => {
     da: da ?? (a ? null : new Date()),
     a,
     squadraId,
-    limite
+    limite,
+    // Il sito pubblico non vede gli eventi ancora programmati
+    soloVisibili: true
   });
 
   // Poco: un risultato inserito durante la partita deve comparire in fretta

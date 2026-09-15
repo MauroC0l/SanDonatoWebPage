@@ -1,427 +1,467 @@
 /* =========================================
-   1. SISTEMA DI VARIABILI
+   Archivio delle notizie.
+   Stessa lingua visiva della home e del calendario.
+   Vedi NewsPage.jsx. Prefisso: nws-
    ========================================= */
-:root {
-  /* Palette Colori */
-  --primary-color: #1d3557;       /* Navy profondo */
-  --primary-light: #457b9d;       /* Navy chiaro */
-  --accent-color: #ff7b33;        /* Arancione vibrante */
-  --accent-hover: #e65a10;        /* Arancione scuro */
-  
-  --bg-body: #f8fafc;             /* Grigio ghiaccio */
-  --bg-surface: #ffffff;          /* Bianco puro */
-  --bg-input: #f1f5f9;            /* Sfondo input default */
-  --bg-input-hover: #e2e8f0;      /* Sfondo input hover */
-  
-  --border-input: #cbd5e1;        /* Bordo input */
-  --border-light: rgba(255, 255, 255, 0.6);
-  
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
-  
-  /* Spaziature e Forme */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --shadow-sm: 0 4px 12px rgba(29, 53, 87, 0.05);
-  --shadow-md: 0 10px 30px rgba(29, 53, 87, 0.08);
-  --shadow-focus: 0 0 0 4px rgba(255, 123, 51, 0.15);
-  
-  --transition-smooth: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+.nws {
+  --nws-bg: #f6f8fb;
+  --nws-carta: #ffffff;
+  --nws-inchiostro: #0f172a;
+  --nws-testo: #475569;
+  --nws-tenue: #7c8ba1;
+  --nws-bordo: #e6ebf2;
+  --nws-arancio: #ff6600;
+  --nws-raggio: 18px;
+  --nws-ombra: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -16px rgba(15, 23, 42, .22);
+  --nws-ombra-alta: 0 4px 10px rgba(15, 23, 42, .06), 0 24px 48px -24px rgba(15, 23, 42, .3);
+
+  /*
+   * La tavolozza del pannello, perché questa pagina usa due controlli che
+   * vivono là dentro: la tendina e il calendario. Senza queste variabili
+   * resterebbero bianchi su bianco — è lo stesso motivo per cui le finestre
+   * di dialogo se le ridichiarano.
+   */
+  --adm-surface: #ffffff;
+  --adm-bg: #f1f4f9;
+  --adm-line: #e6ebf2;
+  --adm-line-soft: #f0f3f8;
+  --adm-ink: #0f172a;
+  --adm-muted: #7c8ba1;
+  --adm-blue: #0b4fd1;
+  --adm-blue-dark: #0940a8;
+  --adm-blue-soft: #e7eefc;
+  --adm-danger: #b42318;
+  --adm-danger-soft: #fdecea;
+  --adm-radius: 12px;
+  --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
+
+  background: var(--nws-bg);
+  color: var(--nws-testo);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  padding: clamp(1rem, 2vw, 1.6rem) 0 clamp(3rem, 6vw, 5rem);
 }
 
-/* =========================================
-   2. SEZIONE PRINCIPALE
-   ========================================= */
-.news-section {
-  background-color: var(--bg-body);
-  min-height: 100vh;
+/* ---------- Intestazione ---------- */
 
-  min-height: 100svh;
-  padding: clamp(2rem, 5vw, 4rem) 1rem;
-  color: var(--text-main);
-  animation: fadeInPage 0.6s ease-out forwards;
-}
-
-.news-section-title {
-  text-align: center;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 800;
-  color: var(--primary-color);
-  margin-bottom: 3.5rem;
-  position: relative;
-}
-
-.news-section-title::after {
-  content: "";
-  display: block;
-  width: 60px;
-  height: 5px;
-  background: var(--accent-color);
-  border-radius: 10px;
-  margin: 0.8rem auto 0;
-}
-
-.news-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 3rem;
-  max-width: 1440px;
+.nws-intestazione,
+.nws-contenitore {
+  max-width: 1320px;
   margin: 0 auto;
-  align-items: start;
+  padding: 0 clamp(1rem, 4vw, 2rem);
 }
 
-/* =========================================
-   3. SIDEBAR STILE "GLASS CARD"
-   ========================================= */
-.news-sidebar {
-  background: var(--bg-surface);
-  padding: 2.5rem 2rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-light);
-  
-  position: sticky;
-  top: 100px;
-  z-index: 10;
-  transition: top 0.3s ease;
-}
+.nws-intestazione { margin-bottom: clamp(1rem, 2.5vw, 1.5rem); }
 
-/* Titolo Sidebar */
-.news-sidebar h4 {
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 800;
-  color: var(--primary-color);
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.news-sidebar h4::before {
-  content: "";
-  display: block;
-  width: 6px;
-  height: 24px;
-  background: var(--accent-color);
-  border-radius: 4px;
-}
-
-/* Gruppi Form */
-.form-group {
-  margin-bottom: 2rem;
-}
-
-.form-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
+.nws-occhiello {
+  display: inline-block;
+  margin-bottom: .5rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 102, 0, .1);
+  color: var(--nws-arancio);
+  font-size: .72rem;
   font-weight: 700;
-  margin-bottom: 0.8rem;
-  display: block;
+  letter-spacing: .09em;
+  text-transform: uppercase;
 }
 
-.no-options-msg {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-style: italic;
+.nws-titolo-pagina {
+  margin: 0 0 .25rem;
+  color: var(--nws-inchiostro);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.15;
 }
 
-/* =========================================
-   4. CHECKBOX DESIGN (Custom & Clean)
-   ========================================= */
-.custom-checkbox {
+.nws-sottotitolo {
+  margin: 0;
+  color: var(--nws-tenue);
+  font-size: clamp(.9rem, 1.5vw, 1rem);
+}
+
+/* ---------- Filtri ---------- */
+
+.nws-filtri {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: .6rem 1rem;
+  align-items: center;
+
+  margin-bottom: 1.25rem;
+  padding: .8rem;
+  border: 1px solid var(--nws-bordo);
+  border-radius: var(--nws-raggio);
+  background: var(--nws-carta);
+  box-shadow: var(--nws-ombra);
+}
+
+.nws-cerca {
   display: flex;
   align-items: center;
-  margin-bottom: 0.6rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
-  transition: background var(--transition-smooth);
+  gap: .5rem;
+
+  padding: 0 .7rem;
+  height: 38px;
+  border: 1px solid var(--nws-bordo);
+  border-radius: 10px;
+  background: var(--nws-bg);
 }
 
-.custom-checkbox:hover {
-  background-color: var(--bg-body);
-}
+.nws-cerca svg { flex: 0 0 auto; color: var(--nws-tenue); }
 
-.custom-checkbox .form-check-input {
-  appearance: none;
-  width: 1.3rem;
-  height: 1.3rem;
-  border: 2px solid var(--border-input);
-  border-radius: 6px;
-  margin-right: 0.8rem;
-  cursor: pointer;
-  background-color: var(--bg-surface);
-  transition: all 0.2s ease;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.custom-checkbox .form-check-input:checked {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
-  box-shadow: 0 4px 10px rgba(255, 123, 51, 0.3);
-}
-
-.custom-checkbox .form-check-input:checked::after {
-  content: "";
-  position: absolute;
-  top: 45%;
-  left: 50%;
-  width: 6px;
-  height: 10px;
-  border: solid var(--text-inverse);
-  border-width: 0 2px 2px 0;
-  transform: translate(-50%, -60%) rotate(45deg);
-}
-
-.custom-checkbox .form-check-label {
-  font-size: 0.95rem;
-  color: var(--text-main);
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.custom-checkbox .form-check-input:checked ~ .form-check-label {
-  color: var(--primary-color);
-  font-weight: 600;
-}
-
-/* =========================================
-   5. DROPDOWN & INPUT MODERNIZZATI
-   ========================================= */
-
-.form-select, 
-.news-sidebar .form-control {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  background-color: var(--bg-input);
-  border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 0.8rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--primary-color);
-  transition: all var(--transition-smooth);
-  cursor: pointer;
-}
-
-/* Nota: I colori dentro le SVG data-uri rimangono hardcoded per necessità tecnica */
-.form-select {
-  padding-right: 2.5rem;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231d3557' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 16px 12px;
-}
-
-.form-select option {
-  background-color: var(--bg-surface);
-  color: var(--primary-color);
-  padding: 10px;
-}
-
-.form-select:hover, 
-.news-sidebar .form-control:hover {
-  background-color: var(--bg-input-hover);
-}
-
-.form-select:focus, 
-.news-sidebar .form-control:focus {
-  background-color: var(--bg-surface);
-  border-color: var(--accent-color);
-  box-shadow: var(--shadow-focus);
+.nws-cerca input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--nws-inchiostro);
+  font: inherit;
+  font-size: .88rem;
   outline: none;
 }
 
-.react-datepicker-wrapper {
-  width: 100%;
-}
-.news-sidebar .custom-datepicker {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d3557' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3e%3cline x1='16' y1='2' x2='16' y2='6'/%3e%3cline x1='8' y1='2' x2='8' y2='6'/%3e%3cline x1='3' y1='10' x2='21' y2='10'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 18px;
+.nws-filtri-campi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
 }
 
-/* =========================================
-   6. CUSTOM DATEPICKER OVERRIDE
-   ========================================= */
+/* I controlli del pannello sono nati per una colonna stretta: qui stanno in
+   riga e devono poter restringersi insieme. */
+.nws-filtri-campi > * { flex: 1 1 150px; min-width: 0; }
 
-.react-datepicker {
-  font-family: inherit !important;
-  border: none !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-md) !important;
-  overflow: hidden;
-  background-color: var(--bg-surface) !important;
-}
+.nws-azzera {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
 
-.react-datepicker__header {
-  background-color: var(--primary-color) !important;
-  border-bottom: none !important;
-  padding-top: 1rem !important;
-}
+  flex: 0 0 auto;
+  padding: 0 .8rem;
+  height: 38px;
+  border: 1px solid var(--nws-bordo);
+  border-radius: 10px;
+  background: var(--nws-carta);
 
-.react-datepicker__current-month,
-.react-datepicker-time__header,
-.react-datepicker-year-header {
-  color: var(--text-inverse) !important;
-  font-weight: 700 !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 1rem !important;
-  margin-bottom: 0.5rem;
-}
-
-.react-datepicker__day-name {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--nws-testo);
+  font: inherit;
+  font-size: .82rem;
   font-weight: 600;
-  width: 2.2rem !important;
-  line-height: 2.2rem !important;
+  cursor: pointer;
 }
 
-.react-datepicker__day {
-  color: var(--text-main);
-  width: 2.2rem !important;
-  line-height: 2.2rem !important;
-  margin: 0.2rem !important;
-  border-radius: 50% !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.nws-azzera:hover { border-color: var(--nws-arancio); color: var(--nws-arancio); }
+
+/* Il pulsante dei filtri esiste solo sul telefono */
+.nws-apri-filtri { display: none; }
+
+.nws-conto {
+  margin: 0 0 .8rem;
+  color: var(--nws-tenue);
+  font-size: .84rem;
 }
 
-.react-datepicker__day:hover {
-  background-color: var(--bg-input-hover) !important;
-  color: var(--primary-color);
+/* ---------- Griglia ---------- */
+
+.nws-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
 }
 
-.react-datepicker__day--selected,
-.react-datepicker__day--range-start,
-.react-datepicker__day--range-end {
-  background-color: var(--accent-color) !important;
-  color: var(--text-inverse) !important;
-  box-shadow: 0 4px 10px rgba(255, 123, 51, 0.4);
-}
-
-.react-datepicker__day--in-selecting-range,
-.react-datepicker__day--in-range {
-  background-color: rgba(255, 123, 51, 0.15) !important;
-  color: var(--accent-hover) !important;
-  border-radius: 0 !important;
-}
-
-.react-datepicker__day--today {
-  font-weight: 800 !important;
+.nws-scheda {
   position: relative;
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+  border-radius: var(--nws-raggio);
+  background: var(--nws-carta);
+  box-shadow: var(--nws-ombra);
+
+  color: inherit;
+  text-decoration: none;
+
+  transition: transform .3s ease, box-shadow .3s ease;
 }
-.react-datepicker__day--today::after {
-  content: '';
+
+.nws-scheda:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--nws-ombra-alta);
+}
+
+.nws-scheda:focus-visible {
+  outline: 3px solid var(--nws-arancio);
+  outline-offset: 3px;
+}
+
+.nws-foto {
+  display: block;
+  aspect-ratio: 16 / 10;
+  /* Non si stringe quando il titolo è lungo: senza, in una fila di quattro
+     schede le immagini vengono tutte alte diverse. */
+  flex: 0 0 auto;
+  background-size: cover;
+  background-position: center;
+  transition: transform .5s ease;
+}
+
+.nws-scheda:hover .nws-foto { transform: scale(1.04); }
+
+.nws-testi {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  flex: 1;
+  padding: .85rem .95rem 1rem;
+}
+
+.nws-etichette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem;
+}
+
+.nws-categoria,
+.nws-sport {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nws-categoria { background: var(--nws-arancio); color: #fff; }
+
+.nws-sport {
+  border: 1px solid var(--nws-bordo);
+  color: var(--nws-tenue);
+}
+
+.nws-data {
+  color: var(--nws-tenue);
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.nws-titolo {
+  color: var(--nws-inchiostro);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -.01em;
+
+  /* Tre righe al massimo: le schede di una fila devono restare alte uguali,
+     e un titolo lunghissimo sfalserebbe tutta la riga. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nws-sommario {
+  color: var(--nws-tenue);
+  font-size: .84rem;
+  line-height: 1.45;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nws-leggi {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+
+  margin-top: auto;
+  padding-top: .5rem;
+  color: var(--nws-arancio);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.nws-leggi svg { font-size: .7rem; transition: transform .2s ease; }
+.nws-scheda:hover .nws-leggi svg { transform: translateX(3px); }
+
+/* ---------- La prima, in evidenza ---------- */
+
+.nws-scheda-grande {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  min-height: clamp(260px, 34vw, 380px);
+  color: #fff;
+}
+
+.nws-scheda-grande .nws-foto {
   position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background-color: var(--primary-color);
-  border-radius: 50%;
+  inset: 0;
+  aspect-ratio: auto;
 }
 
-.react-datepicker__navigation-icon::before {
-  border-color: var(--text-inverse) !important;
-  border-width: 2px 2px 0 0 !important;
+.nws-velo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    to top,
+    rgba(5, 12, 25, .9) 0%,
+    rgba(5, 12, 25, .55) 40%,
+    rgba(5, 12, 25, .05) 75%
+  );
 }
 
-.react-datepicker__triangle {
-  display: none !important;
+.nws-scheda-grande .nws-testi {
+  position: relative;
+  flex: 0 0 auto;
+  max-width: 62ch;
+  padding: clamp(1rem, 3vw, 1.8rem);
 }
 
-/* =========================================
-   7. BOTTONE RESET & MOBILE
-   ========================================= */
-.filter-reset-btn {
-  width: 100%;
-  background-color: transparent;
-  color: var(--text-muted);
-  border: 2px dashed var(--border-input);
-  font-weight: 600;
-  padding: 0.8rem;
-  border-radius: 12px;
-  margin-top: 1rem;
-  transition: all var(--transition-smooth);
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.05em;
+.nws-scheda-grande .nws-titolo {
+  color: #fff;
+  font-size: clamp(1.2rem, 2.6vw, 1.9rem);
+  -webkit-line-clamp: 2;
 }
 
-.filter-reset-btn:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-  background-color: rgba(255, 123, 51, 0.05);
-  transform: translateY(-2px);
+.nws-scheda-grande .nws-sommario { color: rgba(255, 255, 255, .8); }
+.nws-scheda-grande .nws-data { color: rgba(255, 255, 255, .75); }
+
+.nws-scheda-grande .nws-sport {
+  border-color: rgba(255, 255, 255, .35);
+  color: rgba(255, 255, 255, .85);
 }
 
-.mobile-filters-toggle {
-  display: none;
-  margin-bottom: 2rem;
-  justify-content: center;
-}
+/* ---------- Pagine ---------- */
 
-.filter-toggle-btn {
-  background: var(--primary-color);
-  color: var(--text-inverse);
-  padding: 0.9rem 2.5rem;
-  border-radius: 50px;
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 8px 20px rgba(29, 53, 87, 0.25);
+.nws-pagine {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  transition: transform 0.2s ease;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
-.filter-toggle-btn:active {
-  transform: scale(0.96);
+.nws-pagine button {
+  padding: .5rem 1rem;
+  border: 1px solid var(--nws-bordo);
+  border-radius: 999px;
+  background: var(--nws-carta);
+
+  color: var(--nws-inchiostro);
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: border-color .2s ease, color .2s ease;
 }
 
-/* Responsive Logic */
-@media (max-width: 992px) {
-  .news-layout {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .mobile-filters-toggle {
-    display: flex;
-  }
-
-  .news-sidebar {
-    display: none;
-    background: var(--bg-surface);
-    border: none;
-    border-top: 4px solid var(--accent-color);
-    box-shadow: var(--shadow-md);
-    position: static; 
-  }
-
-  .news-sidebar.show-mobile {
-    display: block;
-    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+.nws-pagine button:hover:not(:disabled) {
+  border-color: var(--nws-arancio);
+  color: var(--nws-arancio);
 }
 
-@keyframes fadeInPage {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+.nws-pagine button:disabled { opacity: .4; cursor: default; }
+
+.nws-pagine span {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--nws-tenue);
+  font-size: .84rem;
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+/* ---------- Vuoti e attese ---------- */
+
+.nws-vuoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .6rem;
+
+  margin: 0;
+  padding: 3rem 1.2rem;
+  border: 1px dashed var(--nws-bordo);
+  border-radius: var(--nws-raggio);
+  background: var(--nws-carta);
+  color: var(--nws-tenue);
+  text-align: center;
+}
+
+.nws-vuoto svg { font-size: 1.8rem; opacity: .5; }
+
+/* Sagome grigie invece della rotella: lo spazio è già quello definitivo,
+   quindi quando le notizie arrivano la pagina non salta. */
+.nws-sagoma {
+  display: block;
+  min-height: 280px;
+  border-radius: var(--nws-raggio);
+  background: linear-gradient(100deg, #eef1f6 30%, #f7f9fc 50%, #eef1f6 70%);
+  background-size: 220% 100%;
+  animation: nwsOnda 1.4s infinite linear;
+}
+
+@keyframes nwsOnda {
+  from { background-position: 180% 0; }
+  to { background-position: -20% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nws-sagoma { animation: none; }
+  .nws-scheda,
+  .nws-foto { transition: none; }
+}
+
+/* ---------- Schermi medi ---------- */
+
+@media (max-width: 900px) {
+  .nws-filtri { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Telefoni ---------- */
+
+@media (max-width: 720px) {
+  /*
+   * I filtri dietro a un pulsante.
+   *
+   * Cinque controlli in cima alla pagina spingerebbero le notizie sotto la
+   * piega, e le notizie sono quello che si è venuti a leggere.
+   */
+  .nws-filtri { display: none; }
+  .nws-filtri.is-aperti { display: grid; }
+
+  .nws-apri-filtri {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+
+    margin-bottom: 1rem;
+    padding: .55rem .9rem;
+    border: 1px solid var(--nws-bordo);
+    border-radius: 999px;
+    background: var(--nws-carta);
+
+    color: var(--nws-inchiostro);
+    font: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Un puntino arancione quando un filtro è acceso: chiuso il pannello,
+     altrimenti non si saprebbe perché mancano delle notizie. */
+  .nws-pallino {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--nws-arancio);
+  }
+
+  .nws-filtri-campi > * { flex-basis: 100%; }
+  .nws-scheda-grande { min-height: 230px; }
 }

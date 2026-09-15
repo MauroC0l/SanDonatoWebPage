@@ -16,6 +16,7 @@ import { getDb } from "../db/client.js";
 import { utenti, sessioni } from "../db/schema.js";
 import { creaHashPassword, verificaPassword } from "../server/password.js";
 import { richiedeAccesso } from "../server/autenticazione.js";
+import { annota } from "../server/registro.js";
 import { improntaSessioneCorrente } from "../server/sessioni.js";
 import { json, errore, conGestioneErrori, soloMetodi } from "../server/risposte.js";
 import { leggiCorpo } from "../server/richiesta.js";
@@ -52,6 +53,13 @@ export default conGestioneErrori(
       eq(sessioni.utenteId, req.utente.id),
       sessioneCorrente ? ne(sessioni.id, sessioneCorrente) : undefined
     ));
+
+    await annota(req.utente, {
+      azione: "password.cambia",
+      tipo: "utente",
+      id: req.utente.id,
+      descrizione: "Ha cambiato la propria password"
+    });
 
     return json(res, { cambiata: true });
   })

@@ -7,9 +7,51 @@
  * componessero ciascuno per conto proprio, prima o poi divergerebbero.
  */
 
+import { urlFile } from "./file.js";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { notizie, media, utenti } from "../db/schema.js";
+
+/**
+ * Cosa vede il sito pubblico: pubblicata E con la data di pubblicazione già
+ * passata.
+ *
+ * È così che funziona la programmazione, e volutamente senza stato nuovo né
+ * lavoro pianificato: una notizia programmata è già "pubblicata", ha solo una
+ * data nel futuro, e diventa visibile da sola quando l'orologio la supera.
+ *
+ * L'alternativa — uno stato "programmata" e un processo che a una certa ora
+ * lo cambia — richiede qualcosa che giri a intervalli regolari. Su Vercel le
+ * funzioni esistono solo mentre arriva una richiesta: quel processo andrebbe
+ * aggiunto, pagato e sorvegliato, e il giorno che si inceppa le notizie
+ * restano invisibili senza che nessuno se ne accorga.
+ *
+ * L'indice idx_notizie_elenco è già su (stato, pubblicata_il): copre
+ * entrambe le condizioni senza aggiungerne uno.
+ */
+function condizioneVisibile() {
+  return and(
+    eq(notizie.stato, "pubblicata"),
+    sql`${notizie.pubblicataIl} is not null and ${notizie.pubblicataIl} <= now()`
+  );
+}
+
+/**
+ * L'altra metà: pubblicata ma non ancora sul sito, cioè programmata.
+ *
+ * È scritta come la NEGAZIONE esatta della condizione qui sopra, dentro alle
+ * notizie pubblicate, e non come "data nel futuro". Le due formulazioni si
+ * assomigliano ma non coincidono: una notizia pubblicata senza data non
+ * sarebbe né visibile né "nel futuro", e sparirebbe da entrambi i filtri del
+ * pannello senza che nessuno possa più trovarla. Così invece ogni riga
+ * pubblicata cade in uno dei due, sempre.
+ */
+function condizioneProgrammata() {
+  return and(
+    eq(notizie.stato, "pubblicata"),
+    sql`not (${notizie.pubblicataIl} is not null and ${notizie.pubblicataIl} <= now())`
+  );
+}
 
 /**
  * Indirizzo pubblico di un file.
@@ -18,13 +60,6 @@ import { notizie, media, utenti } from "../db/schema.js";
  * passeranno su R2 basterà che "chiave" sia valorizzata e che
  * URL_PUBBLICO_FILE sia impostata: gli articoli non vanno toccati.
  */
-export function urlFile(chiave, urlOriginale) {
-  if (chiave) {
-    const base = (process.env.URL_PUBBLICO_FILE || "").replace(/\/+$/, "");
-    return base ? `${base}/${chiave}` : null;
-  }
-  return urlOriginale || null;
-}
 
 /** Colonne restituite da ogni interrogazione sulle notizie. */
 const COLONNE = {
@@ -35,6 +70,7 @@ const COLONNE = {
   sommario: notizie.sommario,
   contenuto: notizie.contenuto,
   sport: notizie.sport,
+  categoria: notizie.categoria,
   stato: notizie.stato,
   pubblicataIl: notizie.pubblicataIl,
   creataIl: notizie.creataIl,
@@ -58,6 +94,7 @@ function daRiga(riga, { conContenuto = true } = {}) {
     sommario: riga.sommario ?? "",
     ...(conContenuto ? { contenuto: riga.contenuto } : {}),
     sport: riga.sport,
+    categoria: riga.categoria,
     stato: riga.stato,
     copertinaId: riga.copertinaId ?? null,
     copertina: urlFile(riga.copertinaChiave, riga.copertinaUrlWp),
@@ -86,6 +123,7 @@ export async function elencaNotizie({
   pagina = 1,
   perPagina = 12,
   sport,
+  categoria,
   stato,
   cerca,
   soloPubblicate = true,
@@ -94,16 +132,41 @@ export async function elencaNotizie({
   const db = getDb();
   const condizioni = [];
 
+  // Il pannello chiede più stati insieme ("bozza,in_revisione" per dire "le
+  // non pubblicate"): arriva come elenco o come stringa con le virgole.
+  const stati = Array.isArray(stato)
+    ? stato
+    : String(stato ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
+  /**
+   * Ogni voce del filtro diventa una condizione, e le condizioni si sommano
+   * in OR.
+   *
+   * Non si può più usare inArray sulla colonna: "programmata" non è un valore
+   * dello stato, è "pubblicata con la data ancora da venire". E per simmetria
+   * "pubblicata" qui significa davvero online, non solo con quello stato in
+   * tabella: altrimenti le due voci si sovrapporrebbero e la stessa notizia
+   * comparirebbe sotto entrambe.
+   */
+  const condizioneDi = (s) => {
+    if (s === "pubblicata") return condizioneVisibile();
+    if (s === "programmata") return condizioneProgrammata();
+    return eq(notizie.stato, s);
+  };
+
   if (soloPubblicate) {
-    condizioni.push(eq(notizie.stato, "pubblicata"));
-  } else if (stato) {
-    condizioni.push(eq(notizie.stato, stato));
+    condizioni.push(condizioneVisibile());
+  } else if (stati.length === 1) {
+    condizioni.push(condizioneDi(stati[0]));
+  } else if (stati.length > 1) {
+    condizioni.push(or(...stati.map(condizioneDi)));
   } else {
     // Nel pannello il cestino si guarda apposta, non per sbaglio
     condizioni.push(sql`${notizie.stato} <> 'cestino'`);
   }
 
   if (sport) condizioni.push(eq(notizie.sport, sport));
+  if (categoria) condizioni.push(eq(notizie.categoria, categoria));
 
   if (cerca) {
     const modello = `%${cerca}%`;
@@ -149,7 +212,7 @@ export async function trovaNotizia(identificativo, { soloPubblicate = true } = {
     : eq(notizie.slug, String(identificativo));
 
   const righe = await base(db)
-    .where(soloPubblicate ? and(condizione, eq(notizie.stato, "pubblicata")) : condizione)
+    .where(soloPubblicate ? and(condizione, condizioneVisibile()) : condizione)
     // Se un nostro id coincidesse con un wp_id altrui, vince il wp_id
     .orderBy(desc(sql`case when ${notizie.wpId} = ${numero || 0} then 1 else 0 end`))
     .limit(1);
@@ -172,7 +235,7 @@ export async function ultimePerSport(quante = 4) {
       )`.as("posizione")
     })
     .from(notizie)
-    .where(eq(notizie.stato, "pubblicata"))
+    .where(condizioneVisibile())
     .as("numerate");
 
   const righe = await base(db)
@@ -213,3 +276,6 @@ export async function slugLibero(desiderato, escludiId = null) {
   // Non dovrebbe succedere, ma meglio uno slug brutto di un errore
   return `${desiderato}-${Date.now()}`;
 }
+
+// Riesportata: mezzo front-end la importa da qui.
+export { urlFile };

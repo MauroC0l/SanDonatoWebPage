@@ -11,15 +11,22 @@
  * impossibile che finisca su un database vero per una variabile d'ambiente
  * sbagliata.
  *
+ * L'eccezione è il database della DIMOSTRAZIONE, che sta su un servizio
+ * remoto ed è fatto apposta di dati inventati. Per quello serve scriverlo:
+ * "--anche-remoto" non si digita per sbaglio, e il nome dell'ospite
+ * finisce stampato a schermo prima di toccare qualunque cosa.
+ *
  * Uso:
  *   node --env-file=.env scripts/semina-dati-prova.mjs
  *   node --env-file=.env scripts/semina-dati-prova.mjs --pulisci
+ *   node --env-file=.env.demo scripts/semina-dati-prova.mjs --anche-remoto
  */
 
 import { eq, like, inArray } from "drizzle-orm";
 import { getDb, chiudiDb } from "../db/client.js";
 import {
-  utenti, squadre, eventi, richiesteIscrizione, associazioniSquadra
+  utenti, squadre, eventi, richiesteIscrizione, associazioniSquadra,
+  schedeAtleta, pagamenti, tipiQuota
 } from "../db/schema.js";
 import { creaHashPassword } from "../server/password.js";
 
@@ -29,6 +36,7 @@ const DOMINIO = "prova.psd";
 const PASSWORD_COMUNE = "provapsd2026";
 
 const soloPulisci = process.argv.includes("--pulisci");
+const ancheRemoto = process.argv.includes("--anche-remoto");
 
 /* =====================================================
    Sicurezza
@@ -38,13 +46,22 @@ function verificaCheSiaLocale() {
   const url = process.env.DATABASE_URL ?? "";
   const locale = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
 
-  if (!locale) {
+  if (locale) return;
+
+  if (!ancheRemoto) {
     throw new Error(
       "DATABASE_URL non punta a un database locale.\n" +
       "   Questo script crea un account admin/admin e centinaia di righe finte:\n" +
-      "   non deve poter toccare un database vero."
+      "   non deve poter toccare un database vero.\n" +
+      "   Se è il database della dimostrazione, aggiungi --anche-remoto."
     );
   }
+
+  /* Il nome dell'ospite, stampato prima di scrivere qualunque cosa: se
+     qualcuno lancia il comando con il file .env sbagliato, lo legge lì. */
+  const ospite = url.replace(/^.*@/, "").replace(/[/?].*$/, "");
+  console.log(`⚠  Database remoto: ${ospite}`);
+  console.log("   Ci finiscono dati inventati e un account admin/admin.");
 }
 
 /* =====================================================
@@ -317,10 +334,199 @@ async function creaRichieste(db, creati, listaSquadre) {
     });
   }
 
+  /*
+   * Qualcuno che fa due sport.
+   *
+   * In Polisportiva succede — il ragazzo che gioca a calcio e d'inverno
+   * fa pallavolo — e senza almeno un caso così nei dati di prova la
+   * schermata che distingue le due squadre non la si vede mai, e quindi
+   * non la si controlla mai.
+   */
+  const accolte = righe.filter((r) => r.stato === "approvata");
+
+  for (const r of accolte.slice(0, 4)) {
+    const altroSport = sportive.filter((s) => s.sport !== r.sport);
+    if (altroSport.length === 0) continue;
+
+    const seconda = scelta(altroSport);
+
+    righe.push({
+      utenteId: r.utenteId,
+      sport: seconda.sport,
+      squadraId: seconda.id,
+      stato: "approvata",
+      richiestaIl: giorniFa(intero(30, 300)),
+      decisaDa: scelta(decisori).id,
+      decisaIl: giorniFa(intero(1, 29)),
+      motivoRifiuto: null
+    });
+  }
+
   await db.insert(richiesteIscrizione).values(righe);
 
   const perStato = righe.reduce((acc, r) => ({ ...acc, [r.stato]: (acc[r.stato] || 0) + 1 }), {});
   console.log(`Create ${righe.length} richieste:`, perStato);
+
+  // Le accolte sono l'elenco di chi sta in squadra: è da lì che nascono le
+  // schede, i certificati e le quote.
+  return righe.filter((r) => r.stato === "approvata");
+}
+
+/* =====================================================
+   Schede degli atleti, certificati e quote
+   ===================================================== */
+
+/** Dalla data al formato "2026-05-14" che vuole una colonna date. */
+const soloData = (d) => d.toISOString().slice(0, 10);
+const fraGiorni = (giorni) => soloData(new Date(Date.now() + giorni * 86400000));
+
+/**
+ * Le schede, con dentro i casi che la segreteria deve distinguere a colpo
+ * d'occhio: certificati scaduti, in scadenza fra due settimane, mai
+ * consegnati; quote saldate, a metà, non ancora decise.
+ *
+ * Le proporzioni sono volutamente sbilanciate verso i guai: una schermata in
+ * cui va tutto bene non dice se i guai si vedrebbero.
+ */
+async function creaSchede(db, richiesteApprovate) {
+  const schede = [];
+  const versamenti = [];
+
+  /*
+   * Una scheda per PERSONA, non per richiesta.
+   *
+   * Chi gioca a calcio e d'inverno fa pallavolo ha due richieste accolte
+   * ma una sola anagrafica, e la tabella lo impone con un indice unico su
+   * utente_id. Senza questa riga, i quattro atleti multi-sport che il
+   * seminatore crea apposta facevano fallire l'inserimento di TUTTE le
+   * schede insieme — e siccome le richieste doppie sono state aggiunte
+   * dopo l'ultima semina, il guasto è rimasto invisibile finché non si è
+   * riempito un database nuovo.
+   */
+  const perPersona = [...new Map(
+    richiesteApprovate.map((r) => [r.utenteId, r])
+  ).values()];
+
+  for (const r of perPersona) {
+    const sorte = Math.random();
+
+    // Uno su sei non ha proprio la scheda: è l'atleta appena inserito, che
+    // nessuno ha ancora registrato. Deve comparire lo stesso nell'elenco.
+    if (sorte < 0.17) continue;
+
+    // Scadenza del certificato: un pezzo scaduto, un pezzo vicino
+    const scadenza =
+      sorte < 0.34 ? fraGiorni(-intero(1, 200)) :
+      sorte < 0.5 ? fraGiorni(intero(0, 28)) :
+      fraGiorni(intero(40, 330));
+
+    const nascita = new Date();
+    nascita.setFullYear(nascita.getFullYear() - intero(8, 42));
+    nascita.setMonth(intero(0, 11), intero(1, 28));
+
+    const minorenne = new Date().getFullYear() - nascita.getFullYear() < 18;
+    const quota = scelta([15000, 20000, 25000, 30000, 35000, null]);
+
+    // Un minore su tre ha anche il secondo contatto
+    const secondoContatto = minorenne && intero(0, 2) === 0;
+
+    schede.push({
+      utenteId: r.utenteId,
+      dataNascita: soloData(nascita),
+      luogoNascita: scelta(["Torino", "Rivoli", "Collegno", "Moncalieri", "Chieri"]),
+      telefono: `3${intero(20, 49)} ${intero(1000000, 9999999)}`,
+      indirizzo: `Via ${scelta(COGNOMI)} ${intero(1, 140)}, Torino`,
+      // Il tutore solo per i minori: è lì che serve davvero
+      tutoreNome: minorenne ? `${scelta(NOMI)} ${scelta(COGNOMI)}` : null,
+      tutoreParentela: minorenne ? scelta(["Madre", "Padre"]) : null,
+      tutoreTelefono: minorenne ? `3${intero(20, 49)} ${intero(1000000, 9999999)}` : null,
+
+      /* Il secondo contatto solo a una parte dei minori, non a tutti:
+         serve a vedere la scheda in tutte e due le forme, con e senza.
+         Una prova in cui ce l'hanno tutti nasconde proprio il caso che
+         si voleva guardare.
+
+         Le colonne ci sono sempre, anche quando sono nulle: le righe si
+         inseriscono tutte insieme, e una riga con meno chiavi delle
+         altre è il modo di ritrovarsi i dati nella colonna sbagliata. */
+      tutore2Nome: secondoContatto ? `${scelta(NOMI)} ${scelta(COGNOMI)}` : null,
+      tutore2Parentela: secondoContatto ? scelta(["Padre", "Nonna", "Nonno", "Zia"]) : null,
+      tutore2Telefono: secondoContatto ? `3${intero(20, 49)} ${intero(1000000, 9999999)}` : null,
+      tipoCertificato: scelta(["agonistico", "non_agonistico"]),
+      certificatoScadenza: scadenza,
+
+      // Il file resta scollegato in tutti i casi: senza un archivio dove
+      // metterlo, fingere che ci sia renderebbe la schermata più ottimista
+      // di com'è. "Scadenza registrata ma copia mai consegnata" è per ora
+      // la situazione di tutti, ed è anche quella che va vista.
+      certificatoMediaId: null,
+
+      quotaStagionaleCentesimi: quota,
+      note: Math.random() < 0.15
+        ? scelta([
+            "Allergia alle arachidi, l'adrenalina è nello zaino.",
+            "Lavora su turni: agli allenamenti del giovedì arriva tardi.",
+            "Il fratello gioca negli Allievi, stessa email di contatto."
+          ])
+        : null
+    });
+
+    if (quota == null) continue;
+
+    /* I versamenti: chi ha saldato in una volta, chi è fermo all'acconto,
+       chi non ha ancora versato niente. */
+    const quanto = Math.random();
+
+    if (quanto < 0.25) continue;
+
+    if (quanto < 0.55) {
+      versamenti.push({
+        utenteId: r.utenteId,
+        importoCentesimi: Math.round(quota * 0.4),
+        causale: "Acconto iscrizione",
+        pagatoIl: soloData(giorniFa(intero(60, 200))),
+        metodo: scelta(["bonifico", "contanti"])
+      });
+      continue;
+    }
+
+    if (Math.random() < 0.5) {
+      versamenti.push({
+        utenteId: r.utenteId,
+        importoCentesimi: quota,
+        causale: "Quota stagionale",
+        pagatoIl: soloData(giorniFa(intero(30, 220))),
+        metodo: scelta(["bonifico", "pos", "contanti"])
+      });
+    } else {
+      const acconto = Math.round(quota / 2);
+      versamenti.push(
+        {
+          utenteId: r.utenteId,
+          importoCentesimi: acconto,
+          causale: "Acconto iscrizione",
+          pagatoIl: soloData(giorniFa(intero(150, 250))),
+          metodo: "bonifico"
+        },
+        {
+          utenteId: r.utenteId,
+          importoCentesimi: quota - acconto,
+          causale: "Saldo",
+          pagatoIl: soloData(giorniFa(intero(20, 140))),
+          metodo: scelta(["bonifico", "pos"])
+        }
+      );
+    }
+  }
+
+  if (schede.length) await db.insert(schedeAtleta).values(schede);
+  if (versamenti.length) await db.insert(pagamenti).values(versamenti);
+
+  const totale = versamenti.reduce((s, v) => s + v.importoCentesimi, 0);
+  console.log(
+    `Create ${schede.length} schede e ${versamenti.length} versamenti ` +
+    `(${(totale / 100).toFixed(2)} € incassati).`
+  );
 }
 
 /* =====================================================
@@ -412,6 +618,35 @@ async function creaEventi(db, creati, listaSquadre) {
 }
 
 /* =====================================================
+   Le tariffe della stagione
+   ===================================================== */
+
+/**
+ * Il listino che l'amministratore decide e la segreteria applica.
+ *
+ * Senza, la pagina "Quote" è vuota e sulla scheda di un atleta non c'è
+ * niente da scegliere: si vede un pannello che sembra rotto invece di uno
+ * che funziona. Gli importi sono verosimili ma inventati, come tutto il
+ * resto qui dentro.
+ */
+async function creaTariffe(db) {
+  const listino = [
+    { nome: "Prima iscrizione", descrizione: "Chi si iscrive per la prima volta", importoCentesimi: 25000, ordine: 1 },
+    { nome: "Rinnovo", descrizione: "Chi c'era anche l'anno scorso", importoCentesimi: 20000, ordine: 2 },
+    { nome: "Fratello o sorella", descrizione: "Dal secondo figlio iscritto", importoCentesimi: 15000, ordine: 3 },
+    { nome: "Minivolley", descrizione: "Corso propedeutico, un allenamento a settimana", importoCentesimi: 12000, ordine: 4 },
+    { nome: "Solo tesseramento", descrizione: "Chi si allena altrove e gioca con noi", importoCentesimi: 5000, ordine: 5 }
+  ];
+
+  /* Si rifanno a ogni giro come l'admin di prova: il seminatore deve
+     poter girare due volte senza lasciare doppioni. */
+  await db.delete(tipiQuota);
+  await db.insert(tipiQuota).values(listino);
+
+  console.log(`Create ${listino.length} tariffe.`);
+}
+
+/* =====================================================
    Esecuzione
    ===================================================== */
 
@@ -434,9 +669,12 @@ async function main() {
     throw new Error("Non ci sono squadre. Lancia prima scripts/semina-squadre.mjs.");
   }
 
+  await creaTariffe(db);
+
   const creati = await creaUtenti(db);
   await collegaAllenatori(db, creati, listaSquadre);
-  await creaRichieste(db, creati, listaSquadre);
+  const approvate = await creaRichieste(db, creati, listaSquadre);
+  await creaSchede(db, approvate);
   await creaEventi(db, creati, listaSquadre);
 
   console.log("\n✅ Fatto.");

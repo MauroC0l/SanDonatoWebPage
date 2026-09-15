@@ -1,0 +1,134 @@
+/* Gli eventi su un mese. Vedi CalendarioEventi.jsx */
+
+.cal {
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  overflow: hidden;
+}
+
+.cal-testa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--adm-line);
+}
+
+.cal-mese {
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.cal-oggi { flex: 0 0 auto; }
+
+.cal-intestazioni,
+.cal-griglia {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-intestazioni {
+  border-bottom: 1px solid var(--adm-line);
+  background: var(--adm-bg);
+}
+
+.cal-intestazioni span {
+  padding: 6px 8px;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--adm-muted);
+  text-align: center;
+}
+
+.cal-casella {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  min-height: 96px;
+  padding: 4px;
+  /* Bordo solo a destra e sotto: su tutti e quattro i lati si
+     raddoppierebbe di spessore fra una casella e l'altra. */
+  border-right: 1px solid var(--adm-line-soft);
+  border-bottom: 1px solid var(--adm-line-soft);
+}
+
+.cal-casella:nth-child(7n) { border-right: 0; }
+.cal-casella.is-fuori { background: var(--adm-bg); }
+.cal-casella.is-fuori .cal-numero { opacity: .45; }
+
+.cal-numero {
+  align-self: flex-end;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--adm-muted);
+}
+
+.cal-casella.is-oggi { background: var(--adm-blue-soft); }
+.cal-casella.is-oggi .cal-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--adm-blue);
+  color: #fff;
+}
+
+.cal-evento {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+
+  padding: 2px 4px;
+  border-left: 3px solid #999;
+  border-radius: 3px;
+  background: var(--adm-surface);
+  box-shadow: 0 1px 1px rgba(16, 32, 56, .08);
+
+  color: var(--adm-ink);
+  font-size: .72rem;
+  text-decoration: none;
+
+  /* Una riga sola, tagliata: in una casella alta tre centimetri il titolo
+     per esteso toglierebbe il posto agli altri eventi dello stesso giorno. */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.cal-evento:hover { background: var(--adm-blue-soft); }
+
+.cal-ora { flex: 0 0 auto; font-weight: 700; }
+.cal-titolo { overflow: hidden; text-overflow: ellipsis; }
+.cal-segno-luogo { flex: 0 0 auto; opacity: .5; font-size: .62rem; }
+
+.cal-altri {
+  padding-left: 4px;
+  font-size: .68rem;
+  color: var(--adm-muted);
+}
+
+@media (max-width: 720px) {
+  /* Su un telefono sette colonne di caselle alte diventano illeggibili.
+     Le sette colonne restano — un calendario con meno non è un calendario —
+     ma basse, con gli eventi ridotti a una barretta del loro colore. */
+  .cal-casella { min-height: 58px; padding: 2px; }
+
+  .cal-evento {
+    min-height: 6px;
+    padding: 1px 2px;
+    border-left-width: 6px;
+    font-size: 0;
+  }
+
+  .cal-ora,
+  .cal-segno-luogo { display: none; }
+  .cal-altri { font-size: .62rem; }
+}

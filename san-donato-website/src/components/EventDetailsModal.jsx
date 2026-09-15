@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { linkMappa } from "../utils/linkMappa";
 import "../css/EventDetailsModal.css";
 
 // --- UTILITIES INTERNE ---
@@ -26,6 +27,11 @@ export default function EventDetailsModal({ event, onClose }) {
   }, [event, onClose]);
 
   if (!event) return null;
+
+  // Dove si gioca, su una mappa. Con le coordinate porta al punto esatto;
+  // senza, fa cercare a Google il nome del luogo. Se non c'è nemmeno quello,
+  // è null e il collegamento non compare.
+  const mappa = linkMappa({ luogo: event.location, latitudine: event.lat, longitudine: event.lng });
 
   // Controllo fine evento per decidere tra Live o Replay
   const isEventEnded = (() => {
@@ -74,12 +80,20 @@ export default function EventDetailsModal({ event, onClose }) {
               </div>
             </div>
 
-            {/* LUOGO */}
+            {/* LUOGO — cliccabile quando c'è qualcosa da aprire */}
             <div className="cp-detail-row">
               <div className="cp-icon-box"><IconMap /></div>
               <div className="cp-detail-content">
                 <label>Luogo</label>
-                <p>{event.location !== "" ? event.location : "Luogo da definire"}</p>
+                {mappa ? (
+                  <p>
+                    <a href={mappa} target="_blank" rel="noreferrer" className="cp-luogo-link">
+                      {event.location}
+                    </a>
+                  </p>
+                ) : (
+                  <p>{event.location !== "" ? event.location : "Luogo da definire"}</p>
+                )}
               </div>
             </div>
 
@@ -156,16 +170,19 @@ export default function EventDetailsModal({ event, onClose }) {
           </div>
 
           {/* FOOTER ACTIONS */}
-          {(event.location && event.location !== "") && (
+          {mappa && (
             <div className="cp-modal-footer">
-              <button
+              {/* Un collegamento vero e non una finestra aperta da JavaScript:
+                  si può tenere premuto per condividerlo, e i blocchi delle
+                  finestre a comparsa non lo fermano. */}
+              <a
                 className="cp-btn-primary"
-                onClick={() => {
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`);
-                }}
+                href={mappa}
+                target="_blank"
+                rel="noreferrer"
               >
                 Apri su Maps
-              </button>
+              </a>
             </div>
           )}
         </div>

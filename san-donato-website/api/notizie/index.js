@@ -13,10 +13,10 @@ import { schemaElencoNotizie, valida } from "../../server/validazione.js";
 export default conGestioneErrori(async (req, res) => {
   if (!soloMetodi(req, res, ["GET"])) return;
 
-  const { pagina, perPagina, sport, cerca } = valida(schemaElencoNotizie, parametri(req));
+  const { pagina, perPagina, sport, categoria, cerca } = valida(schemaElencoNotizie, parametri(req));
 
   const risultato = await elencaNotizie({
-    pagina, perPagina, sport, cerca,
+    pagina, perPagina, sport, categoria, cerca,
     soloPubblicate: true
   });
 

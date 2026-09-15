@@ -96,9 +96,18 @@
 .cp-desc-row p { white-space: pre-wrap; }
 
 .cp-btn-primary {
+  /* Da <button> è diventato <a>: servono display, allineamento e niente
+     sottolineatura, che un link si porta dietro e un pulsante no. */
+  display: block; box-sizing: border-box; text-align: center; text-decoration: none;
   width: 100%; padding: 1rem; background: #1E293B; color: white; border: none; border-radius: 14px; font-weight: 600; cursor: pointer; transition: transform 0.1s;
 }
 .cp-btn-primary:active { transform: scale(0.98); }
+.cp-btn-primary:hover { color: white; }
+
+/* Il nome del luogo apre la mappa: è il gesto che la gente prova per primo,
+   prima di cercare il pulsante in fondo alla scheda. */
+.cp-luogo-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.cp-luogo-link:hover { color: #1E293B; }
 
 /* RESPONSIVE PER IL MODALE */
 @media (max-width: 1024px) {

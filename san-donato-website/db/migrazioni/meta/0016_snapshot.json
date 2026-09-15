@@ -1,0 +1,2197 @@
+{
+  "id": "3f5c992d-a770-46c4-917a-e01d8d5c45ca",
+  "prevId": "852959c1-8d68-431c-b0f2-02797fe4f714",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.associazioni_squadra": {
+      "name": "associazioni_squadra",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "squadra_id": {
+          "name": "squadra_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_associazione_unica": {
+          "name": "idx_associazione_unica",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "squadra_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_associazioni_squadra": {
+          "name": "idx_associazioni_squadra",
+          "columns": [
+            {
+              "expression": "squadra_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "associazioni_squadra_utente_id_utenti_id_fk": {
+          "name": "associazioni_squadra_utente_id_utenti_id_fk",
+          "tableFrom": "associazioni_squadra",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "associazioni_squadra_squadra_id_squadre_id_fk": {
+          "name": "associazioni_squadra_squadra_id_squadre_id_fk",
+          "tableFrom": "associazioni_squadra",
+          "tableTo": "squadre",
+          "columnsFrom": [
+            "squadra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cartelle_media": {
+      "name": "cartelle_media",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creata_da": {
+          "name": "creata_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cartelle_media_creata_da_utenti_id_fk": {
+          "name": "cartelle_media_creata_da_utenti_id_fk",
+          "tableFrom": "cartelle_media",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "creata_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cartelle_media_nome_unique": {
+          "name": "cartelle_media_nome_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nome"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.eventi": {
+      "name": "eventi",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "squadra_id": {
+          "name": "squadra_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_evento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'partita'"
+        },
+        "sport": {
+          "name": "sport",
+          "type": "sport_squadra",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "titolo": {
+          "name": "titolo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avversario": {
+          "name": "avversario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inizio": {
+          "name": "inizio",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fine": {
+          "name": "fine",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "visibile_dal": {
+          "name": "visibile_dal",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutto_il_giorno": {
+          "name": "tutto_il_giorno",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "luogo": {
+          "name": "luogo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latitudine": {
+          "name": "latitudine",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitudine": {
+          "name": "longitudine",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descrizione": {
+          "name": "descrizione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "risultato": {
+          "name": "risultato",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parziali": {
+          "name": "parziali",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "marcatori": {
+          "name": "marcatori",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diretta": {
+          "name": "diretta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_da": {
+          "name": "creato_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "google_event_id": {
+          "name": "google_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "aggiornato_il": {
+          "name": "aggiornato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_eventi_periodo": {
+          "name": "idx_eventi_periodo",
+          "columns": [
+            {
+              "expression": "inizio",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_eventi_squadra": {
+          "name": "idx_eventi_squadra",
+          "columns": [
+            {
+              "expression": "squadra_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "inizio",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "eventi_squadra_id_squadre_id_fk": {
+          "name": "eventi_squadra_id_squadre_id_fk",
+          "tableFrom": "eventi",
+          "tableTo": "squadre",
+          "columnsFrom": [
+            "squadra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "eventi_creato_da_utenti_id_fk": {
+          "name": "eventi_creato_da_utenti_id_fk",
+          "tableFrom": "eventi",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "creato_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "eventi_google_event_id_unique": {
+          "name": "eventi_google_event_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "google_event_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.media": {
+      "name": "media",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "chiave": {
+          "name": "chiave",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mime": {
+          "name": "mime",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "byte": {
+          "name": "byte",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "larghezza": {
+          "name": "larghezza",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "altezza": {
+          "name": "altezza",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alt": {
+          "name": "alt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "titolo": {
+          "name": "titolo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tag": {
+          "name": "tag",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cartella_id": {
+          "name": "cartella_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "caricato_da": {
+          "name": "caricato_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "wp_id": {
+          "name": "wp_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "url_originale_wp": {
+          "name": "url_originale_wp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_media_tag": {
+          "name": "idx_media_tag",
+          "columns": [
+            {
+              "expression": "tag",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "idx_media_cartella": {
+          "name": "idx_media_cartella",
+          "columns": [
+            {
+              "expression": "cartella_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "media_cartella_id_cartelle_media_id_fk": {
+          "name": "media_cartella_id_cartelle_media_id_fk",
+          "tableFrom": "media",
+          "tableTo": "cartelle_media",
+          "columnsFrom": [
+            "cartella_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "media_caricato_da_utenti_id_fk": {
+          "name": "media_caricato_da_utenti_id_fk",
+          "tableFrom": "media",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "caricato_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "media_chiave_unique": {
+          "name": "media_chiave_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "chiave"
+          ]
+        },
+        "media_wp_id_unique": {
+          "name": "media_wp_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "wp_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.media_evento": {
+      "name": "media_evento",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "evento_id": {
+          "name": "evento_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "media_id": {
+          "name": "media_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ordine": {
+          "name": "ordine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_media_evento_unico": {
+          "name": "idx_media_evento_unico",
+          "columns": [
+            {
+              "expression": "evento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "media_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_media_evento": {
+          "name": "idx_media_evento",
+          "columns": [
+            {
+              "expression": "evento_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ordine",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "media_evento_evento_id_eventi_id_fk": {
+          "name": "media_evento_evento_id_eventi_id_fk",
+          "tableFrom": "media_evento",
+          "tableTo": "eventi",
+          "columnsFrom": [
+            "evento_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "media_evento_media_id_media_id_fk": {
+          "name": "media_evento_media_id_media_id_fk",
+          "tableFrom": "media_evento",
+          "tableTo": "media",
+          "columnsFrom": [
+            "media_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.notizie": {
+      "name": "notizie",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titolo": {
+          "name": "titolo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sommario": {
+          "name": "sommario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contenuto": {
+          "name": "contenuto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "copertina_id": {
+          "name": "copertina_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sport": {
+          "name": "sport",
+          "type": "sport_notizia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Altro'"
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "categoria_notizia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'altro'"
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_notizia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'bozza'"
+        },
+        "autore_id": {
+          "name": "autore_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pubblicata_il": {
+          "name": "pubblicata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "aggiornata_il": {
+          "name": "aggiornata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "wp_id": {
+          "name": "wp_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_notizie_elenco": {
+          "name": "idx_notizie_elenco",
+          "columns": [
+            {
+              "expression": "stato",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "pubblicata_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_notizie_sport": {
+          "name": "idx_notizie_sport",
+          "columns": [
+            {
+              "expression": "sport",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_notizie_categoria": {
+          "name": "idx_notizie_categoria",
+          "columns": [
+            {
+              "expression": "categoria",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "notizie_copertina_id_media_id_fk": {
+          "name": "notizie_copertina_id_media_id_fk",
+          "tableFrom": "notizie",
+          "tableTo": "media",
+          "columnsFrom": [
+            "copertina_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "notizie_autore_id_utenti_id_fk": {
+          "name": "notizie_autore_id_utenti_id_fk",
+          "tableFrom": "notizie",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "autore_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "notizie_slug_unique": {
+          "name": "notizie_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        },
+        "notizie_wp_id_unique": {
+          "name": "notizie_wp_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "wp_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pagamenti": {
+      "name": "pagamenti",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "importo_centesimi": {
+          "name": "importo_centesimi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "causale": {
+          "name": "causale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pagato_il": {
+          "name": "pagato_il",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metodo": {
+          "name": "metodo",
+          "type": "metodo_pagamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'bonifico'"
+        },
+        "registrato_da": {
+          "name": "registrato_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_pagamenti_utente": {
+          "name": "idx_pagamenti_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "pagato_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pagamenti_utente_id_utenti_id_fk": {
+          "name": "pagamenti_utente_id_utenti_id_fk",
+          "tableFrom": "pagamenti",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pagamenti_registrato_da_utenti_id_fk": {
+          "name": "pagamenti_registrato_da_utenti_id_fk",
+          "tableFrom": "pagamenti",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "registrato_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.registro_attivita": {
+      "name": "registro_attivita",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "autore": {
+          "name": "autore",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "azione": {
+          "name": "azione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "oggetto_tipo": {
+          "name": "oggetto_tipo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oggetto_id": {
+          "name": "oggetto_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descrizione": {
+          "name": "descrizione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dettaglio": {
+          "name": "dettaglio",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quando": {
+          "name": "quando",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_registro_quando": {
+          "name": "idx_registro_quando",
+          "columns": [
+            {
+              "expression": "quando",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_registro_utente": {
+          "name": "idx_registro_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "quando",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_registro_oggetto": {
+          "name": "idx_registro_oggetto",
+          "columns": [
+            {
+              "expression": "oggetto_tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "oggetto_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "registro_attivita_utente_id_utenti_id_fk": {
+          "name": "registro_attivita_utente_id_utenti_id_fk",
+          "tableFrom": "registro_attivita",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.richieste_iscrizione": {
+      "name": "richieste_iscrizione",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sport": {
+          "name": "sport",
+          "type": "sport_squadra",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "squadra_id": {
+          "name": "squadra_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_richiesta",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'in_attesa'"
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "richiesta_il": {
+          "name": "richiesta_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "decisa_da": {
+          "name": "decisa_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "decisa_il": {
+          "name": "decisa_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_rifiuto": {
+          "name": "motivo_rifiuto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_richieste_stato": {
+          "name": "idx_richieste_stato",
+          "columns": [
+            {
+              "expression": "stato",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "richiesta_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_richieste_sport": {
+          "name": "idx_richieste_sport",
+          "columns": [
+            {
+              "expression": "sport",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "stato",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_richieste_squadra": {
+          "name": "idx_richieste_squadra",
+          "columns": [
+            {
+              "expression": "squadra_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "stato",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_richieste_utente": {
+          "name": "idx_richieste_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "richieste_iscrizione_utente_id_utenti_id_fk": {
+          "name": "richieste_iscrizione_utente_id_utenti_id_fk",
+          "tableFrom": "richieste_iscrizione",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "richieste_iscrizione_squadra_id_squadre_id_fk": {
+          "name": "richieste_iscrizione_squadra_id_squadre_id_fk",
+          "tableFrom": "richieste_iscrizione",
+          "tableTo": "squadre",
+          "columnsFrom": [
+            "squadra_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "richieste_iscrizione_decisa_da_utenti_id_fk": {
+          "name": "richieste_iscrizione_decisa_da_utenti_id_fk",
+          "tableFrom": "richieste_iscrizione",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "decisa_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.schede_atleta": {
+      "name": "schede_atleta",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_nascita": {
+          "name": "data_nascita",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "luogo_nascita": {
+          "name": "luogo_nascita",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provincia_nascita": {
+          "name": "provincia_nascita",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "codice_fiscale": {
+          "name": "codice_fiscale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "taglia_maglietta": {
+          "name": "taglia_maglietta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "indirizzo": {
+          "name": "indirizzo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "civico": {
+          "name": "civico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "citta": {
+          "name": "citta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provincia": {
+          "name": "provincia",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cap": {
+          "name": "cap",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutore_nome": {
+          "name": "tutore_nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tutore_telefono": {
+          "name": "tutore_telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_certificato": {
+          "name": "tipo_certificato",
+          "type": "tipo_certificato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificato_scadenza": {
+          "name": "certificato_scadenza",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificato_media_id": {
+          "name": "certificato_media_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificato_stato": {
+          "name": "certificato_stato",
+          "type": "stato_certificato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'da_validare'"
+        },
+        "certificato_validato_da": {
+          "name": "certificato_validato_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificato_validato_il": {
+          "name": "certificato_validato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certificato_motivo": {
+          "name": "certificato_motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quota_stagionale_centesimi": {
+          "name": "quota_stagionale_centesimi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_quota_id": {
+          "name": "tipo_quota_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aggiornata_da": {
+          "name": "aggiornata_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "aggiornata_il": {
+          "name": "aggiornata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_scheda_atleta_unica": {
+          "name": "idx_scheda_atleta_unica",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_scheda_certificato": {
+          "name": "idx_scheda_certificato",
+          "columns": [
+            {
+              "expression": "certificato_scadenza",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "schede_atleta_utente_id_utenti_id_fk": {
+          "name": "schede_atleta_utente_id_utenti_id_fk",
+          "tableFrom": "schede_atleta",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "schede_atleta_certificato_media_id_media_id_fk": {
+          "name": "schede_atleta_certificato_media_id_media_id_fk",
+          "tableFrom": "schede_atleta",
+          "tableTo": "media",
+          "columnsFrom": [
+            "certificato_media_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "schede_atleta_certificato_validato_da_utenti_id_fk": {
+          "name": "schede_atleta_certificato_validato_da_utenti_id_fk",
+          "tableFrom": "schede_atleta",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "certificato_validato_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "schede_atleta_tipo_quota_id_tipi_quota_id_fk": {
+          "name": "schede_atleta_tipo_quota_id_tipi_quota_id_fk",
+          "tableFrom": "schede_atleta",
+          "tableTo": "tipi_quota",
+          "columnsFrom": [
+            "tipo_quota_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "schede_atleta_aggiornata_da_utenti_id_fk": {
+          "name": "schede_atleta_aggiornata_da_utenti_id_fk",
+          "tableFrom": "schede_atleta",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "aggiornata_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessioni": {
+      "name": "sessioni",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "utente_id": {
+          "name": "utente_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "ultimo_uso_il": {
+          "name": "ultimo_uso_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "scade_il": {
+          "name": "scade_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "idx_sessioni_utente": {
+          "name": "idx_sessioni_utente",
+          "columns": [
+            {
+              "expression": "utente_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_sessioni_scadenza": {
+          "name": "idx_sessioni_scadenza",
+          "columns": [
+            {
+              "expression": "scade_il",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "sessioni_utente_id_utenti_id_fk": {
+          "name": "sessioni_utente_id_utenti_id_fk",
+          "tableFrom": "sessioni",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "utente_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.squadre": {
+      "name": "squadre",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sport": {
+          "name": "sport",
+          "type": "sport_squadra",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "colore": {
+          "name": "colore",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "css_var": {
+          "name": "css_var",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ordine": {
+          "name": "ordine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "attiva": {
+          "name": "attiva",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "calendario_google_id": {
+          "name": "calendario_google_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_squadre_sport": {
+          "name": "idx_squadre_sport",
+          "columns": [
+            {
+              "expression": "sport",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ordine",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "squadre_slug_unique": {
+          "name": "squadre_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tentativi_accesso": {
+      "name": "tentativi_accesso",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "chiave": {
+          "name": "chiave",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quando": {
+          "name": "quando",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_tentativi_chiave": {
+          "name": "idx_tentativi_chiave",
+          "columns": [
+            {
+              "expression": "chiave",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "quando",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tipi_quota": {
+      "name": "tipi_quota",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descrizione": {
+          "name": "descrizione",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importo_centesimi": {
+          "name": "importo_centesimi",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attiva": {
+          "name": "attiva",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ordine": {
+          "name": "ordine",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "creata_da": {
+          "name": "creata_da",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creata_il": {
+          "name": "creata_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "tipi_quota_creata_da_utenti_id_fk": {
+          "name": "tipi_quota_creata_da_utenti_id_fk",
+          "tableFrom": "tipi_quota",
+          "tableTo": "utenti",
+          "columnsFrom": [
+            "creata_da"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.utenti": {
+      "name": "utenti",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ruolo": {
+          "name": "ruolo",
+          "type": "ruolo_utente",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'atleta'"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cognome": {
+          "name": "cognome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "immagine_id": {
+          "name": "immagine_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stato": {
+          "name": "stato",
+          "type": "stato_utente",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'in_attesa'"
+        },
+        "deve_cambiare_password": {
+          "name": "deve_cambiare_password",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ultimo_accesso": {
+          "name": "ultimo_accesso",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creato_il": {
+          "name": "creato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "aggiornato_il": {
+          "name": "aggiornato_il",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_utenti_ruolo": {
+          "name": "idx_utenti_ruolo",
+          "columns": [
+            {
+              "expression": "ruolo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "utenti_immagine_id_media_id_fk": {
+          "name": "utenti_immagine_id_media_id_fk",
+          "tableFrom": "utenti",
+          "tableTo": "media",
+          "columnsFrom": [
+            "immagine_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "utenti_email_unique": {
+          "name": "utenti_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.categoria_notizia": {
+      "name": "categoria_notizia",
+      "schema": "public",
+      "values": [
+        "societa",
+        "eventi",
+        "sport",
+        "solidarieta",
+        "altro"
+      ]
+    },
+    "public.metodo_pagamento": {
+      "name": "metodo_pagamento",
+      "schema": "public",
+      "values": [
+        "contanti",
+        "bonifico",
+        "pos",
+        "altro"
+      ]
+    },
+    "public.ruolo_utente": {
+      "name": "ruolo_utente",
+      "schema": "public",
+      "values": [
+        "admin",
+        "segreteria",
+        "editor",
+        "coach",
+        "atleta"
+      ]
+    },
+    "public.sport_notizia": {
+      "name": "sport_notizia",
+      "schema": "public",
+      "values": [
+        "Calcio",
+        "Pallavolo",
+        "Minivolley",
+        "Basket",
+        "Altro"
+      ]
+    },
+    "public.sport_squadra": {
+      "name": "sport_squadra",
+      "schema": "public",
+      "values": [
+        "Calcio",
+        "Pallavolo",
+        "Basket",
+        "Societa"
+      ]
+    },
+    "public.stato_certificato": {
+      "name": "stato_certificato",
+      "schema": "public",
+      "values": [
+        "da_validare",
+        "valido",
+        "rifiutato"
+      ]
+    },
+    "public.stato_notizia": {
+      "name": "stato_notizia",
+      "schema": "public",
+      "values": [
+        "bozza",
+        "in_revisione",
+        "pubblicata",
+        "cestino"
+      ]
+    },
+    "public.stato_richiesta": {
+      "name": "stato_richiesta",
+      "schema": "public",
+      "values": [
+        "in_attesa",
+        "approvata",
+        "rifiutata"
+      ]
+    },
+    "public.stato_utente": {
+      "name": "stato_utente",
+      "schema": "public",
+      "values": [
+        "in_attesa",
+        "attivo",
+        "sospeso"
+      ]
+    },
+    "public.tipo_certificato": {
+      "name": "tipo_certificato",
+      "schema": "public",
+      "values": [
+        "agonistico",
+        "non_agonistico"
+      ]
+    },
+    "public.tipo_evento": {
+      "name": "tipo_evento",
+      "schema": "public",
+      "values": [
+        "partita",
+        "allenamento",
+        "torneo",
+        "riunione",
+        "evento",
+        "altro"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

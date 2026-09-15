@@ -27,6 +27,18 @@ html {
   /* Impedisce lo scroll orizzontale accidentale su mobile */
   overflow-x: hidden;
   width: 100%;
+
+  /*
+   * Lo spazio della barra di scorrimento resta riservato anche quando la
+   * barra non serve.
+   *
+   * Senza, ogni passaggio da una schermata all'altra faceva "scattare"
+   * tutto il layout: durante il caricamento la pagina è corta e la barra
+   * sparisce, il contenuto guadagna quindici pixel e si sposta; poi i dati
+   * arrivano, la barra torna e tutto rientra. Un salto piccolo, ma su ogni
+   * schermata, e il colpevole non si trova mai perché non è la schermata.
+   */
+  scrollbar-gutter: stable;
 }
 
 body {

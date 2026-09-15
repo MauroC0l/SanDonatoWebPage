@@ -2,15 +2,47 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaExternalLinkAlt,
-  FaExclamationCircle, FaInbox, FaImage
+  FaExclamationCircle, FaInbox, FaImage, FaThLarge, FaBars
 } from "react-icons/fa";
 import { listPosts, trashPost, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
+import { useArea } from "../../context/area";
+import { useDialoghi } from "../../context/dialoghi";
+import { useVista } from "../../hooks/useVista";
+import Tendina from "./Tendina";
+import { CATEGORIE, NOME_CATEGORIA } from "../../api/API.mjs";
+import ScambiaVista from "./ScambiaVista";
 import "../../css/Admin.css";
 
+/* Il filtro per categoria, con la voce che le tiene tutte in testa. */
+const FILTRI_CATEGORIA = [
+  { valore: "", etichetta: "Tutte le categorie" },
+  ...CATEGORIE
+];
+
+/*
+ * Le notizie hanno una copertina, ed è quella che si cerca quando si
+ * rilegge l'archivio: la griglia la mostra grande, la lista sta dietro a
+ * un'unghia. Nessuna delle due vince sempre — chi controlla gli stati
+ * lavora meglio a lista — quindi si sceglie e il sito se lo ricorda.
+ */
+const VISTE = [
+  { valore: "lista", etichetta: "Lista", Icona: FaBars },
+  { valore: "griglia", etichetta: "Griglia", Icona: FaThLarge }
+];
+
+/**
+ * I filtri dell'elenco.
+ *
+ * "Pubblicate" significa davvero online adesso, e "Programmate" le pubblicate
+ * che devono ancora uscire: le due voci non si sovrappongono, così una
+ * notizia si trova sempre sotto una sola di esse. Insieme alle bozze coprono
+ * tutto quello che non è nel cestino, che è appunto "Tutte".
+ */
 const FILTERS = [
-  { key: "publish,draft,pending", label: "Tutte" },
+  { key: "publish,future,draft,pending", label: "Tutte" },
   { key: "publish", label: "Pubblicate" },
+  { key: "future", label: "Programmate" },
   { key: "draft,pending", label: "Bozze" }
 ];
 
@@ -30,13 +62,26 @@ const formatDate = (iso) => {
   }).format(date);
 };
 
+/** Con l'ora: serve solo alle notizie programmate, dove il minuto conta. */
+const formatDateOra = (iso) => {
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit"
+  }).format(date);
+};
+
 export default function PostsListPage() {
   const { sessionExpired } = useAuth();
+  const area = useArea();
+  const { avvisa, conferma } = useDialoghi();
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState(FILTERS[0].key);
   const [searchInput, setSearchInput] = useState("");
+  const [vista, setVista] = useVista("notizie", "lista", ["lista", "griglia"]);
+  const [categoria, setCategoria] = useState("");
   const [search, setSearch] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [busyId, setBusyId] = useState(null);
@@ -44,7 +89,7 @@ export default function PostsListPage() {
   // Identifica la richiesta in corso. Confrontandolo con quello dei dati già
   // ricevuti si ricava lo stato di caricamento, senza chiamare setState
   // dentro l'effect: così ogni cambio di filtro produce un solo render.
-  const requestKey = `${status}|${search}|${page}|${reloadToken}`;
+  const requestKey = `${status}|${search}|${categoria}|${page}|${reloadToken}`;
 
   const [data, setData] = useState({
     key: null, posts: [], total: 0, totalPages: 1, error: ""
@@ -56,7 +101,7 @@ export default function PostsListPage() {
   useEffect(() => {
     let mounted = true;
 
-    listPosts({ search, status, page })
+    listPosts({ search, status, categoria, page })
       .then(result => {
         if (mounted) setData({ key: requestKey, ...result, error: "" });
       })
@@ -75,7 +120,7 @@ export default function PostsListPage() {
       });
 
     return () => { mounted = false; };
-  }, [requestKey, search, status, page, sessionExpired, navigate]);
+  }, [requestKey, search, status, categoria, page, sessionExpired, navigate]);
 
   const reload = useCallback(() => setReloadToken(t => t + 1), []);
 
@@ -91,14 +136,19 @@ export default function PostsListPage() {
   };
 
   const handleTrash = async (post) => {
-    const confirmed = window.confirm(
-      `Spostare "${post.title}" nel cestino?\n\nLa notizia sparisce dal sito ma resta recuperabile.`
-    );
-    if (!confirmed) return;
+    const ok = await conferma({
+      titolo: "Spostare nel cestino?",
+      testo: `"${post.title || "(senza titolo)"}" sparisce dal sito, ma non viene cancellata: `
+        + "si recupera rimettendola in bozza.",
+      conferma: "Sposta nel cestino",
+      pericolo: true
+    });
+    if (!ok) return;
 
     setBusyId(post.id);
     try {
       await trashPost(post.id);
+      avvisa("Notizia spostata nel cestino.");
       reload();
     } catch (err) {
       if (err instanceof AuthError) {
@@ -106,10 +156,7 @@ export default function PostsListPage() {
         navigate("/login", { replace: true });
         return;
       }
-      setData(prev => ({
-        ...prev,
-        error: err.message || "Impossibile spostare la notizia nel cestino."
-      }));
+      avvisa(err.message || "Impossibile spostare la notizia nel cestino.", "errore");
     } finally {
       setBusyId(null);
     }
@@ -124,7 +171,7 @@ export default function PostsListPage() {
             {loading ? "Caricamento…" : `${total} ${total === 1 ? "notizia" : "notizie"}`}
           </p>
         </div>
-        <Link to="/admin/nuova" className="adm-btn adm-btn-primary">
+        <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
           <FaPlus /> Nuova notizia
         </Link>
       </div>
@@ -143,6 +190,21 @@ export default function PostsListPage() {
             </button>
           ))}
         </div>
+
+        <Tendina
+          className="adm-filter-select"
+          valore={categoria}
+          onChange={(v) => { setPage(1); setCategoria(v); }}
+          opzioni={FILTRI_CATEGORIA}
+          segnaposto="Tutte le categorie"
+          etichettaAria="Filtra per categoria"
+        />
+
+        <ScambiaVista
+          vista={vista}
+          onCambia={setVista}
+          opzioni={VISTE}
+        />
 
         <form className="adm-search" onSubmit={handleSearch} role="search">
           <FaSearch className="adm-search-icon" />
@@ -177,14 +239,21 @@ export default function PostsListPage() {
           <p>
             {search
               ? `Nessun risultato per "${search}".`
-              : "Non ci sono ancora notizie in questa sezione."}
+              : status === "future"
+                // Un elenco vuoto qui non è una mancanza: vuol dire che non
+                // c'è niente in attesa di uscire, che di solito va bene.
+                ? "Nessuna notizia in attesa di uscire. Ne programmi una scegliendo "
+                  + "una data nel riquadro \"Quando esce\" mentre la scrivi."
+                : "Non ci sono ancora notizie in questa sezione."}
           </p>
-          <Link to="/admin/nuova" className="adm-btn adm-btn-primary">
-            <FaPlus /> Scrivi la prima
+          <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
+            {/* "Scrivi la prima" solo quando l'archivio è davvero vuoto: con
+                un filtro addosso sarebbe falso, le notizie ci sono. */}
+            <FaPlus /> {search || status !== FILTERS[0].key ? "Nuova notizia" : "Scrivi la prima"}
           </Link>
         </div>
       ) : (
-        <ul className="adm-post-list">
+        <ul className={vista === "griglia" ? "adm-post-griglia" : "adm-post-list"}>
           {posts.map(post => (
             <li key={post.id} className={`adm-post-row ${busyId === post.id ? "is-busy" : ""}`}>
               <div className="adm-post-thumb">
@@ -194,7 +263,7 @@ export default function PostsListPage() {
               </div>
 
               <div className="adm-post-main">
-                <Link to={`/admin/modifica/${post.id}`} className="adm-post-title">
+                <Link to={`${area}/notizie/${post.id}`} className="adm-post-title">
                   {post.title || "(senza titolo)"}
                 </Link>
                 <div className="adm-post-meta">
@@ -202,14 +271,28 @@ export default function PostsListPage() {
                     {STATUS_LABEL[post.status] || post.status}
                   </span>
                   <span className="adm-sport-tag">{post.sport}</span>
-                  <span className="adm-post-date">{formatDate(post.dateISO)}</span>
+                  {/* La categoria solo quando c'è davvero: "Altro" è il
+                      valore di chi non ha ancora scelto, e mostrarlo come
+                      un'etichetta lo farebbe sembrare una scelta. */}
+                  {post.categoria && post.categoria !== "altro" && (
+                    <span className="adm-categoria-tag">
+                      {NOME_CATEGORIA[post.categoria] ?? post.categoria}
+                    </span>
+                  )}
+                  <span className="adm-post-date">
+                    {/* Per una programmata la data è un appuntamento, non un
+                        archivio: va letta con l'ora e introdotta da "esce". */}
+                    {post.status === "future"
+                      ? `esce il ${formatDateOra(post.dateISO)}`
+                      : formatDate(post.dateISO)}
+                  </span>
                   {post.authorName && <span className="adm-post-author">di {post.authorName}</span>}
                 </div>
               </div>
 
               <div className="adm-post-actions">
                 <Link
-                  to={`/admin/modifica/${post.id}`}
+                  to={`${area}/notizie/${post.id}`}
                   className="adm-icon-btn"
                   title="Modifica"
                   aria-label={`Modifica ${post.title}`}

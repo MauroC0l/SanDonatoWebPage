@@ -1,0 +1,185 @@
+/* =========================================
+   Scelta del luogo di un evento (scope: slg-)
+   ========================================= */
+
+.slg { margin-bottom: 1.1rem; }
+
+.slg-riga-ricerca {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.slg-riga-ricerca .adm-input { flex: 1; min-width: 0; }
+.slg-riga-ricerca .adm-btn { flex-shrink: 0; }
+
+.slg-gira { animation: slg-rotazione 1s linear infinite; }
+
+@keyframes slg-rotazione {
+  to { transform: rotate(360deg); }
+}
+
+.slg-errore {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--adm-danger);
+}
+
+/* ---------- Risultati della ricerca ---------- */
+
+.slg-risultati {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0.3rem;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  max-height: 13rem;
+  overflow-y: auto;
+}
+
+.slg-risultato {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--adm-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.slg-risultato:hover { background: var(--adm-line-soft); }
+.slg-risultato svg { flex-shrink: 0; margin-top: 2px; color: var(--adm-muted); }
+
+/* ---------- Mappa ---------- */
+
+/* Mappa e comandi in un riquadro solo: si legge come un oggetto unico, e i
+   pulsanti sono chiaramente i suoi comandi invece che note sciolte. */
+.slg-blocco {
+  margin-top: 0.65rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  overflow: hidden;
+  background: var(--adm-surface);
+  transition: border-color .15s;
+}
+.slg-blocco.ha-punto { border-color: #f3c9c5; }
+
+.slg-mappa {
+  height: 17rem;
+  /* Le tessere della mappa sotto al pannello della tendina e agli avvisi:
+     Leaflet assegna z-index alti ai propri livelli e senza contenimento
+     uscirebbe sopra a tutto. */
+  isolation: isolate;
+  z-index: 0;
+  background: var(--adm-line-soft);
+}
+
+.slg-mappa .leaflet-container { font: inherit; cursor: crosshair; }
+
+/* Segnaposto disegnato in CSS: l'icona predefinita di Leaflet è
+   un'immagine caricata per percorso relativo, che dopo la compilazione
+   non si trova più. */
+.slg-segnaposto-punta {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 0 3px;
+  background: var(--adm-danger);
+  border: 2px solid #fff;
+  /* Tondo in alto, a punta in basso: indica il punto invece di coprirlo */
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px rgba(16, 32, 56, .45);
+}
+
+/* ---------- Barra dei comandi sotto la mappa ---------- */
+
+.slg-barra {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+
+  padding: 0.5rem 0.6rem;
+  border-top: 1px solid var(--adm-line);
+  background: var(--adm-line-soft);
+  font-size: 0.8rem;
+}
+
+.slg-barra-spazio { flex: 1; min-width: 0; }
+
+.slg-coordinate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-muted);
+}
+.slg-coordinate svg { color: var(--adm-danger); }
+
+/* Pulsanti veri e non collegamenti di testo: sono comandi, e in una barra
+   grigia un testo azzurro sembra una nota invece che qualcosa da premere. */
+.slg-azione {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.35rem 0.6rem;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: 8px;
+
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--adm-ink);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.slg-azione:hover:not(:disabled) {
+  border-color: var(--adm-blue);
+  color: var(--adm-blue);
+}
+.slg-azione svg { font-size: 0.72rem; color: var(--adm-muted); }
+.slg-azione:hover:not(:disabled) svg { color: inherit; }
+.slg-azione:disabled { opacity: .5; cursor: not-allowed; }
+
+.slg-azione-togli:hover:not(:disabled) {
+  border-color: #f3c9c5;
+  color: var(--adm-danger);
+  background: var(--adm-danger-soft);
+}
+
+.slg-istruzioni {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--adm-muted);
+}
+
+@media (max-width: 520px) {
+  /* Su schermo stretto le coordinate prendono la loro riga e i pulsanti
+     restano affiancati sotto, invece di andare a capo uno per volta. */
+  .slg-coordinate { width: 100%; justify-content: center; }
+  .slg-barra-spazio { display: none; }
+  .slg-azione { flex: 1; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slg-gira { animation: none; }
+}

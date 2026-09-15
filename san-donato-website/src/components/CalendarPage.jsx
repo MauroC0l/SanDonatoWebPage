@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect } from "react";
 import "../css/CalendarPage.css";
 import EventDetailsModal from "./EventDetailsModal"; 
 import { fetchEventsByRange } from '../api/calendarApi';
+import {
+  FiChevronLeft, FiChevronRight, FiClock, FiMapPin, FiCheck, FiX, FiSliders
+} from "react-icons/fi";
 
 // ==========================================
 // 🛠 UTILITIES E COSTANTI
@@ -36,14 +39,17 @@ const formatDayHeader = (date) => {
 
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(date);
 
-// --- ICON COMPONENTS ---
-const IconChevronLeft = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>;
-const IconChevronRight = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
-const IconClock = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
-const IconCheck = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
-const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
-const IconFilter = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>;
+// --- ICONE ---
+// Erano sette SVG scritti a mano qui dentro. La stessa libreria che usa
+// tutto il resto del sito li ha già, disegnati coerenti fra loro: sette
+// componenti in meno da mantenere e lo stesso tratto della home.
+const IconChevronLeft = () => <FiChevronLeft size={20} />;
+const IconChevronRight = () => <FiChevronRight size={20} />;
+const IconClock = () => <FiClock size={15} />;
+const IconMap = () => <FiMapPin size={15} />;
+const IconCheck = () => <FiCheck size={16} />;
+const IconX = () => <FiX size={22} />;
+const IconFilter = () => <FiSliders size={18} />;
 
 // --- COMPONENTI UI ---
 
@@ -227,11 +233,29 @@ export default function CalendarPage() {
 
 
   if (error) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>Errore: {error}</div>;
+    return (
+      <div className="cp-dashboard-container">
+        <div className="cp-intestazione">
+          <p className="cp-empty-state">Il calendario non si è caricato: {error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="cp-dashboard-container">
+
+      {/* Stessa apertura della home: occhiello, titolo, una riga che dice
+          cosa si sta guardando. Prima la pagina cominciava direttamente con
+          la griglia, senza dire di che calendario fosse. */}
+      <header className="cp-intestazione">
+        <span className="cp-occhiello">Polisportiva San Donato</span>
+        <h1 className="cp-titolo-pagina">Il calendario</h1>
+        <p className="cp-sottotitolo">
+          Partite, allenamenti e appuntamenti di tutte le squadre. Tocca un
+          giorno per vedere cosa c&apos;è, oppure filtra per sport.
+        </p>
+      </header>
 
       <div className="cp-main-grid">
 
@@ -241,7 +265,7 @@ export default function CalendarPage() {
           <aside className={`cp-sidebar ${isMobileSidebarOpen ? 'cp-mobile-open' : ''}`}>
             <div className="cp-mobile-drag-handle"></div>
             <div className="cp-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div className="cp-card-head">
                 <h3 className="cp-card-title">Calendario Sport</h3>
                 <button className="cp-btn-close-mobile" onClick={() => setIsMobileSidebarOpen(false)}><IconX /></button>
               </div>
@@ -261,19 +285,15 @@ export default function CalendarPage() {
               <div className="cp-info-label">Prossimo Match</div>
               {loading ? (
                 /* Uso lo stesso spinner della home anche qui, ma senza margin: auto */
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '1rem' }}>
-                    <div className="cp-loader"></div>
-                </div>
+                <div className="cp-loader cp-loader-piccolo"></div>
               ) : nextMatch ? (
                 <>
                   <div className="cp-info-match">{nextMatch.title}</div>
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    <span className="cp-category-badge" style={{
-                      backgroundColor: nextMatch.color,
-                      color: '#fff',
-                      fontSize: '0.65rem',
-                      padding: '2px 8px'
-                    }}>
+                  <div className="cp-info-categoria">
+                    <span
+                      className="cp-category-badge"
+                      style={{ backgroundColor: nextMatch.color, color: "#fff" }}
+                    >
                       {nextMatch.category}
                     </span>
                   </div>
@@ -285,10 +305,10 @@ export default function CalendarPage() {
             </div>
 
             {/* FILTRI */}
-            <div className="cp-card" style={{ flex: 1, overflowY: 'auto' }}>
+            <div className="cp-card cp-card-filtri">
               <div className="cp-filter-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="cp-filter-title">Categorie</span>
+                <div className="cp-filter-titolo-gruppo">
+                    <span className="cp-filter-title">Sport e squadre</span>
                     <span className="cp-filter-count">{activeFilters.length}</span>
                 </div>
                 
@@ -408,7 +428,7 @@ export default function CalendarPage() {
                           <span className="cp-date-month">{MONTH_NAMES[ev.start.getMonth()].substring(0, 3)}</span>
                           <span className="cp-date-day">{ev.start.getDate()}</span>
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="cp-list-testi">
                           <div className="cp-meta-row">
                             <span className="cp-category-badge" style={{
                               backgroundColor: ev.color,

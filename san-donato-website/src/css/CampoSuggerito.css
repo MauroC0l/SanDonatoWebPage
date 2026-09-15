@@ -1,0 +1,116 @@
+/* Campo di testo con suggerimenti. Vedi CampoSuggerito.jsx */
+
+.sug {
+  position: relative;
+  min-width: 0;
+}
+
+.sug-campo {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sug-campo .adm-input {
+  width: 100%;
+  /* Spazio a destra per la freccia o la crocetta: senza, il testo lungo
+     ci finisce sotto. */
+  padding-right: 2rem;
+}
+
+.sug-freccia {
+  position: absolute;
+  right: .6rem;
+  color: var(--adm-muted);
+  font-size: .7rem;
+  pointer-events: none;
+  transition: transform .2s ease;
+}
+
+.sug.is-aperto .sug-freccia { transform: rotate(180deg); }
+
+.sug-svuota {
+  position: absolute;
+  right: .35rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--adm-muted);
+  font-size: .65rem;
+  cursor: pointer;
+  opacity: .6;
+}
+
+.sug-svuota:hover {
+  opacity: 1;
+  background: var(--adm-danger-soft);
+  color: var(--adm-danger);
+}
+
+/* ---------- L'elenco ---------- */
+
+.sug-elenco {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+
+  list-style: none;
+  max-height: 15rem;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+
+  border: 1px solid var(--adm-line);
+  border-radius: 10px;
+  background: var(--adm-surface);
+  box-shadow: var(--adm-shadow);
+}
+
+.sug-voce {
+  display: block;
+  width: 100%;
+  padding: .45rem .6rem;
+
+  border: 0;
+  border-radius: 7px;
+  background: none;
+
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: .86rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sug-voce.is-evidenziata {
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+}
+
+.sug-niente {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+
+  margin: 0;
+  padding: .6rem;
+  border: 1px solid var(--adm-line);
+  border-radius: 10px;
+  background: var(--adm-surface);
+  box-shadow: var(--adm-shadow);
+
+  color: var(--adm-muted);
+  font-size: .78rem;
+  line-height: 1.4;
+}

@@ -1,0 +1,310 @@
+/* La finestra del pagamento della quota. Vedi SchermataPagamento.jsx */
+
+.pag-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  background: rgba(10, 18, 32, .55);
+  backdrop-filter: blur(2px);
+
+  /* Il portale la attacca al body, fuori da .adm-shell: senza la tavolozza
+     i pulsanti resterebbero bianchi su bianco. */
+  --adm-surface: #ffffff;
+  --adm-bg: #f1f4f9;
+  --adm-line: #dde3ec;
+  --adm-line-soft: #eef1f6;
+  --adm-ink: #16202e;
+  --adm-muted: #5b6a80;
+  --adm-blue: #0b4fd1;
+  --adm-blue-dark: #0940a8;
+  --adm-blue-soft: #e7eefc;
+  --adm-ok: #056b45;
+  --adm-ok-soft: #e3f4ec;
+  --adm-warn: #9a5b00;
+  --adm-warn-soft: #fdf3e4;
+  --adm-radius: 12px;
+
+  color: var(--adm-ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.pag-finestra {
+  display: flex;
+  flex-direction: column;
+
+  /* Larga invece che alta: i due passaggi — quanto e come — stanno
+     affiancati e la finestra ci sta in una schermata senza far comparire
+     la barra di scorrimento, che in una finestra di pagamento fa sempre
+     temere di essersi persi un passaggio. */
+  width: min(880px, 100%);
+  max-height: min(680px, 92vh);
+
+  background: var(--adm-surface);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
+  overflow: hidden;
+}
+
+.pag-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--adm-line);
+}
+
+.pag-titolo {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.pag-avviso {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+
+  padding: .6rem 1.1rem;
+  background: var(--adm-warn-soft);
+  color: var(--adm-warn);
+  font-size: .85rem;
+  line-height: 1.45;
+}
+
+.pag-avviso svg { flex: 0 0 auto; margin-top: 2px; }
+
+.pag-corpo {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 1.1rem;
+  /* Resta come rete di sicurezza per gli schermi bassi, ma con le due
+     sezioni affiancate non serve quasi mai. */
+  overflow-y: auto;
+}
+
+.pag-corpo:not(.pag-esito) {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 1.4rem;
+  align-content: start;
+}
+
+/* Affiancate: il divisorio passa da orizzontale a verticale */
+.pag-corpo:not(.pag-esito) .pag-sezione + .pag-sezione {
+  padding-left: 1.4rem;
+  border-left: 1px solid var(--adm-line-soft);
+}
+
+.pag-sezione-titolo {
+  margin: 0 0 .7rem;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--adm-muted);
+}
+
+/* ---------- Il conto ---------- */
+
+.pag-conto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: .6rem;
+  margin-bottom: 1rem;
+}
+
+.pag-conto > div {
+  padding: .7rem .8rem;
+  border-radius: 10px;
+  background: var(--adm-bg);
+}
+
+.pag-conto > div.is-residuo {
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+}
+
+.pag-conto-etichetta {
+  display: block;
+  font-size: .7rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--adm-muted);
+}
+
+.pag-conto > div.is-residuo .pag-conto-etichetta { color: inherit; opacity: .8; }
+
+.pag-conto-valore {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Quanto ---------- */
+
+.pag-campo-euro {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.pag-campo-euro .adm-input {
+  /* Una cifra da leggere al volo prima di premere "Paga": più grande del
+     resto del modulo, perché è l'unica che conta. */
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pag-campo-euro > span {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--adm-muted);
+}
+
+.pag-scorciatoie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .6rem;
+}
+
+.pag-errore { color: var(--adm-warn); }
+
+/* ---------- Come ---------- */
+
+.pag-modi {
+  display: grid;
+  gap: .5rem;
+}
+
+.pag-modo {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+
+  padding: .8rem .9rem;
+  border: 1px solid var(--adm-line);
+  border-radius: 12px;
+  background: var(--adm-surface);
+
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.pag-modo:hover { border-color: var(--adm-blue); }
+
+.pag-modo.is-scelto {
+  border-color: var(--adm-blue);
+  background: var(--adm-blue-soft);
+}
+
+.pag-modo-icona {
+  flex: 0 0 auto;
+  font-size: 1.3rem;
+  color: var(--adm-blue);
+}
+
+.pag-modo-testi {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pag-modo-testi strong { font-size: .92rem; }
+.pag-modo-testi span { font-size: .78rem; color: var(--adm-muted); }
+.pag-modo.is-scelto .pag-modo-testi span { color: var(--adm-blue); opacity: .85; }
+
+.pag-nota-modo { margin-top: .7rem; }
+
+/* ---------- Piede ---------- */
+
+.pag-piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .8rem;
+
+  padding: .9rem 1.1rem;
+  border-top: 1px solid var(--adm-line);
+  background: var(--adm-bg);
+}
+
+.pag-piede-sicuro {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--adm-muted);
+  font-size: .76rem;
+}
+
+/* ---------- Esito ---------- */
+
+.pag-esito { text-align: center; }
+
+.pag-esito-icona {
+  font-size: 2.4rem;
+  color: var(--adm-ok);
+  margin-bottom: .6rem;
+}
+
+.pag-esito h3 {
+  margin: 0 0 .5rem;
+  font-size: 1.05rem;
+}
+
+.pag-esito p {
+  max-width: 46ch;
+  margin: 0 auto .7rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  color: var(--adm-muted);
+}
+
+.pag-esito .adm-head-actions { justify-content: center; margin-top: 1rem; }
+
+@media (max-width: 760px) {
+  /* Sotto ai 760 px due colonne diventano due strisce: si torna in fila,
+     e lì la barra di scorrimento ci sta perché su un telefono scorrere è
+     il gesto normale. */
+  .pag-corpo:not(.pag-esito) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .pag-corpo:not(.pag-esito) .pag-sezione + .pag-sezione {
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--adm-line-soft);
+  }
+}
+
+@media (max-width: 600px) {
+  .pag-velo { padding: 0; }
+
+  .pag-finestra {
+    max-height: 100vh;
+    max-height: 100svh;
+    border-radius: 0;
+  }
+
+  .pag-piede { justify-content: stretch; }
+  .pag-piede .adm-head-actions { flex: 1; }
+  .pag-piede .adm-btn { flex: 1; }
+}

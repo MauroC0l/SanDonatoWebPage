@@ -1,177 +1,244 @@
-/* --- TopHeader.css --- */
+/* --- TopHeader.css — la barra sopra al logo. Vedi TopHeader.jsx --- */
 
-/* Variabili per facilitare le modifiche */
 :root {
-    --th-bg-color: #002b5c;
-    --th-text-color: #ffffff;
-    --th-accent-color: #ff6600; /* Colore hover e icone */
-    --th-icon-bg: rgba(255, 255, 255, 0.1);
-    --th-height-desktop: 45px;
-    --th-height-mobile: 40px; /* Molto compatto su mobile */
+  --th-bg: #002b5c;
+  --th-bg-scuro: #00224a;
+  --th-testo: #e8eefc;
+  --th-arancio: #ff6600;
+  --th-arancio-chiaro: #ff8533;
+  --th-icona-bg: rgba(255, 255, 255, 0.1);
+  --th-altezza: 46px;
+  --th-altezza-mobile: 42px;
 }
 
-/* Barra superiore principale */
 .top-header {
-    background: var(--th-bg-color);
-    color: var(--th-text-color);
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 0.9rem;
-    width: 100%;
-    overflow: hidden;
-    
-    /* Animazione ingresso */
-    opacity: 0;
-    animation: fadeDown 0.6s ease forwards;
+  width: 100%;
+  /* Una sfumatura appena percettibile invece del blu piatto: stacca la
+     barra dal blocco del logo senza aggiungere una riga di bordo. */
+  background: linear-gradient(180deg, var(--th-bg) 0%, var(--th-bg-scuro) 100%);
+  color: var(--th-testo);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.85rem;
+
+  opacity: 0;
+  animation: thEntra 0.6s ease forwards;
 }
 
-/* Contenitore flessibile */
-.top-header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: var(--th-height-desktop); /* Altezza fissa per consistenza */
+/*
+ * Tre zone: social, contatti, accesso.
+ *
+ * 1fr auto 1fr tiene il centro al centro della pagina anche quando le due
+ * zone laterali hanno larghezze diverse — che è sempre. Con un flex e
+ * space-between l'indirizzo si sposterebbe a ogni larghezza dello schermo.
+ */
+.th-griglia {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+
+  max-width: 1400px;
+  height: var(--th-altezza);
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
-/* --- SEZIONE SOCIAL (Sinistra) --- */
-.social-icons {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+/* ---------- Sinistra: i social ---------- */
+
+.th-social {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.social-icons a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background-color: var(--th-icon-bg);
-    color: var(--th-text-color);
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
+.th-social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  background: var(--th-icona-bg);
+  color: var(--th-testo);
+  font-size: 0.82rem;
+  text-decoration: none;
+
+  transition: background-color .25s ease, color .25s ease, transform .25s ease;
 }
 
-.social-icons a:hover {
-    background-color: var(--th-accent-color);
-    color: white;
-    transform: translateY(-2px);
+.th-social a:hover {
+  background: var(--th-arancio);
+  color: #fff;
+  transform: translateY(-2px);
 }
 
-/* --- SEZIONE CONTATTI (Destra) --- */
-.contact-info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
+.th-social a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
-.contact-info span {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    white-space: nowrap;
+/* ---------- Centro: i contatti ---------- */
+
+.th-contatti {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
-.contact-icon {
-    color: var(--th-accent-color);
-    font-size: 1rem;
+.th-contatto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  color: var(--th-testo);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color .2s ease;
 }
 
-/* Animation Keyframes */
-@keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.th-contatto svg {
+  flex: 0 0 auto;
+  color: var(--th-arancio);
+  font-size: 0.95rem;
+  transition: color .2s ease;
 }
 
-/* --- RESPONSIVE TABLET (max-width: 992px) --- */
+.th-contatto:hover { color: #fff; }
+.th-contatto:hover svg { color: var(--th-arancio-chiaro); }
+
+.th-contatto:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.th-punto {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  flex: 0 0 auto;
+}
+
+/* ---------- Destra: registrazione e accesso ---------- */
+
+.th-accesso {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+/*
+ * Testo arancione che diventa pulsante al passaggio.
+ *
+ * Il bordo c'è già da fermo, trasparente: se comparisse solo al passaggio
+ * la scritta si sposterebbe di un pixel, e su due voci affiancate il
+ * saltello si vede. Stesso motivo per il padding, che non cambia mai.
+ */
+.th-azione {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  color: var(--th-arancio);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: background-color .22s ease, border-color .22s ease,
+              color .22s ease, transform .22s ease;
+}
+
+.th-azione svg { font-size: 0.95rem; }
+
+.th-azione:hover {
+  border-color: var(--th-arancio);
+  background: rgba(255, 102, 0, 0.12);
+  color: var(--th-arancio-chiaro);
+  transform: translateY(-1px);
+}
+
+/* L'accesso è il gesto di chi torna, la registrazione quello di chi arriva:
+   al passaggio il primo si riempie, il secondo resta contornato. */
+.th-azione-forte:hover {
+  background: var(--th-arancio);
+  color: #fff;
+}
+
+.th-azione:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes thEntra {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Schermi medi ---------- */
+
+@media (max-width: 1100px) {
+  /* L'indirizzo è la prima cosa che si sacrifica: l'email resta cliccabile
+     ed è quella che serve per scrivere. */
+  .th-indirizzo,
+  .th-punto { display: none; }
+}
+
 @media (max-width: 992px) {
-    .top-header-container {
-        padding: 0 1rem;
-    }
+  .th-griglia { padding: 0 1rem; }
 }
 
-/* --- RESPONSIVE MOBILE (max-width: 600px) --- */
-@media (max-width: 600px) {
-    
-    .top-header-container {
-        /* Manteniamo ROW per evitare blocchi alti */
-        height: var(--th-height-mobile); 
-        padding: 0 10px; /* Padding laterale ridotto */
-    }
+/* ---------- Telefoni ---------- */
 
-    /* Gestione Contatti */
-    .contact-address {
-        /* Nascondiamo l'indirizzo per salvare spazio */
-        display: none !important; 
-    }
+@media (max-width: 720px) {
+  /*
+   * Due zone invece di tre, e l'email sotto ai social non ci sta: sparisce
+   * il centro e restano gli estremi, allineati ai bordi come nel resto del
+   * sito. L'email si trova comunque nella pagina Contatti e in fondo a
+   * ogni pagina, quindi non si perde niente.
+   */
+  .th-griglia {
+    grid-template-columns: auto 1fr;
+    height: var(--th-altezza-mobile);
+    padding: 0 12px;
+  }
 
-    .contact-info {
-        gap: 0; /* Rimuoviamo gap extra */
-    }
+  .th-contatti { display: none; }
 
-    .contact-email {
-        font-size: 0.75rem; /* Testo leggermente più piccolo */
-    }
+  .th-social { gap: 0.35rem; }
 
-    /* Gestione Social */
-    .social-icons {
-        gap: 0.5rem; /* Icone più vicine tra loro */
-    }
+  .th-social a {
+    width: 26px;
+    height: 26px;
+    font-size: 0.74rem;
+  }
 
-    .social-icons a {
-        width: 24px; /* Icone leggermente più piccole */
-        height: 24px;
-        font-size: 0.75rem;
-    }
+  .th-azione {
+    padding: 4px 9px;
+    font-size: 0.76rem;
+  }
 }
 
-/* --- RESPONSIVE MICRO (max-width: 360px) --- */
-@media (max-width: 360px) {
-    /* Su schermi minuscoli, nascondiamo anche il testo dell'email e lasciamo solo l'icona? 
-       Oppure riduciamo ulteriormente. Qui scelgo di ridurre. */
-    .contact-email {
-        font-size: 0.7rem;
-    }
-}
-/* --- ACCESSO AREA RISERVATA ---
-   Convive con i social ma deve leggersi come un'altra cosa: cerchio vuoto
-   col bordo arancione invece del tondo pieno, preceduto da un separatore. */
+@media (max-width: 420px) {
+  /* Sotto i 420 px le due scritte più quattro social non stanno in riga:
+     resta l'icona, che su un tocco è comunque un bersaglio buono, e il
+     nome dell'azione va nell'etichetta per i lettori di schermo. */
+  .th-azione span { display: none; }
 
-.th-sep {
-    width: 1px;
-    height: 18px;
-    background-color: rgba(255, 255, 255, 0.25);
-    margin: 0 0.2rem;
-    flex-shrink: 0;
-}
+  .th-azione {
+    padding: 5px 8px;
+    border-color: rgba(255, 102, 0, 0.45);
+  }
 
-/* Specificità alzata: deve vincere su .social-icons a, che lo veste da social */
-.social-icons .th-login {
-    box-sizing: border-box; /* il bordo non deve gonfiarlo rispetto agli altri */
-    background-color: transparent;
-    border: 1px solid var(--th-accent-color);
-    color: var(--th-accent-color);
-}
-
-.social-icons .th-login:hover {
-    background-color: var(--th-accent-color);
-    color: #fff;
-}
-
-.social-icons .th-login:focus-visible {
-    outline: 2px solid #fff;
-    outline-offset: 2px;
-}
-
-@media (max-width: 600px) {
-    .th-sep {
-        height: 14px;
-        margin: 0 0.1rem;
-    }
+  .th-azione svg { font-size: 1.05rem; }
 }

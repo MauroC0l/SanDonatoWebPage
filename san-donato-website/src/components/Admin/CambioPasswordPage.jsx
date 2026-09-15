@@ -2,13 +2,33 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaKey, FaEye, FaEyeSlash, FaExclamationCircle, FaArrowRight, FaShieldAlt,
-  FaArrowLeft
+  FaArrowLeft, FaCheckDouble
 } from "react-icons/fa";
 import { cambiaPassword } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
+import { useDialoghi } from "../../context/dialoghi";
+import { percorsoProfilo } from "../../utils/percorsi";
 import "../../css/Admin.css";
 
 const LOGO = "/logo-polisportiva.png";
+
+/** Schermo intero: quando questa pagina sostituisce il pannello. */
+function GuscioPieno({ children }) {
+  return (
+    <div className="alg-page">
+      <main className="alg-form-side">{children}</main>
+    </div>
+  );
+}
+
+/** Dentro al pannello: una pagina come le altre, con la scheda centrata. */
+function GuscioNelPannello({ children }) {
+  return (
+    <div className="adm-page">
+      <div className="adm-centrata">{children}</div>
+    </div>
+  );
+}
 
 /**
  * Cambio della password.
@@ -20,12 +40,33 @@ const LOGO = "/logo-polisportiva.png";
  */
 export default function CambioPasswordPage({ obbligatorio = false }) {
   const { user, ricarica } = useAuth();
+  const { avvisa } = useDialoghi();
   const navigate = useNavigate();
+
+  // Dove si torna indietro. Quando il cambio è obbligatorio non si può
+  // tornare al profilo: quella pagina rimanderebbe subito qui, perché finché
+  // la password provvisoria è in piedi non si va da nessun'altra parte. In
+  // quel caso l'unica via d'uscita vera è il sito pubblico.
+  const indietro = obbligatorio
+    ? { a: "/", etichetta: "Torna alla home" }
+    : { a: percorsoProfilo(user?.role), etichetta: "Torna al profilo" };
 
   const [attuale, setAttuale] = useState("");
   const [nuova, setNuova] = useState("");
   const [conferma, setConferma] = useState("");
-  const [mostra, setMostra] = useState(false);
+  /**
+   * Un occhio per campo, non uno solo per tutti.
+   *
+   * Prima il pulsante era uno e scopriva le tre password insieme: chi voleva
+   * ricontrollare di aver ribattuto bene la seconda si ritrovava in chiaro
+   * anche quella vecchia, davanti a chiunque passasse dietro.
+   */
+  const [mostra, setMostra] = useState({ attuale: false, nuova: false, conferma: false });
+
+  const occhio = (campo) => ({
+    tipo: mostra[campo] ? "text" : "password",
+    inverti: () => setMostra((prima) => ({ ...prima, [campo]: !prima[campo] }))
+  });
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
 
@@ -41,22 +82,36 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
     try {
       await cambiaPassword(attuale, nuova);
       await ricarica();
-      if (!obbligatorio) navigate("/admin", { replace: true });
+      if (!obbligatorio) {
+        avvisa("Password cambiata. Le altre sessioni sono state chiuse.");
+        navigate(indietro.a, { replace: true });
+      }
     } catch (err) {
       setErrore(err.message || "Cambio non riuscito.");
       setInvio(false);
     }
   };
 
+  /**
+   * Due gusci per la stessa schermata.
+   *
+   * Quando il cambio è obbligatorio questa pagina prende il posto di tutto il
+   * pannello, e allora è giusto che occupi lo schermo. Quando invece la si
+   * apre di propria volontà, sta DENTRO al pannello: il guscio a tutta pagina
+   * aggiungeva un secondo blocco alto quanto lo schermo sotto alla barra,
+   * quindi la scheda finiva sotto al centro e nasceva una barra di
+   * scorrimento per del vuoto.
+   */
+  const Guscio = obbligatorio ? GuscioPieno : GuscioNelPannello;
+
   return (
-    <div className="alg-page">
-      <main className="alg-form-side">
+    <Guscio>
         {/* Una via d'uscita c'è sempre, anche quando il cambio è obbligatorio:
             non si può usare il pannello, ma il sito sì. */}
         <div className="alg-back-row">
-          <Link to="/" className="alg-back">
+          <Link to={indietro.a} className="alg-back">
             <FaArrowLeft className="alg-back-arrow" aria-hidden="true" />
-            Torna alla home
+            {indietro.etichetta}
           </Link>
         </div>
 
@@ -79,12 +134,15 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
 
           <form onSubmit={invia} noValidate className="alg-form">
 
+            {/* Tre campi fatti allo stesso modo: ognuno con la sua icona a
+                sinistra e il suo occhio a destra. Prima il terzo non aveva
+                né l'una né l'altro e sembrava un campo di un'altra pagina. */}
             <div className="alg-field">
               <FaKey className="alg-field-icon" aria-hidden="true" />
               <input
                 id="cp-attuale"
-                type={mostra ? "text" : "password"}
-                className="alg-input"
+                type={occhio("attuale").tipo}
+                className="alg-input alg-input-pw"
                 value={attuale}
                 onChange={(e) => setAttuale(e.target.value)}
                 placeholder=" "
@@ -95,13 +153,22 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
               <label htmlFor="cp-attuale" className="alg-label">
                 {obbligatorio ? "Password ricevuta" : "Password attuale"}
               </label>
+              <button
+                type="button"
+                className="alg-reveal"
+                onClick={occhio("attuale").inverti}
+                disabled={invio}
+                aria-label={mostra.attuale ? "Nascondi la password attuale" : "Mostra la password attuale"}
+              >
+                {mostra.attuale ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
 
             <div className="alg-field">
               <FaShieldAlt className="alg-field-icon" aria-hidden="true" />
               <input
                 id="cp-nuova"
-                type={mostra ? "text" : "password"}
+                type={occhio("nuova").tipo}
                 className="alg-input alg-input-pw"
                 value={nuova}
                 onChange={(e) => setNuova(e.target.value)}
@@ -113,19 +180,20 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
               <button
                 type="button"
                 className="alg-reveal"
-                onClick={() => setMostra((v) => !v)}
+                onClick={occhio("nuova").inverti}
                 disabled={invio}
-                aria-label={mostra ? "Nascondi" : "Mostra"}
+                aria-label={mostra.nuova ? "Nascondi la nuova password" : "Mostra la nuova password"}
               >
-                {mostra ? <FaEyeSlash /> : <FaEye />}
+                {mostra.nuova ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
 
             <div className="alg-field">
+              <FaCheckDouble className="alg-field-icon" aria-hidden="true" />
               <input
                 id="cp-conferma"
-                type={mostra ? "text" : "password"}
-                className="alg-input alg-input-senza-icona"
+                type={occhio("conferma").tipo}
+                className="alg-input alg-input-pw"
                 value={conferma}
                 onChange={(e) => setConferma(e.target.value)}
                 placeholder=" "
@@ -133,6 +201,15 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
                 disabled={invio}
               />
               <label htmlFor="cp-conferma" className="alg-label">Ripetila</label>
+              <button
+                type="button"
+                className="alg-reveal"
+                onClick={occhio("conferma").inverti}
+                disabled={invio}
+                aria-label={mostra.conferma ? "Nascondi la conferma" : "Mostra la conferma"}
+              >
+                {mostra.conferma ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
 
             <p className="adm-hint">
@@ -155,7 +232,6 @@ export default function CambioPasswordPage({ obbligatorio = false }) {
             </button>
           </form>
         </div>
-      </main>
-    </div>
+    </Guscio>
   );
 }

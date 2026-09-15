@@ -11,7 +11,9 @@
     "db:genera": "drizzle-kit generate",
     "db:applica": "node --env-file=.env node_modules/drizzle-kit/bin.cjs migrate",
     "db:studio": "node --env-file=.env node_modules/drizzle-kit/bin.cjs studio",
-    "dev:api": "node --env-file=.env dev-server.mjs"
+    "dev:api": "node --env-file=.env dev-server.mjs",
+    "test": "vitest run",
+    "test:guarda": "vitest"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1131.0",
@@ -19,13 +21,10 @@
     "@tiptap/extension-link": "^3.31.3",
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
-    "bootstrap": "^5.3.8",
-    "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
+    "leaflet": "^1.9.4",
     "pg": "^8.23.0",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.10.10",
-    "react-datepicker": "^8.7.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.14.1",
@@ -41,6 +40,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "^5.0.0"
   }
 }

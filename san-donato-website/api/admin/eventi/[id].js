@@ -18,9 +18,10 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "../../../db/client.js";
 import { eventi, mediaEvento } from "../../../db/schema.js";
-import { trovaEvento } from "../../../server/eventi.js";
+import { trovaEvento, soloPartite, TIPI_PARTITA } from "../../../server/eventi.js";
 import { puoGestireSquadra } from "../../../server/autorizzazioni.js";
 import { richiedeAccesso } from "../../../server/autenticazione.js";
+import { annota } from "../../../server/registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../../server/risposte.js";
 import { leggiCorpo, parametri } from "../../../server/richiesta.js";
 import { schemaEventoModifica, valida } from "../../../server/validazione.js";
@@ -36,7 +37,12 @@ async function eventoGestibile(req) {
   const id = idRichiesto(req);
 
   const [riga] = await getDb()
-    .select({ id: eventi.id, squadraId: eventi.squadraId })
+    // Titolo e data servono al registro, che deve poter raccontare cos'era
+    // anche quando l'evento è stato cancellato.
+    .select({
+      id: eventi.id, squadraId: eventi.squadraId,
+      titolo: eventi.titolo, inizio: eventi.inizio
+    })
     .from(eventi)
     .where(eq(eventi.id, id))
     .limit(1);
@@ -61,6 +67,19 @@ async function modifica(req, res) {
   await eventoGestibile(req);
   const dati = valida(schemaEventoModifica, await leggiCorpo(req));
 
+  /*
+   * Un allenatore tocca solo partite, e non le programma.
+   *
+   * Vale anche in modifica: senza, basterebbe creare una partita e poi
+   * cambiarle il tipo in "riunione" per avere un evento di società.
+   */
+  if (soloPartite(req.utente)) {
+    if (dati.tipo !== undefined && !TIPI_PARTITA.includes(dati.tipo)) {
+      throw new ErroreHttp(403, "Puoi gestire partite e tornei, non altri eventi.");
+    }
+    delete dati.visibileDal;
+  }
+
   // Spostare un evento su un'altra squadra richiede il permesso anche su
   // quella: senza questo controllo si potrebbe scrivere nel calendario
   // di chiunque passando dal proprio.
@@ -71,7 +90,8 @@ async function modifica(req, res) {
   const modifiche = { aggiornatoIl: new Date() };
   for (const campo of [
     "squadraId", "tipo", "sport", "titolo", "avversario", "inizio", "fine",
-    "tuttoIlGiorno", "luogo", "descrizione", "risultato", "parziali",
+    "tuttoIlGiorno", "visibileDal", "luogo", "latitudine", "longitudine", "descrizione",
+    "risultato", "parziali",
     "marcatori", "diretta"
   ]) {
     if (dati[campo] !== undefined) modifiche[campo] = dati[campo];
@@ -83,17 +103,40 @@ async function modifica(req, res) {
     .where(eq(eventi.id, idRichiesto(req)))
     .returning({ id: eventi.id, titolo: eventi.titolo, inizio: eventi.inizio });
 
+  await annota(req.utente, {
+    // Inserire il risultato di una partita è l'operazione più frequente su un
+    // evento, e nel registro merita un nome suo invece di sparire fra le
+    // "modifiche": è quella che poi qualcuno contesta.
+    azione: dati.risultato !== undefined ? "eventi.risultato" : "eventi.modifica",
+    tipo: "evento",
+    id: aggiornato.id,
+    descrizione: dati.risultato !== undefined
+      ? `Ha messo il risultato di "${aggiornato.titolo}": ${dati.risultato ?? "—"}`
+      : `Ha modificato "${aggiornato.titolo}"`,
+    dettaglio: { campi: Object.keys(modifiche).filter((c) => c !== "aggiornatoIl") }
+  });
+
   return json(res, { evento: aggiornato });
 }
 
 async function elimina(req, res) {
-  await eventoGestibile(req);
+  const riga = await eventoGestibile(req);
   const id = idRichiesto(req);
 
   const db = getDb();
   // I collegamenti ai file si tolgono per primi; i file restano in archivio
   await db.delete(mediaEvento).where(eq(mediaEvento.eventoId, id));
   await db.delete(eventi).where(eq(eventi.id, id));
+
+  // Qui il registro conta più che altrove: l'evento non c'è più, e questa
+  // riga è l'unica traccia che sia mai esistito.
+  await annota(req.utente, {
+    azione: "eventi.elimina",
+    tipo: "evento",
+    id,
+    descrizione: `Ha eliminato "${riga.titolo}"`,
+    dettaglio: { inizio: riga.inizio, squadraId: riga.squadraId }
+  });
 
   return json(res, { eliminato: id });
 }

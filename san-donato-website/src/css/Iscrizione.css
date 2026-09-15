@@ -1,0 +1,153 @@
+/* La scheda "iscrizione" dell'atleta. Vedi IscrizionePage.jsx */
+
+/*
+ * L'obiettivo di questo foglio è uno solo: su un computer la pagina deve
+ * stare in una schermata, senza barra di scorrimento.
+ *
+ * Prima era una colonna larga con dentro tre gruppi di campi uno sotto
+ * l'altro, più una spalla altrettanto lunga: fra le due si arrivava
+ * tranquillamente al doppio dello schermo, e la quota — la cosa che si
+ * veniva a guardare — stava in fondo. Adesso i campi sono in griglia, i
+ * gruppi affiancati, e quello che resta sono due colonne basse.
+ */
+
+.isc-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.isc-colonna,
+.isc-lato {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* I riquadri si stringono: gli stessi margini di una pagina lunga, su una
+   che deve stare in una schermata, sono spazio buttato. */
+.isc-griglia .adm-panel { padding: .9rem 1rem 1rem; }
+.isc-griglia .adm-panel-title { margin-bottom: .7rem; }
+
+/* I due gruppi di campi affiancati invece che in fila: "i tuoi dati" e
+   "chi chiamare se serve" sono sei campi in tutto, e in colonna occupavano
+   due schermate di telefono su un monitor da ventisette pollici. */
+.isc-colonna .adm-gruppo {
+  margin-bottom: .9rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid var(--adm-line-soft);
+}
+
+.isc-colonna .adm-gruppo:last-of-type {
+  margin-bottom: .6rem;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.isc-colonna .adm-gruppo-titolo {
+  font-size: .74rem;
+  letter-spacing: .07em;
+}
+
+.isc-colonna .adm-campi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .6rem .8rem;
+}
+
+.isc-colonna .adm-campo-largo { grid-column: 1 / -1; }
+
+/* Le spiegazioni sotto ai campi diventano più piccole e più vicine: sono
+   note, e in una pagina densa non devono pesare quanto le etichette. */
+.isc-griglia .adm-hint {
+  margin-top: .25rem;
+  font-size: .74rem;
+  line-height: 1.35;
+}
+
+.isc-griglia .adm-field { gap: .2rem; }
+
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 1000px) {
+  /* Una colonna sola. Qui la pagina scorre, ed è giusto che scorra: su un
+     telefono "tutto a schermo" vorrebbe dire caratteri illeggibili. */
+  .isc-griglia { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Gli anni compiuti, accanto all'etichetta della data di nascita. */
+.adm-eta {
+  margin-left: .4rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Civico e CAP: due campi corti che in una griglia da 190px sprecherebbero
+   mezza riga a testa. */
+.isc-colonna .adm-campo-stretto { grid-column: span 1; max-width: 12rem; }
+
+/* L'asterisco dei campi obbligatori. Arancione e non rosso: segnala cosa
+   serve, non un errore già commesso. */
+.adm-obbligatorio {
+  margin-left: 2px;
+  color: var(--adm-warn);
+  font-weight: 800;
+}
+
+/* ---------- Chi chiamare se serve ---------- */
+
+/* Ogni contatto è un blocco suo: con otto caselle di fila non si capiva
+   più quale telefono appartenesse a quale nome. */
+.isc-contatto {
+  margin-top: .55rem;
+  padding: .55rem .65rem .65rem;
+  border: 1px solid var(--adm-line-soft);
+  border-radius: 10px;
+  background: var(--adm-bg);
+}
+
+.isc-contatto-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .45rem;
+}
+
+.isc-contatto-titolo {
+  color: var(--adm-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+/* "Togli" non è un pulsante come gli altri: toglie qualcosa che si è
+   appena aggiunti, e con lo stesso peso di "Salva" sembrerebbe una
+   scelta importante quanto quella. */
+.isc-togli {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--adm-muted);
+  font: inherit;
+  font-size: .74rem;
+  cursor: pointer;
+}
+
+.isc-togli:hover:not(:disabled) { background: var(--adm-line-soft); color: var(--adm-danger); }
+.isc-togli:disabled { opacity: .5; cursor: default; }
+
+.isc-aggiungi { margin-top: .55rem; }

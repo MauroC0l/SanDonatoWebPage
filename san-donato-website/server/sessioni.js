@@ -14,7 +14,8 @@
 import { randomBytes, createHash } from "node:crypto";
 import { eq, lt } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { sessioni, utenti } from "../db/schema.js";
+import { sessioni, utenti, media } from "../db/schema.js";
+import { urlFile } from "./file.js";
 
 const NOME_COOKIE = "psd_sessione";
 
@@ -111,10 +112,19 @@ export async function utenteDallaSessione(req) {
       nome: utenti.nome,
       cognome: utenti.cognome,
       stato: utenti.stato,
-      deveCambiarePassword: utenti.deveCambiarePassword
+      deveCambiarePassword: utenti.deveCambiarePassword,
+
+      // L'immagine del profilo viaggia con la sessione perché la barra in
+      // alto la mostra su ogni pagina: chiederla a parte vorrebbe dire una
+      // seconda richiesta a ogni caricamento per un dato che è già qui a
+      // portata di join. È un innesto in meno su una chiave primaria, non
+      // una scansione.
+      immagineChiave: media.chiave,
+      immagineUrlWp: media.urlOriginaleWp
     })
     .from(sessioni)
     .innerJoin(utenti, eq(utenti.id, sessioni.utenteId))
+    .leftJoin(media, eq(media.id, utenti.immagineId))
     .where(eq(sessioni.id, id))
     .limit(1);
 
@@ -139,7 +149,8 @@ export async function utenteDallaSessione(req) {
   return {
     id: riga.id, email: riga.email, ruolo: riga.ruolo,
     nome: riga.nome, cognome: riga.cognome,
-    stato: riga.stato, deveCambiarePassword: riga.deveCambiarePassword
+    stato: riga.stato, deveCambiarePassword: riga.deveCambiarePassword,
+    immagineUrl: urlFile(riga.immagineChiave, riga.immagineUrlWp)
   };
 }
 

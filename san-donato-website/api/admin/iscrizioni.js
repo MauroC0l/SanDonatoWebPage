@@ -3,6 +3,7 @@
  *
  *   GET   le richieste che questa persona può decidere
  *   POST  accoglie o respinge  { id, approvata, squadraId?, motivo? }
+ *   PATCH riapre una richiesta respinta  { id }
  *
  * Chi decide: la segreteria e gli amministratori su tutte, un allenatore
  * sugli sport che allena.
@@ -25,6 +26,7 @@ import {
   puo, puoDecidereSport, puoGestireSquadra, sportGestibili, squadreGestibili
 } from "../../server/autorizzazioni.js";
 import { richiedeAccesso } from "../../server/autenticazione.js";
+import { annota } from "../../server/registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../server/risposte.js";
 import { leggiCorpo, parametri } from "../../server/richiesta.js";
 import { schemaDecisione, valida } from "../../server/validazione.js";
@@ -120,13 +122,22 @@ async function decidi(req, res) {
       id: richiesteIscrizione.id,
       utenteId: richiesteIscrizione.utenteId,
       sport: richiesteIscrizione.sport,
-      stato: richiesteIscrizione.stato
+      stato: richiesteIscrizione.stato,
+      // Solo per il registro: il nome va copiato ADESSO, perché la riga
+      // deve continuare a dire di chi si parlava anche fra due anni.
+      nome: utenti.nome,
+      cognome: utenti.cognome,
+      email: utenti.email
     })
     .from(richiesteIscrizione)
+    .innerJoin(utenti, eq(utenti.id, richiesteIscrizione.utenteId))
     .where(eq(richiesteIscrizione.id, dati.id))
     .limit(1);
 
   if (!richiesta) throw new ErroreHttp(404, "Richiesta non trovata.");
+
+  const nomeRichiedente =
+    [richiesta.nome, richiesta.cognome].filter(Boolean).join(" ") || richiesta.email;
 
   if (!await puoDecidereSport(req.utente, richiesta.sport)) {
     throw new ErroreHttp(403, `Non decidi sulle richieste di ${richiesta.sport}.`);
@@ -188,15 +199,111 @@ async function decidi(req, res) {
     // può essere ripresa in considerazione senza doverla riattivare a mano.
   });
 
+  await annota(req.utente, {
+    azione: dati.approvata ? "iscrizioni.accoglie" : "iscrizioni.respinge",
+    tipo: "richiesta",
+    id: richiesta.id,
+    descrizione: dati.approvata
+      ? `Ha inserito ${nomeRichiedente} in squadra (${richiesta.sport})`
+      : `Ha respinto la richiesta di ${nomeRichiedente} per ${richiesta.sport}`,
+    dettaglio: dati.approvata
+      ? { squadraId: dati.squadraId }
+      : { motivo: dati.motivo ?? null }
+  });
+
   return json(res, { id: richiesta.id, approvata: dati.approvata });
+}
+
+/**
+ * Rimette in coda una richiesta respinta.
+ *
+ * Un rifiuto oggi è definitivo: l'account resta "in_attesa" per sempre e
+ * la persona non ha nessun modo di ripresentarsi — non può registrarsi di
+ * nuovo, perché la sua email risulta già presa. In pratica basta un "no"
+ * dato per sbaglio e quell'account è carta straccia.
+ *
+ * Riaprire la riporta sul tavolo di chi decide, cancellando il motivo del
+ * rifiuto: è una richiesta viva come le altre. Del rifiuto resta traccia
+ * nel registro, che è il posto giusto — sulla richiesta darebbe fastidio
+ * a chi la deve guardare adesso.
+ *
+ * Lo fanno amministratori e segreteria, non gli allenatori: annullare la
+ * decisione di qualcun altro è un gesto che sta un gradino sopra.
+ */
+async function riapri(req, res) {
+  if (!puo(req.utente, "iscrizioni.decidi_tutte")) {
+    throw new ErroreHttp(403, "Solo la segreteria e gli amministratori riaprono una richiesta.");
+  }
+
+  const dati = await leggiCorpo(req);
+  const id = Number(dati.id);
+  if (!Number.isInteger(id) || id <= 0) throw new ErroreHttp(400, "Richiesta non valida.");
+
+  const db = getDb();
+
+  const [richiesta] = await db
+    .select({
+      id: richiesteIscrizione.id,
+      utenteId: richiesteIscrizione.utenteId,
+      sport: richiesteIscrizione.sport,
+      stato: richiesteIscrizione.stato,
+      nome: utenti.nome,
+      cognome: utenti.cognome,
+      email: utenti.email
+    })
+    .from(richiesteIscrizione)
+    .innerJoin(utenti, eq(utenti.id, richiesteIscrizione.utenteId))
+    .where(eq(richiesteIscrizione.id, id))
+    .limit(1);
+
+  if (!richiesta) throw new ErroreHttp(404, "Richiesta non trovata.");
+
+  if (richiesta.stato !== "rifiutata") {
+    throw new ErroreHttp(409, "Si riaprono solo le richieste respinte.");
+  }
+
+  const adesso = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx.update(richiesteIscrizione).set({
+      stato: "in_attesa",
+      squadraId: null,
+      decisaDa: null,
+      decisaIl: null,
+      motivoRifiuto: null,
+      // La data di presentazione torna a oggi: in coda deve stare dove
+      // sta una richiesta arrivata adesso, non in fondo fra quelle vecchie.
+      richiestaIl: adesso
+    }).where(eq(richiesteIscrizione.id, richiesta.id));
+
+    // L'account torna in attesa anche se per qualche motivo era altrove:
+    // "richiesta aperta" e "account attivo senza squadra" non devono
+    // poter convivere.
+    await tx.update(utenti)
+      .set({ stato: "in_attesa", aggiornatoIl: adesso })
+      .where(eq(utenti.id, richiesta.utenteId));
+  });
+
+  const nomeRichiedente =
+    [richiesta.nome, richiesta.cognome].filter(Boolean).join(" ") || richiesta.email;
+
+  await annota(req.utente, {
+    azione: "iscrizioni.riapre",
+    tipo: "richiesta",
+    id: richiesta.id,
+    descrizione: `Ha riaperto la richiesta di ${nomeRichiedente} per ${richiesta.sport}`
+  });
+
+  return json(res, { id: richiesta.id, riaperta: true });
 }
 
 export default conGestioneErrori(
   richiedeAccesso(async (req, res) => {
     if (req.method === "GET") return elenco(req, res);
     if (req.method === "POST") return decidi(req, res);
+    if (req.method === "PATCH") return riapri(req, res);
 
-    res.setHeader("Allow", "GET, POST");
+    res.setHeader("Allow", "GET, POST, PATCH");
     return errore(res, 405, `Metodo ${req.method} non consentito.`);
   })
 );

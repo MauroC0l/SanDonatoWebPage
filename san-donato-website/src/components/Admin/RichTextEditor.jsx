@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -6,6 +6,7 @@ import {
   FaBold, FaItalic, FaListUl, FaListOl, FaQuoteRight,
   FaLink, FaUnlink, FaUndo, FaRedo, FaHeading, FaParagraph
 } from "react-icons/fa";
+import { useDialoghi } from "../../context/dialoghi";
 
 /**
  * Un pulsante della barra strumenti.
@@ -34,7 +35,18 @@ function ToolButton({ onClick, active, label, children, disabled, enabled = true
  * Produce HTML, lo stesso formato che WordPress già salva nei post esistenti:
  * così le 96 notizie di archivio restano modificabili senza conversioni.
  */
-export default function RichTextEditor({ value, onChange, disabled }) {
+export default function RichTextEditor({ value, onChange, onNormalizzato, disabled }) {
+  const { chiediTesto } = useDialoghi();
+
+  // La richiamata in un ref: serve dentro a un effetto che deve scattare una
+  // volta sola per istanza dell'editor, e metterla fra le dipendenze lo
+  // farebbe ripartire a ogni render del componente che la passa.
+  const normalizzato = useRef(onNormalizzato);
+
+  // L'aggiornamento sta in un effetto e non nel corpo del componente: toccare
+  // un ref durante il render è una scrittura che React non vede.
+  useEffect(() => { normalizzato.current = onNormalizzato; }, [onNormalizzato]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -56,7 +68,26 @@ export default function RichTextEditor({ value, onChange, disabled }) {
       const html = instance.getHTML();
       // TipTap rappresenta il documento vuoto come un paragrafo vuoto:
       // lo normalizziamo, altrimenti un campo "vuoto" risulterebbe compilato.
-      onChange(html === "<p></p>" ? "" : html);
+      const pulito = html === "<p></p>" ? "" : html;
+
+      /**
+       * Se il testo cambia mentre l'editor non ha il fuoco, non è stata una
+       * persona: è l'editor che sistema il documento per conto suo — chiude i
+       * tag lasciati aperti, butta quelli che non conosce, trasforma in
+       * collegamenti gli indirizzi scritti a mano. Succede appena il
+       * contenuto entra, e a volte un istante dopo.
+       *
+       * Va detto a chi ci sta sopra, altrimenti quella riscrittura viene
+       * contata come una modifica e uscire dalla pagina chiede conferma a chi
+       * non ha toccato niente. Per scrivere qualcosa bisogna prima cliccarci
+       * dentro, quindi il fuoco è il modo più affidabile di distinguere le due.
+       */
+      if (!instance.isFocused) {
+        normalizzato.current?.(pulito);
+        return;
+      }
+
+      onChange(pulito);
     },
     editorProps: {
       attributes: {
@@ -65,6 +96,29 @@ export default function RichTextEditor({ value, onChange, disabled }) {
       }
     }
   });
+
+  /**
+   * Appena l'editor ha analizzato il contenuto iniziale, comunica come lo ha
+   * riscritto.
+   *
+   * TipTap non conserva l'HTML che riceve: lo trasforma nel proprio documento
+   * e lo riserializza. Gli a capo fra i paragrafi spariscono, i tag che non
+   * conosce vengono buttati, quelli aperti e mai chiusi vengono chiusi, e
+   * l'autolink trasforma in collegamenti gli indirizzi scritti a mano. Per le
+   * notizie che arrivano da WordPress la stringa che esce non è quasi mai
+   * identica a quella entrata.
+   *
+   * Senza questo passaggio, confrontare il modulo con ciò che è stato
+   * caricato per capire se ci sono modifiche risponde sempre di sì, e uscire
+   * dall'editor chiede conferma anche a chi non ha toccato niente. Qui
+   * l'editor dichiara la propria versione del testo, e chi lo usa la prende
+   * come punto di partenza invece che come modifica.
+   */
+  useEffect(() => {
+    if (!editor) return;
+    const html = editor.getHTML();
+    normalizzato.current?.(html === "<p></p>" ? "" : html);
+  }, [editor]);
 
   // Il contenuto arriva in modo asincrono quando si modifica una notizia
   // esistente: va riversato nell'editor una volta caricato.
@@ -85,9 +139,19 @@ export default function RichTextEditor({ value, onChange, disabled }) {
     return <div className="adm-editor-loading">Caricamento dell&apos;editor…</div>;
   }
 
-  const setLink = () => {
-    const previous = editor.getAttributes("link").href || "";
-    const url = window.prompt("Indirizzo del collegamento:", previous);
+  const setLink = async () => {
+    const precedente = editor.getAttributes("link").href || "";
+
+    const url = await chiediTesto({
+      titolo: precedente ? "Cambia il collegamento" : "Inserisci un collegamento",
+      testo: "Lascia il campo vuoto e conferma per togliere il collegamento.",
+      etichetta: "Indirizzo",
+      segnaposto: "https://…",
+      valoreIniziale: precedente,
+      conferma: "Applica",
+      monolinea: true,
+      massimo: 500
+    });
 
     if (url === null) return;               // annullato
     if (url === "") {
@@ -95,8 +159,10 @@ export default function RichTextEditor({ value, onChange, disabled }) {
       return;
     }
 
-    const normalized = /^(https?:|mailto:)/i.test(url) ? url : `https://${url}`;
-    editor.chain().focus().extendMarkRange("link").setLink({ href: normalized }).run();
+    // Chi incolla un indirizzo spesso lo scrive senza "https://": senza
+    // questa riga il collegamento verrebbe letto come un percorso del sito.
+    const normalizzato = /^(https?:|mailto:)/i.test(url) ? url : `https://${url}`;
+    editor.chain().focus().extendMarkRange("link").setLink({ href: normalizzato }).run();
   };
 
 

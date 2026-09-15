@@ -1,0 +1,308 @@
+/* La fascia della quota nell'area dell'atleta. Vedi RiquadroQuota.jsx */
+
+.qta {
+  /* Un filo di colore a sinistra: distingue la fascia dai riquadri sotto
+     senza gridare, e diventa verde quando non c'è più niente da versare. */
+  border-left: 4px solid var(--adm-blue);
+
+  /* Un respiro prima delle schede sotto: attaccata, la fascia sembrava la
+     prima riga del modulo invece di un riquadro a sé. */
+  margin-bottom: 1.25rem;
+}
+
+.qta.is-saldata { border-left-color: var(--adm-ok); }
+
+/*
+ * Tre zone su una riga: la cifra, l'avanzamento, cosa si può fare.
+ *
+ * In colonna — com'era prima, in fondo alla spalla destra — la quota
+ * finiva sotto al modulo e la si trovava solo scorrendo. È il dato che una
+ * famiglia viene a controllare per primo.
+ */
+.qta-riga {
+  display: grid;
+  grid-template-columns: minmax(210px, auto) minmax(0, 1fr) minmax(200px, auto);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* ---------- La cifra ---------- */
+
+.qta-testata { min-width: 0; }
+
+.qta-occhiello {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+
+  margin-bottom: .2rem;
+  color: var(--adm-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.qta-occhiello svg { color: var(--adm-blue); }
+
+.qta-cifra {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.qta-cifra-ok { color: var(--adm-ok); }
+.qta-cifra-ok svg { font-size: .8em; }
+
+.qta-cifra-vuota {
+  color: var(--adm-muted);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.qta-sotto {
+  display: block;
+  margin-top: 2px;
+  color: var(--adm-muted);
+  font-size: .82rem;
+}
+
+/* ---------- L'avanzamento ---------- */
+
+.qta-avanzamento { min-width: 0; }
+
+.qta-barra {
+  height: 10px;
+  background: var(--adm-line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.qta-barra-piena {
+  display: block;
+  height: 100%;
+  background: var(--adm-blue);
+  border-radius: 999px;
+  /* Si riempie all'apertura: senza, appare già piena e non si legge come
+     un progresso. */
+  transition: width .5s ease;
+}
+
+.qta-barra-piena.is-saldata { background: var(--adm-ok); }
+
+.qta-numeri {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: .35rem;
+  font-size: .82rem;
+  color: var(--adm-muted);
+}
+
+.qta-percento { font-variant-numeric: tabular-nums; }
+
+.qta-dal {
+  display: block;
+  margin-top: .3rem;
+  font-size: .76rem;
+  color: var(--adm-muted);
+}
+
+/* ---------- Azioni ---------- */
+
+.qta-azioni {
+  display: grid;
+  gap: .5rem;
+  justify-items: stretch;
+}
+
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 900px) {
+  /* In colonna, ma con la cifra sempre per prima: l'ordine di importanza
+     non cambia solo perché cambia la larghezza. */
+  .qta-riga {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* ---------- Ultimo versamento e storico ---------- */
+
+.qta-ultimo {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--adm-muted);
+  font-size: .78rem;
+}
+
+.qta-ultimo svg { flex: 0 0 auto; }
+.qta-ultimo strong { color: var(--adm-ink); }
+
+.qta-tutti {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--adm-blue);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.qta-tutti:hover { text-decoration: underline; }
+
+.qta-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  background: rgba(10, 18, 32, .55);
+  backdrop-filter: blur(2px);
+
+  /* Il portale la attacca al body, fuori da .adm-shell: senza la tavolozza
+     i testi resterebbero bianchi su bianco. */
+  --adm-surface: #ffffff;
+  --adm-bg: #f1f4f9;
+  --adm-line: #dde3ec;
+  --adm-line-soft: #eef1f6;
+  --adm-ink: #16202e;
+  --adm-muted: #5b6a80;
+  --adm-blue: #0b4fd1;
+
+  color: var(--adm-ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.qta-finestra {
+  display: flex;
+  flex-direction: column;
+
+  width: min(460px, 100%);
+  max-height: min(560px, 90vh);
+
+  background: var(--adm-surface);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
+  overflow: hidden;
+}
+
+.qta-finestra-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--adm-line);
+}
+
+.qta-finestra-testa h2 {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.qta-finestra-testa svg { color: var(--adm-blue); }
+
+.qta-storico {
+  list-style: none;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: .5rem;
+  overflow-y: auto;
+}
+
+.qta-storico li {
+  display: flex;
+  align-items: baseline;
+  gap: .8rem;
+
+  padding: .6rem .65rem;
+  border-radius: 10px;
+}
+
+.qta-storico li:nth-child(odd) { background: var(--adm-bg); }
+
+.qta-storico-importo {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+  font-size: .98rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.qta-storico-testi {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.qta-storico-quando { font-size: .84rem; }
+
+.qta-storico-come {
+  color: var(--adm-muted);
+  font-size: .76rem;
+  overflow-wrap: anywhere;
+}
+
+/* Il totale in fondo: la verifica che una famiglia fa davvero è "torna con
+   quello che ho pagato io". */
+.qta-finestra-piede {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: .85rem 1rem;
+  border-top: 1px solid var(--adm-line);
+  background: var(--adm-bg);
+  font-size: .86rem;
+}
+
+.qta-finestra-piede strong {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- I versamenti, anno per anno ---------- */
+
+.qta-anni { display: grid; gap: .2rem; }
+
+.qta-anno {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6rem;
+
+  margin: .7rem 0 .2rem;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--adm-muted);
+}
+
+.qta-anno-totale {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: .84rem;
+  color: var(--adm-ink);
+}

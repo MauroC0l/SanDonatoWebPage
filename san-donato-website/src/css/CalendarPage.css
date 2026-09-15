@@ -1,317 +1,762 @@
-:root {
-  /* Palette Colori */
-  --cp-bg-app: #F8FAFC;
-  --cp-bg-card: #FFFFFF;
-  --cp-bg-hover: #F1F5F9;
-  --cp-text-main: #0F172A;
-  --cp-text-muted: #64748B;
-  --cp-border-color: #E2E8F0;
-  --cp-primary-color: #1E293B;
-  --cp-accent-blue: #3B82F6;
-  --cp-shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
+/* =========================================
+   Calendario pubblico.
+   Stessa lingua visiva della home: fondo chiaro, schede bianche con
+   ombre morbide, blu della società e arancio per quello che conta.
+   Vedi CalendarPage.jsx. Prefisso: cp-
+   ========================================= */
 
-/* Reset */
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-html {
-  scrollbar-gutter: stable;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--cp-bg-app);
-}
-
-body.cp-modal-open {
-  overflow: hidden;
-}
-
-/* --- LAYOUT GENERALE --- */
 .cp-dashboard-container {
-  height: 100vh;
+  --cp-bg: #f6f8fb;
+  --cp-carta: #ffffff;
+  --cp-inchiostro: #0f172a;
+  --cp-testo: #475569;
+  --cp-tenue: #7c8ba1;
+  --cp-bordo: #e6ebf2;
+  --cp-bordo-tenue: #f0f3f8;
+  --cp-arancio: #ff6600;
+  --cp-blu: #002b5c;
+  --cp-raggio: 18px;
+  --cp-ombra: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -16px rgba(15, 23, 42, .22);
+  --cp-ombra-alta: 0 4px 10px rgba(15, 23, 42, .06), 0 24px 48px -24px rgba(15, 23, 42, .3);
 
-  height: 100svh; 
-  padding: clamp(1rem, 1.5vw, 1.5rem); 
-  background-color: var(--cp-bg-app);
-  color: var(--cp-text-main);
-  display: flex;
-  justify-content: center;
-  overflow: hidden; 
+  background: var(--cp-bg);
+  color: var(--cp-testo);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  /* Poco stacco in cima: il calendario è quello che si è venuti a vedere,
+     e tre centimetri di bianco prima del titolo lo spingono sotto la
+     piega su un portatile. */
+  padding: clamp(1rem, 2vw, 1.6rem) 0 clamp(3rem, 6vw, 5rem);
 }
+
+/* ---------- Intestazione ---------- */
+
+.cp-intestazione {
+  max-width: 1320px;
+  margin: 0 auto clamp(.9rem, 2vw, 1.2rem);
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.cp-occhiello {
+  display: inline-block;
+  margin-bottom: .5rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 102, 0, .1);
+  color: var(--cp-arancio);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.cp-titolo-pagina {
+  margin: 0 0 .25rem;
+  color: var(--cp-inchiostro);
+  /* clamp invece di tre media query: la dimensione segue la larghezza con
+     continuità, senza i salti che si vedono ruotando un telefono. */
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+}
+
+.cp-sottotitolo {
+  /* Su tutta la larghezza, non incolonnata a 56 caratteri: qui sotto c'è
+     una griglia larga quanto la pagina, e una frase stretta le lasciava
+     accanto un vuoto che sembrava un errore. Su una riga sola la frase
+     occupa anche meno spazio in altezza, che è il punto. */
+  margin: 0;
+  color: var(--cp-tenue);
+  font-size: clamp(.9rem, 1.5vw, 1rem);
+}
+
+/* ---------- Impianto ---------- */
 
 .cp-main-grid {
-  display: flex;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 1600px;
-  height: 100%; 
+  display: grid;
+  /* minmax(0,...) sulla colonna larga: senza, un titolo lungo dentro a una
+     casella allargherebbe la griglia oltre la pagina invece di andare a capo. */
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 1.25rem;
+
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+  align-items: start;
 }
 
-/* --- SIDEBAR --- */
+/* ---------- Spalla ---------- */
+
 .cp-sidebar {
-  width: 300px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  height: 100%;
-  overflow-y: auto; 
-  flex-shrink: 0;
-  padding-bottom: 1rem;
+  /* Resta in vista mentre si scorre il mese: filtri e prossimo impegno
+     servono proprio mentre si guarda la griglia. */
+  position: sticky;
+  top: 1rem;
 }
-
-.cp-backdrop, .cp-mobile-drag-handle, .cp-btn-close-mobile { display: none; }
 
 .cp-card {
-  background: var(--cp-bg-card);
-  border-radius: 16px;
-  padding: 1.25rem;
-  box-shadow: var(--cp-shadow-sm);
-  border: 1px solid var(--cp-border-color);
+  padding: 1.1rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: var(--cp-raggio);
+  background: var(--cp-carta);
+  box-shadow: var(--cp-ombra);
 }
 
-.cp-card-title { margin: 0; font-size: 1.1rem; font-weight: 800; }
-.cp-card-subtitle { margin: 0.25rem 0 1rem 0; font-size: 0.8rem; color: var(--cp-text-muted); }
+.cp-card-title {
+  margin: 0;
+  color: var(--cp-inchiostro);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
 
-.cp-stat-box { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: #F8FAFC; border-radius: 12px; }
-.cp-stat-icon { font-size: 1.25rem; }
-.cp-stat-value { font-size: 1.5rem; font-weight: 800; line-height: 1; }
-.cp-stat-label { font-size: 0.65rem; color: var(--cp-text-muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+.cp-card-subtitle {
+  margin: 0 0 .9rem;
+  color: var(--cp-tenue);
+  font-size: .8rem;
+}
 
-/* Filtri */
-.cp-filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; height: 28px; }
-.cp-filter-title { font-size: 0.7rem; font-weight: 700; color: var(--cp-text-muted); text-transform: uppercase; }
-.cp-filter-count { background: #E2E8F0; padding: 2px 6px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
+.cp-stat-box {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+
+  padding: .85rem;
+  border-radius: 12px;
+  background: var(--cp-bg);
+}
+
+.cp-stat-icon { font-size: 1.5rem; line-height: 1; }
+
+.cp-stat-value {
+  color: var(--cp-inchiostro);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-stat-label {
+  margin-top: 2px;
+  color: var(--cp-tenue);
+  font-size: .74rem;
+}
+
+/* Il prossimo impegno: unico riquadro scuro della pagina, perché è
+   l'informazione che si viene a cercare. */
+.cp-info-box {
+  padding: 1.1rem;
+  border-radius: var(--cp-raggio);
+  background: linear-gradient(135deg, var(--cp-blu) 0%, #01407f 100%);
+  color: #fff;
+  box-shadow: var(--cp-ombra);
+}
+
+.cp-info-label {
+  margin-bottom: .5rem;
+  color: rgba(255, 255, 255, .7);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.cp-info-match {
+  margin-bottom: .5rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cp-info-date {
+  color: rgba(255, 255, 255, .8);
+  font-size: .8rem;
+  /* La data per esteso comincia col giorno della settimana in minuscolo */
+  text-transform: capitalize;
+}
+
+/* ---------- Filtri ---------- */
+
+.cp-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .7rem;
+}
+
+.cp-filter-title {
+  color: var(--cp-inchiostro);
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.cp-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--cp-bg);
+  color: var(--cp-tenue);
+  font-size: .7rem;
+  font-weight: 700;
+}
 
 .cp-btn-reset {
-  background: transparent;
-  border: none;
-  color: var(--cp-accent-blue);
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cp-arancio);
+  font: inherit;
+  font-size: .74rem;
+  font-weight: 600;
   cursor: pointer;
-  text-transform: uppercase;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
 }
 
-.cp-btn-reset:hover {
-  background-color: #EFF6FF; /* Un azzurro molto chiaro */
-  color: #1E40AF;
+.cp-btn-reset:hover { text-decoration: underline; }
+
+.cp-filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+
+  width: 100%;
+  padding: .45rem .6rem;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+
+  color: var(--cp-testo);
+  font: inherit;
+  font-size: .84rem;
+  text-align: left;
+  cursor: pointer;
+
+  transition: background-color .15s ease, color .15s ease;
 }
 
-/* È un <button>: servono i reset degli stili nativi */
-.cp-filter-item { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.6rem 0.75rem; border-radius: 10px; cursor: pointer; border: 1px solid transparent; background: transparent; font: inherit; color: inherit; text-align: left; margin-bottom: 0.25rem; transition: all 0.2s; }
-.cp-filter-item:hover { background: var(--cp-bg-hover); }
-.cp-filter-item.cp-active { background: white; border-color: var(--cp-border-color); box-shadow: var(--cp-shadow-sm); }
-.cp-filter-item.cp-inactive { opacity: 0.6; }
-.cp-filter-label { display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 500; }
-.cp-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.cp-filter-item:hover { background: var(--cp-bordo-tenue); }
 
-/* Info Box */
-.cp-info-box { background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); border-radius: 16px; padding: 1.25rem; color: #1E3A8A; margin-top: auto; }
-.cp-info-label { font-size: 0.7rem; font-weight: 700; opacity: 0.7; margin-bottom: 0.25rem; text-transform: uppercase; }
-.cp-info-match { font-size: 1.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.25rem; }
-.cp-info-date { font-size: 0.8rem; font-weight: 500; opacity: 0.8; }
+.cp-filter-item.cp-active {
+  background: var(--cp-bordo-tenue);
+  color: var(--cp-inchiostro);
+  font-weight: 600;
+}
 
-/* --- MAIN CALENDAR AREA --- */
+/* Spenta: si legge ancora ma si vede che non conta */
+.cp-filter-item.cp-inactive { opacity: .5; }
+
+.cp-filter-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+}
+
+.cp-filter-label > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cp-dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* ---------- Calendario ---------- */
+
 .cp-calendar-wrapper {
-  background: var(--cp-bg-card);
-  border-radius: 20px;
-  box-shadow: var(--cp-shadow-md);
-  border: 1px solid var(--cp-border-color);
-  flex: 1; 
-  display: flex; flex-direction: column;
-  height: 100%; 
-  overflow: hidden; 
+  min-width: 0;
+  border: 1px solid var(--cp-bordo);
+  border-radius: var(--cp-raggio);
+  background: var(--cp-carta);
+  box-shadow: var(--cp-ombra);
+  overflow: hidden;
 }
 
 .cp-toolbar {
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--cp-border-color);
-  display: flex; flex-direction: column; gap: 0.75rem;
-  flex-shrink: 0;
+  padding: .8rem 1.1rem;
+  border-bottom: 1px solid var(--cp-bordo);
 }
 
-.cp-toolbar-header-row { display: flex; justify-content: space-between; align-items: center; }
-.cp-toolbar-actions-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-.cp-btn-mobile-filter { display: none; }
-.cp-toolbar-title h2 { font-size: 1.5rem; font-weight: 800; margin: 0; text-transform: capitalize; }
-
-.cp-nav-controls { display: flex; gap: 4px; background: #F1F5F9; padding: 3px; border-radius: 10px; align-items: center; }
-.cp-btn-icon { background: white; border: 1px solid rgba(0,0,0,0.05); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 7px; cursor: pointer; color: var(--cp-text-muted); transition: all 0.2s; }
-.cp-btn-icon:hover { color: var(--cp-primary-color); border-color: #CBD5E1; }
-.cp-btn-text { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 0 1rem; font-weight: 700; font-size: 0.8rem; cursor: pointer; color: var(--cp-text-main); border-radius: 7px; height: 28px; transition: all 0.2s; }
-.cp-btn-text:hover { color: var(--cp-accent-blue); }
-
-.cp-view-controls { background: #F1F5F9; padding: 3px; border-radius: 10px; display: flex; }
-.cp-btn-view { border: none; padding: 5px 12px; border-radius: 7px; font-size: 0.75rem; font-weight: 600; color: var(--cp-text-muted); cursor: pointer; background: transparent; transition: all 0.2s; }
-.cp-btn-view.cp-active { background: white; color: var(--cp-text-main); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-/* CONTENT & GRID */
-.cp-calendar-content {
-    flex: 1; 
-    padding: 1rem;
-    overflow: hidden; 
-    display: flex; 
-    flex-direction: column;
+.cp-toolbar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .6rem;
 }
 
-.cp-week-header { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 0.5rem; flex-shrink: 0; }
-.cp-day-name { text-align: center; font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
+.cp-toolbar-title h2 {
+  margin: 0;
+  color: var(--cp-inchiostro);
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+  font-weight: 800;
+  letter-spacing: -.01em;
+  text-transform: capitalize;
+}
 
+.cp-toolbar-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+.cp-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--cp-bg);
+}
+
+.cp-btn-icon,
+.cp-btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+
+  color: var(--cp-testo);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.cp-btn-icon { width: 32px; padding: 0; }
+
+.cp-btn-icon:hover,
+.cp-btn-text:hover {
+  background: var(--cp-carta);
+  color: var(--cp-inchiostro);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .1);
+}
+
+.cp-view-controls {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--cp-bg);
+}
+
+.cp-btn-view {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+
+  color: var(--cp-tenue);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.cp-btn-view:hover { color: var(--cp-inchiostro); }
+
+.cp-btn-view.cp-active {
+  background: var(--cp-carta);
+  color: var(--cp-arancio);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .12);
+}
+
+.cp-btn-mobile-filter {
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 10px;
+  background: var(--cp-carta);
+  color: var(--cp-inchiostro);
+  cursor: pointer;
+}
+
+.cp-calendar-content { padding: 0; }
+
+/* ---------- Griglia del mese ---------- */
+
+.cp-week-header,
 .cp-month-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(6, 1fr); 
-    height: 100%; 
-    gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cp-week-header {
+  background: var(--cp-bg);
+  border-bottom: 1px solid var(--cp-bordo);
+}
+
+.cp-day-name {
+  padding: .5rem;
+  color: var(--cp-tenue);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .cp-day-cell {
-    background: white; border-radius: 12px; border: 1px solid var(--cp-border-color);
-    padding: 4px; transition: all 0.2s; 
-    display: flex; flex-direction: column;
-    overflow: hidden; 
-    cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  min-height: 112px;
+  padding: 5px;
+  /* Bordo solo a destra e sotto: su tutti e quattro i lati raddoppierebbe
+     di spessore fra una casella e l'altra. */
+  border-right: 1px solid var(--cp-bordo-tenue);
+  border-bottom: 1px solid var(--cp-bordo-tenue);
+  cursor: pointer;
+
+  transition: background-color .15s ease;
 }
-.cp-day-cell:hover { border-color: var(--cp-accent-blue); }
-.cp-day-cell.cp-other-month { background: #FAFAFA; opacity: 0.5; }
-.cp-day-cell.cp-today { border: 2px solid var(--cp-accent-blue); background: #EFF6FF; }
 
-.cp-day-header { display: flex; justify-content: flex-end; padding: 2px 4px; }
-.cp-day-number { font-size: 0.8rem; font-weight: 600; color: var(--cp-text-muted); width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-.cp-today .cp-day-number { background: var(--cp-accent-blue); color: white; }
+.cp-day-cell:nth-child(7n) { border-right: 0; }
+.cp-day-cell:hover { background: var(--cp-bg); }
 
-.cp-events-container { display: flex; flex-direction: column; gap: 2px; overflow-y: hidden; flex: 1; }
+.cp-day-cell:focus-visible {
+  outline: 2px solid var(--cp-arancio);
+  outline-offset: -2px;
+}
 
-/* È un <button>: servono i reset degli stili nativi */
+.cp-other-month { background: #fbfcfe; }
+.cp-other-month .cp-day-number { opacity: .35; }
+
+.cp-day-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cp-day-number {
+  color: var(--cp-testo);
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.cp-today .cp-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--cp-arancio);
+  color: #fff;
+  font-weight: 800;
+}
+
+.cp-events-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .cp-event-pill {
-    display: block; width: 100%; border: none; font-family: inherit; text-align: left;
-    font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  display: block;
+  width: 100%;
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 6px;
+
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  /* Una riga sola e tagliata: in una casella alta tre centimetri il titolo
+     per esteso toglierebbe il posto agli altri impegni dello stesso giorno. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: filter .15s ease, transform .15s ease;
 }
-.cp-event-pill:hover { opacity: 0.8; }
 
-/* List View */
-.cp-list-container { overflow-y: auto; height: 100%; padding-right: 4px; }
-.cp-empty-state { text-align: center; padding: 4rem; color: var(--cp-text-muted); font-style: italic; }
-.cp-list-view-item { display: flex; align-items: center; gap: 1rem; background: white; border: 1px solid var(--cp-border-color); padding: 1rem; border-radius: 12px; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; }
-.cp-list-view-item:hover { transform: translateY(2px); border-color: var(--cp-accent-blue); }
-.cp-date-box { width: 50px; height: 50px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-.cp-date-month { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; opacity: 0.8; }
-.cp-date-day { font-size: 1.2rem; font-weight: 800; line-height: 1; }
-.cp-event-title { margin: 0.2rem 0; font-size: 1rem; font-weight: 700; }
-.cp-meta-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; }
-.cp-category-badge { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 6px; color:black }
+.cp-event-pill:hover { filter: brightness(1.08); transform: translateX(1px); }
 
-.cp-error-msg {
-  background-color: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FECACA;
-  padding: 0.5rem 1rem;
+/* Già passato: resta leggibile ma smette di chiedere attenzione */
+.cp-event-past { opacity: .45; }
+
+.cp-pill-text { pointer-events: none; }
+
+/* ---------- Vista giorno ---------- */
+
+.cp-list-container {
+  display: grid;
+  gap: .6rem;
+  padding: 1.1rem;
+}
+
+.cp-list-view-item {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+
+  padding: .8rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 14px;
+  background: var(--cp-carta);
+  cursor: pointer;
+
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.cp-list-view-item:hover {
+  border-color: var(--cp-arancio);
+  box-shadow: var(--cp-ombra-alta);
+  transform: translateY(-1px);
+}
+
+.cp-date-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+  width: 54px;
+  padding: .45rem 0;
   border-radius: 12px;
-  font-size: 0.8rem;
+  line-height: 1.1;
+}
+
+.cp-date-month {
+  font-size: .64rem;
   font-weight: 700;
+  text-transform: uppercase;
+  opacity: .85;
+}
+
+.cp-date-day { font-size: 1.25rem; font-weight: 800; }
+
+.cp-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem .6rem;
+  margin-bottom: .25rem;
+}
+
+.cp-category-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cp-meta-time,
+.cp-meta-location {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--cp-tenue);
+  font-size: .78rem;
+}
+
+.cp-event-title {
+  margin: 0 0 .2rem;
+  color: var(--cp-inchiostro);
+  font-size: .98rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.cp-list-arrow { flex: 0 0 auto; color: var(--cp-tenue); }
+
+.cp-empty-state {
+  padding: 3rem 1.2rem;
+  border: 1px dashed var(--cp-bordo);
+  border-radius: var(--cp-raggio);
+  color: var(--cp-tenue);
   text-align: center;
-  margin-bottom: 0.75rem;
-  animation: cp-fadeIn 0.2s ease-out;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05);
+  font-size: .92rem;
+  line-height: 1.6;
 }
 
-/* ==========================================
-   LOADER (ESATTA COPIA DI HOME PAGE)
-   ========================================== */
+.cp-empty-state strong { color: var(--cp-inchiostro); text-transform: capitalize; }
+
+/* ---------- Attesa ---------- */
+
 .cp-loader {
-  border: 3px solid #eee;
-  /* Utilizzo il colore esatto dell'accento della Home Page (#ff6600) invece di quello locale */
-  border-top: 3px solid #ff6600; 
+  width: 34px;
+  height: 34px;
+  margin: 3rem auto;
+  border: 3px solid var(--cp-bordo);
+  border-top-color: var(--cp-arancio);
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: cp-spin 1s infinite;
-  margin: 2rem auto;
+  animation: cpGira .8s linear infinite;
 }
 
-@keyframes cp-spin {
-  to { transform: rotate(360deg); }
+@keyframes cpGira { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-loader { animation-duration: 2.4s; }
+  .cp-list-view-item,
+  .cp-event-pill { transition: none; }
 }
 
-/* ==========================================
-   AGGIUNTA: Stile per gli eventi passati
-   ========================================== */
-.cp-event-past {
-  opacity: 0.6; /* Solo opacità: il colore originale si mantiene ma è "tenue" */
-}
+/* ---------- Finestra aperta ---------- */
 
-/* ==========================================
-   MOBILE & RESPONSIVE
-   ========================================== */
+body.cp-modal-open { overflow: hidden; }
+
+/* ---------- Schermi medi ---------- */
+
 @media (max-width: 1024px) {
-  .cp-dashboard-container { padding: 0; height: 100vh; height: 100svh; display: block; overflow: hidden; }
-  .cp-main-grid { flex-direction: column; gap: 0; height: 100%; }
-  
-  .cp-mobile-drag-handle { display: flex; /* ... */ }
+  .cp-main-grid { grid-template-columns: 250px minmax(0, 1fr); }
+  .cp-day-cell { min-height: 96px; }
+}
+
+/* ---------- Telefoni ---------- */
+
+@media (max-width: 820px) {
+  .cp-main-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .cp-btn-mobile-filter { display: inline-flex; }
+
+  /*
+   * I filtri diventano un pannello che sale dal basso.
+   *
+   * Di lato non ci starebbero, e sopra al calendario obbligherebbero a
+   * scorrere ogni volta per arrivare alla griglia — che è quello che si è
+   * venuti a vedere.
+   */
+  .cp-sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 60;
+
+    max-height: 82vh;
+    padding: .6rem 1rem 1.5rem;
+    border-radius: 20px 20px 0 0;
+    background: var(--cp-bg);
+    box-shadow: 0 -12px 40px -12px rgba(15, 23, 42, .35);
+
+    overflow-y: auto;
+    transform: translateY(102%);
+    transition: transform .28s ease;
+  }
+
+  .cp-sidebar.cp-mobile-open { transform: translateY(0); }
+
+  .cp-mobile-drag-handle {
+    width: 44px;
+    height: 4px;
+    margin: 0 auto .8rem;
+    border-radius: 999px;
+    background: var(--cp-bordo);
+  }
+
+  .cp-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(10, 18, 32, .45);
+  }
 
   .cp-btn-close-mobile {
-    display: flex; /* Sovrascrive il display: none globale */
-    align-items: center;
-    justify-content: center;
-    background-color: var(--cp-bg-hover); /* Sfondo grigio chiaro */
-    border: 1px solid transparent;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%; /* Cerchio perfetto, oppure usa 10px per quadrato stondato */
-    color: var(--cp-text-muted);
+    display: inline-flex;
+    padding: 4px;
+    border: 0;
+    background: none;
+    color: var(--cp-tenue);
     cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
   }
-
-  .cp-btn-close-mobile:active {
-    background-color: var(--cp-border-color); /* Feedback visivo al tocco */
-    color: var(--cp-text-main);
-    transform: scale(0.95);
-  }
-
-  .cp-sidebar {
-    position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: 80vh; 
-    width: 100%; background: white; 
-    z-index: 10000; 
-    border-radius: 24px 24px 0 0; padding: 1.5rem; box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-    transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: block; 
-  }
-  .cp-sidebar.cp-mobile-open { transform: translateY(0); }
-  
-  .cp-backdrop { 
-    display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
-    backdrop-filter: blur(4px); 
-    z-index: 9999; 
-  }
-
-  .cp-mobile-drag-handle, .cp-btn-close-mobile { display: flex; }
-  .cp-btn-mobile-filter { display: flex; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; }
-  
-  .cp-calendar-wrapper { border-radius: 0; border: none; height: 100%; display: flex; flex-direction: column; }
-  .cp-calendar-content { padding: 0.5rem; overflow-y: auto; }
-  
-  .cp-month-grid { 
-      height: auto; 
-      min-height: 0; 
-      grid-template-rows: repeat(6, minmax(70px, 1fr)); 
-      overflow-y: auto; 
-  }
-
-  .cp-day-cell { min-height: 70px; }
-  
-  .cp-events-container { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 3px; }
-  .cp-event-pill { padding: 0; width: 6px; height: 6px; border-radius: 50%; border: none; flex-shrink: 0; pointer-events: none; }
-  .cp-pill-text { display: none; }
 }
+
+@media (min-width: 821px) {
+  /* Fuori dal telefono non esistono: il pannello è già una colonna. */
+  .cp-mobile-drag-handle,
+  .cp-backdrop,
+  .cp-btn-close-mobile { display: none; }
+}
+
+@media (max-width: 560px) {
+  /*
+   * Sette colonne restano — un calendario con meno non è un calendario —
+   * ma basse, e gli impegni si riducono a una barretta del loro colore.
+   * Il giorno si apre con un tocco e lì si leggono per esteso.
+   */
+  .cp-day-cell { min-height: 62px; padding: 3px; }
+
+  .cp-event-pill {
+    min-height: 6px;
+    padding: 2px;
+    font-size: 0;
+  }
+
+  .cp-list-view-item { gap: .6rem; padding: .65rem; }
+  .cp-date-box { width: 46px; }
+}
+
+/* Piccoli assetti che prima stavano scritti dentro al JSX: in un foglio di
+   stile si vedono tutti insieme e si possono cambiare per punti di rottura,
+   cosa che uno style={{...}} non permette. */
+
+.cp-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .35rem;
+}
+
+.cp-filter-titolo-gruppo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.cp-info-categoria { margin-bottom: .5rem; }
+
+.cp-card-filtri {
+  /* L'elenco degli sport può essere lungo: scorre lui invece di allungare
+     la colonna oltre lo schermo. */
+  flex: 1;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.cp-loader-piccolo {
+  width: 24px;
+  height: 24px;
+  margin: 1rem auto;
+  border-color: rgba(255, 255, 255, .25);
+  border-top-color: #fff;
+}
+
+.cp-list-testi { flex: 1; min-width: 0; }

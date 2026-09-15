@@ -1,0 +1,279 @@
+/* =========================================
+   Selettore di data (scope: cda-)
+   Scritto da zero: nessuna libreria da rivestire.
+   ========================================= */
+
+.cda { position: relative; display: block; }
+
+/* ---------- Il campo ---------- */
+
+.cda-campo { position: relative; display: block; }
+
+.cda-campo .adm-input {
+  padding-left: 2.3rem;
+  padding-right: 2.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cda-icona {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--adm-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.cda.is-aperto .cda-icona { color: var(--adm-blue); }
+
+.cda-svuota {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: var(--adm-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: .55;
+}
+.cda-svuota:hover { opacity: 1; background: var(--adm-danger-soft); color: var(--adm-danger); }
+
+/* ---------- Il pannello ---------- */
+
+.cda-pannello {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  /* Sopra la barra (50) e le tendine (60), sotto gli avvisi (200) */
+  z-index: 80;
+
+  display: flex;
+  align-items: stretch;
+
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: 14px;
+  box-shadow: 0 6px 12px rgba(16, 32, 56, .07), 0 24px 48px -20px rgba(16, 32, 56, .45);
+  overflow: hidden;
+
+  animation: cda-apre .16s cubic-bezier(.2, .9, .3, 1.1);
+}
+
+@keyframes cda-apre {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cda-calendario { padding: 0.75rem; width: 19rem; }
+
+/* ---------- Intestazione ---------- */
+
+.cda-testa {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.cda-scelte { display: flex; gap: 0.35rem; flex: 1; justify-content: center; }
+
+.cda-select {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--adm-ink);
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.cda-select:hover { background: var(--adm-line-soft); }
+.cda-select:focus-visible { border-color: var(--adm-blue); outline: none; }
+
+.cda-freccia {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+
+  background: transparent;
+  border: 1px solid var(--adm-line);
+  border-radius: 8px;
+  color: var(--adm-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.cda-freccia:hover { background: var(--adm-line-soft); color: var(--adm-ink); }
+
+/* ---------- Griglia dei giorni ---------- */
+
+.cda-griglia {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cda-nome-giorno {
+  display: grid;
+  place-items: center;
+  height: 1.6rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--adm-muted);
+}
+
+.cda-giorno {
+  display: grid;
+  place-items: center;
+  /* Quadrati: una griglia di caselle rettangolari si legge peggio, e
+     l'altezza fissa tiene il pannello sempre della stessa dimensione. */
+  aspect-ratio: 1;
+  min-height: 2.05rem;
+
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+
+  font: inherit;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-ink);
+  cursor: pointer;
+}
+.cda-giorno:hover:not(:disabled) { background: var(--adm-line-soft); }
+
+.cda-giorno.is-altro-mese { color: #c2cad6; }
+.cda-giorno:disabled { color: #dde3ec; cursor: not-allowed; }
+
+/* Oggi si riconosce dal contorno, il giorno scelto dal pieno: due segnali
+   diversi, così non si confondono quando cadono sulla stessa casella. */
+.cda-giorno.is-oggi { border-color: var(--adm-blue); font-weight: 700; }
+
+.cda-giorno.is-scelto {
+  background: var(--adm-blue);
+  border-color: var(--adm-blue);
+  color: #fff;
+  font-weight: 700;
+}
+.cda-giorno.is-scelto:hover { background: var(--adm-blue-dark); }
+
+/* ---------- Scorciatoie ---------- */
+
+.cda-scorciatoie {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+
+.cda-scorciatoia {
+  padding: 0.3rem 0.55rem;
+  background: var(--adm-line-soft);
+  border: 0;
+  border-radius: 999px;
+
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--adm-muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cda-scorciatoia:hover { background: var(--adm-blue-soft); color: var(--adm-blue); }
+
+.cda-fatto {
+  margin-left: auto;
+  background: var(--adm-blue);
+  color: #fff;
+}
+.cda-fatto:hover { background: var(--adm-blue-dark); color: #fff; }
+
+/* ---------- Colonna dell'ora ---------- */
+
+.cda-ore {
+  display: flex;
+  flex-direction: column;
+  width: 6.5rem;
+  border-left: 1px solid var(--adm-line);
+  background: #fbfcfe;
+}
+
+.cda-ore-titolo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.75rem 0.6rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--adm-muted);
+}
+
+.cda-ore-lista {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0.4rem 0.5rem;
+  display: grid;
+  gap: 1px;
+  /* Alta quanto il calendario accanto, per non sbilanciare il pannello */
+  max-height: 16.5rem;
+  scrollbar-width: thin;
+}
+
+.cda-ora {
+  padding: 0.28rem 0.4rem;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-ink);
+  cursor: pointer;
+  text-align: center;
+}
+.cda-ora:hover { background: var(--adm-line-soft); }
+.cda-ora.is-scelta { background: var(--adm-blue); color: #fff; font-weight: 700; }
+
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 560px) {
+  .cda-pannello {
+    /* L'ora sotto al calendario invece che di fianco: affiancati non ci
+       stanno, e il pannello uscirebbe dallo schermo. */
+    flex-direction: column;
+    left: 0;
+    right: 0;
+  }
+  .cda-calendario { width: auto; }
+  .cda-ore { width: auto; border-left: 0; border-top: 1px solid var(--adm-line); }
+  .cda-ore-lista {
+    grid-template-columns: repeat(4, 1fr);
+    max-height: 9rem;
+    gap: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cda-pannello { animation: none; }
+}

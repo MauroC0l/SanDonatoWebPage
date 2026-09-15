@@ -1,0 +1,807 @@
+/* La libreria dei file. Vedi LibreriaPage.jsx */
+
+/*
+ * Elenco a sinistra, pannello del file scelto a destra.
+ *
+ * Il pannello sta di fianco e non sopra come una finestra: chi etichetta
+ * lavora in serie, apre un file, scrive due parole, passa al successivo. Una
+ * finestra da chiudere ogni volta raddoppierebbe i gesti.
+ */
+.lib-impianto {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+/*
+ * Aprire un file non muove niente.
+ *
+ * Il pannello dei dettagli era una terza colonna: aprendolo, le schede si
+ * rimpicciolivano e l'intera griglia si riassestava sotto le dita di chi
+ * stava scegliendo. Poi è diventato un cassetto che scorre sopra, ma alla
+ * griglia restava un centimetro di margine in più: con le colonne
+ * elastiche bastava a far rimpicciolire ogni scheda di qualche pixel, e
+ * quel sussulto si vedeva tutto. Adesso il cassetto galleggia e sotto non
+ * cambia una virgola.
+ */
+
+.lib-elenco { min-width: 0; }
+
+.lib-griglia {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .8rem;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.lib-scheda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  width: 100%;
+  padding: 0 0 .6rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface);
+
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.lib-scheda:hover { border-color: var(--adm-blue); }
+
+.lib-scheda.is-scelta {
+  border-color: var(--adm-blue);
+  box-shadow: 0 0 0 2px var(--adm-blue-soft);
+}
+
+.lib-anteprima {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: .5rem;
+  /* Sfondo a scacchi appena accennato: sotto un PNG trasparente il bianco
+     pieno non farebbe capire dove finisce l'immagine. */
+  background: var(--adm-line-soft);
+  overflow: hidden;
+}
+
+.lib-anteprima img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lib-icona {
+  color: var(--adm-muted);
+  font-size: 1.8rem;
+}
+
+.lib-nome,
+.lib-sotto {
+  padding: 0 .6rem;
+  /* Una riga sola: i nomi che arrivano da WordPress sono lunghissimi e
+     sfalserebbero l'altezza di tutta la fila. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lib-nome {
+  color: var(--adm-ink);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.lib-sotto {
+  color: var(--adm-muted);
+  font-size: .72rem;
+}
+
+.lib-etichette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 4px;
+  padding: 0 .6rem;
+}
+
+.lib-etichetta {
+  padding: 1px 7px;
+  border: 1px solid var(--adm-line);
+  border-radius: 999px;
+  background: var(--adm-bg);
+  color: var(--adm-muted);
+  font-size: .68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lib-etichetta-clic {
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease;
+}
+
+.lib-etichetta-clic:hover {
+  border-color: var(--adm-blue);
+  color: var(--adm-blue);
+}
+
+/* ---------- Pannello del file scelto ---------- */
+
+/*
+ * Il cassetto dei dettagli: una scheda che galleggia a destra.
+ *
+ * Fuori dal flusso perché non deve rubare larghezza alla griglia, e
+ * staccata dai bordi dello schermo: appiccicata in alto e in basso
+ * sembrava un pezzo della finestra del browser invece di un riquadro del
+ * sito.
+ *
+ * Dentro è una colonna con la testa ferma, il modulo che scorre e i
+ * comandi fermi in fondo: così "Salva" resta sempre raggiungibile anche
+ * quando un file ha dieci etichette, e nella maggior parte dei casi non
+ * c'è niente da scorrere.
+ */
+.lib-pannello {
+  position: fixed;
+
+  /* Sotto alla barra in cima, che è appiccicata e sta più in alto di
+     lui: partendo da un centimetro dal bordo dello schermo, la testa del
+     cassetto — titolo e X per chiudere — finiva coperta. L'altezza la
+     misura la schermata e la scrive qui: la barra ha una riga o due a
+     seconda del ruolo, e un numero scritto a mano sarebbe giusto per
+     metà delle persone. */
+  top: calc(var(--lib-sotto-barra, 0px) + .75rem);
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 45;
+
+  display: flex;
+  flex-direction: column;
+  width: min(300px, calc(100vw - 2rem));
+
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface);
+  box-shadow: 0 24px 60px -24px rgba(16, 32, 56, .55);
+  overflow: hidden;
+
+  animation: libEntra .22s ease;
+}
+
+@keyframes libEntra {
+  from { transform: translateX(calc(100% + 1rem)); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lib-pannello { animation: none; }
+}
+
+/* La testa resta ferma mentre il modulo scorre, con la X contro il bordo
+   destro: è lì che si va a cercarla per chiudere. */
+.lib-pannello-testa {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+
+  padding: .8rem .9rem;
+  border-bottom: 1px solid var(--adm-line-soft);
+}
+
+.lib-pannello-testa .adm-panel-title { margin: 0; }
+
+/* Tutto il resto: l'unica parte che scorre, quando serve */
+.lib-pannello-corpo {
+  flex: 1;
+  min-height: 0;
+  padding: .9rem;
+  overflow-y: auto;
+}
+
+/* I comandi restano in fondo, sempre sotto agli occhi */
+.lib-pannello-piede {
+  flex: 0 0 auto;
+  display: grid;
+  gap: .5rem;
+
+  padding: .8rem .9rem;
+  border-top: 1px solid var(--adm-line-soft);
+  background: var(--adm-bg);
+}
+
+.lib-pannello-piede .adm-head-actions { gap: .4rem; }
+.lib-pannello-piede .adm-btn { flex: 1; }
+
+/* Dentro al cassetto lo spazio è poco: i campi si stringono. */
+.lib-pannello .adm-field { gap: .15rem; margin-bottom: .7rem; }
+.lib-pannello .adm-hint { margin-top: .2rem; font-size: .72rem; line-height: 1.35; }
+.lib-pannello .adm-label { font-size: .74rem; }
+
+.lib-grande {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: .6rem;
+  /* Bassa quanto basta a riconoscere il file: qui non si guarda una foto,
+     si controlla di aver aperto quella giusta. Ogni centimetro in più è
+     un centimetro che il modulo sotto perde — e su un portatile da tredici
+     pollici il modulo sotto non c'era proprio. */
+  aspect-ratio: 16 / 10;
+  max-height: 20vh;
+  border-radius: 10px;
+  background: var(--adm-line-soft);
+  overflow: hidden;
+}
+
+.lib-grande img {
+  width: 100%;
+  height: 100%;
+  /* contain e non cover: qui si guarda il file per capire quale sia, e un
+     ritaglio può nascondere proprio il pezzo che lo distingue. */
+  object-fit: contain;
+}
+
+.lib-suggerite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: .8rem;
+  /* Con trenta etichette in uso, la fila da sola riempirebbe il cassetto:
+     ne restano in vista un paio di righe, e il resto scorre. */
+  max-height: 4.6rem;
+  overflow-y: auto;
+}
+
+
+/* ---------- Colonna delle cartelle ---------- */
+
+.lib-cartelle {
+  position: sticky;
+  top: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Le voci che ci sono sempre: stanno in cima, staccate da quelle che le
+   persone creano. Sono i punti fissi — tutti i file, i miei, i condivisi,
+   quello che non è ordinato, il cestino — e non devono scorrere via
+   insieme a venti cartelle. */
+.lib-fisse {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: .55rem;
+  margin-bottom: .35rem;
+  border-bottom: 1px solid var(--adm-line);
+}
+
+/* Le cartelle create dalle persone scorrono per conto loro: con venti
+   cartelle la barra diventava più alta della pagina. */
+.lib-cartelle-elenco {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  max-height: 42vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.lib-cartella-riga {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.lib-cartella {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: .85rem;
+  text-align: left;
+  cursor: pointer;
+
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.lib-cartella svg { flex: 0 0 auto; color: var(--adm-muted); }
+.lib-cartella:hover { background: var(--adm-line-soft); }
+
+.lib-cartella.is-scelta,
+.lib-cartella-riga.is-scelta .lib-cartella {
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+  font-weight: 700;
+}
+
+.lib-cartella.is-scelta svg,
+.lib-cartella-riga.is-scelta .lib-cartella svg { color: var(--adm-blue); }
+
+.lib-cartella-nome {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lib-cartella-quanti {
+  flex: 0 0 auto;
+  color: var(--adm-muted);
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rinomina ed elimina compaiono al passaggio: tre righe con sei pulsanti
+   sempre accesi sembrerebbero una barra degli strumenti, non un elenco. */
+.lib-cartella-comandi {
+  display: flex;
+  gap: 1px;
+  flex: 0 0 auto;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.lib-cartella-riga:hover .lib-cartella-comandi,
+.lib-cartella-riga:focus-within .lib-cartella-comandi { opacity: 1; }
+
+.lib-cartella-comandi .adm-icon-btn {
+  width: 26px;
+  height: 26px;
+  font-size: .68rem;
+}
+
+.lib-nuova-cartella {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+  margin-top: .4rem;
+  padding: 7px 9px;
+  border: 1px dashed var(--adm-line);
+  border-radius: 8px;
+  background: none;
+
+  color: var(--adm-muted);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: border-color .15s ease, color .15s ease;
+}
+
+.lib-nuova-cartella:hover {
+  border-color: var(--adm-blue);
+  color: var(--adm-blue);
+}
+
+/* ---------- Cancellazione di un file dalla griglia ---------- */
+
+.lib-cella { position: relative; }
+
+.lib-cancella {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 1px 3px rgba(16, 32, 56, .2);
+
+  /* Compare al passaggio: un cestino sempre acceso su ogni riquadro di una
+     griglia fitta è un invito a sbagliare mira. */
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+.lib-cella:hover .lib-cancella,
+.lib-cella:focus-within .lib-cancella { opacity: 1; }
+
+/* ---------- Sagome durante l'attesa ---------- */
+
+.lib-sagoma {
+  display: block;
+  height: 172px;
+  border-radius: var(--adm-radius);
+  background: linear-gradient(100deg, #eef1f6 30%, #f7f9fc 50%, #eef1f6 70%);
+  background-size: 220% 100%;
+  animation: libOnda 1.4s infinite linear;
+}
+
+@keyframes libOnda {
+  from { background-position: 180% 0; }
+  to { background-position: -20% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lib-sagoma { animation: none; }
+  .lib-cancella,
+  .lib-cartella-comandi { opacity: 1; }
+}
+
+.lib-uso {
+  display: grid;
+  gap: .6rem;
+  margin-top: 1rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 1100px) {
+  .lib-impianto { grid-template-columns: 190px minmax(0, 1fr); }
+}
+
+@media (max-width: 700px) {
+  /*
+   * Il cassetto diventa un pannello che sale dal basso.
+   *
+   * Di lato su uno schermo da telefono coprirebbe tutto lo stesso, ma
+   * entrando da destra: dal basso è il gesto che gli telefoni usano per
+   * questa cosa, il pollice ci arriva, e la griglia resta intravedibile
+   * sopra — che è il modo di capire dove si è.
+   */
+  .lib-pannello {
+    /* Sale dal basso: qui sopra non c'è niente da scavalcare */
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+
+    width: auto;
+    max-height: 86vh;
+    max-height: 86svh;
+    border-radius: 18px 18px 0 0;
+    animation: libSale .24s ease;
+  }
+
+  @keyframes libSale {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  /* Le cartelle diventano una riga che scorre in orizzontale: una colonna
+     di cartelle su un telefono si mangia metà schermo, e i file sono
+     quello che si è venuti a vedere. */
+  .lib-impianto { grid-template-columns: minmax(0, 1fr); }
+
+  .lib-cartelle {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: .4rem;
+  }
+
+  /* In riga anche le fisse: su un telefono la barra è una striscia che
+     scorre di lato, e un riquadro dentro all'altro la spezzerebbe. */
+  .lib-fisse,
+  .lib-cartelle-elenco {
+    flex-direction: row;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .lib-gruppo-titolo { display: none; }
+
+  .lib-cartella { white-space: nowrap; }
+  .lib-cartella-riga { flex: 0 0 auto; }
+
+  /* Rinomina ed elimina sparirebbero comunque dietro al passaggio del
+     mouse, che su un telefono non esiste: restano sempre visibili. */
+  .lib-cartella-comandi { opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .lib-griglia { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+
+/* =====================================================
+   Finestra "scegli dalla libreria" (SceltaDallaLibreria.jsx)
+   ===================================================== */
+
+.scl-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+
+  background: rgba(10, 18, 32, .55);
+  backdrop-filter: blur(2px);
+
+  /* Il portale attacca la finestra al body, fuori da .adm-shell: senza
+     queste variabili i pulsanti del pannello resterebbero bianchi su
+     bianco, perché la tavolozza --adm-* è dichiarata là dentro. */
+  --adm-surface: #ffffff;
+  --adm-bg: #f1f4f9;
+  --adm-line: #dde3ec;
+  --adm-line-soft: #eef1f6;
+  --adm-ink: #16202e;
+  --adm-muted: #5b6a80;
+  --adm-blue: #0b4fd1;
+  --adm-blue-dark: #0940a8;
+  --adm-blue-soft: #e7eefc;
+  --adm-danger: #b42318;
+  --adm-danger-soft: #fdecea;
+  --adm-radius: 12px;
+  --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
+
+  color: var(--adm-ink);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.scl-finestra {
+  display: flex;
+  flex-direction: column;
+
+  width: min(980px, 100%);
+  /* Alta quanto serve ma mai più dello schermo: dentro scorre solo la
+     griglia, così testa e piede restano fermi e raggiungibili. */
+  max-height: min(720px, 92vh);
+
+  background: var(--adm-surface);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
+  overflow: hidden;
+}
+
+.scl-testa {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--adm-line);
+}
+
+.scl-titolo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.scl-titolo svg { color: var(--adm-blue); }
+.scl-testa .adm-search { flex: 1; margin: 0; }
+
+.scl-cartelle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  padding: .7rem 1rem;
+  border-bottom: 1px solid var(--adm-line-soft);
+}
+
+.scl-corpo {
+  flex: 1;
+  min-height: 0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.scl-piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  padding: .8rem 1rem;
+  border-top: 1px solid var(--adm-line);
+  background: var(--adm-bg);
+}
+
+.scl-piede .adm-hint { margin: 0; }
+
+@media (max-width: 600px) {
+  .scl-velo { padding: 0; }
+
+  .scl-finestra {
+    max-height: 100vh;
+    max-height: 100svh;
+    border-radius: 0;
+  }
+
+  /* Su un telefono titolo e ricerca non stanno in riga: la ricerca va
+     sotto, su tutta la larghezza. */
+  .scl-testa { flex-wrap: wrap; }
+  .scl-testa .adm-search { order: 3; flex-basis: 100%; }
+}
+
+/* ---------- Chi ha caricato (solo nella libreria intera) ---------- */
+
+.lib-persone {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 1rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--adm-line);
+}
+
+.lib-gruppo-titolo {
+  padding: 0 9px 4px;
+  color: var(--adm-muted);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Il velo dietro al cassetto: spegne la pagina e la chiude col clic.
+   Serve soprattutto sul telefono, dove il cassetto copre quasi tutto. */
+.lib-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  background: rgba(10, 18, 32, .25);
+  border: 0;
+  cursor: pointer;
+}
+
+@media (min-width: 1101px) {
+  /* Su schermo largo il cassetto sta accanto alla griglia e non la copre:
+     il velo spegnerebbe una pagina che si continua a usare. */
+  .lib-velo { display: none; }
+}
+
+/*
+ * L'attesa: una targhetta che galleggia al centro dei file.
+ *
+ * Stava nel flusso, sopra alla griglia: compariva e spingeva in giù tutte
+ * le schede, spariva e le tirava su — a ogni cambio di cartella la griglia
+ * faceva un salto. Adesso è fuori dal flusso e sotto non si muove niente.
+ */
+.lib-risultati {
+  position: relative;
+  min-height: 8rem;
+}
+
+.lib-attesa {
+  position: absolute;
+  top: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0;
+
+  padding: .45rem .8rem;
+  border: 1px solid var(--adm-line);
+  border-radius: 999px;
+  background: var(--adm-surface);
+  box-shadow: 0 6px 20px -8px rgba(16, 32, 56, .35);
+
+  color: var(--adm-muted);
+  font-size: .85rem;
+  white-space: nowrap;
+}
+
+/* I file che c'erano restano al loro posto, appena sbiaditi: sostituirli
+   con dodici sagome grigie era il salto raccontato due volte. */
+.lib-griglia.is-attesa {
+  opacity: .45;
+  pointer-events: none;
+  transition: opacity .12s ease;
+}
+
+/* La riga che spiega una cartella: c'è solo dove serve — la condivisa e
+   il cestino — e dice la regola che quella cartella ha e le altre no. */
+.lib-descrizione {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+
+  margin: 0 0 .8rem;
+  padding: .55rem .7rem;
+  border: 1px solid var(--adm-line-soft);
+  border-radius: 10px;
+  background: var(--adm-bg);
+
+  color: var(--adm-muted);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+.lib-descrizione svg { flex: 0 0 auto; margin-top: 2px; color: var(--adm-blue); }
+
+/* Chi ha caricato il file: si legge nella cartella condivisa, dove mettono
+   tutti, e nella libreria intera. Sui propri file non comparirebbe niente
+   di nuovo. */
+.lib-chi {
+  padding: 0 .6rem;
+  color: var(--adm-muted);
+  font-size: .7rem;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Il cestino non è una cartella come le altre: staccato in fondo, così non
+   lo si clicca pensando di aprire un posto dove mettere le cose. */
+.lib-cestino {
+  margin-top: .35rem;
+  padding-top: .55rem;
+  border-top: 1px solid var(--adm-line-soft);
+  color: var(--adm-muted);
+}
+
+/*
+ * La tendina dentro al cassetto si accorcia.
+ *
+ * Il cassetto è alto quanto la finestra e il suo corpo scorre: una tendina
+ * da diciassette righe ci finisce dentro tagliata, con le cartelle in fondo
+ * irraggiungibili. Sette righe stanno, e sopra le sette si scorre — la
+ * barra di scorrimento è il modo di sapere che sotto c'è altro.
+ */
+.lib-pannello .tnd-lista {
+  max-height: 11rem;
+}
+
+/* ---------- Dentro al cassetto ci si stringe ----------
+
+   Il cassetto è largo trecento pixel e alto quanto la finestra: campi,
+   etichette e pulsanti della misura del resto del pannello ci stavano
+   dentro come mobili di una casa in una stanza d'albergo. Qui tutto
+   scala di un paio di punti, una volta sola. */
+
+.lib-pannello { font-size: .92rem; }
+
+.lib-pannello .adm-panel-title { font-size: .95rem; }
+.lib-pannello .adm-input { padding: .38rem .5rem; font-size: .85rem; }
+.lib-pannello .adm-field { margin-bottom: .55rem; }
+.lib-pannello .adm-btn { padding: .34rem .6rem; font-size: .82rem; }
+.lib-pannello .tnd-bottone { padding: .34rem .5rem; font-size: .85rem; }
+
+.lib-pannello-testa { padding: .6rem .7rem; }
+.lib-pannello-corpo { padding: .7rem; }
+.lib-pannello-piede { padding: .6rem .7rem; gap: .4rem; }
+
+/* Le etichette proposte: due righe e poi si scorre. Qui dentro, con
+   trenta etichette in uso, si mangiavano il modulo intero. */
+.lib-pannello .lib-suggerite { max-height: 3.6rem; }

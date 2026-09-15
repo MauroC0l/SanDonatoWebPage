@@ -9,7 +9,8 @@
 
 import { eq } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { utenti } from "../db/schema.js";
+import { utenti, media } from "../db/schema.js";
+import { urlFile } from "../server/file.js";
 import { verificaPassword } from "../server/password.js";
 import { creaSessione } from "../server/sessioni.js";
 import { capacitaDi } from "../server/autorizzazioni.js";
@@ -55,6 +56,22 @@ export default conGestioneErrori(async (req, res) => {
     userAgent: req.headers["user-agent"]
   });
 
+  /*
+   * L'immagine del profilo si legge a parte e solo se c'è.
+   *
+   * Il front-end disegna la barra in alto con quello che risponde qui,
+   * senza richiedere di nuovo chi è: senza questo indirizzo comparirebbero
+   * le iniziali fino al primo ricaricamento della pagina, che è proprio il
+   * genere di stranezza che poi viene segnalata come un difetto.
+   */
+  const [immagine] = utente.immagineId
+    ? await db
+      .select({ chiave: media.chiave, urlWp: media.urlOriginaleWp })
+      .from(media)
+      .where(eq(media.id, utente.immagineId))
+      .limit(1)
+    : [];
+
   return json(res, {
     utente: {
       id: utente.id,
@@ -64,6 +81,7 @@ export default conGestioneErrori(async (req, res) => {
       ruolo: utente.ruolo,
       stato: utente.stato,
       deveCambiarePassword: utente.deveCambiarePassword,
+      immagineUrl: urlFile(immagine?.chiave, immagine?.urlWp),
       capacita: capacitaDi(utente.ruolo)
     }
   });

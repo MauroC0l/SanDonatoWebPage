@@ -3,15 +3,16 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUser, FaKey, FaEye, FaEyeSlash, FaExclamationCircle,
   FaArrowRight, FaFutbol, FaVolleyballBall, FaBasketballBall,
-  FaChevronDown, FaArrowLeft
+  FaArrowLeft
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
+import { areaDi } from "../../utils/percorsi";
 import "../../css/Admin.css";
 
 const LOGO = "/logo-polisportiva.png";
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isChecking } = useAuth();
+  const { user, login, isAuthenticated, isChecking } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,7 +22,6 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
 
   if (isChecking) {
     return (
@@ -32,8 +32,10 @@ export default function LoginPage() {
     );
   }
 
+  // Ognuno nella propria area: un atleta non va sotto /admin, dove non
+  // troverebbe nulla che lo riguardi.
   if (isAuthenticated) {
-    return <Navigate to={location.state?.from || "/admin"} replace />;
+    return <Navigate to={location.state?.from || areaDi(user?.role)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -47,8 +49,10 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
-      await login(username, password, remember);
-      navigate(location.state?.from || "/admin", { replace: true });
+      // Il profilo torna dalla login: serve subito, perché dove mandare
+      // questa persona dipende dal suo ruolo e lo stato non è ancora aggiornato.
+      const profilo = await login(username, password, remember);
+      navigate(location.state?.from || areaDi(profilo?.role), { replace: true });
     } catch (err) {
       setError(err.message || "Accesso non riuscito.");
       setSubmitting(false);
@@ -179,41 +183,13 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="alg-help-block">
-            <button
-              type="button"
-              className={`alg-help-toggle ${showHelp ? "is-open" : ""}`}
-              onClick={() => setShowHelp(v => !v)}
-              aria-expanded={showHelp}
-            >
-              Non riesco a entrare
-              <FaChevronDown className="alg-help-arrow" />
-            </button>
-
-            {showHelp && (
-              <div className="alg-help">
-                <p>
-                  Si entra con la propria <strong>email</strong> e la password.
-                  Gli atleti se la scelgono registrandosi; per allenatori,
-                  redattori e segreteria l&apos;account lo crea chi amministra
-                  il sito, e la password si cambia al primo accesso.
-                </p>
-                <ul>
-                  <li>Controlla che l&apos;email sia quella comunicata alla società.</li>
-                  <li>La password distingue maiuscole e minuscole.</li>
-                  <li>
-                    Dopo alcuni tentativi sbagliati l&apos;accesso si blocca per
-                    un quarto d&apos;ora, anche con la password giusta: è una
-                    difesa contro chi prova a indovinarla.
-                  </li>
-                </ul>
-                <p className="alg-help-note">
-                  Password dimenticata o account che non funziona: scrivi a chi
-                  amministra il sito, che può reimpostarla.
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Il posto dove tutti guardano quando la password non va: sotto al
+              modulo, scritto come su qualunque altro sito. */}
+          <p className="alg-recupero">
+            <Link to="/recupera-password" className="adm-inline-link">
+              Password dimenticata?
+            </Link>
+          </p>
 
         </div>
 

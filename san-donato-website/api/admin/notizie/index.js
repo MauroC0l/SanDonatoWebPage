@@ -15,15 +15,16 @@ import { elencaNotizie, slugLibero } from "../../../server/notizie.js";
 import { ripulisciHtml, soloTesto, creaSlug } from "../../../server/sanitizza.js";
 import { puo } from "../../../server/autorizzazioni.js";
 import { richiedeCapacita } from "../../../server/autenticazione.js";
+import { annota } from "../../../server/registro.js";
 import { json, errore, conGestioneErrori } from "../../../server/risposte.js";
 import { leggiCorpo, parametri } from "../../../server/richiesta.js";
 import { schemaElencoNotizie, schemaNotiziaNuova, valida } from "../../../server/validazione.js";
 
 async function elenco(req, res) {
-  const { pagina, perPagina, sport, stato, cerca } = valida(schemaElencoNotizie, parametri(req));
+  const { pagina, perPagina, sport, categoria, stato, cerca } = valida(schemaElencoNotizie, parametri(req));
 
   const risultato = await elencaNotizie({
-    pagina, perPagina, sport, stato, cerca,
+    pagina, perPagina, sport, categoria, stato, cerca,
     soloPubblicate: false
   });
 
@@ -45,17 +46,34 @@ async function crea(req, res) {
   const contenuto = ripulisciHtml(dati.contenuto);
   const slug = await slugLibero(creaSlug(dati.slug || dati.titolo));
 
+  // Con una data indicata si pubblica allora, altrimenti adesso. Una data nel
+  // futuro è la programmazione: la notizia esiste, è "pubblicata", e compare
+  // sul sito quando arriva il momento.
+  const quando = dati.pubblicataIl ?? new Date();
+
   const [creata] = await getDb().insert(notizie).values({
     slug,
     titolo: dati.titolo,
     sommario: dati.sommario || soloTesto(contenuto, 200),
     contenuto,
     sport: dati.sport,
+    categoria: dati.categoria,
     stato: statoFinale,
     copertinaId: dati.copertinaId ?? null,
     autoreId: req.utente.id,
-    pubblicataIl: statoFinale === "pubblicata" ? new Date() : null
-  }).returning({ id: notizie.id, slug: notizie.slug, stato: notizie.stato });
+    pubblicataIl: statoFinale === "pubblicata" ? quando : null
+  }).returning({
+    id: notizie.id, slug: notizie.slug,
+    stato: notizie.stato, pubblicataIl: notizie.pubblicataIl
+  });
+
+  await annota(req.utente, {
+    azione: `notizie.${statoFinale === "pubblicata" ? "pubblica" : "crea"}`,
+    tipo: "notizia",
+    id: creata.id,
+    descrizione: `Ha creato "${dati.titolo}" (${statoFinale})`,
+    dettaglio: { sport: dati.sport, stato: statoFinale }
+  });
 
   return json(res, {
     notizia: creata,

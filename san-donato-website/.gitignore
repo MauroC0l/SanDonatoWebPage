@@ -21,7 +21,15 @@ node_modules
 *.sln
 *.sw?
 
-.env
+# Tutti i file di ambiente, non solo .env: dentro ci sono le stringhe di
+# connessione al database, che contengono la password in chiaro. .env.demo,
+# .env.local, .env.produzione — nessuno di questi deve finire in git.
+.env*
+!.env.esempio
 # Output di build: lo genera la piattaforma di hosting a ogni deploy,
 # tenerlo in git crea solo conflitti a ogni commit
 dist
+
+# File caricati mentre si lavora in locale (ARCHIVIO_LOCALE=1). In produzione
+# stanno su Cloudflare R2: qui sono copie di prova, non fanno parte del sito.
+public/caricamenti

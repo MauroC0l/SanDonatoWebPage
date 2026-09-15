@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import Button from "react-bootstrap/Button";
 import { FaArrowLeft, FaExpand, FaTag } from "react-icons/fa";
 import { getPostById } from "../../api/API.mjs";
 import "../../css/NewsDetail.css";
@@ -64,9 +63,12 @@ export default function NewsDetail() {
       <div className="nd-status-wrapper">
         <h3>Notizia non trovata</h3>
         <p>La notizia che stai cercando è stata rimossa o non esiste più.</p>
-        <Button variant="outline-dark" onClick={() => navigate("/news")}>
-          Torna alle news
-        </Button>
+        {/* Un pulsante normale invece di quello di react-bootstrap: era
+            l'unico componente rimasto di quella libreria in tutto il sito,
+            e trascinarla dentro per una riga non aveva senso. */}
+        <button type="button" className="nd-torna" onClick={() => navigate("/news")}>
+          Torna alle notizie
+        </button>
       </div>
     );
   }

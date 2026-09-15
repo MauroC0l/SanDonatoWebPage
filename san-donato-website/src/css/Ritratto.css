@@ -1,0 +1,35 @@
+/* Immagine del profilo, o iniziali quando manca. Vedi Ritratto.jsx. */
+
+.rit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+
+  /* Le foto arrivano dalle fotocamere dei telefoni, con qualunque
+     proporzione: il ritaglio al centro e il cerchio le rendono tutte uguali
+     senza chiedere a nessuno di ritagliarle prima. */
+  background: var(--adm-line-soft, #eef1f6);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.rit-xs { width: 24px; height: 24px; font-size: 0.62rem; }
+.rit-s  { width: 32px; height: 32px; font-size: 0.75rem; }
+.rit-m  { width: 44px; height: 44px; font-size: 0.95rem; }
+.rit-l  { width: 72px; height: 72px; font-size: 1.5rem; }
+.rit-xl { width: 128px; height: 128px; font-size: 2.6rem; }
+
+/* Un bordo chiaro stacca il cerchio dallo sfondo quando la foto ha i bordi
+   scuri, e fa da anello anche sopra le tinte piene delle iniziali. */
+.rit-bordo {
+  box-shadow: 0 0 0 2px #fff, 0 1px 3px rgba(15, 23, 42, 0.18);
+}

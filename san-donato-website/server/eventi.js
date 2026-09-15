@@ -9,6 +9,7 @@ import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { eventi, squadre, media, mediaEvento } from "../db/schema.js";
 import { urlFile } from "./notizie.js";
+import { puo } from "./autorizzazioni.js";
 
 /* =====================================================
    Squadre
@@ -48,7 +49,10 @@ const COLONNE = {
   inizio: eventi.inizio,
   fine: eventi.fine,
   tuttoIlGiorno: eventi.tuttoIlGiorno,
+  visibileDal: eventi.visibileDal,
   luogo: eventi.luogo,
+  latitudine: eventi.latitudine,
+  longitudine: eventi.longitudine,
   descrizione: eventi.descrizione,
   risultato: eventi.risultato,
   parziali: eventi.parziali,
@@ -79,7 +83,10 @@ function daRiga(riga) {
     inizio: riga.inizio,
     fine: riga.fine,
     tuttoIlGiorno: riga.tuttoIlGiorno,
+    visibileDal: riga.visibileDal,
     luogo: riga.luogo ?? "",
+    latitudine: riga.latitudine,
+    longitudine: riga.longitudine,
     descrizione: riga.descrizione ?? "",
     // Erano righe di testo dentro alla descrizione dell'evento Google:
     // "Partita: 3 - 1", "Marcatori: Rossi, Bianchi". Ora sono campi.
@@ -109,7 +116,9 @@ export async function elencaEventi({
   squadraId = null,
   squadreAmmesse = null,
   limite = 500,
-  ordine = "asc"
+  ordine = "asc",
+  soloVisibili = false,
+  soloProgrammati = false
 } = {}) {
   const db = getDb();
   const condizioni = [];
@@ -117,6 +126,17 @@ export async function elencaEventi({
   if (da) condizioni.push(gte(eventi.inizio, new Date(da)));
   if (a) condizioni.push(lte(eventi.inizio, new Date(a)));
   if (squadraId) condizioni.push(eq(eventi.squadraId, Number(squadraId)));
+
+  // Sul sito si vede solo ciò che è gia uscito. La data vuota vale come
+  // "da sempre": le 263 righe di archivio non hanno questa colonna.
+  if (soloVisibili) {
+    condizioni.push(sql`${eventi.visibileDal} is null or ${eventi.visibileDal} <= now()`);
+  }
+
+  // Il filtro "Programmati" del pannello: l esatto contrario.
+  if (soloProgrammati) {
+    condizioni.push(sql`${eventi.visibileDal} is not null and ${eventi.visibileDal} > now()`);
+  }
 
   if (Array.isArray(squadreAmmesse)) {
     // Nessuna squadra associata significa nessun evento, non tutti:
@@ -180,10 +200,59 @@ export async function ultimiRisultati(quanti = 12) {
   const righe = await base(getDb())
     .where(and(
       lte(eventi.inizio, new Date()),
-      sql`${eventi.risultato} is not null and ${eventi.risultato} <> ''`
+      sql`${eventi.risultato} is not null and ${eventi.risultato} <> ''`,
+      // Anche qui: un evento ancora programmato non compare sul sito, e il
+      // suo risultato nemmeno. Questa riga alimenta la home.
+      sql`${eventi.visibileDal} is null or ${eventi.visibileDal} <= now()`
     ))
     .orderBy(desc(eventi.inizio))
     .limit(quanti);
 
   return righe.map(daRiga);
+}
+
+/* =====================================================
+   Partite ed eventi: due cose diverse sullo stesso calendario
+   ===================================================== */
+
+/**
+ * I tipi che sono "una partita".
+ *
+ * Un torneo sta con le partite e non con gli eventi: ha un risultato, e
+ * chi lo inserisce si fa la stessa domanda — com'è finita.
+ */
+export const TIPI_PARTITA = ["partita", "torneo"];
+
+/**
+ * Chi può creare solo partite.
+ *
+ * L'allenatore mette a calendario gli impegni della sua squadra: partite
+ * e allenamenti. Le assemblee dei soci, le feste e le chiusure della
+ * sede sono cose della società, e le decide chi la amministra.
+ *
+ * Non è una questione di fiducia ma di forma: il modulo di una partita
+ * chiede avversario, risultato e parziali, quello di un evento no, e un
+ * modulo unico buono per tutti e due sarebbe pieno di campi da saltare.
+ */
+export function soloPartite(utente) {
+  return !puo(utente, "eventi.gestisci_tutte");
+}
+
+/**
+ * Una partita già giocata a cui manca qualcosa.
+ *
+ * Il risultato manca a tutti. I parziali no: senza set o senza quarti,
+ * il tabellino di una partita di pallavolo o di basket è a metà, mentre
+ * nel calcio quasi nessuno li scrive. Chiederli a tutti vorrebbe dire
+ * lasciare ogni partita di calcio segnata come incompleta per sempre — e
+ * un avviso che non si spegne mai è un avviso che si smette di leggere.
+ */
+export function daCompletare(evento, sport) {
+  if (!TIPI_PARTITA.includes(evento.tipo)) return false;
+  if (new Date(evento.fine ?? evento.inizio) > new Date()) return false;
+
+  if (!evento.risultato) return true;
+
+  const conParziali = ["Pallavolo", "Basket", "Minivolley"];
+  return conParziali.includes(sport ?? evento.sport) && !evento.parziali;
 }

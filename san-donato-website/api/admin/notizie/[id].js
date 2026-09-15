@@ -18,6 +18,7 @@ import { trovaNotizia, slugLibero } from "../../../server/notizie.js";
 import { ripulisciHtml, soloTesto, creaSlug } from "../../../server/sanitizza.js";
 import { puo } from "../../../server/autorizzazioni.js";
 import { richiedeCapacita } from "../../../server/autenticazione.js";
+import { annota } from "../../../server/registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../../server/risposte.js";
 import { leggiCorpo, parametri } from "../../../server/richiesta.js";
 import { schemaNotiziaModifica, valida } from "../../../server/validazione.js";
@@ -42,7 +43,10 @@ async function modifica(req, res) {
 
   const db = getDb();
   const [esistente] = await db
-    .select({ id: notizie.id, stato: notizie.stato, pubblicataIl: notizie.pubblicataIl })
+    .select({
+      id: notizie.id, titolo: notizie.titolo,
+      stato: notizie.stato, pubblicataIl: notizie.pubblicataIl
+    })
     .from(notizie)
     .where(eq(notizie.id, id))
     .limit(1);
@@ -53,6 +57,7 @@ async function modifica(req, res) {
 
   if (dati.titolo !== undefined) modifiche.titolo = dati.titolo;
   if (dati.sport !== undefined) modifiche.sport = dati.sport;
+  if (dati.categoria !== undefined) modifiche.categoria = dati.categoria;
   if (dati.copertinaId !== undefined) modifiche.copertinaId = dati.copertinaId;
 
   if (dati.contenuto !== undefined) {
@@ -85,11 +90,40 @@ async function modifica(req, res) {
     }
   }
 
+  /**
+   * Una data indicata esplicitamente vince su tutto il resto: è il modo di
+   * spostare avanti l'uscita di una notizia (programmarla) o di correggere
+   * la data di una importata da WordPress.
+   *
+   * Sta dopo il blocco qui sopra apposta: quello mette "adesso" alla prima
+   * pubblicazione, questo lo scavalca quando chi scrive ha scelto un momento.
+   */
+  if (dati.pubblicataIl !== undefined) {
+    modifiche.pubblicataIl = dati.pubblicataIl;
+  }
+
   const [aggiornata] = await db
     .update(notizie)
     .set(modifiche)
     .where(eq(notizie.id, id))
-    .returning({ id: notizie.id, slug: notizie.slug, stato: notizie.stato });
+    .returning({
+      id: notizie.id, slug: notizie.slug,
+      stato: notizie.stato, pubblicataIl: notizie.pubblicataIl
+    });
+
+  const cambioStato = modifiche.stato && modifiche.stato !== esistente.stato;
+
+  await annota(req.utente, {
+    azione: cambioStato ? `notizie.${modifiche.stato}` : "notizie.modifica",
+    tipo: "notizia",
+    id,
+    descrizione: cambioStato
+      ? `Ha portato "${esistente.titolo}" da ${esistente.stato} a ${modifiche.stato}`
+      : `Ha modificato "${modifiche.titolo ?? esistente.titolo}"`,
+    // I nomi dei campi toccati, non il loro contenuto: il registro dice chi
+    // ha messo le mani dove, non conserva una copia di ogni versione.
+    dettaglio: { campi: Object.keys(modifiche).filter((c) => c !== "aggiornataIl") }
+  });
 
   return json(res, { notizia: aggiornata, inviataInRevisione });
 }
@@ -101,9 +135,17 @@ async function cestina(req, res) {
     .update(notizie)
     .set({ stato: "cestino", aggiornataIl: new Date() })
     .where(eq(notizie.id, id))
-    .returning({ id: notizie.id, stato: notizie.stato });
+    .returning({ id: notizie.id, titolo: notizie.titolo, stato: notizie.stato });
 
   if (!cestinata) return errore(res, 404, "Notizia non trovata.");
+
+  await annota(req.utente, {
+    azione: "notizie.cestina",
+    tipo: "notizia",
+    id,
+    descrizione: `Ha cestinato "${cestinata.titolo}"`
+  });
+
   return json(res, { notizia: cestinata });
 }
 

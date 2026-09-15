@@ -11,15 +11,19 @@
 
 import { getDb } from "../../../db/client.js";
 import { eventi } from "../../../db/schema.js";
-import { elencaEventi } from "../../../server/eventi.js";
+import { elencaEventi, soloPartite, TIPI_PARTITA } from "../../../server/eventi.js";
 import { puoGestireSquadra, squadreGestibili } from "../../../server/autorizzazioni.js";
 import { richiedeAccesso } from "../../../server/autenticazione.js";
+import { annota } from "../../../server/registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../../server/risposte.js";
 import { leggiCorpo, parametri } from "../../../server/richiesta.js";
 import { schemaEventoNuovo, schemaElencoEventi, valida } from "../../../server/validazione.js";
 
 async function elenco(req, res) {
   const { da, a, squadraId, limite } = valida(schemaElencoEventi, parametri(req));
+
+  // "Programmati": quelli che sul sito non si vedono ancora
+  const soloProgrammati = parametri(req).programmati === "1";
 
   const ammesse = await squadreGestibili(req.utente);
 
@@ -31,7 +35,8 @@ async function elenco(req, res) {
 
   const risultato = await elencaEventi({
     da, a, squadraId, limite,
-    squadreAmmesse: ammesse
+    squadreAmmesse: ammesse,
+    soloProgrammati
   });
 
   res.setHeader("Cache-Control", "no-store");
@@ -40,6 +45,21 @@ async function elenco(req, res) {
 
 async function crea(req, res) {
   const dati = valida(schemaEventoNuovo, await leggiCorpo(req));
+
+  /*
+   * Un allenatore mette a calendario solo partite, e senza programmarle.
+   *
+   * Il controllo sta qui e non solo nel modulo: i campi che a schermo non
+   * ci sono si possono comunque mandare a mano. "Quando si vede sul sito"
+   * poi non ha senso per una partita — una partita si sa che si gioca, e
+   * tenerla nascosta fino al giorno prima non serve a nessuno.
+   */
+  if (soloPartite(req.utente)) {
+    if (dati.tipo && !TIPI_PARTITA.includes(dati.tipo)) {
+      throw new ErroreHttp(403, "Puoi mettere a calendario partite e tornei, non altri eventi.");
+    }
+    dati.visibileDal = null;
+  }
 
   if (!await puoGestireSquadra(req.utente, dati.squadraId)) {
     throw new ErroreHttp(403, "Non gestisci questa squadra.");
@@ -55,7 +75,10 @@ async function crea(req, res) {
     inizio: dati.inizio,
     fine: dati.fine ?? null,
     tuttoIlGiorno: dati.tuttoIlGiorno,
+    visibileDal: dati.visibileDal ?? null,
     luogo: dati.luogo ?? null,
+    latitudine: dati.latitudine ?? null,
+    longitudine: dati.longitudine ?? null,
     descrizione: dati.descrizione ?? null,
     risultato: dati.risultato ?? null,
     parziali: dati.parziali ?? null,
@@ -63,6 +86,14 @@ async function crea(req, res) {
     diretta: dati.diretta ?? null,
     creatoDa: req.utente.id
   }).returning({ id: eventi.id, titolo: eventi.titolo, inizio: eventi.inizio });
+
+  await annota(req.utente, {
+    azione: "eventi.crea",
+    tipo: "evento",
+    id: creato.id,
+    descrizione: `Ha creato "${creato.titolo}" del ${creato.inizio.toLocaleDateString("it-IT")}`,
+    dettaglio: { squadraId: dati.squadraId, tipo: dati.tipo }
+  });
 
   return json(res, { evento: creato }, 201);
 }

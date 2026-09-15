@@ -3,8 +3,10 @@ import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import MyNavbar from "./components/AllPages/MyNavbar";
 import Hero from "./components/AllPages/Hero";
 import TopHeader from "./components/AllPages/TopHeader";
+import Footer from "./components/AllPages/Footer";
 import HomePage from "./components/Home/HomePage";
 import { usePublishedHeight } from "./hooks/usePublishedHeight";
+import FasciaDimostrativa from "./components/AllPages/FasciaDimostrativa";
 
 // La home resta nel bundle principale: è la pagina d'ingresso.
 // Tutte le altre vengono scaricate solo quando servono davvero.
@@ -67,11 +69,7 @@ function PublicLayout() {
         <Outlet />
       </main>
 
-      <footer className="bg-gray-900 text-white py-6 text-center w-full">
-        <div className="max-w-screen-xl mx-auto px-4">
-          © Polisportiva San Donato — Tutti i diritti riservati
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
@@ -80,6 +78,10 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
+
+      {/* Spenta per difetto: si accende solo dove VITE_SITO_DIMOSTRATIVO=1,
+          cioè sul progetto della dimostrazione. */}
+      <FasciaDimostrativa />
 
       <Suspense fallback={<RouteFallback />}>
         <Routes>
@@ -108,7 +110,24 @@ export default function App() {
           {/* La registrazione degli atleti passa dallo stesso bundle
               dell'area riservata: il sito pubblico non se la porta dietro. */}
           <Route path="/registrati" element={<AdminRoot section="registrazione" />} />
-          <Route path="/admin/*" element={<AdminRoot section="admin" />} />
+          <Route path="/recupera-password" element={<AdminRoot section="recupero" />} />
+          {/* La scelta della password a chi ne ha una provvisoria. Ha un
+              indirizzo suo e non resta nascosta dentro al pannello: è una
+              tappa obbligata, e deve poterla ricaricare, condividere con chi
+              la sta aiutando, o ritrovarla nella cronologia. */}
+          <Route path="/select-password" element={<AdminRoot section="scelta-password" />} />
+
+          {/* Il pannello, sotto quattro prefissi: l'indirizzo dice con che
+              ruolo ci si sta dentro. Le schermate sono le stesse, e quali
+              siano raggiungibili lo decidono le capacità, non il prefisso. */}
+          <Route path="/admin/*" element={<AdminRoot section="staff" />} />
+          <Route path="/segreteria/*" element={<AdminRoot section="staff" />} />
+          <Route path="/editor/*" element={<AdminRoot section="staff" />} />
+          <Route path="/coach/*" element={<AdminRoot section="staff" />} />
+
+          {/* L'area dell'atleta: stesso bundle e stessa sessione del pannello,
+              schermate diverse. Si chiama con parole sue perché è sua. */}
+          <Route path="/area-riservata/*" element={<AdminRoot section="atleta" />} />
 
         </Routes>
       </Suspense>

@@ -9,7 +9,22 @@ import { z } from "zod";
 import { ErroreHttp } from "./risposte.js";
 
 export const SPORT = ["Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"];
+
+/* Di cosa parla la notizia, che non è lo sport: la maggior parte
+   dell'archivio racconta la vita della società, non una partita.
+   Vedi la nota sull'enum in db/schema.js. */
+export const CATEGORIE = ["societa", "eventi", "sport", "solidarieta", "altro"];
 export const STATI = ["bozza", "in_revisione", "pubblicata", "cestino"];
+
+/**
+ * I valori che il FILTRO del pannello accetta, che sono uno in più.
+ *
+ * "programmata" non è uno stato del database e non deve finire in STATI, che
+ * è l'elenco usato anche in scrittura: scriverla in tabella significherebbe
+ * inventare un valore che l'enum di Postgres rifiuta. È solo un modo di
+ * chiedere "le pubblicate che non sono ancora uscite", e vale in lettura.
+ */
+export const STATI_FILTRO = [...STATI, "programmata"];
 
 export const schemaAccesso = z.object({
   email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255),
@@ -24,9 +39,19 @@ const CAMPI = {
   contenuto: z.string().min(1, "La notizia è vuota."),
   sommario: z.string().trim().max(500),
   sport: z.enum(SPORT),
+  categoria: z.enum(CATEGORIE),
   stato: z.enum(STATI),
   slug: z.string().trim().max(90),
-  copertinaId: z.number().int().positive().nullable()
+  copertinaId: z.number().int().positive().nullable(),
+
+  /**
+   * Quando la notizia compare sul sito.
+   *
+   * Nel futuro significa "programmata": lo stato resta "pubblicata" e le
+   * interrogazioni pubbliche scartano le date non ancora arrivate. Vedi la
+   * nota in server/notizie.js sul perché non esiste uno stato apposta.
+   */
+  pubblicataIl: z.coerce.date().nullable()
 };
 
 export const schemaNotiziaNuova = z.object({
@@ -34,9 +59,11 @@ export const schemaNotiziaNuova = z.object({
   contenuto: CAMPI.contenuto,
   sommario: CAMPI.sommario.optional(),
   sport: CAMPI.sport.optional().default("Altro"),
+  categoria: CAMPI.categoria.optional().default("altro"),
   stato: CAMPI.stato.optional().default("bozza"),
   slug: CAMPI.slug.optional(),
-  copertinaId: CAMPI.copertinaId.optional()
+  copertinaId: CAMPI.copertinaId.optional(),
+  pubblicataIl: CAMPI.pubblicataIl.optional()
 });
 
 /**
@@ -54,16 +81,33 @@ export const schemaNotiziaModifica = z.object({
   contenuto: CAMPI.contenuto.optional(),
   sommario: CAMPI.sommario.optional(),
   sport: CAMPI.sport.optional(),
+  categoria: CAMPI.categoria.optional(),
   stato: CAMPI.stato.optional(),
   slug: CAMPI.slug.optional(),
-  copertinaId: CAMPI.copertinaId.optional()
+  copertinaId: CAMPI.copertinaId.optional(),
+  pubblicataIl: CAMPI.pubblicataIl.optional()
 });
 
 export const schemaElencoNotizie = z.object({
   pagina: z.coerce.number().int().min(1).optional().default(1),
   perPagina: z.coerce.number().int().min(1).max(50).optional().default(12),
   sport: z.enum(SPORT).optional(),
-  stato: z.enum(STATI).optional(),
+  categoria: z.enum(CATEGORIE).optional(),
+
+  /**
+   * Uno stato solo oppure più stati separati da virgola.
+   *
+   * Il filtro "Bozze" del pannello ne chiede due insieme — bozza e
+   * in_revisione — perché sono la stessa cosa per chi guarda: roba non
+   * ancora online. Prima lo schema accettava un solo valore, il pannello ne
+   * mandava due, e il caso "non è un valore dell'elenco" finiva scartato in
+   * silenzio: il filtro spariva e l'elenco mostrava tutto.
+   */
+  stato: z.preprocess(
+    (v) => (typeof v === "string" ? v.split(",").map((s) => s.trim()).filter(Boolean) : v),
+    z.array(z.enum(STATI_FILTRO)).min(1).max(STATI_FILTRO.length)
+  ).optional(),
+
   cerca: z.string().trim().max(120).optional()
 });
 
@@ -94,7 +138,16 @@ const CAMPI_EVENTO = {
   inizio: z.coerce.date(),
   fine: z.coerce.date().nullable(),
   tuttoIlGiorno: z.boolean(),
+
+  // Da quando compare sul sito. Vuoto significa subito: vedi la nota sulla
+  // colonna in db/schema.js, il verso è opposto a quello delle notizie.
+  visibileDal: z.coerce.date().nullable(),
   luogo: z.string().trim().max(240).nullable(),
+
+  // Coordinate del punto scelto sulla mappa. Facoltative e sempre in coppia:
+  // una latitudine senza longitudine non indica nulla.
+  latitudine: z.coerce.number().min(-90).max(90).nullable(),
+  longitudine: z.coerce.number().min(-180).max(180).nullable(),
   descrizione: z.string().trim().max(4000).nullable(),
   risultato: z.string().trim().max(60).nullable(),
   parziali: z.string().trim().max(160).nullable(),
@@ -111,7 +164,10 @@ export const schemaEventoNuovo = z.object({
   inizio: CAMPI_EVENTO.inizio,
   fine: CAMPI_EVENTO.fine.optional(),
   tuttoIlGiorno: CAMPI_EVENTO.tuttoIlGiorno.optional().default(false),
+  visibileDal: CAMPI_EVENTO.visibileDal.optional(),
   luogo: CAMPI_EVENTO.luogo.optional(),
+  latitudine: CAMPI_EVENTO.latitudine.optional(),
+  longitudine: CAMPI_EVENTO.longitudine.optional(),
   descrizione: CAMPI_EVENTO.descrizione.optional(),
   risultato: CAMPI_EVENTO.risultato.optional(),
   parziali: CAMPI_EVENTO.parziali.optional(),
@@ -134,7 +190,10 @@ export const schemaEventoModifica = z.object({
   inizio: CAMPI_EVENTO.inizio.optional(),
   fine: CAMPI_EVENTO.fine.optional(),
   tuttoIlGiorno: CAMPI_EVENTO.tuttoIlGiorno.optional(),
+  visibileDal: CAMPI_EVENTO.visibileDal.optional(),
   luogo: CAMPI_EVENTO.luogo.optional(),
+  latitudine: CAMPI_EVENTO.latitudine.optional(),
+  longitudine: CAMPI_EVENTO.longitudine.optional(),
   descrizione: CAMPI_EVENTO.descrizione.optional(),
   risultato: CAMPI_EVENTO.risultato.optional(),
   parziali: CAMPI_EVENTO.parziali.optional(),

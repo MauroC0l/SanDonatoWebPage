@@ -1,0 +1,171 @@
+/* Il fondo di ogni pagina. Vedi Footer.jsx */
+
+.ft {
+  background: linear-gradient(180deg, #00224a 0%, #001835 100%);
+  color: #c9d6ea;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: .88rem;
+}
+
+.ft-contenitore {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(2.2rem, 5vw, 3.4rem) clamp(1rem, 4vw, 2rem) 1.4rem;
+}
+
+/*
+ * Una colonna larga per la società e le altre a scomparsa automatica.
+ *
+ * auto-fit con minmax fa da solo quello che servirebbero tre media query:
+ * le colonne si affiancano finché ciascuna sta sopra ai 170 pixel, poi si
+ * impilano. Su un telefono restano due colonne di collegamenti affiancate
+ * invece di una colonna lunghissima da scorrere.
+ */
+.ft-alto {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.6fr) repeat(auto-fit, minmax(170px, 1fr));
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+
+/* ---------- La società ---------- */
+
+.ft-marchio {
+  display: block;
+  margin-bottom: .6rem;
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.ft-frase {
+  max-width: 42ch;
+  margin: 0 0 1.1rem;
+  font-size: .84rem;
+  line-height: 1.55;
+  opacity: .8;
+}
+
+.ft-social {
+  display: flex;
+  gap: .5rem;
+}
+
+.ft-social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: .9rem;
+  text-decoration: none;
+
+  transition: background-color .25s ease, transform .25s ease;
+}
+
+.ft-social a:hover {
+  background: #ff6600;
+  transform: translateY(-2px);
+}
+
+.ft-social a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- Colonne di collegamenti ---------- */
+
+.ft-colonna-titolo {
+  margin: 0 0 .7rem;
+  color: #fff;
+  font-size: .76rem;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.ft-colonna ul {
+  list-style: none;
+  display: grid;
+  gap: .45rem;
+  margin: 0;
+  padding: 0;
+}
+
+.ft-colonna a {
+  color: #c9d6ea;
+  font-size: .85rem;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.ft-colonna a:hover { color: #ff8534; }
+
+.ft-colonna a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------- Dove siamo ---------- */
+
+.ft-dove {
+  display: grid;
+  align-content: start;
+  gap: .55rem;
+}
+
+.ft-contatto {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+
+  color: #c9d6ea;
+  font-size: .85rem;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.ft-contatto svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #ff6600;
+}
+
+.ft-contatto:hover { color: #fff; }
+.ft-fuori { opacity: .5; font-size: .8rem; }
+
+/* ---------- Riga finale ---------- */
+
+.ft-basso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .4rem 1.2rem;
+
+  padding-top: 1.2rem;
+  font-size: .76rem;
+  opacity: .65;
+}
+
+.ft-fiscali {
+  /* I dati fiscali non vanno mai a capo in mezzo a una partita IVA */
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .ft-basso {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .ft-fiscali { white-space: normal; }
+}

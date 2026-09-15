@@ -1,0 +1,184 @@
+/* =========================================
+   Menu a tendina disegnato da noi (scope: tnd-)
+   Vive dentro .adm-shell, quindi eredita le variabili di colore da Admin.css.
+   ========================================= */
+
+.tnd { position: relative; }
+
+.tnd-bottone {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  /* .adm-input porta già bordo, raggio e spaziatura: qui si aggiusta solo
+     ciò che cambia fra un <input> e un <button>. */
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.tnd-bottone:disabled { cursor: not-allowed; }
+
+.tnd-valore {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tnd-valore.is-vuoto { color: var(--adm-muted); }
+
+.tnd-freccia {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--adm-muted);
+  transition: transform .18s;
+}
+.tnd.is-aperta .tnd-freccia { transform: rotate(180deg); }
+
+.tnd.is-aperta .tnd-bottone {
+  border-color: var(--adm-blue);
+  box-shadow: 0 0 0 3px var(--adm-blue-soft);
+}
+
+/* ---------- Pannello ---------- */
+
+.tnd-pannello {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  /* Sopra la barra in alto (50), sotto gli avvisi (200) */
+  z-index: 60;
+
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  box-shadow: 0 4px 8px rgba(16, 32, 56, .06), 0 18px 40px -18px rgba(16, 32, 56, .4);
+  overflow: hidden;
+
+  animation: tnd-apre .14s ease-out;
+}
+
+@keyframes tnd-apre {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.tnd-ricerca {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--adm-line-soft);
+  color: var(--adm-muted);
+  font-size: 0.8rem;
+}
+
+.tnd-ricerca input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--adm-ink);
+  outline: none;
+}
+
+.tnd-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  /* Oltre questa altezza si scorre: un elenco che arriva a fondo schermo
+     nasconde il resto del modulo e non si capisce più dove si era. */
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.tnd-vuoto {
+  padding: 0.9rem 0.6rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--adm-muted);
+}
+
+.tnd-gruppo {
+  padding: 0.55rem 0.6rem 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--adm-muted);
+}
+
+.tnd-voce {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--adm-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tnd-voce:disabled { opacity: .45; cursor: not-allowed; }
+
+/* Evidenziata e non :hover, così il mouse e le frecce puntano allo stesso
+   posto: con entrambi attivi si vedrebbero due voci accese insieme. */
+.tnd-voce.is-evidenziata:not(:disabled) { background: var(--adm-line-soft); }
+.tnd-voce.is-scelta { color: var(--adm-blue); font-weight: 600; }
+.tnd-voce.is-scelta.is-evidenziata { background: var(--adm-blue-soft); }
+
+.tnd-voce-testo {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.tnd-voce-nota {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--adm-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tnd-pallino {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.tnd-spunta { flex-shrink: 0; font-size: 0.75rem; color: var(--adm-blue); }
+
+/* Nella barra dei filtri .adm-filter-select dà solo un tetto alla larghezza:
+   a un <select> bastava, a un <div> no, perché si stringerebbe sul testo. */
+.tnd.adm-filter-select { flex: 0 1 16rem; width: 16rem; }
+
+/* Versione compatta, per le tendine che stanno dentro a una riga d'elenco */
+.tnd-mini .tnd-bottone { padding: 0.4rem 0.6rem; font-size: 0.82rem; }
+.tnd-mini .tnd-pannello { min-width: 15rem; left: auto; right: 0; }
+
+/* Il ruolo nell'elenco delle persone: largo abbastanza da leggere
+   "Amministratore" senza che venga tagliato a metà. */
+.adm-tendina-ruolo { min-width: 9.5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tnd-pannello { animation: none; }
+  .tnd-freccia { transition: none; }
+}
