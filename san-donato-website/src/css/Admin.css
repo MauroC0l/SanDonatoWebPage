@@ -355,9 +355,30 @@
   align-items: center;
   justify-content: center;
   gap: 0.9rem;
-  min-height: 55vh;
   color: var(--adm-muted);
   background: var(--adm-bg);
+}
+
+/*
+ * L'attesa DENTRO a una pagina: occupa lo spazio dove comparirà il
+ * contenuto, non tutto lo schermo. Attorno c'è già il pannello, con la sua
+ * barra in cima.
+ */
+.adm-loading { min-height: 55vh; }
+
+/*
+ * L'attesa PRIMA di una pagina — accesso, registrazione, scelta della
+ * password, l'istante in cui si controlla se la sessione è aperta.
+ *
+ * Qui attorno non c'è ancora niente: prende tutto lo schermo, in tinta
+ * unita. Con un'altezza parziale si vedeva una fascia grigia in mezzo al
+ * bianco della pagina, e la rotella sembrava appoggiata su una striscia
+ * invece che su uno sfondo.
+ */
+.adm-boot {
+  min-height: 100vh;
+  min-height: 100svh;
+  width: 100%;
 }
 
 .adm-spinner {
