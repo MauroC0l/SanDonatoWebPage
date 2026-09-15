@@ -99,10 +99,18 @@ Il ramo `backend-proprio` va spinto su GitHub: Vercel pubblica quello che
 trova lì, non quello che c'è sul portatile. **`main` non si tocca** — è il
 ramo del sito attuale.
 
-Su Vercel: progetto nuovo dal repository, ramo di produzione
-`backend-proprio`. Il `vercel.json` c'è già e manda `/api/*` alle funzioni e
-tutto il resto a `index.html`; le funzioni sono i file dentro `api/`, una per
-indirizzo, e Vercel le riconosce da sé.
+Su Vercel: progetto nuovo dal repository. Le impostazioni che contano sono
+tre, e sbagliarne una costa un pomeriggio:
+
+| Impostazione | Valore | Perché |
+|---|---|---|
+| Root Directory | `san-donato-website` | il repository ha il sito dentro una cartella, non alla radice: lasciandolo vuoto Vercel non trova nemmeno il `package.json` |
+| Production Branch | `backend-proprio` | `main` è il ramo del sito attuale e non va pubblicato qui |
+| Framework Preset | Vite | comando `npm run build`, cartella d'uscita `dist`: li riconosce da solo |
+
+Il `vercel.json` c'è già e manda `/api/*` alle funzioni e tutto il resto a
+`index.html`; le funzioni sono i file dentro `api/`, una per indirizzo, e
+Vercel le riconosce da sé.
 
 Variabili d'ambiente da impostare sul progetto:
 
