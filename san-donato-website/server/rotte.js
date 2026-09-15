@@ -110,9 +110,13 @@ export const ROTTE = TABELLA.map(([percorso, handler]) => ({
 /**
  * Quale rotta risponde a questo indirizzo, e con quali parametri.
  *
- * Riceve il percorso SENZA "/api/" davanti. Restituisce null se non
- * risponde nessuno: sta a chi chiama decidere cosa dire, che in fondo è
- * sempre un 404.
+ * Riceve i pezzi del percorso senza "/api/" davanti e GIÀ DECODIFICATI:
+ * scioglierli è compito di chi legge la richiesta, perché a seconda di
+ * come arriva — dall'indirizzo o da una riscrittura — sono già sciolti
+ * oppure no, e farlo due volte cambierebbe i nomi che contengono un %.
+ *
+ * Restituisce null se non risponde nessuno: sta a chi chiama decidere
+ * cosa dire, che in fondo è sempre un 404.
  */
 export function trovaRotta(pezzi) {
   for (const rotta of ROTTE) {
@@ -125,7 +129,7 @@ export function trovaRotta(pezzi) {
       const atteso = rotta.segmenti[i];
 
       if (atteso.tipo === "parametro") {
-        parametri[atteso.nome] = decodeURIComponent(pezzi[i]);
+        parametri[atteso.nome] = pezzi[i];
       } else if (atteso.valore !== pezzi[i]) {
         combacia = false;
         break;

@@ -108,9 +108,10 @@ tre, e sbagliarne una costa un pomeriggio:
 | Production Branch | `backend-proprio` | `main` è il ramo del sito attuale e non va pubblicato qui |
 | Framework Preset | Vite | comando `npm run build`, cartella d'uscita `dist`: li riconosce da solo |
 
-Il `vercel.json` c'è già e manda `/api/*` alle funzioni e tutto il resto a
-`index.html`; le funzioni sono i file dentro `api/`, una per indirizzo, e
-Vercel le riconosce da sé.
+Il `vercel.json` c'è già e fa due cose: manda tutto quello che comincia per
+`/api/` all'unica funzione (`api/smista.js`, che poi smista internamente) e
+tutto il resto a `index.html`, che è il modo in cui un sito a pagina singola
+risponde a un indirizzo qualunque.
 
 Variabili d'ambiente da impostare sul progetto:
 

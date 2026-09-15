@@ -2,9 +2,11 @@
  * Server di sviluppo per le API — solo in locale, mai in produzione.
  *
  * In produzione le richieste sotto /api arrivano alla funzione unica che sta
- * in api/[[...percorso]].js, che le smista. In locale `vite dev` serve solo
- * il front-end, quindi senza questo server le API non esisterebbero e si
- * potrebbe provare il sito soltanto dopo un deploy: un giro lentissimo.
+ * in api/smista.js, portate lì da una riscrittura di vercel.json.
+ *
+ * In locale `vite dev` serve solo il front-end, quindi senza questo server
+ * le API non esisterebbero e si potrebbe provare il sito soltanto dopo un
+ * deploy: un giro lentissimo.
  *
  * Qui dentro c'è il minimo indispensabile: un server HTTP che passa tutto
  * allo STESSO smistatore usato in produzione. Prima questo file si
@@ -15,7 +17,7 @@
  */
 
 import { createServer } from "node:http";
-import smista from "./api/[[...percorso]].js";
+import smista from "./api/smista.js";
 import { ROTTE } from "./server/rotte.js";
 
 const PORTA = Number(process.env.PORTA_API || 3001);

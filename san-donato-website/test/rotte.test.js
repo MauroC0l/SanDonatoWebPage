@@ -3,6 +3,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ROTTE, trovaRotta } from "../server/rotte.js";
+import { pezziChiesti } from "../api/smista.js";
 
 /**
  * L'elenco delle rotte e i file sul disco devono dire la stessa cosa.
@@ -106,9 +107,63 @@ describe("smistamento degli indirizzi", () => {
     expect(dove("admin")).toBe(null);
   });
 
-  it("un indirizzo codificato torna leggibile", () => {
-    expect(dove("notizie/festa%20di%20natale").parametri).toEqual({
+  it("i pezzi arrivano già sciolti, e passano così come sono", () => {
+    /* Chi legge la richiesta scioglie le sequenze %XX: qui dentro non si
+       tocca niente, perché a seconda di come arriva l'indirizzo — dal
+       percorso o da una riscrittura — sono già sciolte oppure no, e
+       farlo due volte storpierebbe un nome che contiene un %. */
+    expect(dove("notizie/festa di natale").parametri).toEqual({
       identificativo: "festa di natale"
     });
+  });
+});
+
+describe("da dove arriva l'indirizzo chiesto", () => {
+  /*
+   * Lo stesso indirizzo raggiunge lo smistatore in due modi diversi, e
+   * questo è il punto che in produzione era rotto:
+   *
+   *   - in locale il server passa la richiesta così com'è, e il percorso
+   *     sta in req.url;
+   *   - su Vercel una riscrittura di vercel.json manda tutto a /api/smista
+   *     e allega il percorso originale come parametro, perché dopo una
+   *     riscrittura req.url mostra la destinazione e non più la richiesta.
+   *
+   * Se la seconda strada non funziona, il sito pubblicato risponde con la
+   * home a ogni chiamata all'API — ed è esattamente quello che faceva.
+   */
+  const pezzi = (url, query) => {
+    const req = { url, query };
+    return pezziChiesti(req, new URL(url, "http://interno"));
+  };
+
+  it("in locale il percorso sta nell'indirizzo", () => {
+    expect(pezzi("/api/admin/atleti/539")).toEqual(["admin", "atleti", "539"]);
+    expect(pezzi("/api/notizie?perPagina=3")).toEqual(["notizie"]);
+  });
+
+  it("su Vercel il percorso arriva dalla riscrittura", () => {
+    expect(pezzi("/api/smista?percorso=admin/atleti/539", { percorso: "admin/atleti/539" }))
+      .toEqual(["admin", "atleti", "539"]);
+
+    // Anche leggendolo dalla query, se req.query non c'è
+    expect(pezzi("/api/smista?percorso=admin/atleti/539"))
+      .toEqual(["admin", "atleti", "539"]);
+  });
+
+  it("le sequenze %XX si sciolgono una volta sola", () => {
+    // Dall'indirizzo arrivano codificate
+    expect(pezzi("/api/notizie/festa%20di%20natale"))
+      .toEqual(["notizie", "festa di natale"]);
+
+    // Dalla riscrittura arrivano già sciolte: scioglierle di nuovo
+    // storpierebbe un nome che contiene davvero un %
+    expect(pezzi("/api/smista", { percorso: "notizie/festa di natale" }))
+      .toEqual(["notizie", "festa di natale"]);
+  });
+
+  it("un percorso spezzettato in un elenco si rimette insieme", () => {
+    expect(pezzi("/api/smista", { percorso: ["admin", "media", "cartelle"] }))
+      .toEqual(["admin", "media", "cartelle"]);
   });
 });

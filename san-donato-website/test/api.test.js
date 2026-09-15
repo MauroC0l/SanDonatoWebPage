@@ -380,8 +380,24 @@ describe("certificato medico", () => {
     /* Serve un certificato che scade fra parecchio: il blocco si apre da
        solo negli ultimi tre mesi, e su uno in scadenza non si vedrebbe. */
     const fraMesi = new Date(Date.now() + 300 * 86400000).toISOString().slice(0, 10);
-    const atleta = elenco.corpo.atleti.find((a) => a.certificatoScadenza);
-    expect(atleta, "serve un atleta con un certificato").toBeTruthy();
+
+    /*
+     * Serve un certificato CON LA COPIA CARICATA, non solo con una data.
+     *
+     * Approvare quello che non si è potuto guardare è proprio la cosa che
+     * il server rifiuta con un 409, quindi un atleta con la sola data farebbe
+     * fallire questo test dicendo una cosa vera su un'altra regola.
+     *
+     * Un database appena seminato non ne ha nessuno — i file di prova li
+     * attacca scripts/certificati-di-prova.mjs — e in quel caso questo test
+     * non ha niente da provare e lo dice.
+     */
+    const atleta = elenco.corpo.atleti.find((a) => a.certificatoScadenza && a.certificatoCaricato);
+
+    if (!atleta) {
+      console.warn("    (saltato: nessun atleta ha la copia del certificato caricata)");
+      return;
+    }
 
     const primaScadenza = atleta.certificatoScadenza;
 

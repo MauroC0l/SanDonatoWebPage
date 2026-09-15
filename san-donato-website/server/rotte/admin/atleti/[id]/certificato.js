@@ -53,13 +53,18 @@ export default conGestioneErrori(
 
     if (!atleta) throw new ErroreHttp(404, "Atleta non trovato.");
 
+    /* Prima si guarda la richiesta, poi lo stato delle cose.
+
+       Un rifiuto senza motivo è una richiesta incompleta, e dirlo è più
+       utile che rispondere che manca il file: chi la manda può correggere
+       la prima cosa da solo, la seconda no. */
+    const dati = valida(schemaValidazione, await leggiCorpo(req));
+
     // Serve il file: una scadenza battuta a mano non è un documento, e
     // approvarla vorrebbe dire firmare qualcosa che nessuno ha visto.
     if (!atleta.certificatoMediaId) {
       throw new ErroreHttp(409, "Non c'è nessun file da controllare: l'atleta ha scritto solo la scadenza.");
     }
-
-    const dati = valida(schemaValidazione, await leggiCorpo(req));
     const salvata = await validaCertificato(id, dati, req.utente.id);
 
     if (!salvata) throw new ErroreHttp(404, "Scheda non trovata.");
