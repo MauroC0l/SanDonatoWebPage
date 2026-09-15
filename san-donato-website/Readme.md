@@ -2,8 +2,8 @@
 
 Sito pubblico e area riservata della Polisportiva San Donato di Torino.
 
-React + Vite per il front-end, funzioni serverless in `api/` per il
-back-end, Postgres per i dati. **WordPress non è più il motore del sito**:
+React + Vite per il front-end, una funzione serverless che smista tutte le
+chiamate al back-end, Postgres per i dati. **WordPress non è più il motore del sito**:
 resta in piedi solo come archivio dei file delle notizie vecchie, finché
 non saranno trasferiti.
 
@@ -27,8 +27,7 @@ Il sito parla con le API attraverso il proxy di Vite: per il browser stanno
 sulla stessa origine, come in produzione. Senza questo il cookie di
 sessione (`SameSite=Strict`) non partirebbe mai.
 
-> **`npm run dev:api` va riavviato a ogni modifica dentro `server/` o
-> `api/`.** Il server di sviluppo carica i moduli una volta sola all'avvio:
+> **`npm run dev:api` va riavviato a ogni modifica dentro `server/`.** Il server di sviluppo carica i moduli una volta sola all'avvio:
 > senza riavvio si continua a provare il codice di prima, e si finisce per
 > cercare un difetto che è già stato corretto.
 
@@ -101,7 +100,7 @@ stanno tutti in `server/autorizzazioni.js`, e un endpoint si protegge con
 | `coach` | `/coach` | partite e atleti delle proprie squadre, libreria propria |
 | `atleta` | `/area-riservata` | la propria iscrizione e le proprie quote |
 
-Altre quattro regole che valgono la pena di essere sapute prima di leggere
+Altre cinque regole che valgono la pena di essere sapute prima di leggere
 il codice:
 
 - **Partite ed eventi sono due sezioni, un calendario solo.** Un allenatore
@@ -113,6 +112,15 @@ il codice:
   non l'ha guardato, quell'atleta non è a posto. Toccarlo lo riporta da
   controllare, e finché è valido l'atleta non lo può sostituire — si sblocca
   tre mesi prima della scadenza.
+- **Le API sono trentacinque rotte e una funzione sola.** Su Vercel, senza
+  un framework che le impacchetti, ogni file dentro `api/` diventerebbe una
+  funzione a sé: il piano gratuito ne ammette dodici. Le rotte stanno in
+  `server/rotte/` — un file per indirizzo, come prima — e in `api/` c'è solo
+  `[[...percorso]].js`, che legge l'indirizzo e chiama la rotta giusta.
+  L'elenco sta in `server/rotte.js` e va aggiornato a mano quando si
+  aggiunge una rotta: non si può leggere la cartella a tempo di esecuzione,
+  perché chi impacchetta il codice segue le importazioni scritte. C'è un
+  test che fallisce se elenco e cartella divergono.
 - **La libreria dei file ha due versioni.** Chi scrive le notizie la vede
   intera; chi mette a calendario le partite vede solo quello che ha caricato
   lui, e lo sa perché c'è scritto.
@@ -142,8 +150,11 @@ Due regole che valgono sopra a tutte le altre, e che sono nei test:
 ## Struttura
 
 ```
-api/          una funzione serverless per file (ogni file = un indirizzo pubblico!)
-server/       codice condiviso fra le funzioni — MAI dentro api/
+api/          UNA funzione sola: [[...percorso]].js, che smista (vedi sotto)
+server/
+  rotte/      una rotta per file: il nome del file È l'indirizzo pubblico
+  rotte.js    l'elenco che lega gli indirizzi alle rotte, tenuto a mano
+  *.js        codice condiviso fra le rotte
 db/           schema Drizzle, client, migrazioni
 scripts/      lavori una tantum: importazioni, dati di prova, classificazioni
 test/         la suite
