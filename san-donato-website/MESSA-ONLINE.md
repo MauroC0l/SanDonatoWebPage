@@ -126,6 +126,88 @@ E due che **non** vanno messe:
 - le `R2_*` — non ci sono ancora. Senza, il caricamento di file è spento e
   lo dice (vedi sotto).
 
+## 3-bis. Due progetti sullo stesso repository
+
+Serve perché i siti sono due e il repository è uno: la dimostrazione, che
+sta sul ramo `backend-proprio`, e il sito della società, che un giorno starà
+su `main`. Vercel lo permette anche sul piano gratuito — fino a 25 progetti
+collegati allo stesso repository.
+
+### Il primo progetto: la dimostrazione
+
+1. **Add New → Project**, importa `MauroC0l/SanDonatoWebPage`.
+2. Chiamalo **`psd-demo`**. Il nome diventa l'indirizzo
+   (`psd-demo.vercel.app`), quindi sceglilo pensando a chi lo leggerà.
+3. **Root Directory**: premi *Edit* e scegli `san-donato-website`. È il
+   passo che si dimentica: senza, Vercel non trova nemmeno il
+   `package.json`.
+4. **Framework Preset**: Vite. Comando di build e cartella d'uscita li
+   riconosce da sé.
+5. **Environment Variables**, prima di premere Deploy:
+   - `DATABASE_URL` = la stringa di Neon
+   - `VITE_SITO_DIMOSTRATIVO` = `1`
+6. **Deploy**. Il primo giro pubblica il ramo predefinito (`main`): è
+   normale, si aggiusta al passo dopo.
+
+Poi, a progetto creato:
+
+7. **Settings → Git → Production Branch**: scrivi `backend-proprio` e salva.
+8. **Settings → Environment Variables**: accendi *Automatically expose
+   System Environment Variables*. Senza, la variabile che dice a Vercel su
+   quale ramo sta lavorando non esiste, e il filtro del passo 9 non
+   funziona.
+9. **Settings → Git → Ignored Build Step**, comando personalizzato:
+
+   ```bash
+   [ "$VERCEL_GIT_COMMIT_REF" = "backend-proprio" ] && exit 1 || exit 0
+   ```
+
+   **Attenzione al verso, che è contro-intuitivo**: uscita `0` vuol dire
+   *salta la build*, uscita `1` vuol dire *costruisci*. Scritto al
+   contrario, questo progetto salterebbe proprio i propri deploy e
+   costruirebbe quelli dell'altro ramo. È l'errore più comune con questo
+   campo.
+
+10. **Deployments → il deploy più recente → Redeploy**, scegliendo il ramo
+    `backend-proprio`. Da qui in poi ci pensa il push.
+
+### Il secondo progetto: il sito della società
+
+Quando servirà, stessa procedura con tre differenze:
+
+- nome **`psd`** (o il nome che porterà il dominio);
+- **Production Branch**: `main`;
+- **niente** `VITE_SITO_DIMOSTRATIVO` — quella accende la targhetta "versione
+  di prova" e il `noindex`, che sul sito vero sarebbero un disastro — e una
+  `DATABASE_URL` sua, che punta a un altro database. **Mai lo stesso di
+  quello della dimostrazione**: là dentro c'è un account `admin`/`admin`.
+
+E l'Ignored Build Step speculare:
+
+```bash
+[ "$VERCEL_GIT_COMMIT_REF" = "main" ] && exit 1 || exit 0
+```
+
+### Come si verifica che il filtro funzioni
+
+Fai un push su `backend-proprio` e guarda i due progetti:
+
+- `psd-demo` costruisce;
+- l'altro mostra il deploy come **Skipped**, senza consumare una build.
+
+Senza questo filtro entrambi i progetti reagiscono a ogni push — il piano
+gratuito costruisce **una build alla volta**, quindi il secondo resta in
+coda — e nascono indirizzi di anteprima che fanno vedere il ramo sbagliato
+a chi li apre.
+
+### Il piano, detto una volta sola
+
+Il gratuito è riservato all'uso **personale e non commerciale**, e Vercel
+considera commerciale anche "ricevere un pagamento per creare, aggiornare o
+ospitare il sito" e "qualunque metodo per elaborare pagamenti dai
+visitatori". La dimostrazione fatta da volontari ci sta; il sito della
+società che incassa le quote no, e andrà su Pro.
+
 ## 4. Controlli dopo il primo deploy
 
 Nell'ordine, perché ognuno dipende dal precedente:
