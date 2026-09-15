@@ -111,16 +111,42 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================= */
 /* 6. Fallback di caricamento delle pagine (route lazy) */
 /* ============================= */
+/*
+ * L'attesa mentre arriva il codice di una pagina.
+ *
+ * Sta sopra a tutto e occupa lo schermo intero, centrata. Prima era alta
+ * 45vh: la rotella finiva a un quarto di schermo, e quando la pagina
+ * arrivava e ne mostrava un'altra — quella che controlla la sessione,
+ * alta quanto lo schermo — la rotella saltava in mezzo. Due attese in fila
+ * si notano solo se non stanno nello stesso posto.
+ *
+ * E soprattutto: COMPARE DOPO UN QUARTO DI SECONDO. Quasi sempre la
+ * pagina arriva prima, e allora non si vede niente — che è la cosa
+ * migliore che possa fare un'attesa. Una rotella che lampeggia per
+ * ottanta millisecondi fa sembrare il sito più lento di quanto sia.
+ */
 .route-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  min-height: 45vh;
   padding: 20px;
+
+  background: #ffffff;
   color: #6b7280;
   font-weight: 500;
+
+  animation: attesa-compare .18s ease .25s both;
+}
+
+@keyframes attesa-compare {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .route-loading-spinner {

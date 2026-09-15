@@ -25,7 +25,7 @@ const SPORT = [
 ];
 
 export default function RegistrazionePage() {
-  const { isAuthenticated, isChecking, ricarica } = useAuth();
+  const { isAuthenticated, ricarica } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -36,14 +36,10 @@ export default function RegistrazionePage() {
   const [invio, setInvio] = useState(false);
   const [fatta, setFatta] = useState(null);
 
-  if (isChecking) {
-    return (
-      <div className="adm-boot">
-        <div className="adm-spinner" />
-        <p>Un momento…</p>
-      </div>
-    );
-  }
+  /* Come nell'accesso: il modulo si disegna subito, senza aspettare la
+     risposta sulla sessione. Chi è già dentro viene portato via un istante
+     dopo, e chi non lo è — cioè chiunque arrivi qui — non guarda una
+     rotella per niente. */
 
   // Chi è già dentro non ha motivo di registrarsi di nuovo
   if (isAuthenticated && !fatta) return <Navigate to="/admin" replace />;

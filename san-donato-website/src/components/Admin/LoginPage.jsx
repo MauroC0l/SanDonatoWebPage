@@ -12,7 +12,7 @@ import "../../css/Admin.css";
 const LOGO = "/logo-polisportiva.png";
 
 export default function LoginPage() {
-  const { user, login, isAuthenticated, isChecking } = useAuth();
+  const { user, login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,14 +23,18 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (isChecking) {
-    return (
-      <div className="adm-boot">
-        <div className="adm-spinner" />
-        <p>Verifica dell&apos;accesso…</p>
-      </div>
-    );
-  }
+  /*
+   * Nessuna attesa prima del modulo.
+   *
+   * Il controllo della sessione c'è ancora — serve a mandare via chi è già
+   * dentro — ma non si aspetta che finisca per disegnare: a un modulo di
+   * accesso non serve sapere chi sei, e chi arriva qui nove volte su dieci
+   * una sessione non ce l'ha. Prima, per quel decimo di secondo, tutti
+   * guardavano una rotella invece del campo in cui stavano per scrivere.
+   *
+   * Chi invece è già entrato vede il modulo per un istante e poi viene
+   * portato nella sua area: è il prezzo, ed è il più basso dei due.
+   */
 
   // Ognuno nella propria area: un atleta non va sotto /admin, dove non
   // troverebbe nulla che lo riguardi.

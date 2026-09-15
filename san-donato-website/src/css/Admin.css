@@ -379,6 +379,11 @@
   min-height: 100vh;
   min-height: 100svh;
   width: 100%;
+
+  /* Stesso ritardo dell'attesa che arriva prima (.route-loading): se la
+     risposta è veloce non si vede niente, e se è lenta le due si
+     sostituiscono nello stesso punto invece di scambiarsi di posto. */
+  animation: attesa-compare .18s ease .25s both;
 }
 
 .adm-spinner {
