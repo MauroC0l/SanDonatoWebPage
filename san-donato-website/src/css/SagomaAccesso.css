@@ -1,0 +1,114 @@
+/*
+ * La sagoma della pagina di accesso.
+ *
+ * Ricalca la stessa griglia della pagina vera (Admin.css, .alg-page): due
+ * colonne su schermo largo, una sola sotto i 900 pixel. Se le due misure
+ * divergessero, al momento dello scambio la pagina farebbe un salto — che è
+ * esattamente quello che una sagoma esiste per evitare.
+ *
+ * Compare dopo un quarto di secondo come le altre attese: quasi sempre il
+ * codice arriva prima e non si vede nulla.
+ */
+.sga-pagina {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: #f1f4f9;
+
+  animation: attesa-compare .18s ease .25s both;
+}
+
+/* Il pannello di sinistra: lo stesso blu della pagina vera, così il colore
+   non cambia quando la pagina arriva. */
+.sga-lato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: clamp(2rem, 5vw, 4rem);
+  background: linear-gradient(150deg, #0a52c9 0%, #06326f 55%, #041c3f 100%);
+}
+
+.sga-modulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.sga-scheda {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+
+  width: min(26rem, 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 18px 40px -24px rgba(16, 32, 56, .35);
+}
+
+/* ---------- I pezzi ---------- */
+
+.sga-logo,
+.sga-riga,
+.sga-campo,
+.sga-pulsante {
+  display: block;
+  border-radius: 8px;
+  background: rgba(16, 32, 56, .09);
+
+  /* Il respiro lento è quello che distingue una sagoma da un errore di
+     caricamento: una pagina grigia e ferma sembra rotta. */
+  animation: sga-respiro 1.4s ease-in-out infinite;
+}
+
+/* Sul pannello blu il grigio non si vedrebbe: lì le forme sono chiare. */
+.sga-lato .sga-logo,
+.sga-lato .sga-riga { background: rgba(255, 255, 255, .18); }
+
+.sga-logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+}
+
+.sga-riga { height: 14px; width: 100%; }
+.sga-riga-titolo { height: 22px; width: 70%; }
+.sga-riga-corta { width: 45%; }
+
+.sga-campo {
+  height: 44px;
+  border-radius: 10px;
+}
+
+.sga-pulsante {
+  height: 46px;
+  margin-top: .4rem;
+  border-radius: 10px;
+  background: rgba(11, 79, 209, .18);
+}
+
+@keyframes sga-respiro {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+
+/* ---------- Schermi stretti ---------- */
+
+@media (max-width: 900px) {
+  /* Come la pagina vera: il pannello blu sparisce e resta il modulo. */
+  .sga-pagina { grid-template-columns: minmax(0, 1fr); }
+  .sga-lato { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sga-logo,
+  .sga-riga,
+  .sga-campo,
+  .sga-pulsante { animation: none; }
+}

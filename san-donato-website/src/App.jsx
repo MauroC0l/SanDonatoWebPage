@@ -7,6 +7,7 @@ import Footer from "./components/AllPages/Footer";
 import HomePage from "./components/Home/HomePage";
 import { usePublishedHeight } from "./hooks/usePublishedHeight";
 import FasciaDimostrativa from "./components/AllPages/FasciaDimostrativa";
+import SagomaAccesso from "./components/AllPages/SagomaAccesso";
 
 // La home resta nel bundle principale: è la pagina d'ingresso.
 // Tutte le altre vengono scaricate solo quando servono davvero.
@@ -106,10 +107,33 @@ export default function App() {
           </Route>
 
           {/* ---------- Area riservata ---------- */}
-          <Route path="/login" element={<AdminRoot section="login" />} />
+
+          {/* Accesso e registrazione hanno un'attesa loro: la SAGOMA della
+              pagina invece della rotella di tutte le altre. Sono le due
+              porte che si aprono dal sito pubblico — quindi le più
+              attraversate — e hanno una forma sola, che si può disegnare
+              in anticipo. Chi guarda riconosce dove sta arrivando prima di
+              poterlo leggere, e quando la pagina arriva non si sposta
+              niente perché lo spazio era già quello. */}
+          <Route
+            path="/login"
+            element={(
+              <Suspense fallback={<SagomaAccesso />}>
+                <AdminRoot section="login" />
+              </Suspense>
+            )}
+          />
+
           {/* La registrazione degli atleti passa dallo stesso bundle
               dell'area riservata: il sito pubblico non se la porta dietro. */}
-          <Route path="/registrati" element={<AdminRoot section="registrazione" />} />
+          <Route
+            path="/registrati"
+            element={(
+              <Suspense fallback={<SagomaAccesso />}>
+                <AdminRoot section="registrazione" />
+              </Suspense>
+            )}
+          />
           <Route path="/recupera-password" element={<AdminRoot section="recupero" />} />
           {/* La scelta della password a chi ne ha una provvisoria. Ha un
               indirizzo suo e non resta nascosta dentro al pannello: è una
