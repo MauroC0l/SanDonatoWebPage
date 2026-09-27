@@ -367,6 +367,21 @@ export default function AdminRoot({ section }) {
               }
             />
 
+            {/* ---------- La propria iscrizione ----------
+                La stessa schermata dell'atleta, sotto il prefisso di chi la
+                apre: un allenatore compila i suoi dati e vede la sua quota
+                senza passare da /area-riservata, che è l'area di chi gioca
+                e lo rimbalzerebbe indietro. Il componente si adatta da sé —
+                a chi non scende in campo non chiede il certificato. */}
+            <Route
+              path="iscrizione"
+              element={
+                <Riservato una={["iscrizione.propria"]}>
+                  <Pigra cosa="dell'iscrizione"><IscrizionePage /></Pigra>
+                </Riservato>
+              }
+            />
+
             {/* ---------- La propria scheda ----------
                 Fuori da <Riservato>: è l'unica pagina che chiunque sia
                 entrato deve poter aprire, compreso chi aspetta una squadra. */}

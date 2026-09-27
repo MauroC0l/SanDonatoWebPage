@@ -1,8 +1,14 @@
 /**
- * /api/iscrizione — la propria iscrizione, compilata dall'atleta.
+ * /api/iscrizione — la propria iscrizione, compilata da chi si iscrive.
  *
  *   GET    la propria scheda e cosa manca ancora
  *   PATCH  scrive i propri dati e il proprio certificato
+ *
+ * Non solo gli atleti: anche gli allenatori sono iscritti alla società e
+ * versano la loro quota, e compilano questa stessa scheda. Per questo la
+ * porta resta aperta a chiunque abbia una sessione invece di chiedere una
+ * capacità: qui non si tocca nient'altro che la propria riga, e chi
+ * amministra il sito può benissimo giocare in prima squadra.
  *
  * Perché non riusare /api/admin/atleti/:id: quello richiede "atleti.leggi",
  * che un atleta non ha e non deve avere — con quella capacità vedrebbe anche
@@ -22,6 +28,8 @@ import { z } from "zod";
 import { getDb } from "../../db/client.js";
 import { squadre, richiesteIscrizione, schedeAtleta, media, pagamenti } from "../../db/schema.js";
 import { salvaScheda, cosaManca, minorenne } from "../atleti.js";
+import { assicuraQuotaAllenatore } from "../quote.js";
+import { legamiDichiaratiDa } from "../legami.js";
 import { urlFile } from "../notizie.js";
 import { richiedeAccesso } from "../autenticazione.js";
 import { annota } from "../registro.js";
@@ -120,6 +128,12 @@ function modificabile(scheda) {
 async function leggi(req, res) {
   const db = getDb();
 
+  /* Prima di leggere, non dopo: la quota degli allenatori si assegna da
+     sé, e assegnandola dopo la lettura la pagina si aprirebbe la prima
+     volta dicendo "quota da definire" per poi mostrarla al secondo giro.
+     Chi la vede una volta sola resterebbe con l'informazione sbagliata. */
+  await assicuraQuotaAllenatore(req.utente);
+
   const [scheda] = await db
     .select({
       dataNascita: schedeAtleta.dataNascita,
@@ -181,6 +195,20 @@ async function leggi(req, res) {
   const [appartenenza] = appartenenze;
 
   /**
+   * Gioca, o sta in società senza scendere in campo?
+   *
+   * La risposta è già scritta nelle appartenenze e non nel ruolo
+   * dell'account, che qui mentirebbe in tutti e due i versi: un allenatore
+   * può giocare in prima squadra, e un account "atleta" la cui richiesta è
+   * stata respinta non gioca da nessuna parte.
+   *
+   * Da qui dipendono due cose: se chiedergli il certificato medico, e se
+   * mostrargli la propria quota dentro a questa pagina — chi gioca ha la
+   * sezione "Quota" tutta sua, chi allena no.
+   */
+  const gioca = appartenenze.length > 0;
+
+  /**
    * I propri versamenti.
    *
    * Li vede, non li scrive: sono i conti della società, e li registra la
@@ -201,6 +229,12 @@ async function leggi(req, res) {
 
   const versatoCentesimi = versamenti.reduce((s, v) => s + v.importoCentesimi, 0);
 
+  /* Le parentele dichiarate, come le vede chi le ha dichiarate: il codice
+     fiscale che ha scritto lui e a che punto è. Se quel codice fiscale
+     corrisponda a un iscritto non si dice — la ragione sta in cima a
+     server/legami.js, ed è che non è un dato suo. */
+  const fratelli = await legamiDichiaratiDa(req.utente.id);
+
   res.setHeader("Cache-Control", "no-store");
 
   return json(res, {
@@ -210,7 +244,15 @@ async function leggi(req, res) {
       certificatoUrl: scheda?.certificatoMediaId
         ? urlFile(scheda.certificatoChiave, scheda.certificatoUrlWp)
         : null,
-      manca: cosaManca(scheda),
+      manca: cosaManca(scheda, { certificatoRichiesto: gioca }),
+
+      /* Lo dice il server perché è lui a sapere chi gioca: il modulo lo usa
+         per non mostrare affatto il riquadro del certificato a chi non deve
+         consegnarlo. Un riquadro vuoto e disabilitato sarebbe comunque una
+         cosa in più da capire. */
+      certificatoRichiesto: gioca,
+      fratelli,
+      gioca,
       // Lo sa il server perché è lui a decidere cosa manca: il modulo lo
       // usa per accendere gli asterischi sui campi del genitore.
       minorenne: minorenne(scheda?.dataNascita),

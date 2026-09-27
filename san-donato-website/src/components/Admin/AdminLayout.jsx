@@ -3,7 +3,8 @@ import {
   FaNewspaper, FaSignOutAlt, FaExternalLinkAlt,
   FaCalendarAlt, FaUsers, FaUserCheck, FaRunning, FaHistory, FaSitemap, FaHome, FaFutbol,
   FaEuroSign,
-  FaImages
+  FaImages,
+  FaClipboardCheck
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -40,7 +41,13 @@ const SEZIONI = [
   { a: "quote", etichetta: "Quote", Icona: FaEuroSign, capacita: ["quote.gestisci"] },
   { a: "utenti", etichetta: "Utenti", Icona: FaUsers, capacita: ["utenti.gestisci"] },
   { a: "libreria", etichetta: "Libreria", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
-  { a: "registro", etichetta: "Registro", Icona: FaHistory, capacita: ["registro.leggi"] }
+  { a: "registro", etichetta: "Registro", Icona: FaHistory, capacita: ["registro.leggi"] },
+
+  /* In fondo, dopo tutto quello che si amministra, perché è l'unica voce
+     che non riguarda gli altri: è la propria iscrizione alla società e la
+     propria quota. Oggi la vede chi allena — anche un allenatore è un
+     iscritto che versa la sua quota — e chiunque altro la capacità dica. */
+  { a: "iscrizione", etichetta: "Iscrizione", Icona: FaClipboardCheck, capacita: ["iscrizione.propria"] }
 ];
 
 /**

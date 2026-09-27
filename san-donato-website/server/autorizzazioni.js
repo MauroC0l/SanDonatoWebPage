@@ -86,7 +86,19 @@ const CAPACITA = {
     "iscrizioni.decidi_proprie",
     // Legge la scheda dei propri atleti ma non la scrive: quote e certificati
     // li registra la segreteria. All'allenatore serve saperlo, non deciderlo.
-    "atleti.leggi"
+    "atleti.leggi",
+
+    /**
+     * Anche l'allenatore è iscritto alla società e versa la sua quota.
+     *
+     * La capacità serve al pannello per mostrargli la sezione
+     * "Iscrizione", che sotto i prefissi dello staff non compare a
+     * nessun altro. Non protegge niente sul server: /api/iscrizione
+     * tocca solo la riga di chi chiede, e resta aperta a chiunque abbia
+     * una sessione — un amministratore che gioca in prima squadra deve
+     * poter compilare la sua.
+     */
+    "iscrizione.propria"
   ],
   /**
    * Un atleta non amministra niente. L'unica cosa che può fare è caricare i
@@ -100,7 +112,13 @@ const CAPACITA = {
    * passare dalla segreteria che lo riceve via email.
    */
   atleta: [
-    "media.carica"
+    "media.carica",
+
+    /* Ce l'ha anche lui, e per la stessa ragione dell'allenatore: la sua
+       area non consulta le capacità — le sezioni sono fisse — ma lasciarla
+       fuori vorrebbe dire scrivere qui che un atleta non ha un'iscrizione
+       da compilare, che è il contrario del vero. */
+    "iscrizione.propria"
     // La libreria dei file non la vede: quella sfoglia il materiale di
     // tutti, e si apre a chi scrive le notizie. Un atleta carica il
     // proprio certificato e basta.

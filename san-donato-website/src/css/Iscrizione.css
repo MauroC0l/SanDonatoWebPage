@@ -151,3 +151,83 @@
 .isc-togli:disabled { opacity: .5; cursor: default; }
 
 .isc-aggiungi { margin-top: .55rem; }
+
+/* ---------- Senza la colonna di destra ----------
+
+   Chi non deve consegnare il certificato medico e non ha una squadra —
+   un allenatore, che è iscritto alla società ma non scende in campo — si
+   ritroverebbe il modulo schiacciato a sinistra e mezza pagina bianca
+   accanto. In quel caso i campi si prendono tutta la larghezza. */
+.isc-griglia-sola {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- Fratelli e sorelle ----------
+
+   Il pannello sta sotto al modulo e fuori da esso: sono due salvataggi
+   diversi — i propri dati si salvano col pulsante in cima, una parentela
+   si dichiara subito — e tenerli dentro allo stesso <form> voleva dire un
+   invio che ne faceva partire due. */
+.fra-spiega { margin-top: 0; }
+
+.fra-elenco {
+  list-style: none;
+  margin: .8rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: .4rem;
+}
+
+.fra-riga {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .5rem .7rem;
+  border-radius: 8px;
+  border: 1px solid var(--adm-line-soft);
+  background: var(--adm-surface);
+}
+
+/* Il colore dice a colpo d'occhio a che punto è, ma non da solo: accanto
+   c'è sempre l'icona e la frase per esteso, perché un colore non lo
+   leggono tutti allo stesso modo. */
+.fra-riga.is-in_attesa { color: var(--adm-warn); }
+.fra-riga.is-confermato { color: var(--adm-ok); }
+.fra-riga.is-respinto { color: var(--adm-danger); }
+
+.fra-testi {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.fra-codice {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--adm-ink);
+}
+
+.fra-stato { font-size: .78rem; color: var(--adm-muted); }
+
+.fra-aggiungi {
+  display: flex;
+  align-items: flex-end;
+  gap: .6rem;
+  margin-top: .8rem;
+  flex-wrap: wrap;
+}
+
+.fra-aggiungi .adm-field { flex: 1; min-width: 14rem; }
+
+/* Il codice fiscale si scrive in maiuscolo e a caratteri larghi: sedici
+   caratteri senza spazi si ricontrollano a occhio uno per uno. */
+.fra-aggiungi .adm-input {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.fra-errore { color: var(--adm-danger); }

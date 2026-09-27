@@ -645,6 +645,23 @@ export const tipiQuota = pgTable("tipi_quota", {
   // l'alfabeto non conosce — prima iscrizione, rinnovo, fratello.
   ordine: integer("ordine").notNull().default(0),
 
+  /**
+   * La tariffa che si assegna da sola a chi allena.
+   *
+   * Gli allenatori versano una quota fissa, uguale per tutti: non c'è
+   * niente da scegliere, quindi non ha senso far aprire alla segreteria
+   * venti schede per ripetere venti volte la stessa selezione. Il sistema
+   * la applica da sé la prima volta che l'allenatore apre la propria
+   * iscrizione, e da lì in poi è una quota come le altre — si può
+   * cambiare a mano, e cambiata non torna indietro.
+   *
+   * Una colonna e non il nome della tariffa cercato nel codice: il giorno
+   * che qualcuno rinomina "Allenatori" in "Tecnici", la quota smetterebbe
+   * di essere assegnata e nessuno se ne accorgerebbe — un difetto che non
+   * fa rumore è il peggiore da trovare.
+   */
+  perAllenatori: boolean("per_allenatori").notNull().default(false),
+
   creataDa: integer("creata_da").references(() => utenti.id, { onDelete: "set null" }),
   creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
 });
@@ -823,6 +840,95 @@ export const pagamenti = pgTable("pagamenti", {
   creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
   index("idx_pagamenti_utente").on(t.utenteId, t.pagatoIl)
+]);
+
+/* =====================================================
+   Fratelli e sorelle — la tariffa agevolata
+   ===================================================== */
+
+/**
+ * A che punto è una parentela dichiarata.
+ *
+ * Non basta lo stato "c'è / non c'è": chi dichiara ha diritto di sapere se
+ * la sua richiesta è stata guardata, e un "respinto" senza motivo è una
+ * telefonata in segreteria assicurata.
+ */
+export const statoLegame = pgEnum("stato_legame", [
+  "in_attesa",
+  "confermato",
+  "respinto"
+]);
+
+/**
+ * "Ho un fratello o una sorella già iscritti": la dichiarazione, non la
+ * tariffa.
+ *
+ * La società fa pagare meno dal secondo figlio iscritto, e finora chi ne
+ * aveva diritto se lo doveva ricordare — o se lo ricordava la segreteria,
+ * a memoria, mentre assegnava le quote. Qui l'interessato lo dichiara una
+ * volta e resta scritto.
+ *
+ * TRE COSE CHE QUESTA TABELLA NON FA, e sono il punto:
+ *
+ * 1. non assegna nessuna tariffa. La quota la scrive chi ha
+ *    "quote.gestisci", come sempre: un campo del modulo che abbassa da
+ *    solo l'importo dovuto sarebbe l'atleta che si decide la propria
+ *    quota, cioè l'esatto contrario della regola che regge tutto il resto
+ *    del sito;
+ *
+ * 2. non dimostra la parentela. Il codice fiscale contiene cognome, nome,
+ *    data e comune di nascita: della famiglia non dice niente. Due fratelli
+ *    con cognomi diversi esistono, e due cugini che abitano insieme pure.
+ *    Il sistema cerca la persona, la segreteria decide se sono fratelli;
+ *
+ * 3. non dice a chi dichiara se quel codice fiscale è iscritto. La risposta
+ *    è sempre la stessa — "la segreteria controllerà" — perché altrimenti
+ *    chiunque potrebbe provare il codice fiscale di una persona qualsiasi e
+ *    scoprire se fa sport qui. Per questo "utente_collegato_id" lo riempie
+ *    il server ma non esce mai verso chi ha dichiarato.
+ *
+ * Una tabella e non una colonna sulla scheda: i figli iscritti possono
+ * essere tre, e la stessa dichiarazione va riletta la stagione dopo.
+ */
+export const legamiFamiliari = pgTable("legami_familiari", {
+  id: serial("id").primaryKey(),
+
+  // Chi dichiara di avere un fratello o una sorella già iscritti.
+  utenteId: integer("utente_id").notNull()
+    .references(() => utenti.id, { onDelete: "cascade" }),
+
+  /* Il codice fiscale COSÌ COM'È STATO SCRITTO, normalizzato in maiuscolo.
+     Si conserva anche quando la persona non viene trovata: è la traccia di
+     cosa è stato dichiarato, e serve alla segreteria per capire se è un
+     errore di battitura o una persona che non si è ancora iscritta. */
+  codiceFiscaleDichiarato: text("codice_fiscale_dichiarato").notNull(),
+
+  /* Chi il sistema ha trovato con quel codice fiscale, se l'ha trovato.
+     Lo riempie il server al momento della dichiarazione e NON torna mai a
+     chi ha dichiarato: la vede solo chi tiene le quote. */
+  utenteCollegatoId: integer("utente_collegato_id")
+    .references(() => utenti.id, { onDelete: "set null" }),
+
+  stato: statoLegame("stato").notNull().default("in_attesa"),
+
+  // Perché è stata respinta. "Respinta" e basta obbliga a telefonare.
+  motivo: text("motivo"),
+
+  decisoDa: integer("deciso_da").references(() => utenti.id, { onDelete: "set null" }),
+  decisoIl: timestamp("deciso_il", { withTimezone: true }),
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  /* La stessa persona non dichiara due volte lo stesso codice fiscale:
+     senza questo vincolo, premere due volte il pulsante lascerebbe due
+     righe identiche da controllare in segreteria. */
+  uniqueIndex("idx_legame_unico").on(t.utenteId, t.codiceFiscaleDichiarato),
+
+  // "Cosa c'è da controllare" è la domanda che si fa aprendo la segreteria.
+  index("idx_legame_stato").on(t.stato, t.creatoIl),
+
+  // Per mostrare sulla scheda di una persona i legami che la riguardano,
+  // compresi quelli in cui è stata nominata da qualcun altro.
+  index("idx_legame_collegato").on(t.utenteCollegatoId)
 ]);
 
 /* =====================================================

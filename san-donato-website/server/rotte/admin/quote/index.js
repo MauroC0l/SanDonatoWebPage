@@ -24,7 +24,11 @@ const schemaTariffa = z.object({
   // In centesimi e interi, come ogni importo del sito. Zero è ammesso: una
   // tariffa gratuita esiste — gli istruttori, i dirigenti.
   importoCentesimi: z.coerce.number().int().min(0).max(100000000),
-  ordine: z.coerce.number().int().min(0).max(999).optional()
+  ordine: z.coerce.number().int().min(0).max(999).optional(),
+
+  // La tariffa che il sito assegna da solo agli allenatori. Una sola alla
+  // volta: contrassegnandone una, la precedente smette di esserlo.
+  perAllenatori: z.boolean().optional()
 });
 
 export default conGestioneErrori(

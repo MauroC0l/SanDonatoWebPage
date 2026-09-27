@@ -6,6 +6,68 @@ che è stato lasciato lì per una ragione scritta qui sotto.
 
 ---
 
+## Chiesto dalla società il 16 settembre 2026, e già fatto a metà
+
+Le due richieste sono scritte, provate e pronte; quello che resta qui sotto
+è la parte che **non si può chiudere da soli**, perché serve una risposta
+della società o un pezzo di sito che ancora non c'è.
+
+### Quota degli allenatori: chi la vede in segreteria?
+
+Fatto: gli allenatori hanno la sezione **Iscrizione** come gli atleti, con i
+loro dati e la loro quota, e la tariffa se la prendono da soli — è la riga di
+`tipi_quota` contrassegnata "allenatori", una sola alla volta. Il certificato
+medico a loro non si chiede.
+
+Resta aperto, e va deciso:
+
+- **la segreteria non li vede.** L'elenco "Atleti" nasce dalle richieste di
+  iscrizione accolte (`elencaAtleti` in `server/atleti.js`), e un allenatore
+  che non gioca non ne ha nessuna: la sua quota esiste, ma per chi tiene la
+  cassa non c'è. Finché i 10 € si versano online e la notifica scrive da
+  sé, il buco è nel controllo, non nell'incasso — ma va chiuso;
+- **la quota si assegna quando l'allenatore entra nel sito.** Chi non entra
+  mai non risulta dovere niente. È la conseguenza dell'aver scelto di non
+  toccare i venti account esistenti con una migrazione;
+- **chi altro paga?** Oggi la capacità `iscrizione.propria` ce l'hanno
+  atleta e allenatore. Se anche dirigenti e segreteria versano qualcosa, è
+  una riga in `server/autorizzazioni.js` — e un test che va aggiornato
+  apposta, perché oggi dice il contrario;
+- **un allenatore che gioca anche in prima squadra** oggi prende la quota da
+  atleta se la segreteria gliel'ha messa, e quella degli allenatori solo se
+  non ne ha nessuna. Non paga due volte. Se invece deve, serve una regola
+  nuova: una quota per persona non basta più;
+- **la stagione non esiste come colonna.** `quota_stagionale_centesimi` vuol
+  dire "quella in corso", e il giorno che si cambia stagione i conti
+  dell'anno prima si perdono. Vale per tutti, non solo per gli allenatori.
+
+### Tariffa per fratelli: cosa succede quando il primo si ritira
+
+Fatto: il giro completo — l'atleta dichiara il codice fiscale del fratello
+dalla propria iscrizione, il sito cerca quella persona e confronta cognome e
+indirizzo, la segreteria conferma o respinge dalla scheda. La conferma **non**
+tocca la quota: la tariffa si sceglie a parte, come sempre.
+
+Resta aperto:
+
+- **se il primo iscritto si ritira a novembre**, il secondo resta con la
+  tariffa agevolata: nessuno gliela toglie e nessuno avvisa. Prima di
+  scrivere codice serve sapere se la società la toglierebbe davvero;
+- **il proprio codice fiscale è ancora controllato solo nella lunghezza**
+  (`server/rotte/iscrizione.js`). Quello del fratello no: lì il carattere di
+  controllo si verifica. La differenza è voluta — stringere anche l'altro
+  significherebbe rifiutare il salvataggio a chi ha già scritto un codice
+  fiscale storto mesi fa — ma finché resta, la ricerca del fratello può non
+  trovare una persona che c'è;
+- **nessuno avvisa chi ha dichiarato.** Conferma e rifiuto si vedono solo
+  entrando nel sito, come tutto il resto: è la stessa mancanza delle email,
+  più in basso in questa pagina;
+- **la segreteria non ha un elenco** delle dichiarazioni da controllare: le
+  vede aprendo la scheda di quella persona. Con due o tre all'anno va bene
+  così; se diventassero trenta, servirebbe una voce nel cruscotto.
+
+---
+
 ## In attesa della società
 
 Non sono lavori di programmazione: senza una decisione o una credenziale non

@@ -1,0 +1,1 @@
+ALTER TABLE "tipi_quota" ADD COLUMN "per_allenatori" boolean DEFAULT false NOT NULL;

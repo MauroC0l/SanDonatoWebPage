@@ -30,6 +30,7 @@ import rotta_eventi_index from "./rotte/eventi/index.js";
 import rotta_eventi_risultati from "./rotte/eventi/risultati.js";
 import rotta_io from "./rotte/io.js";
 import rotta_iscrizione from "./rotte/iscrizione.js";
+import rotta_iscrizione_fratelli from "./rotte/iscrizione/fratelli.js";
 import rotta_newsletter from "./rotte/newsletter.js";
 import rotta_notizie_index from "./rotte/notizie/index.js";
 import rotta_notizie_ultime_per_sport from "./rotte/notizie/ultime-per-sport.js";
@@ -39,6 +40,7 @@ import rotta_squadre from "./rotte/squadre.js";
 import rotta_uscita from "./rotte/uscita.js";
 import rotta_admin_atleti_id from "./rotte/admin/atleti/[id].js";
 import rotta_admin_atleti_id_certificato from "./rotte/admin/atleti/[id]/certificato.js";
+import rotta_admin_atleti_id_legami from "./rotte/admin/atleti/[id]/legami.js";
 import rotta_admin_eventi_id from "./rotte/admin/eventi/[id].js";
 import rotta_admin_eventi_id_media from "./rotte/admin/eventi/[id]/media.js";
 import rotta_admin_media_id from "./rotte/admin/media/[id].js";
@@ -72,6 +74,7 @@ const TABELLA = [
   ["eventi/risultati",               rotta_eventi_risultati],
   ["io",                             rotta_io],
   ["iscrizione",                     rotta_iscrizione],
+  ["iscrizione/fratelli",            rotta_iscrizione_fratelli],
   ["newsletter",                     rotta_newsletter],
   ["notizie",                        rotta_notizie_index],
   ["notizie/ultime-per-sport",       rotta_notizie_ultime_per_sport],
@@ -81,6 +84,7 @@ const TABELLA = [
   ["uscita",                         rotta_uscita],
   ["admin/atleti/[id]",              rotta_admin_atleti_id],
   ["admin/atleti/[id]/certificato",  rotta_admin_atleti_id_certificato],
+  ["admin/atleti/[id]/legami",       rotta_admin_atleti_id_legami],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],
   ["admin/eventi/[id]/media",        rotta_admin_eventi_id_media],
   ["admin/media/[id]",               rotta_admin_media_id],

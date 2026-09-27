@@ -3118,3 +3118,47 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   text-transform: none;
   color: var(--adm-ink);
 }
+
+/* ---------- Parentele dichiarate ----------
+
+   Stanno nella scheda dell'atleta, sotto alla quota: è lì che servono, nel
+   momento in cui si sceglie la tariffa. Una riga per dichiarazione, con
+   quello che il sito ha trovato e i due pulsanti per decidere — perché
+   quello che il sito NON può stabilire è se siano davvero fratelli. */
+.adm-legami {
+  list-style: none;
+  margin: 0 0 .6rem;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+
+.adm-legame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  flex-wrap: wrap;
+  padding: .6rem .8rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface);
+}
+
+.adm-legame.is-in_attesa { border-left: 3px solid var(--adm-warn); }
+.adm-legame.is-confermato { border-left: 3px solid var(--adm-ok); }
+.adm-legame.is-respinto { border-left: 3px solid var(--adm-danger); }
+
+.adm-legame-chi {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.adm-legame-titolo { font-size: .9rem; }
+.adm-legame-esito { font-size: .78rem; color: var(--adm-muted); }
+.adm-legame-motivo { font-size: .78rem; color: var(--adm-danger); }
+
+.adm-legame-azioni { display: flex; gap: .4rem; flex-wrap: wrap; }

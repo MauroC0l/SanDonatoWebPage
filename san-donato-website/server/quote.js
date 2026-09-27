@@ -12,7 +12,7 @@
  * chi paga quanto è amministrazione.
  */
 
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { tipiQuota, schedeAtleta } from "../db/schema.js";
 import { ErroreHttp } from "./risposte.js";
@@ -39,6 +39,7 @@ export async function elencaTipiQuota({ ancheSpente = true } = {}) {
       importoCentesimi: tipiQuota.importoCentesimi,
       attiva: tipiQuota.attiva,
       ordine: tipiQuota.ordine,
+      perAllenatori: tipiQuota.perAllenatori,
       quanti: sql`count(${schedeAtleta.id})::int`
     })
     .from(tipiQuota)
@@ -46,7 +47,8 @@ export async function elencaTipiQuota({ ancheSpente = true } = {}) {
     .where(condizioni.length ? and(...condizioni) : undefined)
     .groupBy(
       tipiQuota.id, tipiQuota.nome, tipiQuota.descrizione,
-      tipiQuota.importoCentesimi, tipiQuota.attiva, tipiQuota.ordine
+      tipiQuota.importoCentesimi, tipiQuota.attiva, tipiQuota.ordine,
+      tipiQuota.perAllenatori
     )
     .orderBy(asc(tipiQuota.ordine), asc(tipiQuota.nome));
 
@@ -61,9 +63,12 @@ export async function creaTipoQuota(dati, autoreId) {
       descrizione: dati.descrizione ?? null,
       importoCentesimi: dati.importoCentesimi,
       ordine: dati.ordine ?? 0,
+      perAllenatori: dati.perAllenatori ?? false,
       creataDa: autoreId
     })
     .returning({ id: tipiQuota.id, nome: tipiQuota.nome });
+
+  if (dati.perAllenatori) await restaLaSolaPerAllenatori(creata.id);
 
   return creata;
 }
@@ -76,6 +81,7 @@ export async function aggiornaTipoQuota(id, dati) {
   if (dati.importoCentesimi !== undefined) modifiche.importoCentesimi = dati.importoCentesimi;
   if (dati.attiva !== undefined) modifiche.attiva = dati.attiva;
   if (dati.ordine !== undefined) modifiche.ordine = dati.ordine;
+  if (dati.perAllenatori !== undefined) modifiche.perAllenatori = dati.perAllenatori;
 
   if (Object.keys(modifiche).length === 0) {
     throw new ErroreHttp(400, "Non c'è niente da salvare.");
@@ -96,7 +102,114 @@ export async function aggiornaTipoQuota(id, dati) {
     .returning({ id: tipiQuota.id, nome: tipiQuota.nome });
 
   if (!aggiornata) throw new ErroreHttp(404, "Tariffa non trovata.");
+
+  if (modifiche.perAllenatori === true) await restaLaSolaPerAllenatori(aggiornata.id);
+
   return aggiornata;
+}
+
+/**
+ * Spegne il contrassegno "allenatori" su tutte le altre tariffe.
+ *
+ * Due tariffe degli allenatori vorrebbero dire due importi diversi assegnati
+ * a caso a seconda di quale il database restituisce per prima. Invece di
+ * rifiutare la seconda con un errore — che obbligherebbe a ricordarsi quale
+ * fosse la prima e a spegnerla a mano — l'ultima parola è dell'ultima
+ * scelta: si contrassegna quella nuova e la vecchia si spegne da sé.
+ *
+ * Le quote già assegnate non si toccano: chi ha versato i suoi 10 € li ha
+ * versati, e cambiare il listino non riscrive il passato.
+ */
+async function restaLaSolaPerAllenatori(idTenuta) {
+  await getDb()
+    .update(tipiQuota)
+    .set({ perAllenatori: false })
+    .where(and(eq(tipiQuota.perAllenatori, true), ne(tipiQuota.id, Number(idTenuta))));
+}
+
+/**
+ * La tariffa degli allenatori, o null se nessuno l'ha ancora decisa.
+ *
+ * Null e non un importo di ripiego: 10 € scritti nel codice sarebbero una
+ * cifra che nessun consiglio ha deliberato, e il giorno che cambia
+ * resterebbe lì. Senza tariffa, all'allenatore non viene chiesto niente —
+ * che è la cosa giusta da fare quando non si sa quanto chiedere.
+ */
+export async function tariffaAllenatori() {
+  const [riga] = await getDb()
+    .select({
+      id: tipiQuota.id,
+      nome: tipiQuota.nome,
+      importoCentesimi: tipiQuota.importoCentesimi
+    })
+    .from(tipiQuota)
+    .where(and(eq(tipiQuota.perAllenatori, true), eq(tipiQuota.attiva, true)))
+    .orderBy(asc(tipiQuota.ordine), asc(tipiQuota.id))
+    .limit(1);
+
+  return riga ?? null;
+}
+
+/**
+ * Assegna a un allenatore la quota degli allenatori, se non ne ha già una.
+ *
+ * Si chiama quando l'allenatore apre la propria iscrizione, e non al momento
+ * in cui l'account viene creato: gli allenatori ci sono già tutti, e una
+ * assegnazione fatta solo ai nuovi lascerebbe fuori proprio quelli che
+ * allenano da anni. Il prezzo di questa scelta va detto: finché un
+ * allenatore non entra nel sito almeno una volta, la società non sa che
+ * deve 10 € — e quando ci sarà il pagamento online quel conto dovrà
+ * comparire anche a chi tiene la cassa.
+ *
+ * Il ruolo e non una capacità, come per eAmministratore(): qui la domanda
+ * non è cosa gli è permesso fare, è chi deve pagare quella cifra.
+ *
+ * NON sovrascrive mai una quota già scritta. Se la segreteria ha messo
+ * zero — un allenatore esentato — quello zero resta: assegnare è una cosa
+ * sola, che avviene una volta.
+ */
+export async function assicuraQuotaAllenatore(utente) {
+  if (utente?.ruolo !== "coach") return null;
+
+  const db = getDb();
+
+  const [scheda] = await db
+    .select({
+      id: schedeAtleta.id,
+      quotaStagionaleCentesimi: schedeAtleta.quotaStagionaleCentesimi
+    })
+    .from(schedeAtleta)
+    .where(eq(schedeAtleta.utenteId, utente.id))
+    .limit(1);
+
+  if (scheda && scheda.quotaStagionaleCentesimi != null) return null;
+
+  const tariffa = await tariffaAllenatori();
+  if (!tariffa) return null;
+
+  const quota = {
+    quotaStagionaleCentesimi: tariffa.importoCentesimi,
+    tipoQuotaId: tariffa.id,
+    aggiornataIl: new Date()
+  };
+
+  if (scheda) {
+    await db.update(schedeAtleta).set(quota).where(eq(schedeAtleta.id, scheda.id));
+  } else {
+    /* La scheda di un allenatore nasce qui, vuota a parte la quota: i suoi
+       dati li scriverà lui, come fa ogni atleta.
+
+       onConflictDoNothing perché due richieste che arrivano insieme —
+       due schede aperte, o un doppio clic — proverebbero a inserirla
+       entrambe: l'indice unico su utente_id la rifiuterebbe con un errore
+       del database, cioè una pagina rotta al posto di una quota. Chi
+       perde la corsa non fa niente, ed è giusto: quella riga esiste già. */
+    await db.insert(schedeAtleta)
+      .values({ utenteId: utente.id, ...quota })
+      .onConflictDoNothing();
+  }
+
+  return tariffa;
 }
 
 /**

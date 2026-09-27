@@ -19,6 +19,7 @@ import {
   utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media, tipiQuota
 } from "../db/schema.js";
 import { urlFile } from "./file.js";
+import { legamiPerSegreteria } from "./legami.js";
 
 /*
  * La tabella media entra due volte nella stessa interrogazione — una per il
@@ -53,8 +54,15 @@ export function minorenne(dataNascita) {
  * legge la segreteria sulla scheda di quella persona: due conti separati
  * vorrebbero dire un atleta convinto di aver finito e una segreteria che
  * lo cerca al telefono per un campo che nessuno gli ha mai chiesto.
+ *
+ * "certificatoRichiesto" spento serve a chi sta in società senza giocare:
+ * un allenatore compila la stessa scheda e versa la sua quota, ma un
+ * certificato di idoneità agonistica per una persona che sta a bordo campo
+ * non lo chiede nessuno. Acceso per difetto, perché il caso normale è
+ * l'atleta e un difetto sbagliato qui vorrebbe dire certificati non più
+ * chiesti a chi scende in campo.
  */
-export function cosaManca(scheda) {
+export function cosaManca(scheda, { certificatoRichiesto = true } = {}) {
   const mancanti = [];
 
   if (!scheda?.dataNascita) mancanti.push("la data di nascita");
@@ -75,8 +83,10 @@ export function cosaManca(scheda) {
     }
   }
 
-  if (!scheda?.certificatoScadenza) mancanti.push("la scadenza del certificato medico");
-  if (!scheda?.certificatoMediaId) mancanti.push("la copia del certificato medico");
+  if (certificatoRichiesto) {
+    if (!scheda?.certificatoScadenza) mancanti.push("la scadenza del certificato medico");
+    if (!scheda?.certificatoMediaId) mancanti.push("la copia del certificato medico");
+  }
 
   return mancanti;
 }
@@ -323,6 +333,9 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
 
   const versatoCentesimi = versamenti.reduce((somma, v) => somma + v.importoCentesimi, 0);
 
+  // Come i versamenti: si chiedono solo a chi li può vedere.
+  const legami = conQuote ? await legamiPerSegreteria(id) : [];
+
   /* La data di iscrizione e quella del PRIMO versamento: iscritti alla
      societa lo si e da quando si e pagato. I versamenti arrivano dal piu
      recente, quindi il primo e in fondo. */
@@ -385,7 +398,13 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
       tipoQuota: anagrafica.tipoQuota ?? null,
       versatoCentesimi,
       pagamenti: versamenti,
-      iscrittoDal
+      iscrittoDal,
+
+      /* I fratelli dichiarati stanno con le quote e non con l'anagrafica,
+         perché servono a una cosa sola: decidere se applicare la tariffa
+         agevolata. All'allenatore non arrivano, come non gli arrivano i
+         conti — e per la stessa ragione. */
+      legami
     } : {}),
 
     squadre: squadreSue

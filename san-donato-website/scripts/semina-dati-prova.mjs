@@ -26,9 +26,10 @@ import { eq, like, inArray } from "drizzle-orm";
 import { getDb, chiudiDb } from "../db/client.js";
 import {
   utenti, squadre, eventi, richiesteIscrizione, associazioniSquadra,
-  schedeAtleta, pagamenti, tipiQuota
+  schedeAtleta, pagamenti, tipiQuota, legamiFamiliari
 } from "../db/schema.js";
 import { creaHashPassword } from "../server/password.js";
+import { carattereDiControllo } from "../server/codice-fiscale.js";
 
 /* Tutti gli account finti finiscono su questo dominio: è così che si
    riconoscono e si cancellano senza toccare quelli veri. */
@@ -388,6 +389,35 @@ const fraGiorni = (giorni) => soloData(new Date(Date.now() + giorni * 86400000))
  * Le proporzioni sono volutamente sbilanciate verso i guai: una schermata in
  * cui va tutto bene non dice se i guai si vedrebbero.
  */
+/* I mesi come li scrive un codice fiscale: A gennaio, B febbraio, e
+   avanti saltando le lettere che si confondono leggendo. */
+const MESI_CF = "ABCDEHLMPRST";
+const CONSONANTI = "BCDFGHLMNPRSTVZ";
+
+/**
+ * Un codice fiscale finto ma FATTO BENE: forma giusta e carattere di
+ * controllo che torna.
+ *
+ * Sedici caratteri a caso sarebbero bastati finché il codice fiscale
+ * serviva solo a riempire una casella. Adesso con un codice fiscale si
+ * cerca il fratello o la sorella già iscritti, e una prova in cui nessun
+ * codice fiscale è valido è una prova in cui quella funzione non si può
+ * nemmeno provare.
+ *
+ * "L219" è Torino. Le sei lettere iniziali sono consonanti a caso e non
+ * ricavate da nome e cognome: qui servono dati verosimili, non persone
+ * rintracciabili.
+ */
+function codiceFiscaleFinto(nascita) {
+  const lettere = Array.from({ length: 6 }, () => scelta([...CONSONANTI])).join("");
+  const anno = String(nascita.getFullYear()).slice(2);
+  const mese = MESI_CF[nascita.getMonth()];
+  const giorno = String(nascita.getDate()).padStart(2, "0");
+
+  const primi15 = `${lettere}${anno}${mese}${giorno}L219`;
+  return primi15 + carattereDiControllo(primi15);
+}
+
 async function creaSchede(db, richiesteApprovate) {
   const schede = [];
   const versamenti = [];
@@ -433,6 +463,7 @@ async function creaSchede(db, richiesteApprovate) {
     schede.push({
       utenteId: r.utenteId,
       dataNascita: soloData(nascita),
+      codiceFiscale: codiceFiscaleFinto(nascita),
       luogoNascita: scelta(["Torino", "Rivoli", "Collegno", "Moncalieri", "Chieri"]),
       telefono: `3${intero(20, 49)} ${intero(1000000, 9999999)}`,
       indirizzo: `Via ${scelta(COGNOMI)} ${intero(1, 140)}, Torino`,
@@ -519,8 +550,43 @@ async function creaSchede(db, richiesteApprovate) {
     }
   }
 
+  /* Due fratelli veri dentro ai dati di prova.
+
+     Senza una coppia che abita allo stesso indirizzo, la tariffa agevolata
+     per fratelli non si può nemmeno guardare: lo stesso tetto è una delle
+     due cose che il sito confronta prima di far decidere la segreteria. */
+  const famiglie = [];
+
+  for (let i = 0; i + 1 < schede.length && famiglie.length < 2; i += 2) {
+    const [uno, due] = [schede[i], schede[i + 1]];
+    due.indirizzo = uno.indirizzo;
+    famiglie.push([uno, due]);
+  }
+
   if (schede.length) await db.insert(schedeAtleta).values(schede);
   if (versamenti.length) await db.insert(pagamenti).values(versamenti);
+
+  const parentele = famiglie.map(([uno, due]) => ({
+    utenteId: uno.utenteId,
+    codiceFiscaleDichiarato: due.codiceFiscale,
+    utenteCollegatoId: due.utenteId
+  }));
+
+  /* Una dichiarazione che non trova nessuno: succede davvero — un codice
+     fiscale battuto male, oppure un fratello che non si e ancora iscritto
+     — e sono due cose diverse che solo una persona sa distinguere. */
+  if (schede.length > 4) {
+    parentele.push({
+      utenteId: schede[4].utenteId,
+      codiceFiscaleDichiarato: "BNCLRA05T41L219V",
+      utenteCollegatoId: null
+    });
+  }
+
+  if (parentele.length) {
+    await db.insert(legamiFamiliari).values(parentele);
+    console.log(`Dichiarate ${parentele.length} parentele, da controllare in segreteria.`);
+  }
 
   const totale = versamenti.reduce((s, v) => s + v.importoCentesimi, 0);
   console.log(
@@ -635,7 +701,12 @@ async function creaTariffe(db) {
     { nome: "Rinnovo", descrizione: "Chi c'era anche l'anno scorso", importoCentesimi: 20000, ordine: 2 },
     { nome: "Fratello o sorella", descrizione: "Dal secondo figlio iscritto", importoCentesimi: 15000, ordine: 3 },
     { nome: "Minivolley", descrizione: "Corso propedeutico, un allenamento a settimana", importoCentesimi: 12000, ordine: 4 },
-    { nome: "Solo tesseramento", descrizione: "Chi si allena altrove e gioca con noi", importoCentesimi: 5000, ordine: 5 }
+    { nome: "Solo tesseramento", descrizione: "Chi si allena altrove e gioca con noi", importoCentesimi: 5000, ordine: 5 },
+
+    /* L'unica che si assegna da sola: la prende ogni allenatore la prima
+       volta che apre la propria iscrizione. Il contrassegno "perAllenatori"
+       e quello che la distingue, non il nome. */
+    { nome: "Allenatori", descrizione: "Chi allena: quota fissa, uguale per tutti", importoCentesimi: 1000, ordine: 6, perAllenatori: true }
   ];
 
   /* Si rifanno a ogni giro come l'admin di prova: il seminatore deve

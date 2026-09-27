@@ -10,6 +10,8 @@ import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import { statoCertificato, quantoManca } from "../../utils/certificato";
 import { anni } from "../../utils/eta";
+import RiquadroFratelli from "./RiquadroFratelli";
+import RiquadroQuota from "./RiquadroQuota";
 import Tendina from "../Admin/Tendina";
 import CampoData from "../Admin/CampoData";
 import CampoSuggerito from "../Admin/CampoSuggerito";
@@ -117,6 +119,19 @@ function daIscrizione(i) {
  * email: qui li scrive direttamente chi li ha, e il certificato medico lo
  * carica chi ce l'ha in mano. Quello che NON si può toccare da qui è la
  * quota e i versamenti — quelli restano i conti della società.
+ *
+ * La stessa schermata la aprono due persone diverse:
+ *
+ *   - un atleta, da /area-riservata/iscrizione. Ha la sezione "Quota"
+ *     tutta sua, e il certificato medico glielo chiediamo;
+ *   - un allenatore, da /coach/iscrizione. È un iscritto anche lui e versa
+ *     la sua quota, ma non scende in campo: niente certificato, e la quota
+ *     compare qui perché nella sua area non c'è nessun'altra pagina che
+ *     gliela mostri.
+ *
+ * Le due differenze non si decidono guardando il ruolo dell'account — un
+ * allenatore può giocare in prima squadra — ma quello che risponde il
+ * server, che sa chi ha una squadra e chi no.
  */
 export default function IscrizionePage() {
   const navigate = useNavigate();
@@ -252,6 +267,33 @@ export default function IscrizionePage() {
     validazione: iscrizione?.certificatoStato
   });
 
+  /*
+   * A chi non gioca il certificato non si chiede, e il riquadro non si
+   * disabilita: sparisce. Un pannello grigio con dentro un pulsante spento
+   * è una domanda in più — "questo dovrei compilarlo?" — a cui la risposta
+   * è no.
+   *
+   * Il valore lo decide il server: qui il confronto è con false perché una
+   * risposta vecchia, senza quel campo, deve continuare a chiederlo.
+   */
+  const certificatoRichiesto = iscrizione?.certificatoRichiesto !== false;
+
+  /*
+   * La quota dentro a questa pagina solo a chi non ce l'ha altrove.
+   *
+   * L'atleta ha la sezione "Quota" tutta sua, con lo storico dei
+   * versamenti: ripeterla qui vorrebbe dire la stessa cifra in due posti,
+   * e due posti sono due occasioni di dire cose diverse. Nell'area di chi
+   * allena quella sezione non c'è, e la sua quota deve pur comparire da
+   * qualche parte.
+   */
+  const quotaQui = user?.role !== "atleta";
+
+  /* Senza certificato e senza squadre la colonna di destra resterebbe
+     vuota: in quel caso il modulo si prende tutta la larghezza invece di
+     lasciare mezza pagina bianca. */
+  const conLato = certificatoRichiesto || (iscrizione?.appartenenze ?? []).length > 0;
+
   /* Il permesso lo decide il server ed è lì che conta: qui serve solo a
      non far compilare campi che verrebbero poi rifiutati. */
   const permesso = iscrizione?.certificatoModificabile ?? { si: true };
@@ -322,8 +364,13 @@ export default function IscrizionePage() {
       )}
 
 
+      {/* La quota in cima e a tutta larghezza, come nella pagina che gli
+          atleti hanno a parte: è la prima cosa che si viene a controllare,
+          più dell'indirizzo che si è già scritto tre mesi fa. */}
+      {quotaQui && <RiquadroQuota iscrizione={iscrizione} />}
+
       <form id="modulo-iscrizione" onSubmit={salva}>
-        <div className="isc-griglia">
+        <div className={`isc-griglia ${conLato ? "" : "isc-griglia-sola"}`}>
           <div className="isc-colonna">
             <section className="adm-panel">
               <h2 className="adm-panel-title">
@@ -440,7 +487,9 @@ export default function IscrizionePage() {
 
           </div>
 
+          {conLato && (
           <aside className="isc-lato">
+            {certificatoRichiesto && (
             <section className="adm-panel">
               <h2 className="adm-panel-title">
                 <FaFileMedical aria-hidden="true" /> Certificato medico
@@ -547,6 +596,7 @@ export default function IscrizionePage() {
                 </p>
               </div>
             </section>
+            )}
 
             {(iscrizione?.appartenenze ?? []).length > 0 && (
               <section className="adm-panel">
@@ -568,8 +618,25 @@ export default function IscrizionePage() {
             )}
 
           </aside>
+          )}
         </div>
       </form>
+
+      {/* Fuori dal modulo, e sotto: una parentela si dichiara subito e per
+          conto suo, mentre i propri dati si salvano col pulsante in cima.
+          Dentro allo stesso <form> sarebbero due salvataggi dietro a un
+          invio solo — e un <form> dentro a un altro non è nemmeno HTML
+          valido.
+
+          Solo a chi gioca: la tariffa agevolata è quella degli iscritti
+          dal secondo figlio in poi, e un allenatore non c'entra. */}
+      {iscrizione?.gioca && (
+        <RiquadroFratelli
+          fratelli={iscrizione?.fratelli ?? []}
+          onAggiornati={(elenco) => setIscrizione({ ...iscrizione, fratelli: elenco })}
+          onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
+        />
+      )}
     </div>
   );
 }

@@ -185,4 +185,31 @@ describe("cosa manca per completare l'iscrizione", () => {
     expect(senzaData).toContain("la data di nascita");
     expect(senzaData).not.toContain("il contatto di un genitore");
   });
+
+  it("a chi non scende in campo il certificato non si chiede", () => {
+    /* Un allenatore compila la stessa scheda e versa la sua quota, ma un
+       certificato di idoneità agonistica per chi sta a bordo campo non lo
+       chiede nessuno: senza questa distinzione la sua iscrizione
+       resterebbe per sempre "incompleta" per un foglio che non esiste. */
+    const allenatore = {
+      dataNascita: "1980-03-02",
+      codiceFiscale: "RSSMRA80C02L219X",
+      telefono: "333 4445556"
+    };
+
+    expect(cosaManca(allenatore, { certificatoRichiesto: false })).toEqual([]);
+
+    // Gli altri campi restano obbligatori per tutti: il certificato è
+    // l'unica cosa che salta.
+    expect(cosaManca({ ...allenatore, telefono: null }, { certificatoRichiesto: false }))
+      .toEqual(["un numero di telefono"]);
+  });
+
+  it("per difetto il certificato si chiede, che è il caso dell'atleta", () => {
+    /* Il valore predefinito conta più di quanto sembri: sbagliato, il
+       certificato smetterebbe di essere chiesto a chi gioca — e nessuno
+       se ne accorgerebbe finché non serve. */
+    expect(cosaManca({ ...completa, certificatoMediaId: null }))
+      .toContain("la copia del certificato medico");
+  });
 });

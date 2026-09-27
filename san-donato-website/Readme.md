@@ -97,8 +97,14 @@ stanno tutti in `server/autorizzazioni.js`, e un endpoint si protegge con
 | `admin` | `/admin` | tutto |
 | `segreteria` | `/segreteria` | iscrizioni, quote, controllo dei certificati |
 | `editor` | `/editor` | notizie e libreria dei file |
-| `coach` | `/coach` | partite e atleti delle proprie squadre, libreria propria |
+| `coach` | `/coach` | partite e atleti delle proprie squadre, libreria propria, la propria iscrizione |
 | `atleta` | `/area-riservata` | la propria iscrizione e le proprie quote |
+
+Anche l'allenatore è un iscritto: versa una quota fissa, e ha la sezione
+**Iscrizione** come un atleta — i suoi dati e la sua quota, nient'altro. La
+tariffa gliela assegna il sito da solo, perché ce n'è una sola: è la riga di
+`tipi_quota` contrassegnata "allenatori". Il certificato medico a lui non si
+chiede: non scende in campo.
 
 Altre cinque regole che valgono la pena di essere sapute prima di leggere
 il codice:
@@ -112,11 +118,13 @@ il codice:
   non l'ha guardato, quell'atleta non è a posto. Toccarlo lo riporta da
   controllare, e finché è valido l'atleta non lo può sostituire — si sblocca
   tre mesi prima della scadenza.
-- **Le API sono trentacinque rotte e una funzione sola.** Su Vercel, senza
+- **Le API sono trentasette rotte e una funzione sola.** Su Vercel, senza
   un framework che le impacchetti, ogni file dentro `api/` diventerebbe una
   funzione a sé: il piano gratuito ne ammette dodici. Le rotte stanno in
   `server/rotte/` — un file per indirizzo, come prima — e in `api/` c'è solo
-  `[[...percorso]].js`, che legge l'indirizzo e chiama la rotta giusta.
+  `smista.js`, che legge l'indirizzo e chiama la rotta giusta. Non si chiama
+  `[[...percorso]].js` perché quella è una convenzione di Next.js, che qui
+  non c'è: Vercel non la riconosceva e non creava nessuna funzione.
   L'elenco sta in `server/rotte.js` e va aggiornato a mano quando si
   aggiunge una rotta: non si può leggere la cartella a tempo di esecuzione,
   perché chi impacchetta il codice segue le importazioni scritte. C'è un
@@ -137,8 +145,18 @@ Due regole che valgono sopra a tutte le altre, e che sono nei test:
   scrive solo l'interessato. Nessun ruolo, amministratore compreso, ha una
   capacità per riscriverla. Unica eccezione concordata: la segreteria può
   registrare il certificato medico, perché arriva quasi sempre su carta.
-- **L'allenatore non vede le quote.** Non gli vengono nascoste a schermo:
-  non escono proprio dal server.
+- **L'allenatore non vede le quote.** Quelle degli ALTRI, si intende: la
+  sua la vede, ed è giusto — sono soldi che gli chiediamo noi. Quelle dei
+  suoi atleti non gli vengono nascoste a schermo, non escono proprio dal
+  server.
+- **La tariffa per fratelli: dichiara l'atleta, verifica il sistema, decide
+  la segreteria.** Dalla propria iscrizione si scrive il codice fiscale del
+  fratello o della sorella già iscritti; il sito cerca quella persona e
+  confronta cognome e indirizzo, ma non assegna niente e non dice mai se
+  quel codice fiscale corrisponde a un iscritto — altrimenti chiunque
+  potrebbe provare il codice fiscale di una persona qualsiasi e scoprire se
+  fa sport qui. Conferma la segreteria, e la tariffa la sceglie a parte:
+  "sono fratelli?" e "quanto paga?" sono due domande diverse.
 - **I versamenti nessuno li scrive a mano.** Né la segreteria né un
   amministratore: la tabella `pagamenti` si legge e basta, e a scriverla
   sarà la notifica del fornitore del pagamento online. Un importo battuto

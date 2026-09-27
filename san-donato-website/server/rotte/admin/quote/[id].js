@@ -23,7 +23,11 @@ const schemaModifica = z.object({
   descrizione: z.string().trim().max(300).optional(),
   importoCentesimi: z.coerce.number().int().min(0).max(100000000).optional(),
   attiva: z.boolean().optional(),
-  ordine: z.coerce.number().int().min(0).max(999).optional()
+  ordine: z.coerce.number().int().min(0).max(999).optional(),
+
+  // La tariffa che il sito assegna da solo agli allenatori. Una sola alla
+  // volta: contrassegnandone una, la precedente smette di esserlo.
+  perAllenatori: z.boolean().optional()
 });
 
 export default conGestioneErrori(

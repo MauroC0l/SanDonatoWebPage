@@ -28,7 +28,7 @@ import "../../css/Admin.css";
  * devono di più senza che nessuno gliel'abbia detto.
  */
 
-const VUOTA = { nome: "", descrizione: "", importo: "", ordine: "" };
+const VUOTA = { nome: "", descrizione: "", importo: "", ordine: "", perAllenatori: false };
 
 export default function QuotePage() {
   const navigate = useNavigate();
@@ -88,7 +88,8 @@ export default function QuotePage() {
         nome: nuova.nome.trim(),
         descrizione: nuova.descrizione.trim() || undefined,
         importoCentesimi,
-        ordine: Number(nuova.ordine) || 0
+        ordine: Number(nuova.ordine) || 0,
+        perAllenatori: nuova.perAllenatori
       });
 
       setNuova(null);
@@ -116,7 +117,8 @@ export default function QuotePage() {
         nome: modifica.nome.trim(),
         descrizione: modifica.descrizione.trim(),
         importoCentesimi,
-        ordine: Number(modifica.ordine) || 0
+        ordine: Number(modifica.ordine) || 0,
+        perAllenatori: modifica.perAllenatori
       });
 
       setModifica(null);
@@ -268,6 +270,22 @@ export default function QuotePage() {
             </span>
           </label>
 
+          {/* L'unica tariffa che si assegna da sola. Le altre le sceglie
+              la segreteria, una scheda alla volta. */}
+          <label className="adm-check">
+            <input
+              type="checkbox"
+              checked={nuova.perAllenatori}
+              onChange={(e) => setNuova({ ...nuova, perAllenatori: e.target.checked })}
+              disabled={occupato}
+            />
+            <span className="adm-check-box" aria-hidden="true" />
+            <span>
+              È la quota degli allenatori
+              <em> (gliela assegna il sito da solo, la prima volta che aprono la loro iscrizione)</em>
+            </span>
+          </label>
+
           <div className="adm-head-actions">
             <button type="submit" className="adm-btn adm-btn-primary" disabled={occupato}>
               <FaSave /> Crea
@@ -343,6 +361,20 @@ export default function QuotePage() {
                         />
                       </label>
 
+                      <label className="adm-check">
+                        <input
+                          type="checkbox"
+                          checked={modifica.perAllenatori}
+                          onChange={(e) => setModifica({ ...modifica, perAllenatori: e.target.checked })}
+                          disabled={occupato}
+                        />
+                        <span className="adm-check-box" aria-hidden="true" />
+                        <span>
+                          È la quota degli allenatori
+                          <em> (se un&apos;altra lo era, smette di esserlo)</em>
+                        </span>
+                      </label>
+
                       {t.quanti > 0 && (
                         <p className="adm-hint">
                           Ce l&apos;hanno {t.quanti} atleti: cambiando l&apos;importo, le
@@ -371,6 +403,13 @@ export default function QuotePage() {
                         <span className="qta-tariffa-nome">
                           {t.nome}
                           {!t.attiva && <span className="adm-status adm-status-draft">Spenta</span>}
+
+                          {/* Si vede senza aprire la modifica: è l'unica
+                              tariffa che il sito assegna per conto suo, e
+                              chi guarda il listino deve sapere quale. */}
+                          {t.perAllenatori && (
+                            <span className="adm-status adm-status-pending">Allenatori</span>
+                          )}
                         </span>
                         {t.descrizione && (
                           <span className="qta-tariffa-nota">{t.descrizione}</span>
@@ -394,7 +433,8 @@ export default function QuotePage() {
                               nome: t.nome,
                               descrizione: t.descrizione ?? "",
                               importo: versoCampo(t.importoCentesimi),
-                              ordine: String(t.ordine)
+                              ordine: String(t.ordine),
+                              perAllenatori: !!t.perAllenatori
                             })}
                             title="Modifica"
                             aria-label={`Modifica ${t.nome}`}

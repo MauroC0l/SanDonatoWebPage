@@ -58,6 +58,15 @@ describe("l'allenatore e le quote", () => {
     expect(puo(utente("coach"), "atleti.leggi")).toBe(true);
   });
 
+  it("la propria iscrizione ce l'ha: è un iscritto anche lui", () => {
+    /* Gli allenatori versano una quota alla società, quindi hanno una
+       scheda da compilare come tutti. La capacità accende la sezione
+       "Iscrizione" sotto il suo prefisso; non vedere le quote ALTRUI e
+       vedere la PROPRIA sono due cose diverse, e devono restare tali. */
+    expect(puo(utente("coach"), "iscrizione.propria")).toBe(true);
+    expect(puo(utente("coach"), "quote.gestisci")).toBe(false);
+  });
+
   it("vede solo le proprie squadre, non tutte", async () => {
     /*
      * null significa "nessun limite, le vede tutte".
@@ -88,6 +97,20 @@ describe("la segreteria", () => {
   it("non amministra gli account né le squadre", () => {
     expect(puo(utente("segreteria"), "utenti.gestisci")).toBe(false);
     expect(puo(utente("segreteria"), "squadre.gestisci")).toBe(false);
+  });
+});
+
+describe("chi ha una quota da versare", () => {
+  it("oggi sono atleti e allenatori, e nessun altro", () => {
+    /* La società ha chiesto i 10 € agli allenatori. Se dovessero versarli
+       anche dirigenti e segreteria, questa riga è il posto da cambiare —
+       e questo test è quello che se ne accorge se cambia per sbaglio. */
+    expect(puo(utente("atleta"), "iscrizione.propria")).toBe(true);
+    expect(puo(utente("coach"), "iscrizione.propria")).toBe(true);
+
+    for (const ruolo of ["admin", "segreteria", "editor"]) {
+      expect(puo(utente(ruolo), "iscrizione.propria"), `${ruolo} non la deve avere`).toBe(false);
+    }
   });
 });
 

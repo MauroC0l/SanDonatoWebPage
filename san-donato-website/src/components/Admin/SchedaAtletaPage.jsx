@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import {
   getAtleta, salvaSchedaAtleta,
-  uploadMedia, validaCertificato, listTariffe, AuthError
+  uploadMedia, validaCertificato, decidiParentela, listTariffe, AuthError
 } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -296,6 +296,44 @@ export default function SchedaAtletaPage() {
     try {
       setAtleta(await validaCertificato(id, { approva, motivo }));
       avvisa(approva ? "Certificato accettato." : "Certificato respinto.", approva ? "ok" : "info");
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      setSalvataggio(false);
+    }
+  };
+
+  /**
+   * Conferma o respinge una parentela dichiarata.
+   *
+   * Confermare NON cambia la quota, ed è voluto: dice che sono fratelli, e
+   * basta. La tariffa agevolata si sceglie qui sopra, un momento dopo,
+   * perché "sono fratelli?" è un fatto da verificare e "quanto paga?" una
+   * decisione della società — e le decisioni sulle quote restano di chi le
+   * tiene, non di un automatismo.
+   */
+  const decidiLegame = async (legameId, conferma) => {
+    let motivo;
+
+    if (!conferma) {
+      motivo = await chiediTesto({
+        titolo: "Perché non la riconosci?",
+        testo: "Lo legge chi l'ha dichiarata, nella sua pagina.",
+        segnaposto: "Es. il codice fiscale è di un genitore, non di un fratello.",
+        conferma: "Respingi"
+      });
+      if (!motivo) return;
+    }
+
+    setSalvataggio(true);
+    try {
+      setAtleta(await decidiParentela(id, { legameId, conferma, motivo }));
+      avvisa(
+        conferma
+          ? "Parentela confermata. La tariffa si sceglie qui sopra."
+          : "Parentela respinta.",
+        conferma ? "ok" : "info"
+      );
     } catch (err) {
       gestisciErrore(err);
     } finally {
@@ -806,6 +844,95 @@ export default function SchedaAtletaPage() {
                 * a schermo: a chi guarda la scheda di un atleta non serve
                 * sapere perché un pulsante che non ha mai visto non c'è.
                 */}
+            </section>)}
+
+            {/* ---------- Fratelli e sorelle dichiarati ----------
+
+                Sotto alla quota e non altrove: è lì che serve, nel momento
+                in cui si sceglie la tariffa. Compare solo se qualcosa è
+                stato dichiarato — un pannello vuoto su ogni scheda sarebbe
+                una domanda in più su centocinquanta pagine.
+
+                Il sistema ha già cercato la persona e confrontato cognome e
+                indirizzo; quello che NON può fare è dire se sono davvero
+                fratelli, perché il codice fiscale non contiene la famiglia.
+                Perciò decide una persona. */}
+            {vista === "quota" && tieneIConti && (atleta.legami ?? []).length > 0 && (
+            <section className="adm-panel">
+              <h2 className="adm-panel-title">
+                <FaUsers aria-hidden="true" /> Fratelli e sorelle dichiarati
+              </h2>
+
+              <ul className="adm-legami">
+                {atleta.legami.map((l) => (
+                  <li key={l.id} className={`adm-legame is-${l.stato}`}>
+                    <div className="adm-legame-chi">
+                      <span className="adm-legame-titolo">
+                        {/* Chi ha dichiarato chi. Sulla scheda di un
+                            ragazzo conta sapere anche quando è stato
+                            NOMINATO da qualcun altro: la tariffa ridotta
+                            riguarda uno dei due, e per deciderlo bisogna
+                            vedere la coppia intera. */}
+                        {l.laSua
+                          ? <>Ha dichiarato <strong>{l.codiceFiscale}</strong></>
+                          : <><strong>{l.dichiarataDa}</strong> ha dichiarato lui</>}
+                      </span>
+
+                      <span className="adm-legame-esito">
+                        {l.trovato ? (
+                          <>
+                            Il sito ha trovato <strong>{l.trovato.nomeCompleto}</strong>
+                            {l.trovato.stessoCognome && ", stesso cognome"}
+                            {l.trovato.stessoIndirizzo && ", stesso indirizzo"}
+                            {!l.trovato.stessoCognome && !l.trovato.stessoIndirizzo
+                              && " — ma cognome e indirizzo non coincidono"}
+                          </>
+                        ) : (
+                          /* Due cose diverse, e le distingue solo una
+                             persona: un errore di battitura, oppure un
+                             fratello che non si è ancora iscritto. */
+                          <>Nessun iscritto ha questo codice fiscale: o è
+                            scritto male, o quel fratello non si è ancora iscritto.</>
+                        )}
+                      </span>
+
+                      {l.stato === "respinto" && l.motivo && (
+                        <span className="adm-legame-motivo">{l.motivo}</span>
+                      )}
+                    </div>
+
+                    {l.stato === "in_attesa" ? (
+                      <div className="adm-legame-azioni">
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn-secondary"
+                          onClick={() => decidiLegame(l.id, true)}
+                          disabled={salvataggio}
+                        >
+                          <FaCheckCircle /> Sono fratelli
+                        </button>
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn-ghost"
+                          onClick={() => decidiLegame(l.id, false)}
+                          disabled={salvataggio}
+                        >
+                          <FaTimesCircle /> No
+                        </button>
+                      </div>
+                    ) : (
+                      <span className={`adm-status ${l.stato === "confermato" ? "adm-status-publish" : "adm-status-respinta"}`}>
+                        {l.stato === "confermato" ? "Confermata" : "Respinta"}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <p className="adm-hint">
+                Confermare non cambia la quota: la tariffa agevolata si
+                sceglie qui sopra, fra le tariffe.
+              </p>
             </section>)}
           </div>
 

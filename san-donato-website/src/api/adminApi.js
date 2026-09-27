@@ -609,6 +609,27 @@ export async function salvaIscrizione(dati) {
 }
 
 /**
+ * Dichiara un fratello o una sorella già iscritti, per la tariffa ridotta.
+ *
+ * Risponde con l'elenco delle proprie dichiarazioni e con nient'altro: se
+ * quel codice fiscale corrisponda davvero a un iscritto non si può sapere
+ * da qui, ed è voluto — vedi server/legami.js.
+ */
+export async function dichiaraFratello(codiceFiscale) {
+  const { fratelli } = await chiedi("/iscrizione/fratelli", {
+    method: "POST",
+    body: JSON.stringify({ codiceFiscale })
+  });
+  return fratelli;
+}
+
+/** Ritira una propria dichiarazione, finché la segreteria non l'ha guardata. */
+export async function ritiraFratello(id) {
+  const { fratelli } = await chiedi(`/iscrizione/fratelli?id=${id}`, { method: "DELETE" });
+  return fratelli;
+}
+
+/**
  * Gli eventi di una squadra, dall'API pubblica.
  *
  * Un atleta non può passare da /api/admin/eventi, che vuole il permesso di
@@ -767,6 +788,21 @@ export async function validaCertificato(utenteId, { approva, motivo } = {}) {
   const { atleta } = await chiedi(`/admin/atleti/${utenteId}/certificato`, {
     method: "POST",
     body: JSON.stringify({ approva, motivo })
+  });
+  return atleta;
+}
+
+/**
+ * La segreteria decide su una parentela dichiarata.
+ *
+ * Confermare NON assegna nessuna tariffa: dice solo che sono fratelli. La
+ * quota agevolata si applica un momento dopo, con il comando di sempre —
+ * "sono fratelli?" e "quanto paga?" sono due domande diverse.
+ */
+export async function decidiParentela(utenteId, { legameId, conferma, motivo } = {}) {
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/legami`, {
+    method: "PATCH",
+    body: JSON.stringify({ legameId, conferma, motivo })
   });
   return atleta;
 }
