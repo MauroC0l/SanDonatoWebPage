@@ -5,7 +5,7 @@
  * endpoint: il sito pubblico e il pannello devono vedere la stessa forma.
  */
 
-import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import { eventi, squadre, media, mediaEvento } from "../db/schema.js";
 import { urlFile } from "./notizie.js";
@@ -58,6 +58,10 @@ const COLONNE = {
   parziali: eventi.parziali,
   marcatori: eventi.marcatori,
   diretta: eventi.diretta,
+  gironeId: eventi.gironeId,
+  inCasa: eventi.inCasa,
+  noteUfficiali: eventi.noteUfficiali,
+  sparitaIl: eventi.sparitaIl,
   squadraNome: squadre.nome,
   squadraColore: squadre.colore,
   squadraCssVar: squadre.cssVar,
@@ -93,7 +97,13 @@ function daRiga(riga) {
     risultato: riga.risultato,
     parziali: riga.parziali,
     marcatori: riga.marcatori ?? [],
-    diretta: riga.diretta
+    diretta: riga.diretta,
+    // Dal calendario della federazione: data, ora, luogo, avversario e
+    // risultato li scrive la lettura notturna, e dal pannello non si toccano.
+    ufficiale: riga.gironeId !== null,
+    inCasa: riga.inCasa,
+    noteUfficiali: riga.noteUfficiali,
+    sparitaIl: riga.sparitaIl
   };
 }
 
@@ -129,8 +139,16 @@ export async function elencaEventi({
 
   // Sul sito si vede solo ciò che è gia uscito. La data vuota vale come
   // "da sempre": le 263 righe di archivio non hanno questa colonna.
+  //
+  // Fra parentesi, e non per scrupolo: and() di Drizzle non ne aggiunge
+  // attorno a un sql`...` scritto a mano, e senza queste l'or scavalcava
+  // tutti gli altri filtri — un evento programmato e già uscito compariva
+  // in ogni richiesta, di qualunque squadra e di qualunque periodo.
   if (soloVisibili) {
-    condizioni.push(sql`${eventi.visibileDal} is null or ${eventi.visibileDal} <= now()`);
+    condizioni.push(sql`(${eventi.visibileDal} is null or ${eventi.visibileDal} <= now())`);
+    // Una partita tolta dal calendario ufficiale non si gioca, finché non
+    // ricompare: sul sito non deve restare come se niente fosse.
+    condizioni.push(isNull(eventi.sparitaIl));
   }
 
   // Il filtro "Programmati" del pannello: l esatto contrario.
@@ -203,7 +221,8 @@ export async function ultimiRisultati(quanti = 12) {
       sql`${eventi.risultato} is not null and ${eventi.risultato} <> ''`,
       // Anche qui: un evento ancora programmato non compare sul sito, e il
       // suo risultato nemmeno. Questa riga alimenta la home.
-      sql`${eventi.visibileDal} is null or ${eventi.visibileDal} <= now()`
+      sql`(${eventi.visibileDal} is null or ${eventi.visibileDal} <= now())`,
+      isNull(eventi.sparitaIl)
     ))
     .orderBy(desc(eventi.inizio))
     .limit(quanti);
@@ -222,6 +241,17 @@ export async function ultimiRisultati(quanti = 12) {
  * chi lo inserisce si fa la stessa domanda — com'è finita.
  */
 export const TIPI_PARTITA = ["partita", "torneo"];
+
+/**
+ * Quello che un allenatore può mettere a calendario: le partite, e gli
+ * allenamenti della sua squadra.
+ *
+ * Un elenco a parte e non TIPI_PARTITA allargato: un allenamento non ha
+ * un risultato, e TIPI_PARTITA serve proprio a dire "qui si chiede com'è
+ * finita". Prima i due elenchi erano uno solo, e il modulo proponeva
+ * all'allenatore "Allenamento" che il server poi rifiutava con un 403.
+ */
+export const TIPI_ALLENATORE = [...TIPI_PARTITA, "allenamento"];
 
 /**
  * Chi può creare solo partite.

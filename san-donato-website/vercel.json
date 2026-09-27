@@ -9,5 +9,16 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/calendari",
+      "schedule": "0 23 * * *"
+    }
+  ],
+  "functions": {
+    "api/smista.js": {
+      "maxDuration": 60
+    }
+  }
 }

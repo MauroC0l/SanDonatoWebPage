@@ -16,6 +16,7 @@ import {
   pgTable, pgEnum, serial, integer, text, boolean, timestamp, date,
   doublePrecision, jsonb, index, uniqueIndex
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /* =====================================================
    Tipi enumerati
@@ -491,12 +492,149 @@ export const eventi = pgTable("eventi", {
 
   googleEventId: text("google_event_id").unique(),
 
+  /* ---------- Partite dal calendario ufficiale ----------
+
+     Vuote per tutto quello che qualcuno inserisce a mano: amichevoli,
+     allenamenti, feste. Piene per le partite che arrivano dalla
+     federazione, e allora comandano loro: data, ora, luogo, avversario e
+     risultato li scrive la lettura notturna, e dal pannello non si
+     toccano — la regola decisa è che vince il calendario ufficiale. */
+
+  /* Da quale girone arriva. Finché c'è, i campi ufficiali sono bloccati.
+     set null e non cascade: togliendo una fonte vecchia, le partite della
+     stagione passata restano nel calendario e tornano normali eventi. */
+  gironeId: integer("girone_id").references(() => gironiUfficiali.id, { onDelete: "set null" }),
+
+  // "girone:12:14102" — vedi chiaveUfficiale() in server/calendari/partite.js
+  chiaveUfficiale: text("chiave_ufficiale").unique(),
+
+  // In casa è solo la nostra palestra, non "la squadra scritta per prima"
+  inCasa: boolean("in_casa"),
+
+  // "Rinviata", "Anticipo al venerdì": la colonna note della federazione
+  noteUfficiali: text("note_ufficiali"),
+
+  /* Quando la partita è sparita dal calendario ufficiale. Non si cancella:
+     può essere un rinvio, un errore di chi aggiorna il foglio, una gara
+     spostata in un altro girone. Sul sito non si vede più; nel pannello
+     finisce fra le cose da controllare, e se ricompare torna com'era. */
+  sparitaIl: timestamp("sparita_il", { withTimezone: true }),
+
   creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow(),
   aggiornatoIl: timestamp("aggiornato_il", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
   // L'interrogazione più frequente: "gli eventi fra due date"
   index("idx_eventi_periodo").on(t.inizio),
-  index("idx_eventi_squadra").on(t.squadraId, t.inizio)
+  index("idx_eventi_squadra").on(t.squadraId, t.inizio),
+  // "Le partite di questo girone": ogni lettura notturna, per ogni girone
+  index("idx_eventi_girone").on(t.gironeId)
+]);
+
+/* =====================================================
+   Calendari ufficiali — le partite dalle federazioni
+   ===================================================== */
+
+/**
+ * Una fonte di calendari ufficiali: oggi una cartella Google Drive in cui
+ * la federazione pubblica un file per girone.
+ *
+ * Tutto quello che cambia di stagione in stagione sta qui, e lo cambia
+ * l'amministratore dal pannello: la cartella nuova, il nome con cui la
+ * federazione scrive la nostra società, la palestra in cui giochiamo in
+ * casa. Nessuna di queste cose deve richiedere di toccare il codice.
+ *
+ * Il formato dice quale lettore usare (server/calendari/formati/). È testo
+ * e non un tipo enumerato: un formato nuovo è codice nuovo, e non deve
+ * portarsi dietro una migrazione.
+ */
+export const fontiCalendario = pgTable("fonti_calendario", {
+  id: serial("id").primaryKey(),
+
+  nome: text("nome").notNull(),
+  formato: text("formato").notNull(),
+
+  // L'identificativo della cartella Drive, non l'indirizzo intero:
+  // l'indirizzo si ricostruisce, e due modi di scrivere lo stesso
+  // collegamento non devono sembrare due cartelle diverse.
+  cartella: text("cartella").notNull(),
+
+  /* Come la federazione scrive il nostro nome: "Pol. San Donato",
+     "Polisportiva San Donato". Basta l'inizio del nome — "Pol. San Donato
+     Rossa" è nostra — e maiuscole e punteggiatura non contano. */
+  nomiNostri: text("nomi_nostri").array().notNull(),
+
+  /* In casa è SOLO dove giochiamo noi: "Cartiera", "Via Fossano 8".
+     Vuoto significa "fidati dell'ordine del foglio". */
+  palestreCasa: text("palestre_casa").array().notNull().default(sql`'{}'::text[]`),
+
+  attiva: boolean("attiva").notNull().default(true),
+
+  /* Una lettura alla volta. La notturna e il pulsante "Aggiorna ora"
+     possono partire insieme, e due letture parallele scriverebbero due
+     volte le stesse partite nuove. Chi comincia segna l'ora qui; una
+     lettura bloccata da più di dieci minuti si considera morta. */
+  inLetturaDal: timestamp("in_lettura_dal", { withTimezone: true }),
+
+  ultimaLettura: timestamp("ultima_lettura", { withTimezone: true }),
+  // "ok", "avvisi" (qualche file non si è letto), "errore" (niente di fatto)
+  esito: text("esito"),
+  // Quanti file, quante partite, quali errori: quello che serve a capire
+  // una lettura andata storta senza aprire i log del server.
+  riepilogo: jsonb("riepilogo"),
+
+  creataDa: integer("creata_da").references(() => utenti.id, { onDelete: "set null" }),
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
+});
+
+/**
+ * Una nostra squadra dentro a un girone ufficiale: un file della fonte più
+ * il nome con cui la nostra squadra ci compare.
+ *
+ * È l'unica cosa che l'amministratore deve decidere a mano, una volta per
+ * stagione: "Pol. San Donato nell'Under 14 femminile girone A" è la nostra
+ * Volley U14. Dal titolo di un file non lo si ricava con certezza — le
+ * categorie cambiano nome ogni anno, e le squadre del sito anche — e un
+ * collegamento sbagliato metterebbe le partite nel calendario di altri.
+ *
+ * Il nome è parte della chiave perché due nostre squadre possono stare
+ * nello stesso girone: sono due righe, da collegare a due squadre.
+ *
+ * `partite` conserva le nostre partite dell'ultima lettura. Serve a
+ * scriverle nel calendario nel momento in cui il girone viene collegato,
+ * senza aspettare la notte e senza riscaricare niente.
+ */
+export const gironiUfficiali = pgTable("gironi_ufficiali", {
+  id: serial("id").primaryKey(),
+
+  fonteId: integer("fonte_id").notNull()
+    .references(() => fontiCalendario.id, { onDelete: "cascade" }),
+
+  fileId: text("file_id").notNull(),
+  nomeFile: text("nome_file"),
+  // "XX Torneo Autunno/Cossalter - Under 14 FEMMINILE GIRONE A"
+  titolo: text("titolo"),
+  nomeNelGirone: text("nome_nel_girone").notNull(),
+
+  // Vuota finché l'amministratore non sceglie. Fino ad allora le partite
+  // si leggono ma non entrano nel calendario del sito.
+  squadraId: integer("squadra_id").references(() => squadre.id, { onDelete: "set null" }),
+
+  // "Questo girone non ci riguarda": un file di un'altra società con un
+  // nome simile al nostro, una squadra che non vogliamo sul sito.
+  ignorato: boolean("ignorato").notNull().default(false),
+
+  partite: jsonb("partite").notNull().default(sql`'[]'::jsonb`),
+
+  ultimaLettura: timestamp("ultima_lettura", { withTimezone: true }),
+
+  // Il file non è più nella cartella. Le sue partite restano: finita la
+  // stagione la federazione toglie i file, e lo storico è nostro.
+  sparitoIl: timestamp("sparito_il", { withTimezone: true }),
+
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  uniqueIndex("idx_girone_unico").on(t.fonteId, t.fileId, t.nomeNelGirone),
+  index("idx_girone_squadra").on(t.squadraId)
 ]);
 
 /** Foto e video di una partita, caricati dal coach. */

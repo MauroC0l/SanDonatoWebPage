@@ -14,6 +14,8 @@
 
 import rotta_accesso from "./rotte/accesso.js";
 import rotta_admin_atleti_index from "./rotte/admin/atleti/index.js";
+import rotta_admin_calendari_index from "./rotte/admin/calendari/index.js";
+import rotta_admin_calendari_lettura from "./rotte/admin/calendari/lettura.js";
 import rotta_admin_carica_file from "./rotte/admin/carica-file.js";
 import rotta_admin_eventi_index from "./rotte/admin/eventi/index.js";
 import rotta_admin_iscrizioni from "./rotte/admin/iscrizioni.js";
@@ -25,6 +27,7 @@ import rotta_admin_registro from "./rotte/admin/registro.js";
 import rotta_admin_squadre_index from "./rotte/admin/squadre/index.js";
 import rotta_admin_utenti from "./rotte/admin/utenti.js";
 import rotta_cambia_password from "./rotte/cambia-password.js";
+import rotta_cron_calendari from "./rotte/cron/calendari.js";
 import rotta_cruscotto from "./rotte/cruscotto.js";
 import rotta_eventi_index from "./rotte/eventi/index.js";
 import rotta_eventi_risultati from "./rotte/eventi/risultati.js";
@@ -41,6 +44,8 @@ import rotta_uscita from "./rotte/uscita.js";
 import rotta_admin_atleti_id from "./rotte/admin/atleti/[id].js";
 import rotta_admin_atleti_id_certificato from "./rotte/admin/atleti/[id]/certificato.js";
 import rotta_admin_atleti_id_legami from "./rotte/admin/atleti/[id]/legami.js";
+import rotta_admin_calendari_id from "./rotte/admin/calendari/[id].js";
+import rotta_admin_calendari_gironi_id from "./rotte/admin/calendari/gironi/[id].js";
 import rotta_admin_eventi_id from "./rotte/admin/eventi/[id].js";
 import rotta_admin_eventi_id_media from "./rotte/admin/eventi/[id]/media.js";
 import rotta_admin_media_id from "./rotte/admin/media/[id].js";
@@ -48,6 +53,7 @@ import rotta_admin_media_cartelle_id from "./rotte/admin/media/cartelle/[id].js"
 import rotta_admin_notizie_id from "./rotte/admin/notizie/[id].js";
 import rotta_admin_quote_id from "./rotte/admin/quote/[id].js";
 import rotta_admin_squadre_id from "./rotte/admin/squadre/[id].js";
+import rotta_calendario_squadra from "./rotte/calendario/[squadra].js";
 import rotta_notizie_identificativo from "./rotte/notizie/[identificativo].js";
 
 /*
@@ -58,6 +64,8 @@ import rotta_notizie_identificativo from "./rotte/notizie/[identificativo].js";
 const TABELLA = [
   ["accesso",                        rotta_accesso],
   ["admin/atleti",                   rotta_admin_atleti_index],
+  ["admin/calendari",                rotta_admin_calendari_index],
+  ["admin/calendari/lettura",        rotta_admin_calendari_lettura],
   ["admin/carica-file",              rotta_admin_carica_file],
   ["admin/eventi",                   rotta_admin_eventi_index],
   ["admin/iscrizioni",               rotta_admin_iscrizioni],
@@ -69,6 +77,7 @@ const TABELLA = [
   ["admin/squadre",                  rotta_admin_squadre_index],
   ["admin/utenti",                   rotta_admin_utenti],
   ["cambia-password",                rotta_cambia_password],
+  ["cron/calendari",                 rotta_cron_calendari],
   ["cruscotto",                      rotta_cruscotto],
   ["eventi",                         rotta_eventi_index],
   ["eventi/risultati",               rotta_eventi_risultati],
@@ -85,6 +94,8 @@ const TABELLA = [
   ["admin/atleti/[id]",              rotta_admin_atleti_id],
   ["admin/atleti/[id]/certificato",  rotta_admin_atleti_id_certificato],
   ["admin/atleti/[id]/legami",       rotta_admin_atleti_id_legami],
+  ["admin/calendari/[id]",           rotta_admin_calendari_id],
+  ["admin/calendari/gironi/[id]",    rotta_admin_calendari_gironi_id],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],
   ["admin/eventi/[id]/media",        rotta_admin_eventi_id_media],
   ["admin/media/[id]",               rotta_admin_media_id],
@@ -92,6 +103,7 @@ const TABELLA = [
   ["admin/notizie/[id]",             rotta_admin_notizie_id],
   ["admin/quote/[id]",               rotta_admin_quote_id],
   ["admin/squadre/[id]",             rotta_admin_squadre_id],
+  ["calendario/[squadra]",           rotta_calendario_squadra],
   ["notizie/[identificativo]",       rotta_notizie_identificativo],
 ];
 

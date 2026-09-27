@@ -33,7 +33,12 @@ const CAPACITA = {
     "certificato.registra",
     // Il registro dice chi ha fatto cosa su tutto il sito: è uno strumento
     // di controllo, e chi controlla è chi amministra.
-    "registro.leggi"
+    "registro.leggi",
+
+    /* Le fonti dei calendari ufficiali e il collegamento dei gironi alle
+       squadre: decidono cosa entra nel calendario di tutte le squadre, e
+       la società ha voluto che fosse una cosa dell'amministratore. */
+    "calendari.gestisci"
   ],
 
   /**

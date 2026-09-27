@@ -843,3 +843,56 @@ export async function aggiornaTariffa(id, dati) {
 export async function eliminaTariffa(id) {
   return chiedi(`/admin/quote/${id}`, { method: "DELETE" });
 }
+
+/* =====================================================
+   Calendari ufficiali
+   ===================================================== */
+
+/**
+ * Fonti, gironi, partite sparite e ultime variazioni, in una chiamata.
+ * Solo per l'amministratore.
+ */
+export async function getCalendariUfficiali() {
+  return chiedi("/admin/calendari");
+}
+
+export async function creaFonteCalendario(dati) {
+  const { fonte } = await chiedi("/admin/calendari", {
+    method: "POST",
+    body: JSON.stringify(dati)
+  });
+  return fonte;
+}
+
+export async function aggiornaFonteCalendario(id, dati) {
+  const { fonte } = await chiedi(`/admin/calendari/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dati)
+  });
+  return fonte;
+}
+
+/** Rifiuta con 409 se la fonte ha già portato partite: in quel caso si disattiva. */
+export async function eliminaFonteCalendario(id) {
+  return chiedi(`/admin/calendari/${id}`, { method: "DELETE" });
+}
+
+/** { squadraId } collega il girone, { ignorato } lo mette da parte o lo riprende. */
+export async function aggiornaGironeCalendario(id, dati) {
+  return chiedi(`/admin/calendari/gironi/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dati)
+  });
+}
+
+/**
+ * "Aggiorna ora": legge una fonte, o tutte le attive se non se ne indica
+ * nessuna. Risponde a lettura finita, con l'esito di ciascuna.
+ */
+export async function leggiCalendariOra(fonteId) {
+  const { esiti } = await chiedi("/admin/calendari/lettura", {
+    method: "POST",
+    body: JSON.stringify(fonteId ? { fonteId } : {})
+  });
+  return esiti;
+}

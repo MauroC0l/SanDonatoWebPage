@@ -14,7 +14,7 @@
  * disegna e basta, senza rifare i conti né decidere dove mandare chi clicca.
  */
 
-import { and, asc, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import {
   notizie, eventi, squadre, utenti, richiesteIscrizione, schedeAtleta, pagamenti
@@ -155,7 +155,8 @@ async function prossimiEventi(utente, { quanti = 5 } = {}) {
   const ammesse = await squadreGestibili(utente);
   if (Array.isArray(ammesse) && ammesse.length === 0) return [];
 
-  const condizioni = [gte(eventi.inizio, new Date())];
+  // Senza le partite tolte dal calendario ufficiale: non si giocano
+  const condizioni = [gte(eventi.inizio, new Date()), isNull(eventi.sparitaIl)];
   if (Array.isArray(ammesse)) condizioni.push(inArray(eventi.squadraId, ammesse));
 
   return getDb()
@@ -196,6 +197,10 @@ async function risultatiMancanti(utente) {
     sql`${eventi.inizio} < now()`,
     sql`${eventi.inizio} > now() - interval '60 days'`,
     inArray(eventi.tipo, ["partita", "torneo"]),
+    /* Le partite del calendario ufficiale no: il risultato lo porta la
+       lettura notturna, e dal pannello non si può scrivere. Chiederlo a un
+       allenatore vorrebbe dire dargli un compito che non può svolgere. */
+    isNull(eventi.gironeId),
     sql`(
       ${eventi.risultato} is null or ${eventi.risultato} = ''
       or (
@@ -340,7 +345,8 @@ async function cruscottoAtleta(utente) {
       .where(and(
         eq(eventi.squadraId, appartenenza.squadraId),
         gte(eventi.inizio, new Date()),
-        sql`${eventi.visibileDal} is null or ${eventi.visibileDal} <= now()`
+        isNull(eventi.sparitaIl),
+        sql`(${eventi.visibileDal} is null or ${eventi.visibileDal} <= now())`
       ))
       .orderBy(asc(eventi.inizio))
       .limit(4);

@@ -182,3 +182,11 @@
   .tnd-pannello { animation: none; }
   .tnd-freccia { transition: none; }
 }
+
+/* Sopra la pagina e non dentro al contenitore: la posizione la calcola il
+   componente, agganciata al pulsante. Qui si annulla quella di base. */
+.tnd-pannello-sovrapposto {
+  position: fixed;
+  right: auto;
+  z-index: 150;
+}

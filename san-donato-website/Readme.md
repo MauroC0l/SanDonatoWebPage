@@ -109,16 +109,19 @@ chiede: non scende in campo.
 Altre cinque regole che valgono la pena di essere sapute prima di leggere
 il codice:
 
-- **Partite ed eventi sono due sezioni, un calendario solo.** Un allenatore
-  mette a calendario partite, tornei e allenamenti della propria squadra;
-  assemblee, feste e chiusure della sede le decide chi amministra. Cambia il
-  modulo, non il calendario del sito.
+- **Partite ed eventi sono due sezioni, un calendario solo.** Per chi
+  amministra la divisione è la provenienza: in *Partite* solo quelle
+  ufficiali, che arrivano dalle federazioni; in *Eventi* tutto quello che si
+  inserisce a mano — amichevoli, allenamenti, assemblee, feste. Un allenatore
+  ha solo *Partite*, dove trova e inserisce partite, tornei e allenamenti
+  delle sue squadre, ufficiali o no. Il calendario del sito, e quello da
+  abbonare, mostrano tutto insieme.
 - **Il certificato medico lo controlla la segreteria.** Caricare un file e
   consegnare un certificato valido non sono la stessa cosa: finché qualcuno
   non l'ha guardato, quell'atleta non è a posto. Toccarlo lo riporta da
   controllare, e finché è valido l'atleta non lo può sostituire — si sblocca
   tre mesi prima della scadenza.
-- **Le API sono trentasette rotte e una funzione sola.** Su Vercel, senza
+- **Le API sono quarantatré rotte e una funzione sola.** Su Vercel, senza
   un framework che le impacchetti, ogni file dentro `api/` diventerebbe una
   funzione a sé: il piano gratuito ne ammette dodici. Le rotte stanno in
   `server/rotte/` — un file per indirizzo, come prima — e in `api/` c'è solo
@@ -165,6 +168,51 @@ Due regole che valgono sopra a tutte le altre, e che sono nei test:
 
 ---
 
+## Calendari ufficiali
+
+Le partite dei campionati **non si inseriscono a mano**: arrivano dai
+calendari che le federazioni pubblicano, e il calendario del sito le segue.
+Vince sempre il calendario ufficiale — anche sul risultato. Le partite
+inserite a mano restano per amichevoli e incontri non ufficiali.
+
+Come funziona, in quattro pezzi:
+
+- **Fonti.** Una cartella Google Drive in cui la federazione pubblica un
+  file per girone (oggi la pallavolo UISP). L'amministratore le aggiunge
+  da *Calendari ufficiali* nel pannello, con il nome con cui la federazione
+  scrive il nostro ("Pol. San Donato") e la nostra palestra ("Cartiera"):
+  a ogni cambio di stagione si cambia la cartella lì, non il codice.
+- **Gironi.** Ogni file in cui compare una nostra squadra diventa un
+  girone, che l'amministratore collega **una volta** a una squadra del
+  sito. Da quel momento le partite entrano da sole nel suo calendario.
+- **Lettura notturna.** `/api/cron/calendari`, chiamata da Vercel alle 23
+  UTC (mezzanotte d'inverno, l'una d'estate). Rilegge ogni fonte attiva:
+  partite nuove, spostate, con il risultato, sparite. Tutto finisce nel
+  registro attività. Il pulsante "Aggiorna ora" fa la stessa cosa subito.
+- **Partite ufficiali bloccate.** Data, ora, campo, avversario e risultato
+  li scrive la federazione e dal pannello non si cambiano; marcatori,
+  diretta, note e foto sì. Una partita tolta dal calendario ufficiale
+  sparisce dal sito, ma non si cancella: può essere un rinvio.
+
+Il calendario di ogni squadra si può anche **abbonare** dal telefono:
+`/api/calendario/:id.ics` (formato iCal, `server/ical.js`) si aggiunge a
+Google Calendar o a Calendario di Apple, che lo rileggono da soli. I link
+stanno nel calendario del sito, nella pagina della squadra dell'atleta e
+nella gestione squadre ("Link calendario"). È una copia in sola lettura del
+nostro database, non una seconda fonte: niente da tenere allineato.
+
+Le regole di prudenza stanno in cima a `server/calendari/sincronizza.js`:
+una cartella vuota o un file illeggibile **non tolgono niente**, e il
+lettore di un formato si ferma con un errore se il modello del foglio
+cambia, invece di leggere colonne che non vogliono più dire la stessa cosa.
+
+Per aggiungere una federazione si scrive un lettore in
+`server/calendari/formati/` e lo si registra in `formati/index.js`: il resto
+è già comune. I file veri su cui provarlo vanno in `test/esempi/calendari/`,
+**ripuliti** dei fogli con i contatti delle società.
+
+---
+
 ## Struttura
 
 ```
@@ -172,6 +220,7 @@ api/          UNA funzione sola: [[...percorso]].js, che smista (vedi sotto)
 server/
   rotte/      una rotta per file: il nome del file È l'indirizzo pubblico
   rotte.js    l'elenco che lega gli indirizzi alle rotte, tenuto a mano
+  calendari/  lettura dei calendari ufficiali: formati, Drive, sincronizzazione
   *.js        codice condiviso fra le rotte
 db/           schema Drizzle, client, migrazioni
 scripts/      lavori una tantum: importazioni, dati di prova, classificazioni
@@ -205,6 +254,8 @@ Vedi `.env.esempio` per l'elenco completo e commentato.
 | `R2_*`, `URL_PUBBLICO_FILE` | archivio dei file su Cloudflare R2 |
 | `ARCHIVIO_LOCALE` | **solo in locale**: scrive i file in `public/caricamenti` |
 | `VITE_GOOGLE_API_KEY`, `VITE_*_CALENDAR_ID` | calendari Google, in via di dismissione |
+| `CRON_SECRET` | la lettura notturna dei calendari ufficiali: senza, è spenta |
+| `GOOGLE_DRIVE_API_KEY` | facoltativa: legge le cartelle Drive con l'API ufficiale invece che dalla pagina pubblica |
 | `MAILERLITE_API_KEY` | newsletter — **solo lato server**, mai con prefisso `VITE_` |
 
 > Tutto ciò che inizia con `VITE_` finisce **in chiaro** nel codice scaricato

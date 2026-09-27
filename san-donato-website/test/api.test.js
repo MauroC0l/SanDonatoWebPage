@@ -502,3 +502,89 @@ describe("tariffe della stagione", () => {
     expect(creata.stato).toBe(403);
   });
 });
+
+describe("calendari ufficiali", () => {
+  seAccesa("li gestisce solo l'amministratore", async () => {
+    /* Decidono cosa entra nel calendario di tutte le squadre: né la
+       segreteria né un allenatore, neanche in sola lettura. */
+    for (const chi of ["segreteria", "coach", "atleta"]) {
+      const { chiedi } = await entra(chi);
+      expect((await chiedi("/admin/calendari")).stato, chi).toBe(403);
+      expect((await chiedi("/admin/calendari/lettura", { method: "POST", body: "{}" })).stato, chi).toBe(403);
+    }
+
+    const { chiedi } = await entra("admin");
+    const esito = await chiedi("/admin/calendari");
+    expect(esito.stato).toBe(200);
+    expect(esito.corpo.formati.map((f) => f.codice)).toContain("uisp_pallavolo");
+  });
+
+  seAccesa("una fonte con un collegamento che non è una cartella viene rifiutata", async () => {
+    const { chiedi } = await entra("admin");
+    const esito = await chiedi("/admin/calendari", {
+      method: "POST",
+      body: JSON.stringify({
+        nome: "Prova", formato: "uisp_pallavolo",
+        cartella: "https://example.com/calendario.pdf", nomiNostri: ["Pol. San Donato"]
+      })
+    });
+
+    expect(esito.stato).toBe(400);
+  });
+
+  seAccesa("la lettura notturna non parte senza il segreto giusto", async () => {
+    const chiedi = sessione();
+    const senza = await chiedi("/cron/calendari");
+    const sbagliato = await chiedi("/cron/calendari", { headers: { Authorization: "Bearer sbagliato" } });
+
+    // 503 se il segreto non è configurato, 401 se è sbagliato: mai 200
+    expect([401, 503]).toContain(senza.stato);
+    expect([401, 503]).toContain(sbagliato.stato);
+  });
+});
+
+describe("calendario da abbonare", () => {
+  seAccesa("ogni squadra ha il suo file iCal, pubblico", async () => {
+    const chiedi = sessione();
+    const { corpo } = await chiedi("/squadre");
+    const squadra = corpo.squadre[0];
+
+    const risposta = await fetch(`${BASE}/calendario/${squadra.id}.ics`);
+    expect(risposta.status).toBe(200);
+    expect(risposta.headers.get("content-type")).toMatch(/^text\/calendar/);
+
+    const testo = await risposta.text();
+    expect(testo.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+    expect(testo).toContain(`X-WR-CALNAME:${squadra.nome}`);
+  });
+
+  seAccesa("una squadra che non esiste dà 404", async () => {
+    expect((await fetch(`${BASE}/calendario/999999.ics`)).status).toBe(404);
+    expect((await fetch(`${BASE}/calendario/non-un-numero`)).status).toBe(404);
+  });
+});
+
+describe("l'allenatore mette a calendario", () => {
+  seAccesa("partite e allenamenti delle sue squadre, ma non gli appuntamenti della società", async () => {
+    /* Il modulo gli proponeva "Allenamento" e il server lo rifiutava con
+       un 403: i due elenchi dei tipi non coincidevano. */
+    const { chiedi } = await entra("coach");
+    const { corpo } = await chiedi("/admin/eventi");
+    const squadraId = corpo.squadreAmmesse[0];
+
+    const nuovo = (tipo) => chiedi("/admin/eventi", {
+      method: "POST",
+      body: JSON.stringify({
+        squadraId, tipo, titolo: `Prova ${tipo}`,
+        inizio: new Date(Date.now() + 7 * 86_400_000).toISOString()
+      })
+    });
+
+    const allenamento = await nuovo("allenamento");
+    expect(allenamento.stato).toBe(201);
+    expect((await nuovo("riunione")).stato).toBe(403);
+
+    // In ordine: la prova non lascia allenamenti finti nel calendario
+    await chiedi(`/admin/eventi/${allenamento.corpo.evento.id}`, { method: "DELETE" });
+  });
+});

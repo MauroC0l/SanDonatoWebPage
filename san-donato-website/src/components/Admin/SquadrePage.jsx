@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaPlus, FaPencilAlt, FaSave, FaTimes, FaUsers, FaRunning,
-  FaExclamationCircle, FaSitemap, FaThLarge, FaBars
+  FaExclamationCircle, FaSitemap, FaThLarge, FaBars, FaLink
 } from "react-icons/fa";
 import {
   listSquadreConGestori, creaSquadra, aggiornaSquadra,
@@ -13,6 +13,7 @@ import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import ScambiaVista from "./ScambiaVista";
 import { useVista } from "../../hooks/useVista";
+import { indirizziCalendario } from "../../utils/calendarioSquadra";
 import "../../css/Admin.css";
 
 /*
@@ -207,6 +208,19 @@ export default function SquadrePage() {
       await ricarica();
     } catch (err) {
       gestisciErrore(err);
+    }
+  };
+
+  /* Il link da mandare alle famiglie, sul gruppo della squadra: chi lo apre
+     abbona il calendario, e le partite spostate si spostano anche sul suo
+     telefono. */
+  const copiaCalendario = async (s) => {
+    const { https } = indirizziCalendario(s.id);
+    try {
+      await navigator.clipboard.writeText(https);
+      avvisa(`Link del calendario di ${s.nome} copiato: incollalo dove lo leggono le famiglie.`);
+    } catch {
+      avvisa(`Copia non riuscita. Il link è ${https}`, "info", { permanente: true });
     }
   };
 
@@ -484,6 +498,15 @@ export default function SquadrePage() {
                           onClick={() => apriModifica(s)}
                         >
                           <FaPencilAlt /> Modifica
+                        </button>
+
+                        <button
+                          type="button"
+                          className="adm-btn adm-btn-ghost"
+                          onClick={() => copiaCalendario(s)}
+                          title="Il calendario della squadra, da abbonare con Google o Apple"
+                        >
+                          <FaLink /> Link calendario
                         </button>
 
                         <button

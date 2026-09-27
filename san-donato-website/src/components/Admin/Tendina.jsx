@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FaCheck, FaChevronDown, FaSearch } from "react-icons/fa";
 import "../../css/Tendina.css";
 
@@ -27,7 +28,12 @@ export default function Tendina({
   className = "",
   etichettaAria,
   // Testo da mostrare quando la ricerca non trova nulla
-  vuoto = "Nessun risultato."
+  vuoto = "Nessun risultato.",
+  /* Il pannello si disegna SOPRA la pagina invece che dentro al suo
+     contenitore. Serve dove il contenitore taglia o scorre — una tabella
+     con lo scorrimento orizzontale — e dove, rimanendo dentro, il pannello
+     aprendosi deformava la tabella intera. */
+  sovrapposta = false
 }) {
   const [aperta, setAperta] = useState(false);
   const [cerca, setCerca] = useState("");
@@ -36,6 +42,9 @@ export default function Tendina({
   const contenitore = useRef(null);
   const campoRicerca = useRef(null);
   const listaRef = useRef(null);
+  const pannelloRef = useRef(null);
+  const [posizione, setPosizione] = useState(null);
+  const [destinazione, setDestinazione] = useState(null);
   const idLista = useId();
 
   const conRicerca = cercabile ?? opzioni.length > 8;
@@ -77,6 +86,46 @@ export default function Tendina({
     setEvidenziata(opzioni.findIndex((o) => String(o.valore) === String(valore ?? "")));
   }, [disabilitato, opzioni, valore]);
 
+  /* ---------- Pannello sovrapposto ----------
+
+     Agganciato al pulsante con una posizione fissa, e ricalcolato quando
+     la pagina o la tabella scorrono. Si apre verso l'alto quando sotto non
+     ci sta: in fondo allo schermo, verso il basso finirebbe fuori. */
+
+  const calcolaPosizione = useCallback(() => {
+    const riquadro = contenitore.current?.getBoundingClientRect();
+    if (!riquadro) return;
+
+    const margine = 8;
+    const larghezza = Math.min(Math.max(riquadro.width, 240), window.innerWidth - 2 * margine);
+    const sinistra = Math.min(Math.max(riquadro.left, margine), window.innerWidth - larghezza - margine);
+    const sotto = window.innerHeight - riquadro.bottom;
+    const sopra = sotto < 300 && riquadro.top > sotto;
+
+    setPosizione(sopra
+      ? { left: sinistra, width: larghezza, bottom: window.innerHeight - riquadro.top + 4 }
+      : { left: sinistra, width: larghezza, top: riquadro.bottom + 4 });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!aperta || !sovrapposta) return undefined;
+
+    /* Sovrapposto, il pannello va dentro al guscio del pannello (e non in
+       fondo a <body>): i colori e i caratteri sono variabili dichiarate lì,
+       e fuori il menu comparirebbe bianco su bianco. La posizione fissa lo
+       porta comunque sopra a tutto. */
+    setDestinazione(contenitore.current?.closest(".adm-shell, .alg-page, .adm-boot") ?? document.body);
+    calcolaPosizione();
+    // In cattura: così arrivano anche gli scorrimenti della tabella, non
+    // solo quelli della pagina.
+    window.addEventListener("scroll", calcolaPosizione, true);
+    window.addEventListener("resize", calcolaPosizione);
+    return () => {
+      window.removeEventListener("scroll", calcolaPosizione, true);
+      window.removeEventListener("resize", calcolaPosizione);
+    };
+  }, [aperta, sovrapposta, calcolaPosizione]);
+
   // Un clic fuori chiude. Il listener si attacca solo a tendina aperta:
   // lasciarlo sempre acceso significherebbe farlo girare su ogni clic della
   // pagina per ciascuna delle tendine presenti.
@@ -84,7 +133,8 @@ export default function Tendina({
     if (!aperta) return;
 
     const fuori = (e) => {
-      if (!contenitore.current?.contains(e.target)) chiudi();
+      // Il pannello sovrapposto non sta dentro al contenitore: va contato a parte
+      if (!contenitore.current?.contains(e.target) && !pannelloRef.current?.contains(e.target)) chiudi();
     };
     document.addEventListener("mousedown", fuori);
     return () => document.removeEventListener("mousedown", fuori);
@@ -154,6 +204,13 @@ export default function Tendina({
     }
   };
 
+  const disegna = (pannello) => {
+    if (!sovrapposta) return pannello;
+    // Finché posizione e destinazione non sono calcolate non si mostra
+    // niente: un fotogramma dopo, non un pannello nel punto sbagliato.
+    return destinazione && posizione ? createPortal(pannello, destinazione) : null;
+  };
+
   return (
     <div
       ref={contenitore}
@@ -176,8 +233,12 @@ export default function Tendina({
         <FaChevronDown className="tnd-freccia" aria-hidden="true" />
       </button>
 
-      {aperta && (
-        <div className="tnd-pannello">
+      {aperta && disegna(
+        <div
+          ref={pannelloRef}
+          className={`tnd-pannello ${sovrapposta ? "tnd-pannello-sovrapposto" : ""}`}
+          style={sovrapposta ? posizione : undefined}
+        >
           {conRicerca && (
             <div className="tnd-ricerca">
               <FaSearch aria-hidden="true" />

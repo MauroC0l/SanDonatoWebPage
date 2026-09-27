@@ -11,7 +11,7 @@
 
 import { getDb } from "../../../../db/client.js";
 import { eventi } from "../../../../db/schema.js";
-import { elencaEventi, soloPartite, TIPI_PARTITA } from "../../../eventi.js";
+import { elencaEventi, soloPartite, TIPI_ALLENATORE } from "../../../eventi.js";
 import { puoGestireSquadra, squadreGestibili } from "../../../autorizzazioni.js";
 import { richiedeAccesso } from "../../../autenticazione.js";
 import { annota } from "../../../registro.js";
@@ -55,8 +55,8 @@ async function crea(req, res) {
    * tenerla nascosta fino al giorno prima non serve a nessuno.
    */
   if (soloPartite(req.utente)) {
-    if (dati.tipo && !TIPI_PARTITA.includes(dati.tipo)) {
-      throw new ErroreHttp(403, "Puoi mettere a calendario partite e tornei, non altri eventi.");
+    if (dati.tipo && !TIPI_ALLENATORE.includes(dati.tipo)) {
+      throw new ErroreHttp(403, "Puoi mettere a calendario partite, tornei e allenamenti, non altri eventi.");
     }
     dati.visibileDal = null;
   }

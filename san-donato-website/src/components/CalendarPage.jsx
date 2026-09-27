@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { indirizziCalendario } from "../utils/calendarioSquadra";
 import "../css/CalendarPage.css";
 import EventDetailsModal from "./EventDetailsModal"; 
 import { fetchEventsByRange } from '../api/calendarApi';
@@ -92,6 +93,52 @@ const EventPill = ({ event, onClick }) => {
     </button>
   );
 };
+
+/**
+ * Il calendario di una squadra sul telefono, per chi non ha un account.
+ *
+ * Si sceglie la squadra e si abbona: Google Calendar o Calendario di Apple
+ * rileggono l'indirizzo da soli, e una partita spostata si sposta anche lì.
+ */
+function CalendarioSulTelefono({ squadre }) {
+  const [scelta, setScelta] = useState("");
+  const squadra = squadre.find((s) => String(s.squadraId) === scelta);
+  const indirizzi = squadra ? indirizziCalendario(squadra.squadraId) : null;
+
+  if (!squadre.length) return null;
+
+  return (
+    <div className="cp-card cp-abbona">
+      <h3 className="cp-card-title">Sul tuo telefono</h3>
+      <p className="cp-card-subtitle">
+        Aggiungi le partite di una squadra al calendario del telefono: si aggiornano da sole.
+      </p>
+
+      <select
+        className="cp-abbona-scelta"
+        value={scelta}
+        onChange={(e) => setScelta(e.target.value)}
+        aria-label="Squadra da aggiungere al calendario"
+      >
+        <option value="">Scegli la squadra…</option>
+        {squadre.map((s) => (
+          <option key={s.squadraId} value={String(s.squadraId)}>{s.label}</option>
+        ))}
+      </select>
+
+      {indirizzi && (
+        <div className="cp-abbona-azioni">
+          <a className="cp-abbona-btn" href={indirizzi.google} target="_blank" rel="noreferrer">
+            Google Calendar
+          </a>
+          <a className="cp-abbona-btn" href={indirizzi.webcal}>
+            iPhone e Mac
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
@@ -328,6 +375,8 @@ export default function CalendarPage() {
                 ))}
               </div>
             </div>
+
+            <CalendarioSulTelefono squadre={availableCategories} />
 
           </aside>
         </>

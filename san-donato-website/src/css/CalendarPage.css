@@ -760,3 +760,38 @@ body.cp-modal-open { overflow: hidden; }
 }
 
 .cp-list-testi { flex: 1; min-width: 0; }
+
+/* ---------- Il calendario sul telefono ---------- */
+
+.cp-abbona-scelta {
+  width: 100%;
+  padding: .6rem .75rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 10px;
+  background: var(--cp-carta);
+  color: var(--cp-inchiostro);
+  font: inherit;
+  font-size: .9rem;
+}
+
+.cp-abbona-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+
+.cp-abbona-btn {
+  flex: 1 1 8rem;
+  padding: .55rem .75rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 10px;
+  background: var(--cp-bg);
+  color: var(--cp-blu);
+  font-size: .85rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.cp-abbona-btn:hover { border-color: var(--cp-arancio); color: var(--cp-arancio); }

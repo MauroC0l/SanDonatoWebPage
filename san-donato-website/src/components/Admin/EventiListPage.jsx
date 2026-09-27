@@ -64,8 +64,9 @@ function dataLeggibile(iso, conOra = true) {
   return `${data} · ${d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
-/* I tipi che stanno sotto "Partite". Deve combaciare con TIPI_PARTITA in
-   server/eventi.js, che è quello che il server fa rispettare. */
+/* I tipi che un allenatore trova sotto "Partite". Deve combaciare con
+   TIPI_ALLENATORE in server/eventi.js, che è quello che il server fa
+   rispettare. */
 const TIPI_PARTITA = ["partita", "torneo", "allenamento"];
 
 /**
@@ -78,6 +79,9 @@ const TIPI_PARTITA = ["partita", "torneo", "allenamento"];
  */
 function daCompletare(e, adesso) {
   if (!["partita", "torneo"].includes(e.tipo)) return false;
+  // Il risultato di una partita ufficiale lo porta la federazione: non è
+  // qualcosa che chi guarda questo elenco possa completare.
+  if (e.ufficiale) return false;
   if (new Date(e.fine ?? e.inizio) > adesso) return false;
 
   if (!e.risultato) return true;
@@ -93,8 +97,15 @@ export default function EventiListPage({ genere = "partite" }) {
   const ePartite = genere === "partite";
   const sezione = ePartite ? "partite" : "eventi";
   const navigate = useNavigate();
-  const { sessionExpired } = useAuth();
+  const { user, sessionExpired } = useAuth();
   const area = useArea();
+
+  /* Chi amministra divide per PROVENIENZA: in Partite quelle ufficiali,
+     che porta la federazione; in Eventi tutto quello che si inserisce a
+     mano — amichevoli, allenamenti, appuntamenti della società. Un
+     allenatore invece ha solo Partite, e lì trova tutti gli impegni delle
+     sue squadre, come prima: la divisione gli toglierebbe le amichevoli. */
+  const perProvenienza = (user?.capabilities ?? []).includes("eventi.gestisci_tutte");
   const { avvisa, conferma } = useDialoghi();
 
   const [eventi, setEventi] = useState([]);
@@ -202,9 +213,14 @@ export default function EventiListPage({ genere = "partite" }) {
    * compila due moduli diversi e cerca due cose diverse.
    */
   const dellaSezione = useMemo(
-    () => eventi.filter((e) => TIPI_PARTITA.includes(e.tipo) === ePartite),
-    [eventi, ePartite]
+    () => eventi.filter((e) => (perProvenienza
+      ? Boolean(e.ufficiale) === ePartite
+      : TIPI_PARTITA.includes(e.tipo) === ePartite)),
+    [eventi, ePartite, perProvenienza]
   );
+
+  // Le partite ufficiali non si creano a mano: arrivano dalla federazione
+  const siCrea = !(ePartite && perProvenienza);
 
   // Con 263 eventi in archivio, "Tutti" senza pagine e una schermata
   // lunghissima in cui non si trova niente.
@@ -235,19 +251,27 @@ export default function EventiListPage({ genere = "partite" }) {
         <div className="adm-head-left">
           <h1 className="adm-page-title">{ePartite ? "Partite" : "Eventi"}</h1>
           <p className="adm-page-sub">
-            {ePartite
-              ? "Partite, tornei e allenamenti delle tue squadre: da qui finiscono nel calendario del sito."
-              : "Assemblee, feste, chiusure della sede. Stesso calendario delle partite, modulo diverso."}
+            {ePartite && perProvenienza
+              ? "Le partite ufficiali, dai calendari delle federazioni: orari e risultati si aggiornano da soli ogni notte. Qui si aggiungono marcatori, diretta e foto."
+              : ePartite
+                ? "Partite, tornei e allenamenti delle tue squadre: da qui finiscono nel calendario del sito."
+                : "Amichevoli, allenamenti e appuntamenti della società: tutto quello che non arriva dai calendari ufficiali."}
           </p>
         </div>
 
         <div className="adm-head-actions">
-          <Link
-            to={`${area}/${sezione}/${ePartite ? "nuova" : "nuovo"}`}
-            className="adm-btn adm-btn-primary"
-          >
-            <FaPlus /> {ePartite ? "Nuova partita" : "Nuovo evento"}
-          </Link>
+          {siCrea ? (
+            <Link
+              to={`${area}/${sezione}/${ePartite ? "nuova" : "nuovo"}`}
+              className="adm-btn adm-btn-primary"
+            >
+              <FaPlus /> {ePartite ? "Nuova partita" : "Nuovo evento"}
+            </Link>
+          ) : (
+            <Link to={`${area}/calendari`} className="adm-btn adm-btn-ghost">
+              Calendari ufficiali
+            </Link>
+          )}
         </div>
       </div>
 
@@ -299,18 +323,20 @@ export default function EventiListPage({ genere = "partite" }) {
         <CalendarioEventi
           mese={mese}
           onCambiaMese={setMese}
-          eventi={eventi}
+          eventi={dellaSezione}
           area={area}
           oggi={adesso}
           sezione={sezione}
         />
-      ) : eventi.length === 0 ? (
+      ) : dellaSezione.length === 0 ? (
         <div className="adm-empty">
           <FaCalendarAlt className="adm-empty-icon" />
           <p>
             {Array.isArray(squadreAmmesse) && squadreAmmesse.length === 0
               ? "Non sei associato a nessuna squadra. Chiedi a chi amministra il sito di collegarti alla tua."
-              : "Nessun evento in questo periodo."}
+              : ePartite && perProvenienza
+                ? "Nessuna partita ufficiale in questo periodo. Arrivano collegando i gironi in Calendari ufficiali."
+                : "Nessun evento in questo periodo."}
           </p>
         </div>
       ) : (
@@ -328,6 +354,16 @@ export default function EventiListPage({ genere = "partite" }) {
 
                 <div className="adm-post-meta">
                   <span className="adm-sport-tag">{evento.squadra}</span>
+                  {evento.ufficiale && !evento.sparitaIl && (
+                    <span className="adm-status adm-status-ufficiale" title="Orari e risultato li aggiorna la federazione">
+                      Ufficiale
+                    </span>
+                  )}
+                  {evento.sparitaIl && (
+                    <span className="adm-status adm-status-respinta" title="La federazione non la elenca più: sul sito non si vede">
+                      Tolta dal calendario ufficiale
+                    </span>
+                  )}
                   {evento.visibileDal && new Date(evento.visibileDal) > adesso && (
                     <span className="adm-status adm-status-future">
                       Si vede dal {dataLeggibile(evento.visibileDal)}
@@ -355,14 +391,18 @@ export default function EventiListPage({ genere = "partite" }) {
                 >
                   <FaPencilAlt />
                 </Link>
-                <button
-                  type="button"
-                  className="adm-icon-btn adm-icon-danger"
-                  onClick={() => elimina(evento)}
-                  title="Elimina"
-                >
-                  <FaTrashAlt />
-                </button>
+                {/* Una partita ufficiale tornerebbe alla lettura dopo: si
+                    elimina solo quando la federazione l'ha tolta */}
+                {(!evento.ufficiale || evento.sparitaIl) && (
+                  <button
+                    type="button"
+                    className="adm-icon-btn adm-icon-danger"
+                    onClick={() => elimina(evento)}
+                    title="Elimina"
+                  >
+                    <FaTrashAlt />
+                  </button>
+                )}
               </div>
             </li>
           ))}

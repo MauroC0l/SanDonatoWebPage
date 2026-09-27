@@ -4,7 +4,8 @@ import {
   FaCalendarAlt, FaUsers, FaUserCheck, FaRunning, FaHistory, FaSitemap, FaHome, FaFutbol,
   FaEuroSign,
   FaImages,
-  FaClipboardCheck
+  FaClipboardCheck,
+  FaCalendarCheck
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -35,6 +36,9 @@ const SEZIONI = [
   // Finiscono sullo stesso calendario del sito.
   { a: "partite", etichetta: "Partite", Icona: FaFutbol, capacita: ["eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
   { a: "eventi", etichetta: "Eventi", Icona: FaCalendarAlt, capacita: ["eventi.gestisci_tutte"] },
+  // Da dove arrivano le partite ufficiali: accanto a partite ed eventi,
+  // perché è la terza strada per cui qualcosa entra nel calendario.
+  { a: "calendari", etichetta: "Calendari ufficiali", Icona: FaCalendarCheck, capacita: ["calendari.gestisci"] },
   { a: "richieste", etichetta: "Richieste", Icona: FaUserCheck, capacita: ["iscrizioni.decidi_tutte", "iscrizioni.decidi_proprie"] },
   { a: "atleti", etichetta: "Atleti", Icona: FaRunning, capacita: ["atleti.leggi"] },
   { a: "squadre", etichetta: "Squadre", Icona: FaSitemap, capacita: ["squadre.gestisci"] },

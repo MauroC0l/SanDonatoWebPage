@@ -26,6 +26,7 @@ const RegistroPage = lazy(() => import("./RegistroPage"));
 const LibreriaPage = lazy(() => import("./LibreriaPage"));
 const QuotePage = lazy(() => import("./QuotePage"));
 const SquadrePage = lazy(() => import("./SquadrePage"));
+const CalendariUfficialiPage = lazy(() => import("./CalendariUfficialiPage"));
 const RecuperoPasswordPage = lazy(() => import("./RecuperoPasswordPage"));
 const SceltaPasswordPage = lazy(() => import("./SceltaPasswordPage"));
 const HomePannello = lazy(() => import("./HomePannello"));
@@ -281,6 +282,19 @@ export default function AdminRoot({ section }) {
               element={
                 <Riservato una={["eventi.gestisci_tutte"]}>
                   <Pigra cosa="dell'evento"><EventoEditorPage genere="eventi" /></Pigra>
+                </Riservato>
+              }
+            />
+
+            {/* ---------- Calendari ufficiali ----------
+                Le fonti delle federazioni e il collegamento dei gironi alle
+                squadre: decide cosa entra nel calendario di tutti, quindi
+                solo chi amministra. */}
+            <Route
+              path="calendari"
+              element={
+                <Riservato una={["calendari.gestisci"]}>
+                  <Pigra cosa="dei calendari"><CalendariUfficialiPage /></Pigra>
                 </Riservato>
               }
             />

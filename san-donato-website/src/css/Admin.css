@@ -49,7 +49,8 @@
    Non va MAI a capo — se lo spazio manca si stringono le etichette, non si
    sposta la riga: è il punto fisso a cui si torna da qualunque schermata. */
 .adm-topbar-alta {
-  max-width: 1180px;
+  /* Allineata alla riga delle sezioni, che è più larga delle pagine */
+  max-width: 1520px;
   margin: 0 auto;
   padding: 0.55rem 1.25rem;
   display: flex;
@@ -66,12 +67,15 @@
   background: #fbfcfe;
 }
 
+/* Più larga del contenuto delle pagine, e senza barra di scorrimento: con
+   tredici sezioni la riga a 1180px scorreva, e una voce del menu che si
+   raggiunge solo scorrendo è una voce che non si trova. A 1520px ci stanno
+   tutte; sotto, le voci vanno a capo invece di nascondersi. */
 .adm-topbar-nav .adm-nav {
-  max-width: 1180px;
+  max-width: 1520px;
   margin: 0 auto;
   padding: 0.3rem 1.25rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
 }
 
 .adm-brand {
@@ -3162,3 +3166,106 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-legame-motivo { font-size: .78rem; color: var(--adm-danger); }
 
 .adm-legame-azioni { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+/* =========================================
+   Calendari ufficiali
+   ========================================= */
+
+.adm-cal-sezione { margin-bottom: 1.75rem; }
+.adm-cal-spiega { margin: -0.35rem 0 0.85rem; max-width: 60rem; }
+
+/* La spiegazione dei gironi da assegnare: è la prima cosa da fare in
+   pagina, e da semplice nota grigia passava inosservata. */
+.adm-cal-didascalia {
+  margin: -0.2rem 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  max-width: 60rem;
+  border-left: 3px solid var(--adm-blue);
+  border-radius: 0 8px 8px 0;
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue-dark);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.adm-cal-modulo { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
+.adm-cal-azioni-modulo { justify-content: flex-end; margin-top: 0; }
+
+.adm-cal-fonte { margin-bottom: 1.25rem; }
+.adm-cal-fonte.is-disattivato { opacity: .7; }
+.adm-cal-fonte .adm-scheda-nome { font-size: 1.1rem; }
+.adm-cal-fonte .adm-status svg { vertical-align: -1px; }
+.adm-cal-fonte > .adm-hint { margin-top: 0.85rem; }
+
+.adm-cal-errori { margin-top: 0.85rem; align-items: flex-start; }
+.adm-cal-errori ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; }
+.adm-cal-errori li + li { margin-top: 0.2rem; }
+
+.adm-cal-tabella { margin-top: 1rem; }
+.adm-cal-tabella tr.is-busy { opacity: .55; pointer-events: none; }
+.adm-cal-cella-squadra { min-width: 12rem; }
+
+.adm-cal-ignorati { margin-top: 1rem; display: grid; gap: 0.75rem; justify-items: start; }
+.adm-cal-ignorati .adm-schede { width: 100%; }
+
+/* Una partita sparita: il testo a sinistra, i due pulsanti a destra, e
+   sul telefono uno sotto l'altro. */
+.adm-cal-riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+.adm-cal-riga-testo { display: grid; gap: 0.2rem; min-width: 0; overflow-wrap: anywhere; }
+.adm-cal-riga-testo .adm-hint { margin: 0; }
+.adm-cal-riga-azioni { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+/* Scorre dentro al suo riquadro: quaranta variazioni in fila allungavano
+   la pagina più di tutto il resto messo insieme. */
+.adm-cal-variazioni {
+  list-style: none;
+  margin: 0 0 0.6rem;
+  display: grid;
+  gap: 0;
+  padding: 0.35rem 1.1rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.adm-cal-variazioni li {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--adm-line-soft);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.adm-cal-variazioni li:last-child { border-bottom: 0; }
+.adm-cal-variazioni time { margin: 0; white-space: nowrap; }
+.adm-cal-variazioni a { color: var(--adm-blue-dark); }
+
+@media (max-width: 560px) {
+  .adm-cal-variazioni li { grid-template-columns: 1fr; gap: 0.15rem; }
+}
+
+/* L'icona che gira mentre la lettura è in corso */
+.adm-gira { animation: adm-spin 0.9s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .adm-gira { animation: none; } }
+
+/* La targhetta delle partite che arrivano dalla federazione */
+.adm-status-ufficiale { background: var(--adm-blue-soft); color: var(--adm-blue-dark); }
+
+/* ---------- Il calendario sul telefono ---------- */
+
+.atl-abbona { margin-top: 1.5rem; }
+.atl-abbona-testo { margin: -0.35rem 0 0.85rem; }
+.atl-abbona-azioni { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.atl-abbona-azioni .adm-btn { flex: 1 1 11rem; justify-content: center; }
+.atl-abbona-link {
+  margin-top: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--adm-muted);
+}

@@ -42,6 +42,8 @@ async function categorie() {
 
   cacheSquadre = squadre.map((s) => ({
     id: s.nome,
+    // Per il calendario da abbonare, il cui indirizzo usa l'identificativo
+    squadraId: s.id,
     label: s.nome,
     color: s.colore,
     cssVar: s.cssVar,

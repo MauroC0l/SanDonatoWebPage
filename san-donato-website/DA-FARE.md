@@ -19,13 +19,15 @@ loro dati e la loro quota, e la tariffa se la prendono da soli — è la riga di
 `tipi_quota` contrassegnata "allenatori", una sola alla volta. Il certificato
 medico a loro non si chiede.
 
-Resta aperto, e va deciso:
+Resta aperto:
 
-- **la segreteria non li vede.** L'elenco "Atleti" nasce dalle richieste di
-  iscrizione accolte (`elencaAtleti` in `server/atleti.js`), e un allenatore
-  che non gioca non ne ha nessuna: la sua quota esiste, ma per chi tiene la
-  cassa non c'è. Finché i 10 € si versano online e la notifica scrive da
-  sé, il buco è nel controllo, non nell'incasso — ma va chiuso;
+- **la segreteria non li vede — DECISO il 27 settembre 2026, da fare.**
+  L'elenco "Atleti" nasce dalle richieste di iscrizione accolte
+  (`elencaAtleti` in `server/atleti.js`), e un allenatore che non gioca non
+  ne ha nessuna: la sua quota esiste, ma per chi tiene la cassa non c'è. La
+  società ha scelto una **sezione apposita, per amministratori e
+  segreteria, con tutti gli allenatori e solo loro**, ciascuno con la sua
+  quota. Non vanno mescolati all'elenco degli atleti;
 - **la quota si assegna quando l'allenatore entra nel sito.** Chi non entra
   mai non risulta dovere niente. È la conseguenza dell'aver scelto di non
   toccare i venti account esistenti con una migrazione;
@@ -50,9 +52,12 @@ tocca la quota: la tariffa si sceglie a parte, come sempre.
 
 Resta aperto:
 
-- **se il primo iscritto si ritira a novembre**, il secondo resta con la
-  tariffa agevolata: nessuno gliela toglie e nessuno avvisa. Prima di
-  scrivere codice serve sapere se la società la toglierebbe davvero;
+- **se il primo iscritto si ritira a novembre — DECISO il 27 settembre
+  2026.** Il secondo tiene la tariffa agevolata **per l'anno in corso**.
+  L'anno dopo, se ridichiara un fratello che non fa più parte della
+  società, il sistema lo **segnala** e la segreteria decide: nessun rifiuto
+  automatico. Non si può ancora scrivere, perché il sito non sa cos'è una
+  stagione: si fa insieme alle stagioni, qui sotto;
 - **il proprio codice fiscale è ancora controllato solo nella lunghezza**
   (`server/rotte/iscrizione.js`). Quello del fratello no: lì il carattere di
   controllo si verifica. La differenza è voluta — stringere anche l'altro
@@ -65,6 +70,37 @@ Resta aperto:
 - **la segreteria non ha un elenco** delle dichiarazioni da controllare: le
   vede aprendo la scheda di quella persona. Con due o tre all'anno va bene
   così; se diventassero trenta, servirebbe una voce nel cruscotto.
+
+### Stagioni, e chi smette
+
+Oggi il sito **non sa cos'è una stagione**, e ne seguono due buchi. Chi
+smette a metà anno o non rinnova resta attivo, con squadra, scheda e quota
+di prima: l'unica leva è sospendere l'account, che toglie l'accesso senza
+dire né quando né perché ha smesso. La quota invece è un campo solo, "quella
+in corso": il giorno che la si cambia, i conti dell'anno prima si perdono.
+
+La proposta accettata: una tabella `stagioni`, un'iscrizione per stagione
+(quota, versamenti, tariffa e dichiarazioni dei fratelli legati a quella) e
+un ritiro con data e motivo, segnato dalla segreteria. Le regole decise dalla
+società il 27 settembre 2026:
+
+1. **il cambio di stagione è automatico**: una stagione dura un anno intero,
+   dal 1° luglio al 30 giugno. Non ci sono buchi fra una stagione e l'altra;
+2. **i dati di un atleta restano per sempre legati alla stagione in cui ha
+   giocato**: squadra, quota, versamenti, tariffa, certificato di quell'anno.
+   La stagione nuova non li sovrascrive, ne apre di nuovi accanto: la
+   stagione 2026/27 di un ragazzo deve leggersi uguale anche nel 2030;
+3. **la quota è divisa in due metà, la seconda a gennaio**: chi smette prima
+   non paga la seconda;
+4. **per quanti anni si tengono i dati di chi non torna** lo deve dire chi
+   segue la privacy della società: non è ancora stato chiesto. "Legati alla
+   stagione" dice dove stanno, non quanto a lungo si possono tenere;
+5. **fratelli**: vedi sopra, il sistema segnala e la segreteria decide.
+
+Da chiarire prima di scrivere codice: se "prima di gennaio" è la data del
+ritiro o quella del versamento; come si comporta il pagamento online con due
+rate; quali dati dell'anagrafica sono della persona (nome, codice fiscale,
+data di nascita) e quali della stagione (squadra, certificato, taglia).
 
 ---
 
@@ -119,11 +155,34 @@ Il vecchio gestionale va spento e i suoi dati — anagrafiche, pagamenti,
 certificati — devono passare di qui. Manca di sapere come estrarli:
 esportazione, accesso al database, o copiatura a mano.
 
-### Calendario ufficiale
+### Calendari ufficiali delle federazioni
 
-I venti calendari Google vanno importati una volta sola e poi spenti. Lo
-schema e lo script ci sono; il calendario del sito al momento gira sui dati
-di prova.
+Fatto per la **pallavolo UISP**: le partite si leggono ogni notte dalle
+cartelle Drive della federazione e il calendario del sito le segue (vedi
+"Calendari ufficiali" nel Readme). Resta:
+
+- **`CRON_SECRET` su Vercel.** Senza, la lettura notturna non parte e il
+  pannello lo dice. È una stringa casuale, da mettere nelle variabili del
+  progetto;
+- **le altre federazioni** (FIGC per il calcio, e le altre): ognuna vuole
+  il suo lettore in `server/calendari/formati/`, scritto sui suoi file veri.
+  Servono i collegamenti alle cartelle o alle pagine da cui si scaricano;
+- **l'orario della lettura notturna** è in UTC, perché così vuole Vercel:
+  alle 23, cioè mezzanotte d'inverno e l'una d'estate. Sul piano gratuito
+  Vercel la fa partire in un momento qualsiasi di quell'ora;
+- **il calendario Google "collettore"** che qualcuno riempie con i titoli
+  "sport categoria - casa / ospite" non serve più: da dove arrivi non si
+  è capito, e va avvisato chi lo aggiorna prima di spegnerlo;
+- **i venti calendari Google di squadra sono vuoti** (verificato con la
+  società il 27 settembre 2026) e **non servono più**: al loro posto ogni
+  squadra ha un calendario da abbonare, `/api/calendario/:id.ics`, che
+  Google e Apple rileggono da soli (deciso lo stesso giorno). Da togliere,
+  con calma: `scripts/importa-eventi-google.mjs`, la colonna
+  `squadre.calendario_google_id` e le variabili `VITE_*_CALENDAR_ID`;
+- **Google Calendar rilegge quando vuole**: di solito ogni 8-24 ore, e non
+  si può forzare. Una partita spostata il giorno stesso sul sito si vede
+  subito, sul telefono di chi usa Google no. Apple rispetta le sei ore
+  indicate nel file.
 
 ---
 

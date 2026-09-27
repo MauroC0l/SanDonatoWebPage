@@ -18,7 +18,7 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "../../../../db/client.js";
 import { eventi, mediaEvento } from "../../../../db/schema.js";
-import { trovaEvento, soloPartite, TIPI_PARTITA } from "../../../eventi.js";
+import { trovaEvento, soloPartite, TIPI_ALLENATORE } from "../../../eventi.js";
 import { puoGestireSquadra } from "../../../autorizzazioni.js";
 import { richiedeAccesso } from "../../../autenticazione.js";
 import { annota } from "../../../registro.js";
@@ -41,7 +41,12 @@ async function eventoGestibile(req) {
     // anche quando l'evento è stato cancellato.
     .select({
       id: eventi.id, squadraId: eventi.squadraId,
-      titolo: eventi.titolo, inizio: eventi.inizio
+      titolo: eventi.titolo, inizio: eventi.inizio,
+      // Per le partite del calendario ufficiale: vedi CAMPI_UFFICIALI
+      gironeId: eventi.gironeId, sparitaIl: eventi.sparitaIl,
+      tipo: eventi.tipo, sport: eventi.sport, avversario: eventi.avversario,
+      fine: eventi.fine, tuttoIlGiorno: eventi.tuttoIlGiorno, luogo: eventi.luogo,
+      risultato: eventi.risultato, parziali: eventi.parziali
     })
     .from(eventi)
     .where(eq(eventi.id, id))
@@ -55,6 +60,39 @@ async function eventoGestibile(req) {
   return riga;
 }
 
+/**
+ * I campi che in una partita del calendario ufficiale scrive la federazione.
+ *
+ * La regola decisa è che vince il calendario ufficiale: cambiarli qui non
+ * servirebbe a niente, perché la lettura notturna li riscriverebbe — e nel
+ * frattempo il sito mostrerebbe un orario che non è quello vero. Restano
+ * liberi marcatori, diretta, descrizione, punto sulla mappa e foto, che la
+ * federazione non conosce.
+ *
+ * Il modulo del pannello li manda comunque, uguali a prima: si rifiuta solo
+ * chi prova a CAMBIARLI.
+ */
+const CAMPI_UFFICIALI = [
+  "squadraId", "tipo", "sport", "titolo", "avversario", "inizio", "fine",
+  "tuttoIlGiorno", "luogo", "risultato", "parziali"
+];
+
+function cambiaCampoUfficiale(riga, dati) {
+  return CAMPI_UFFICIALI.filter((campo) => {
+    if (dati[campo] === undefined) return false;
+
+    const prima = riga[campo];
+    const dopo = dati[campo];
+
+    if (prima instanceof Date || dopo instanceof Date) {
+      if (!prima || !dopo) return Boolean(prima) !== Boolean(dopo);
+      return new Date(prima).getTime() !== new Date(dopo).getTime();
+    }
+    // Vuoto e assente sono la stessa cosa: il modulo manda "" dove non c'è niente
+    return (prima ?? "") !== (dopo ?? "");
+  });
+}
+
 async function leggi(req, res) {
   await eventoGestibile(req);
 
@@ -64,8 +102,21 @@ async function leggi(req, res) {
 }
 
 async function modifica(req, res) {
-  await eventoGestibile(req);
+  const riga = await eventoGestibile(req);
   const dati = valida(schemaEventoModifica, await leggiCorpo(req));
+
+  if (riga.gironeId) {
+    const cambiati = cambiaCampoUfficiale(riga, dati);
+    if (cambiati.length) {
+      throw new ErroreHttp(
+        409,
+        "Questa partita viene dal calendario ufficiale: data, ora, luogo, avversario e "
+        + "risultato li aggiorna la federazione, ogni notte. Qui puoi aggiungere "
+        + "marcatori, diretta, descrizione e foto."
+      );
+    }
+    for (const campo of CAMPI_UFFICIALI) delete dati[campo];
+  }
 
   /*
    * Un allenatore tocca solo partite, e non le programma.
@@ -74,8 +125,8 @@ async function modifica(req, res) {
    * cambiarle il tipo in "riunione" per avere un evento di società.
    */
   if (soloPartite(req.utente)) {
-    if (dati.tipo !== undefined && !TIPI_PARTITA.includes(dati.tipo)) {
-      throw new ErroreHttp(403, "Puoi gestire partite e tornei, non altri eventi.");
+    if (dati.tipo !== undefined && !TIPI_ALLENATORE.includes(dati.tipo)) {
+      throw new ErroreHttp(403, "Puoi gestire partite, tornei e allenamenti, non altri eventi.");
     }
     delete dati.visibileDal;
   }
@@ -122,6 +173,17 @@ async function modifica(req, res) {
 async function elimina(req, res) {
   const riga = await eventoGestibile(req);
   const id = idRichiesto(req);
+
+  /* Una partita ufficiale che c'è ancora tornerebbe alla prossima lettura.
+     Si toglie solo quando la federazione l'ha tolta: allora è sparita dal
+     sito, e cancellarla è fare ordine nel pannello. */
+  if (riga.gironeId && !riga.sparitaIl) {
+    throw new ErroreHttp(
+      409,
+      "Questa partita è nel calendario ufficiale e tornerebbe alla prossima lettura. "
+      + "Se la federazione la toglie, sparisce dal sito da sola."
+    );
+  }
 
   const db = getDb();
   // I collegamenti ai file si tolgono per primi; i file restano in archivio

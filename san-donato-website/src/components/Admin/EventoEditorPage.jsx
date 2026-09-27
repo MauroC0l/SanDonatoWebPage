@@ -18,6 +18,10 @@ import SceltaLuogo from "./SceltaLuogo";
 import CampoData from "./CampoData";
 import "../../css/Admin.css";
 
+/* Quello che di una partita ufficiale si può scrivere dal pannello: la
+   federazione non lo conosce, quindi non lo riscrive. Il resto è suo. */
+const CAMPI_LIBERI = new Set(["descrizione", "marcatori", "diretta"]);
+
 /*
  * I tipi, divisi fra le due sezioni.
  *
@@ -35,6 +39,16 @@ const TIPI_EVENTO = [
   { valore: "evento", etichetta: "Evento" },
   { valore: "riunione", etichetta: "Riunione" },
   { valore: "altro", etichetta: "Altro" }
+];
+
+/* La sezione Eventi di chi amministra raccoglie tutto quello che non arriva
+   dai calendari ufficiali: gli appuntamenti della società, ma anche le
+   amichevoli e gli allenamenti. Le partite ufficiali stanno in Partite. */
+const TIPI_EVENTI_ADMIN = [
+  { valore: "partita", etichetta: "Partita amichevole" },
+  { valore: "torneo", etichetta: "Torneo" },
+  { valore: "allenamento", etichetta: "Allenamento" },
+  ...TIPI_EVENTO
 ];
 
 const SPORT_SQUADRA = ["Calcio", "Pallavolo", "Basket", "Societa"];
@@ -130,6 +144,8 @@ export default function EventoEditorPage({ genere = "partite" }) {
   const [salvataggio, setSalvataggio] = useState(false);
   const [caricandoFile, setCaricandoFile] = useState(false);
   const [errore, setErrore] = useState("");
+  // Pieno solo per le partite del calendario ufficiale: vedi "bloccato" più in basso
+  const [ufficiale, setUfficiale] = useState(null);
   const inputFile = useRef(null);
 
   const gestisciErrore = useCallback((err) => {
@@ -189,6 +205,9 @@ export default function EventoEditorPage({ genere = "partite" }) {
           diretta: evento.diretta ?? ""
         });
         setMedia(evento.media ?? []);
+        setUfficiale(evento.ufficiale
+          ? { sparitaIl: evento.sparitaIl, note: evento.noteUfficiali, inCasa: evento.inCasa }
+          : null);
         setCaricamento(false);
       })
       .catch((err) => {
@@ -250,7 +269,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
 
     setSalvataggio(true);
 
-    const dati = {
+    const tutti = {
       squadraId: Number(form.squadraId),
       tipo: form.tipo,
       sport: form.sport || null,
@@ -265,6 +284,9 @@ export default function EventoEditorPage({ genere = "partite" }) {
       latitudine: form.latitudine ?? null,
       longitudine: form.longitudine ?? null,
       descrizione: form.descrizione.trim() || null,
+      // Il modulo lo chiedeva ma non lo mandava: il collegamento si perdeva
+      // al salvataggio senza che nessuno se ne accorgesse.
+      diretta: form.diretta.trim() || null,
 
       // Solo i campi che questo sport prevede. Quelli che non prevede non
       // partono affatto, così un valore già in archivio non viene cancellato
@@ -279,6 +301,13 @@ export default function EventoEditorPage({ genere = "partite" }) {
           : null
       } : {})
     };
+
+    /* Di una partita ufficiale partono solo i campi che la federazione non
+       conosce: il resto lo riscrive la lettura notturna, e il server
+       rifiuterebbe comunque di cambiarlo. */
+    const dati = ufficiale
+      ? Object.fromEntries(Object.entries(tutti).filter(([campo]) => CAMPI_LIBERI.has(campo)))
+      : tutti;
 
     try {
       if (nuovo) {
@@ -378,6 +407,8 @@ export default function EventoEditorPage({ genere = "partite" }) {
   }
 
   const occupato = salvataggio || caricandoFile;
+  // I campi che in una partita ufficiale scrive la federazione
+  const bloccato = occupato || Boolean(ufficiale);
   const eUnaPartita = form.tipo === "partita" || form.tipo === "torneo";
 
   /* Campi che questo sport non prevede ma che hanno già qualcosa scritto:
@@ -414,6 +445,20 @@ export default function EventoEditorPage({ genere = "partite" }) {
         </div>
       )}
 
+      {ufficiale && (
+        <div className={`adm-alert ${ufficiale.sparitaIl ? "adm-alert-warn" : "adm-alert-info"}`}>
+          <FaInfoCircle />
+          <span>
+            <strong>Partita del calendario ufficiale.</strong>{" "}
+            {ufficiale.sparitaIl
+              ? "La federazione non la elenca più: sul sito non si vede. Se ricompare, torna da sola. "
+              : "Data, ora, campo, avversario e risultato li aggiorna la federazione, ogni notte. "}
+            Qui puoi aggiungere marcatori, diretta, note e foto.
+            {ufficiale.note && <> Nota della federazione: <em>{ufficiale.note}</em>.</>}
+          </span>
+        </div>
+      )}
+
       <div className="adm-editor-grid">
         <div className="adm-editor-col">
 
@@ -425,7 +470,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                 onChange={(v) => aggiorna({ squadraId: v })}
                 opzioni={opzioniSquadra}
                 segnaposto="Scegli…"
-                disabilitato={occupato}
+                disabilitato={bloccato}
                 etichettaAria="Squadra"
                 vuoto="Nessuna squadra fra quelle che gestisci."
               />
@@ -436,8 +481,8 @@ export default function EventoEditorPage({ genere = "partite" }) {
               <Tendina
                 valore={form.tipo}
                 onChange={(v) => aggiorna({ tipo: v })}
-                opzioni={ePartita ? TIPI_PARTITA : TIPI_EVENTO}
-                disabilitato={occupato}
+                opzioni={ePartita ? TIPI_PARTITA : TIPI_EVENTI_ADMIN}
+                disabilitato={bloccato}
                 etichettaAria="Tipo di evento"
               />
             </div>
@@ -454,7 +499,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
               valore={form.sport}
               onChange={(v) => aggiorna({ sport: v })}
               opzioni={opzioniSport}
-              disabilitato={occupato}
+              disabilitato={bloccato}
               etichettaAria="Sport dell'evento"
             />
           </div>
@@ -467,7 +512,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
               value={form.titolo}
               onChange={(e) => aggiorna({ titolo: e.target.value })}
               placeholder="Es. Allievi - Rivoli"
-              disabled={occupato}
+              disabled={bloccato}
             />
           </label>
 
@@ -478,7 +523,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
               className="adm-input"
               value={form.avversario}
               onChange={(e) => aggiorna({ avversario: e.target.value })}
-              disabled={occupato}
+              disabled={bloccato}
             />
           </label>
 
@@ -487,7 +532,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
               type="checkbox"
               checked={form.tuttoIlGiorno}
               onChange={(e) => aggiorna({ tuttoIlGiorno: e.target.checked })}
-              disabled={occupato}
+              disabled={bloccato}
             />
             <span className="adm-check-box" aria-hidden="true" />
             <span>Dura tutto il giorno (senza orario)</span>
@@ -500,7 +545,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                 valore={form.inizio}
                 onChange={(v) => aggiorna({ inizio: v })}
                 conOra={!form.tuttoIlGiorno}
-                disabilitato={occupato}
+                disabilitato={bloccato}
                 etichettaAria="Inizio dell'evento"
               />
             </div>
@@ -512,7 +557,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                 onChange={(v) => aggiorna({ fine: v })}
                 conOra={!form.tuttoIlGiorno}
                 minimo={form.inizio || null}
-                disabilitato={occupato}
+                disabilitato={bloccato}
                 etichettaAria="Fine dell'evento"
               />
             </div>
@@ -523,7 +568,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
             latitudine={form.latitudine}
             longitudine={form.longitudine}
             onChange={aggiorna}
-            disabilitato={occupato}
+            disabilitato={bloccato}
           />
 
           <label className="adm-field">
@@ -620,7 +665,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                   value={form.risultato}
                   onChange={(e) => aggiorna({ risultato: e.target.value })}
                   placeholder={esito.risultato.segnaposto}
-                  disabled={occupato}
+                  disabled={bloccato}
                 />
               </label>
             )}
@@ -634,7 +679,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                   value={form.parziali}
                   onChange={(e) => aggiorna({ parziali: e.target.value })}
                   placeholder={esito.parziali.segnaposto}
-                  disabled={occupato}
+                  disabled={bloccato}
                 />
                 <span className="adm-hint">Separati da virgola, nell&apos;ordine in cui si sono giocati.</span>
               </label>

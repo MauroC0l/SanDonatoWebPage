@@ -7,6 +7,7 @@ import {
 import { getProfilo, eventiDiSquadra, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { linkMappa } from "../../utils/linkMappa";
+import AbbonaCalendario from "./AbbonaCalendario";
 import "../../css/Admin.css";
 
 /** Quanto avanti si guarda, e quanto indietro. */
@@ -300,6 +301,11 @@ export default function SquadraPage() {
           />
         </>
       )}
+
+      {/* In fondo e non in cima: prima si guarda il calendario, poi ci si
+          chiede come averlo sul telefono. C'è anche a calendario vuoto,
+          perché le partite arriveranno e l'abbonamento le porterà da sé. */}
+      {scelta?.squadraId && <AbbonaCalendario squadraId={scelta.squadraId} nome={scelta.squadra} />}
     </div>
   );
 }
