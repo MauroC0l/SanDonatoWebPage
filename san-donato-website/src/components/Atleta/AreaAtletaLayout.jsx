@@ -5,6 +5,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { areaDi, AREA_ATLETA } from "../../utils/percorsi";
+import NavigazioneMobile from "../Admin/NavigazioneMobile";
 
 import "../../css/Admin.css";
 
@@ -34,6 +35,14 @@ const SEZIONI = [
 
   { a: "/area-riservata/profilo", etichetta: "Profilo", Icona: FaUserCircle }
 ];
+
+const PROFILO = SEZIONI[SEZIONI.length - 1];
+
+/* Lo stesso elenco nell'ordine del telefono: le prime quattro vanno nella
+   barra in basso, le altre nel menu. */
+const SEZIONI_MOBILE = ["Home", "Squadra", "Iscrizione", "Quota", "Contatti", "Profilo"]
+  .map((nome) => SEZIONI.find((s) => s.etichetta === nome))
+  .map(({ a, fine, etichetta, Icona }) => ({ a, esatta: fine, etichetta, Icona }));
 
 export default function AreaAtletaLayout() {
   const { user, isAuthenticated, isChecking, logout, deveCambiarePassword } = useAuth();
@@ -89,11 +98,12 @@ export default function AreaAtletaLayout() {
           </Link>
 
           <div className="adm-user">
-            <a href="/" className="adm-ghost-btn" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
+            {/* Sul telefono stanno nel menu in basso */}
+            <a href="/" className="adm-ghost-btn adm-solo-schermo-grande" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
               <FaExternalLinkAlt /> <span className="adm-hide-sm">Vedi il sito</span>
             </a>
 
-            <button type="button" className="adm-ghost-btn adm-btn-esci" onClick={handleLogout} title="Esci">
+            <button type="button" className="adm-ghost-btn adm-btn-esci adm-solo-schermo-grande" onClick={handleLogout} title="Esci">
               <FaSignOutAlt /> <span className="adm-hide-sm">Esci</span>
             </button>
           </div>
@@ -122,6 +132,16 @@ export default function AreaAtletaLayout() {
       <main className="adm-main">
         <Outlet />
       </main>
+
+      {/* Sul telefono: Home, Squadra, Iscrizione e Quota nella barra in
+          basso, che sono le quattro domande di chi gioca; contatti e
+          profilo nel menu. Chi aspetta ancora una squadra ha solo il
+          profilo, come sopra. */}
+      <NavigazioneMobile
+        sezioni={inAttesa ? [] : SEZIONI_MOBILE}
+        extra={inAttesa ? [PROFILO] : []}
+        onEsci={handleLogout}
+      />
     </div>
   );
 }

@@ -5,12 +5,14 @@ import {
   FaEuroSign,
   FaImages,
   FaClipboardCheck,
-  FaCalendarCheck
+  FaCalendarCheck,
+  FaUserCircle
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { AREA_ATLETA } from "../../utils/percorsi";
 import Ritratto from "./Ritratto";
+import NavigazioneMobile from "./NavigazioneMobile";
 
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
@@ -52,6 +54,21 @@ const SEZIONI = [
      propria quota. Oggi la vede chi allena — anche un allenatore è un
      iscritto che versa la sua quota — e chiunque altro la capacità dica. */
   { a: "iscrizione", etichetta: "Iscrizione", Icona: FaClipboardCheck, capacita: ["iscrizione.propria"] }
+];
+
+/**
+ * Quali sezioni vanno nella barra in basso sul telefono, in ordine.
+ *
+ * Ci stanno quattro voci più il menu: per ciascun ruolo vincono le prime
+ * quattro di questo elenco che quel ruolo può aprire. Ne esce la barra
+ * giusta per tutti senza scriverla ruolo per ruolo — all'amministratore
+ * Home, Partite, Richieste, Atleti; alla segreteria Home, Richieste,
+ * Atleti, Quote; a chi scrive le notizie Home, Partite, Notizie, Libreria.
+ * Il resto sta nel menu, a un tocco.
+ */
+const PRIORITA_MOBILE = [
+  "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
+  "eventi", "iscrizione", "calendari", "squadre", "utenti", "registro"
 ];
 
 /**
@@ -132,6 +149,10 @@ export default function AdminLayout() {
     navigate("/login", { replace: true });
   };
 
+  const perMobile = [...visibili]
+    .sort((x, y) => PRIORITA_MOBILE.indexOf(x.a) - PRIORITA_MOBILE.indexOf(y.a))
+    .map(({ a, etichetta, Icona, esatta }) => ({ a: a ? `${area}/${a}` : area, etichetta, Icona, esatta }));
+
   return (
     <div className="adm-shell">
       {/**
@@ -155,7 +176,9 @@ export default function AdminLayout() {
           </Link>
 
           <div className="adm-user">
-            <a href="/" className="adm-ghost-btn" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
+            {/* Sul telefono "Vedi il sito" ed "Esci" stanno nel menu in basso:
+                qui, accanto al marchio, resta solo la propria foto. */}
+            <a href="/" className="adm-ghost-btn adm-solo-schermo-grande" target="_blank" rel="noreferrer" title="Apri il sito pubblico">
               <FaExternalLinkAlt /> <span className="adm-hide-sm">Vedi il sito</span>
             </a>
 
@@ -173,7 +196,7 @@ export default function AdminLayout() {
               <span className="adm-profilo-nome">{user?.name}</span>
             </NavLink>
 
-            <button type="button" className="adm-ghost-btn adm-btn-esci" onClick={handleLogout} title="Esci">
+            <button type="button" className="adm-ghost-btn adm-btn-esci adm-solo-schermo-grande" onClick={handleLogout} title="Esci">
               <FaSignOutAlt /> <span className="adm-hide-sm">Esci</span>
             </button>
           </div>
@@ -203,6 +226,12 @@ export default function AdminLayout() {
       <main className="adm-main">
         <Outlet />
       </main>
+
+      <NavigazioneMobile
+        sezioni={perMobile}
+        extra={[{ a: `${area}/profilo`, etichetta: "Profilo", Icona: FaUserCircle }]}
+        onEsci={handleLogout}
+      />
     </div>
   );
 }

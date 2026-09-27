@@ -594,7 +594,8 @@ export default function PersonePage() {
         </div>
       ) : (
         <div className="adm-tabella-scorrevole">
-          <table className="adm-tabella">
+          {/* adm-tabella-persone: sul telefono ogni riga diventa una scheda */}
+          <table className="adm-tabella adm-tabella-persone">
             <thead>
               <tr>
                 <th scope="col">Persona</th>

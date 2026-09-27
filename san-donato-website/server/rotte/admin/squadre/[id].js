@@ -1,19 +1,22 @@
 /**
  * /api/admin/squadre/:id — modifica di una squadra.
  *
- *   PATCH  nome, sport, colore, ordine, attiva
+ *   PATCH   nome, sport, colore, ordine, attiva
+ *   DELETE  solo una squadra VUOTA
  *
- * Non esiste il DELETE, ed è voluto: cancellare una squadra porterebbe via
- * con sé i suoi eventi (la chiave esterna è in cascata) e lascerebbe senza
- * squadra le richieste di iscrizione accolte. Una squadra che non esiste più
- * si DISATTIVA — sparisce dalle tendine e dai filtri, ma il campionato
- * dell'anno scorso resta consultabile.
+ * Cancellare una squadra porterebbe via con sé i suoi eventi (la chiave
+ * esterna è in cascata, con marcatori e foto) e lascerebbe senza squadra
+ * gli iscritti accolti. Per questo si cancella solo una squadra che non ha
+ * niente: niente partite, nessun iscritto, nessun girone ufficiale — di
+ * solito una creata per sbaglio. Tutte le altre si DISATTIVANO: spariscono
+ * dalle tendine e dai filtri, ma il campionato dell'anno scorso resta
+ * consultabile.
  */
 
-import { eq, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../../../db/client.js";
-import { squadre, richiesteIscrizione } from "../../../../db/schema.js";
+import { squadre, richiesteIscrizione, eventi, gironiUfficiali } from "../../../../db/schema.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
 import { annota } from "../../../registro.js";
 import { creaSlug } from "../../../sanitizza.js";
@@ -34,15 +37,61 @@ const schemaModifica = z.object({
   attiva: z.boolean().optional()
 });
 
+/** Cancella una squadra, ma solo se non c'è niente da perdere. */
+async function elimina(req, res, id) {
+  const db = getDb();
+
+  const [esistente] = await db
+    .select({ id: squadre.id, nome: squadre.nome })
+    .from(squadre)
+    .where(eq(squadre.id, id))
+    .limit(1);
+  if (!esistente) return errore(res, 404, "Squadra non trovata.");
+
+  const [[partite], [iscritti], [gironi]] = await Promise.all([
+    db.select({ n: count() }).from(eventi).where(eq(eventi.squadraId, id)),
+    db.select({ n: count() }).from(richiesteIscrizione)
+      .where(and(eq(richiesteIscrizione.squadraId, id), eq(richiesteIscrizione.stato, "approvata"))),
+    db.select({ n: count() }).from(gironiUfficiali).where(eq(gironiUfficiali.squadraId, id))
+  ]);
+
+  const cosa = [
+    partite.n && `${partite.n} ${partite.n === 1 ? "evento" : "eventi"} in calendario`,
+    iscritti.n && `${iscritti.n} ${iscritti.n === 1 ? "iscritto" : "iscritti"}`,
+    gironi.n && `${gironi.n} ${gironi.n === 1 ? "girone ufficiale collegato" : "gironi ufficiali collegati"}`
+  ].filter(Boolean);
+
+  if (cosa.length) {
+    throw new ErroreHttp(
+      409,
+      `"${esistente.nome}" ha ${cosa.join(", ")}: cancellarla li porterebbe via. `
+      + "Disattivala: sparisce dal sito e la sua storia resta."
+    );
+  }
+
+  await db.delete(squadre).where(eq(squadre.id, id));
+
+  await annota(req.utente, {
+    azione: "squadre.elimina",
+    tipo: "squadra",
+    id,
+    descrizione: `Ha cancellato la squadra "${esistente.nome}", che era vuota`
+  });
+
+  return json(res, { eliminata: id });
+}
+
 export default conGestioneErrori(
   richiedeCapacita("squadre.gestisci", async (req, res) => {
-    if (req.method !== "PATCH" && req.method !== "PUT") {
-      res.setHeader("Allow", "PATCH, PUT");
-      return errore(res, 405, `Metodo ${req.method} non consentito.`);
-    }
-
     const id = Number(parametri(req).id);
     if (!Number.isInteger(id) || id <= 0) throw new ErroreHttp(400, "Identificativo non valido.");
+
+    if (req.method === "DELETE") return elimina(req, res, id);
+
+    if (req.method !== "PATCH" && req.method !== "PUT") {
+      res.setHeader("Allow", "PATCH, PUT, DELETE");
+      return errore(res, 405, `Metodo ${req.method} non consentito.`);
+    }
 
     const dati = valida(schemaModifica, await leggiCorpo(req));
     if (Object.keys(dati).length === 0) throw new ErroreHttp(400, "Non c'è niente da salvare.");

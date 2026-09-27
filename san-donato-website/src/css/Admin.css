@@ -2674,7 +2674,9 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 
 @media (max-width: 640px) {
   .adm-intervallo-etichetta { width: 100%; padding-bottom: 0; }
-  .adm-intervallo-campo { flex-basis: 100%; max-width: none; }
+  /* "Dal" e "Al" affiancati: una sotto l'altra, con l'etichetta sopra,
+     il riquadro occupava metà schermo prima del registro vero */
+  .adm-intervallo-campo { flex: 1 1 calc(50% - 0.4rem); max-width: none; }
   .adm-intervallo .adm-btn { width: 100%; }
 }
 
@@ -3268,4 +3270,301 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8rem;
   color: var(--adm-muted);
+}
+
+/* =========================================
+   Telefono: barra in basso e menu
+   =========================================
+
+   Sul computer la navigazione è la riga sotto al marchio. Sotto i 760px
+   quella riga spariva in cinque righe e un terzo dello schermo: qui la
+   sostituisce la barra in basso di NavigazioneMobile.jsx, con quattro
+   sezioni e il menu. */
+
+.adm-barra-basso,
+.adm-menu-velo,
+.adm-menu-foglio { display: none; }
+
+@media (max-width: 760px) {
+  .adm-topbar-nav,
+  .adm-solo-schermo-grande { display: none !important; }
+
+  /* In alto resta una riga sottile: marchio a sinistra, la propria foto
+     a destra. Il nome della pagina lo dice già il titolo sotto. */
+  .adm-topbar-alta { padding: 0.45rem 1rem; }
+  .adm-profilo-nome { display: none; }
+
+  /* Lo spazio per la barra, che sta sopra al fondo della pagina */
+  .adm-main { padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)); }
+
+  .adm-barra-basso {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0.2rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Sopra al velo del menu: resta toccabile anche a menu aperto, ed è
+       da lì che il menu si richiude */
+    z-index: 60;
+    padding: 0.3rem 0.35rem calc(0.3rem + env(safe-area-inset-bottom));
+    background: var(--adm-surface);
+    border-top: 1px solid var(--adm-line);
+    box-shadow: 0 -6px 18px -12px rgba(16, 32, 56, .35);
+  }
+
+  .adm-barra-voce {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.22rem;
+    min-width: 0;
+    min-height: 3.1rem;
+    padding: 0.35rem 0.2rem;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--adm-muted);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .adm-barra-voce svg { font-size: 1.15rem; }
+  .adm-barra-voce span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm-barra-voce.is-active { background: var(--adm-blue-soft); color: var(--adm-blue); }
+
+  .adm-menu-velo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgba(16, 32, 56, .38);
+    animation: adm-menu-velo .15s ease-out;
+  }
+
+  .adm-menu-foglio {
+    display: block;
+    position: fixed;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: calc(4.35rem + env(safe-area-inset-bottom));
+    z-index: 58;
+    max-height: calc(100svh - 8rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.85rem;
+    border-radius: 16px;
+    background: var(--adm-surface);
+    box-shadow: 0 18px 48px -12px rgba(16, 32, 56, .45);
+    animation: adm-menu-foglio .18s ease-out;
+  }
+
+  .adm-menu-griglia {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+  }
+
+  .adm-menu-voce {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 4.6rem;
+    padding: 0.7rem 0.3rem;
+    border-radius: 12px;
+    background: var(--adm-line-soft);
+    color: var(--adm-ink);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+  }
+  .adm-menu-voce svg { font-size: 1.2rem; color: var(--adm-muted); }
+  .adm-menu-voce.is-active { background: var(--adm-blue-soft); color: var(--adm-blue); }
+  .adm-menu-voce.is-active svg { color: var(--adm-blue); }
+
+  .adm-menu-fondo {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--adm-line-soft);
+  }
+  /* Senza sezioni nel menu (chi aspetta una squadra) il separatore non serve */
+  .adm-menu-foglio > .adm-menu-fondo:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+  .adm-menu-azione {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.9rem;
+    padding: 0.6rem;
+    border: 1px solid var(--adm-line);
+    border-radius: 10px;
+    background: var(--adm-surface);
+    color: var(--adm-ink);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .adm-menu-esci { color: var(--adm-danger); }
+}
+
+@keyframes adm-menu-velo { from { opacity: 0; } }
+@keyframes adm-menu-foglio { from { opacity: 0; transform: translateY(12px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-menu-velo, .adm-menu-foglio { animation: none; }
+}
+
+/* =========================================
+   Telefono: le pagine
+   =========================================
+
+   Fotografate una per una a 390px prima di scrivere queste regole. Il
+   problema comune era l'altezza: filtri impilati uno sotto l'altro e
+   riquadri uno per riga spingevano il contenuto vero sotto al bordo dello
+   schermo. */
+
+/* L'icona dei titoli di sezione sta sulla riga del titolo, non sopra */
+.adm-gruppo-titolo { display: flex; align-items: center; gap: 0.4rem; }
+
+@media (max-width: 760px) {
+  /* I riquadri dei numeri due per riga: con la larghezza minima di prima
+     su 358px ne stava uno, e cinque riquadri riempivano lo schermo. */
+  .adm-riepilogo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+  .adm-riquadro { padding: 0.65rem 0.75rem; }
+
+  /* Filtri: le pillole in una riga sola che scorre di lato, le tendine due
+     per riga, la ricerca a tutta larghezza. */
+  .adm-toolbar { gap: 0.6rem; }
+  .adm-toolbar .adm-chip-group {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Il bordo della pagina, non quello del riquadro: la riga scorre fino
+       al margine dello schermo come ci si aspetta su un telefono */
+    margin: 0 -1rem;
+    padding: 0 1rem 2px;
+  }
+  .adm-toolbar .adm-chip-group::-webkit-scrollbar { display: none; }
+  .adm-toolbar .adm-chip { flex-shrink: 0; }
+  /* .tnd per vincere su Tendina.css, che dà alle tendine dei filtri 16rem fissi */
+  .adm-toolbar .tnd.adm-filter-select { flex: 1 1 9.5rem; max-width: none; width: auto; }
+  .adm-toolbar .adm-search { flex: 1 1 100%; min-width: 0; }
+
+  /* Le targhette non si spezzano: "tu" diventava una T sopra a una U */
+  .adm-role-tag, .adm-status { white-space: nowrap; }
+
+  /* ---------- Utenti: da tabella a schede ----------
+     Cinque colonne su 358px scorrevano di lato, e il nome restava mezzo
+     fuori. Qui ogni riga è una scheda: persona e pulsante in alto, ruolo e
+     stato sotto, l'ultimo accesso in fondo. */
+  .adm-tabella-persone thead { display: none; }
+  /* Senza la larghezza minima del computer (44rem): con quella ogni scheda
+     restava larga 704px e il pulsante per aprirla finiva fuori dallo schermo */
+  .adm-tabella-persone { min-width: 0; }
+  .adm-tabella-persone,
+  .adm-tabella-persone tbody { display: block; }
+
+  .adm-tabella-persone tr.adm-riga {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "persona persona azioni"
+      "ruolo   stato   stato"
+      "accesso accesso accesso";
+    align-items: center;
+    gap: 0.45rem 0.5rem;
+    padding: 0.8rem 0.9rem;
+    border-bottom: 1px solid var(--adm-line-soft);
+  }
+  .adm-tabella-persone tr.adm-riga > td { display: block; padding: 0; border: 0; }
+  .adm-tabella-persone tr.adm-riga > td:nth-child(1) { grid-area: persona; }
+  .adm-tabella-persone tr.adm-riga > td:nth-child(2) { grid-area: ruolo; }
+  .adm-tabella-persone tr.adm-riga > td:nth-child(3) { grid-area: stato; }
+  .adm-tabella-persone tr.adm-riga > td:nth-child(4) { grid-area: accesso; font-size: 0.8rem; color: var(--adm-muted); }
+  /* Larga quanto il pulsante: la colonna delle azioni sul computer ha una
+     larghezza minima, e qui restava a zero con il pulsante invisibile */
+  .adm-tabella-persone tr.adm-riga > td:nth-child(5) { grid-area: azioni; width: auto; min-width: 2.25rem; }
+  /* Foto accanto al nome, come sul computer */
+  .adm-tabella-persone tr.adm-riga > td.adm-cella-persona { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
+  .adm-tabella-persone tr.adm-riga > td:nth-child(4).adm-accesso-vecchio { color: var(--adm-warn); }
+
+  .adm-tabella-persone tr.adm-riga-dettaglio { display: block; }
+  .adm-tabella-persone tr.adm-riga-dettaglio > td { display: block; padding: 0.9rem; }
+}
+
+/* ---------- Calendari ufficiali: gironi collegati, da tabella a schede ----------
+   Sul telefono si vedevano due colonne su cinque, e la tendina della
+   squadra — il comando della tabella — restava fuori a destra. */
+@media (max-width: 760px) {
+  .adm-cal-tabella { min-width: 0; }
+  .adm-cal-tabella thead { display: none; }
+  .adm-cal-tabella,
+  .adm-cal-tabella tbody { display: block; }
+
+  .adm-cal-tabella tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "girone   girone"
+      "foglio   partite"
+      "prossima prossima"
+      "squadra  squadra";
+    gap: 0.35rem 0.75rem;
+    padding: 0.85rem 0.9rem;
+    border-bottom: 1px solid var(--adm-line-soft);
+  }
+  .adm-cal-tabella tbody tr:last-child { border-bottom: 0; }
+  .adm-cal-tabella tbody td { display: block; padding: 0; border: 0; font-size: 0.85rem; }
+
+  .adm-cal-tabella tbody td:nth-child(1) { grid-area: girone; font-weight: 700; color: var(--adm-ink); }
+  .adm-cal-tabella tbody td:nth-child(2) { grid-area: foglio; }
+  .adm-cal-tabella tbody td:nth-child(3) { grid-area: partite; }
+  .adm-cal-tabella tbody td:nth-child(4) { grid-area: prossima; }
+  .adm-cal-tabella tbody td:nth-child(5) { grid-area: squadra; margin-top: 0.3rem; min-width: 0; }
+
+  /* Senza intestazione, ogni dato dice cos'è */
+  .adm-cal-tabella tbody td:nth-child(2)::before,
+  .adm-cal-tabella tbody td:nth-child(3)::before,
+  .adm-cal-tabella tbody td:nth-child(4)::before {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--adm-muted);
+  }
+  .adm-cal-tabella tbody td:nth-child(2)::before { content: "Nel foglio"; }
+  .adm-cal-tabella tbody td:nth-child(3)::before { content: "Partite"; }
+  .adm-cal-tabella tbody td:nth-child(4)::before { content: "Prossima"; }
+
+  /* La tendina a tutta larghezza: qui è il comando principale */
+  .adm-cal-tabella .tnd.tnd-mini { width: 100%; }
+}
+
+/* Computer di media larghezza: tredici voci a 1280px andavano su due righe
+   per una manciata di pixel. Un po' meno di aria dentro a ogni voce e
+   stanno su una. */
+@media (min-width: 761px) and (max-width: 1400px) {
+  .adm-topbar-nav .adm-nav { gap: 0.1rem; }
+  .adm-nav-link { padding: 0.5rem 0.62rem; }
 }

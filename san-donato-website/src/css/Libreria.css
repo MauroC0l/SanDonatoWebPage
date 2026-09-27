@@ -805,3 +805,12 @@
 /* Le etichette proposte: due righe e poi si scorre. Qui dentro, con
    trenta etichette in uso, si mangiavano il modulo intero. */
 .lib-pannello .lib-suggerite { max-height: 3.6rem; }
+
+/* Telefono: ogni cartella della striscia prende la larghezza del suo nome.
+   Stringendosi per starci tutte, "File condivisi" diventava "File con…" e
+   la prima voce si allungava in altezza. */
+@media (max-width: 760px) {
+  .lib-cartelle, .lib-fisse, .lib-cartelle-elenco { align-items: center; }
+  .lib-cartella { flex: 0 0 auto; }
+  .lib-cartella-nome { overflow: visible; }
+}
