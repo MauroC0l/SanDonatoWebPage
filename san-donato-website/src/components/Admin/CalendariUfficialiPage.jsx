@@ -195,12 +195,13 @@ function Girone({ g, area, occupato, onRinomina, onIgnora }) {
         {nome === null ? (
           <div className="adm-cal-girone-nome">
             <strong>{g.nome}</strong>
+            {/* Con la scritta, non la sola matita: da sola non si notava */}
             <button
-              type="button" className="adm-icon-btn adm-cal-rinomina"
-              onClick={() => setNome(g.nomePersonale ?? "")}
-              title="Rinomina il girone" aria-label={`Rinomina ${g.nome}`}
+              type="button" className="adm-btn adm-btn-ghost adm-cal-rinomina"
+              onClick={() => setNome(g.nomePersonale ?? g.nome)}
+              aria-label={`Rinomina ${g.nome}`}
             >
-              <FaPencilAlt />
+              <FaPencilAlt /> Rinomina
             </button>
           </div>
         ) : (
@@ -517,26 +518,10 @@ export default function CalendariUfficialiPage() {
       )}
 
       {dati.fonti.map((fonte) => {
-        if (modifica?.id === fonte.id) {
-          return (
-            <ModuloFonte
-              key={fonte.id}
-              titolo={`Modifica "${fonte.nome}"`}
-              iniziale={{
-                nome: fonte.nome,
-                formato: fonte.formato,
-                cartella: fonte.indirizzo,
-                nomiNostri: fonte.nomiNostri.join("\n"),
-                palestreCasa: fonte.palestreCasa.join("\n"),
-                attiva: fonte.attiva
-              }}
-              formati={dati.formati}
-              salvataggio={salvataggio}
-              onSalva={salvaFonte}
-              onAnnulla={() => setModifica(null)}
-            />
-          );
-        }
+        /* In modifica il modulo prende il posto della sola intestazione: i
+           gironi restano dentro alla scheda del torneo anche mentre la si
+           modifica, invece di sparire finché non si salva. */
+        const inModifica = modifica?.id === fonte.id;
 
         const esito = ESITI[inLettura === fonte.id ? "occupata" : fonte.esito];
         const errori = fonte.riepilogo?.errori ?? [];
@@ -544,7 +529,24 @@ export default function CalendariUfficialiPage() {
         const iscritte = suoi.filter((g) => g.squadraId).length;
 
         return (
-          <section key={fonte.id} className={`adm-panel adm-cal-torneo ${fonte.attiva ? "" : "is-disattivato"}`}>
+          <section key={fonte.id} className={`adm-panel adm-cal-torneo ${fonte.attiva || inModifica ? "" : "is-disattivato"}`}>
+            {inModifica ? (
+              <ModuloFonte
+                titolo={`Modifica "${fonte.nome}"`}
+                iniziale={{
+                  nome: fonte.nome,
+                  formato: fonte.formato,
+                  cartella: fonte.indirizzo,
+                  nomiNostri: fonte.nomiNostri.join("\n"),
+                  palestreCasa: fonte.palestreCasa.join("\n"),
+                  attiva: fonte.attiva
+                }}
+                formati={dati.formati}
+                salvataggio={salvataggio}
+                onSalva={salvaFonte}
+                onAnnulla={() => setModifica(null)}
+              />
+            ) : (<>
             <header className="adm-cal-fonte-testa">
               <h2 className="adm-cal-fonte-nome">{fonte.nome}</h2>
               <span className="adm-sport-tag">{formatoDi(fonte.formato)?.nome ?? fonte.formato}</span>
@@ -573,6 +575,7 @@ export default function CalendariUfficialiPage() {
                 </div>
               </div>
             )}
+            </>)}
 
             <h3 className="adm-panel-title adm-cal-gironi-titolo">
               Gironi con una nostra squadra · {suoi.length}
@@ -596,7 +599,7 @@ export default function CalendariUfficialiPage() {
               </ul>
             )}
 
-            <footer className="adm-cal-fonte-azioni">
+            {!inModifica && <footer className="adm-cal-fonte-azioni">
               <button type="button" className="adm-btn adm-btn-ghost" onClick={() => leggi(fonte)} disabled={letturaInCorso}>
                 <FaSyncAlt className={inLettura === fonte.id ? "adm-gira" : ""} />
                 {inLettura === fonte.id ? " Lettura…" : " Leggi adesso"}
@@ -615,7 +618,7 @@ export default function CalendariUfficialiPage() {
                   <FaTimes /> Togli
                 </button>
               )}
-            </footer>
+            </footer>}
           </section>
         );
       })}
