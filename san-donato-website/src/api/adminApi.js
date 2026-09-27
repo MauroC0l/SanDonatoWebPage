@@ -454,6 +454,11 @@ export async function aggiornaSquadra(id, dati) {
   return squadra;
 }
 
+/** Solo una squadra vuota: il server rifiuta con 409 se ha partite, iscritti o gironi. */
+export async function eliminaSquadra(id) {
+  return chiedi(`/admin/squadre/${id}`, { method: "DELETE" });
+}
+
 export async function dissociaSquadra(utenteId, squadraId) {
   return chiedi(`/admin/squadre?utenteId=${utenteId}&squadraId=${squadraId}`, {
     method: "DELETE"

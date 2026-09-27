@@ -140,8 +140,13 @@ export default function Tendina({
     return () => document.removeEventListener("mousedown", fuori);
   }, [aperta, chiudi]);
 
+  /* Il campo di ricerca prende il fuoco da solo solo con un mouse. Su un
+     telefono il fuoco apre la tastiera, che copre metà dello schermo proprio
+     mentre si voleva scegliere una voce: la ricerca resta lì, e la tastiera
+     arriva solo se la si tocca. */
   useEffect(() => {
-    if (aperta && conRicerca) campoRicerca.current?.focus();
+    if (!aperta || !conRicerca) return;
+    if (window.matchMedia?.("(pointer: fine)").matches) campoRicerca.current?.focus();
   }, [aperta, conRicerca]);
 
   // La voce evidenziata deve restare in vista anche quando ci si arriva con

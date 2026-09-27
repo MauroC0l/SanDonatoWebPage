@@ -588,3 +588,29 @@ describe("l'allenatore mette a calendario", () => {
     await chiedi(`/admin/eventi/${allenamento.corpo.evento.id}`, { method: "DELETE" });
   });
 });
+
+describe("cancellare una squadra", () => {
+  seAccesa("si cancella solo una squadra vuota", async () => {
+    const { chiedi } = await entra("admin");
+
+    // Vuota: nata adesso, senza partite né iscritti né calendari
+    const creata = await chiedi("/admin/squadre", {
+      method: "POST",
+      body: JSON.stringify({ nome: `Prova cancellazione ${Date.now()}`, sport: "Calcio" })
+    });
+    expect(creata.stato).toBe(201);
+    expect((await chiedi(`/admin/squadre/${creata.corpo.squadra.id}`, { method: "DELETE" })).stato).toBe(200);
+
+    // Con qualcosa dentro: si rifiuta, e dice perché
+    const { corpo } = await chiedi("/admin/squadre");
+    const piena = corpo.squadre.find((s) => s.eventi > 0 || s.atleti > 0);
+    const rifiuto = await chiedi(`/admin/squadre/${piena.id}`, { method: "DELETE" });
+    expect(rifiuto.stato).toBe(409);
+    expect(rifiuto.corpo.errore).toMatch(/Disattivala/);
+  });
+
+  seAccesa("la segreteria non cancella squadre", async () => {
+    const { chiedi } = await entra("segreteria");
+    expect((await chiedi("/admin/squadre/1", { method: "DELETE" })).stato).toBe(403);
+  });
+});

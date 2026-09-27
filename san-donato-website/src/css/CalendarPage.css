@@ -795,3 +795,58 @@ body.cp-modal-open { overflow: hidden; }
 }
 
 .cp-abbona-btn:hover { border-color: var(--cp-arancio); color: var(--cp-arancio); }
+
+/* ---------- Mese vuoto: dov'è il prossimo evento ---------- */
+
+.cp-mese-vuoto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: .8rem 1rem;
+  border: 1px solid var(--cp-bordo);
+  border-left: 3px solid var(--cp-arancio);
+  border-radius: 12px;
+  background: var(--cp-carta);
+  color: var(--cp-testo);
+  font-size: .92rem;
+}
+
+.cp-mese-vuoto strong { color: var(--cp-inchiostro); }
+
+.cp-mese-vuoto-vai {
+  flex-shrink: 0;
+  padding: .5rem .85rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--cp-arancio);
+  color: #fff;
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- Telefono: il pannello dei filtri ---------- */
+
+@media (max-width: 820px) {
+  /* Scorre il pannello, non la pagina dietro: arrivati in fondo lo
+     scorrimento si ferma lì invece di passare al calendario. */
+  .cp-sidebar { max-height: 88vh; overscroll-behavior: contain; }
+
+  /* Un solo scorrimento, quello del pannello. Dentro, "Sport e squadre"
+     aveva il suo, limitato a pochi centimetri: si vedevano due squadre. */
+  .cp-sidebar .cp-card-filtri { flex: none; max-height: none; overflow: visible; }
+
+  /* Voci più grandi: si toccano con il pollice, non si cliccano */
+  .cp-sidebar .cp-filter-item { padding-top: .7rem; padding-bottom: .7rem; font-size: .95rem; }
+}
+
+/* Gli eventi dei giorni grigi (mese prima, mese dopo) si vedono, ma
+   attenuati come il numero del giorno: sono lì per orientarsi, non sono il
+   mese che si sta guardando. Restano toccabili. */
+.cp-other-month .cp-event-pill { opacity: .45; }
+.cp-other-month .cp-event-pill:hover,
+.cp-other-month .cp-event-pill:focus-visible { opacity: .8; }

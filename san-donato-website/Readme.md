@@ -179,12 +179,15 @@ Come funziona, in quattro pezzi:
 
 - **Fonti.** Una cartella Google Drive in cui la federazione pubblica un
   file per girone (oggi la pallavolo UISP). L'amministratore le aggiunge
-  da *Calendari ufficiali* nel pannello, con il nome con cui la federazione
-  scrive il nostro ("Pol. San Donato") e la nostra palestra ("Cartiera"):
-  a ogni cambio di stagione si cambia la cartella lì, non il codice.
+  dal riquadro *Calendari ufficiali* in cima alla pagina **Squadre**, con
+  il nome con cui la federazione scrive il nostro ("Pol. San Donato") e la
+  nostra palestra ("Cartiera"): a ogni cambio di stagione si cambia la
+  cartella lì, non il codice.
 - **Gironi.** Ogni file in cui compare una nostra squadra diventa un
   girone, che l'amministratore collega **una volta** a una squadra del
-  sito. Da quel momento le partite entrano da sole nel suo calendario.
+  sito, dalla riga "Calendario ufficiale" di quella squadra. Da quel
+  momento le partite entrano da sole nel suo calendario. Le partite tolte
+  dalla federazione si controllano nella sezione *Partite*.
 - **Lettura notturna.** `/api/cron/calendari`, chiamata da Vercel alle 23
   UTC (mezzanotte d'inverno, l'una d'estate). Rilegge ogni fonte attiva:
   partite nuove, spostate, con il risultato, sparite. Tutto finisce nel

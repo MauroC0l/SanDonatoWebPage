@@ -315,6 +315,9 @@ export default function AtletiPage() {
           onChange={setSquadraId}
           opzioni={opzioniSquadra}
           segnaposto="Tutte le squadre"
+          // Senza ricerca: la pagina ha già la sua casella di ricerca, e sul
+          // telefono questa apriva la tastiera a ogni tocco della tendina
+          cercabile={false}
           etichettaAria="Filtra per squadra"
         />
 

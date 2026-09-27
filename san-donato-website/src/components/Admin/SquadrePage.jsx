@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaPlus, FaPencilAlt, FaSave, FaTimes, FaUsers, FaRunning,
-  FaExclamationCircle, FaSitemap, FaThLarge, FaBars, FaLink
+  FaExclamationCircle, FaSitemap, FaThLarge, FaBars, FaLink, FaCalendarCheck
 } from "react-icons/fa";
 import {
-  listSquadreConGestori, creaSquadra, aggiornaSquadra,
-  listUtenti, associaSquadra, dissociaSquadra, AuthError
+  listSquadreConGestori, creaSquadra, aggiornaSquadra, eliminaSquadra,
+  listUtenti, associaSquadra, dissociaSquadra,
+  getCalendariUfficiali, aggiornaGironeCalendario, AuthError
 } from "../../api/adminApi";
+import FontiCalendari from "./FontiCalendari";
 import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
@@ -64,8 +66,13 @@ const GESTISCE = ["coach", "editor", "admin"];
  */
 export default function SquadrePage() {
   const navigate = useNavigate();
-  const { sessionExpired } = useAuth();
+  const { user, sessionExpired } = useAuth();
   const { avvisa, conferma } = useDialoghi();
+
+  // I calendari ufficiali stanno qui, sulle squadre, per chi li può gestire
+  const conCalendari = (user?.capabilities ?? []).includes("calendari.gestisci");
+  const [calendari, setCalendari] = useState(null);
+  const [occupati, setOccupati] = useState(() => new Set());
 
   const [squadre, setSquadre] = useState([]);
   const [persone, setPersone] = useState([]);
@@ -89,19 +96,129 @@ export default function SquadrePage() {
   }, [navigate, sessionExpired, avvisa]);
 
   const ricarica = useCallback(() => {
-    return Promise.all([listSquadreConGestori(), listUtenti()])
-      .then(([elenco, utenti]) => {
+    return Promise.all([
+      listSquadreConGestori(),
+      listUtenti(),
+      conCalendari ? getCalendariUfficiali() : null
+    ])
+      .then(([elenco, utenti, statoCalendari]) => {
         setSquadre(elenco);
         setPersone(utenti.filter((u) => GESTISCE.includes(u.ruolo)));
+        setCalendari(statoCalendari);
         setCaricamento(false);
       })
       .catch((err) => {
         gestisciErrore(err);
         setCaricamento(false);
       });
-  }, [gestisciErrore]);
+  }, [gestisciErrore, conCalendari]);
 
   useEffect(() => { ricarica(); }, [ricarica]);
+
+  /* ---------- Calendari ufficiali ---------- */
+
+  const segnaOccupato = (id, si) => setOccupati((prima) => {
+    const dopo = new Set(prima);
+    if (si) dopo.add(id); else dopo.delete(id);
+    return dopo;
+  });
+
+  /* I gironi di una squadra, e quelli che le si possono collegare: i liberi,
+     e quelli di un'altra squadra — che la seguono con marcatori e foto,
+     senza perdere niente. Quelli messi da parte no: prima si riprendono. */
+  const gironiDi = (squadraId) => (calendari?.gironi ?? []).filter((g) => g.squadraId === squadraId);
+
+  const collegabiliA = (squadraId) => (calendari?.gironi ?? [])
+    .filter((g) => g.squadraId !== squadraId && !g.ignorato && !g.sparitoIl)
+    .map((g) => ({
+      valore: String(g.id),
+      etichetta: g.titolo || g.nomeFile,
+      nota: g.squadraId
+        ? `ora in ${g.squadraNome}`
+        : `${g.nomeNelGirone} · ${g.partite} partite`
+    }));
+
+  const collega = async (girone, squadraId) => {
+    const squadra = squadre.find((s) => s.id === squadraId);
+
+    if (girone.squadraId) {
+      const ok = await conferma({
+        titolo: `Spostare il girone su ${squadra?.nome}?`,
+        testo: `Le sue ${girone.nelCalendario} partite passano dal calendario di `
+          + `${girone.squadraNome} a quello di ${squadra?.nome}, con marcatori e foto già inseriti.`,
+        conferma: "Sposta"
+      });
+      if (!ok) return;
+    }
+
+    segnaOccupato(girone.id, true);
+    try {
+      const { conto } = await aggiornaGironeCalendario(girone.id, { squadraId });
+      avvisa(
+        conto?.nuove
+          ? `Calendario collegato a ${squadra?.nome}: ${conto.nuove} partite sono entrate nel suo calendario.`
+          : `Calendario collegato a ${squadra?.nome}.`
+      );
+      await ricarica();
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      segnaOccupato(girone.id, false);
+    }
+  };
+
+  /* Scollegare toglie le partite dal calendario della squadra: va detto
+     cosa si perde, e cosa invece torna collegando di nuovo. */
+  const scollega = async (girone) => {
+    const aggiunte = girone.conAggiunte > 0
+      ? ` Di queste, ${girone.conAggiunte === 1 ? "una ha" : `${girone.conAggiunte} hanno`} marcatori, diretta, `
+        + "note o foto aggiunti a mano, che andranno persi."
+      : "";
+
+    const ok = await conferma({
+      titolo: `Scollegare il calendario da ${girone.squadraNome}?`,
+      testo: `Le sue ${girone.nelCalendario} partite escono dal calendario di ${girone.squadraNome}.${aggiunte} `
+        + "Il girone torna fra quelli da assegnare: collegandolo di nuovo le partite ufficiali tornano subito.",
+      conferma: "Scollega",
+      pericolo: true
+    });
+    if (!ok) return;
+
+    segnaOccupato(girone.id, true);
+    try {
+      const { conto } = await aggiornaGironeCalendario(girone.id, { squadraId: null });
+      avvisa(`Calendario scollegato: ${conto?.tolte ?? 0} partite tolte dal calendario.`, "info");
+      await ricarica();
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      segnaOccupato(girone.id, false);
+    }
+  };
+
+  /* ---------- Cancellazione ----------
+     Solo di una squadra vuota: senza partite, iscritti né gironi. Le altre
+     si disattivano, e il server lo ricontrolla comunque. */
+  const siCancella = (s) => s.atleti === 0 && s.eventi === 0 && gironiDi(s.id).length === 0;
+
+  const cancella = async (s) => {
+    const ok = await conferma({
+      titolo: `Cancellare "${s.nome}"?`,
+      testo: "Non ha partite, iscritti né calendari ufficiali: sparisce del tutto, "
+        + "anche dalle tendine. Chi la gestiva smette di gestirla.",
+      conferma: "Cancella",
+      pericolo: true
+    });
+    if (!ok) return;
+
+    try {
+      await eliminaSquadra(s.id);
+      avvisa(`"${s.nome}" cancellata.`, "info");
+      await ricarica();
+    } catch (err) {
+      gestisciErrore(err);
+    }
+  };
 
   /* ---------- Creazione ---------- */
 
@@ -254,8 +371,9 @@ export default function SquadrePage() {
         <div className="adm-head-left">
           <h1 className="adm-page-title">Squadre</h1>
           <p className="adm-page-sub">
-            {squadre.length} squadre · chi le allena e quanti ne fanno parte.
-            Una squadra non si cancella: si disattiva, e la sua storia resta.
+            {squadre.length} squadre · chi le allena, quanti ne fanno parte e da quale
+            calendario ufficiale arrivano le partite. Si cancella solo una squadra vuota:
+            le altre si disattivano, e la loro storia resta.
           </p>
         </div>
 
@@ -338,6 +456,19 @@ export default function SquadrePage() {
             </button>
           </div>
         </form>
+      )}
+
+      {calendari && (
+        <FontiCalendari
+          dati={calendari}
+          opzioniSquadre={squadre
+            .filter((s) => s.attiva && s.sport !== "Societa")
+            .map((s) => ({ valore: String(s.id), etichetta: s.nome, nota: s.sport }))}
+          onCollega={collega}
+          onCambio={ricarica}
+          onErrore={gestisciErrore}
+          occupati={occupati}
+        />
       )}
 
       <div className="adm-toolbar">
@@ -491,6 +622,55 @@ export default function SquadrePage() {
                         />
                       </div>
 
+                      {/* Il calendario ufficiale della squadra: i gironi della
+                          federazione da cui arrivano le sue partite. Stesso
+                          gesto di "affida a…": una tendina per aggiungere, una
+                          × per togliere. I calendari di società non ne hanno. */}
+                      {calendari && s.sport !== "Societa" && (
+                        <div className="adm-squadre-riga">
+                          <span className="adm-dato-etichetta">
+                            <FaCalendarCheck aria-hidden="true" /> Calendario ufficiale
+                          </span>
+
+                          {gironiDi(s.id).length === 0 && (
+                            <span className="adm-hint">Nessuno: le partite si inseriscono a mano.</span>
+                          )}
+
+                          {gironiDi(s.id).map((g) => (
+                            <span
+                              key={g.id}
+                              className={`adm-chip adm-chip-squadra adm-chip-girone ${occupati.has(g.id) ? "is-busy" : ""}`}
+                              title={`${g.nomeFile} · ${g.nomeNelGirone}`}
+                            >
+                              {g.titolo || g.nomeFile}
+                              <span className="adm-chip-nota">{g.partite} partite</span>
+                              <button
+                                type="button"
+                                onClick={() => scollega(g)}
+                                title={`Scollega da ${s.nome}`}
+                                disabled={occupati.has(g.id)}
+                              >
+                                <FaTimes />
+                              </button>
+                            </span>
+                          ))}
+
+                          <Tendina
+                            className="tnd-mini"
+                            sovrapposta
+                            valore=""
+                            onChange={(v) => {
+                              const girone = calendari.gironi.find((g) => String(g.id) === v);
+                              if (girone) collega(girone, s.id);
+                            }}
+                            opzioni={collegabiliA(s.id)}
+                            segnaposto="+ collega un girone…"
+                            vuoto="Nessun girone da collegare: aggiungi una fonte qui sopra."
+                            etichettaAria={`Collega un calendario ufficiale a ${s.nome}`}
+                          />
+                        </div>
+                      )}
+
                       <footer className="adm-scheda-azioni">
                         <button
                           type="button"
@@ -516,6 +696,17 @@ export default function SquadrePage() {
                         >
                           {s.attiva ? "Disattiva" : "Riattiva"}
                         </button>
+
+                        {siCancella(s) && (
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn-ghost adm-btn-pericolo"
+                            onClick={() => cancella(s)}
+                            title="Si cancella solo una squadra senza partite, iscritti né calendari"
+                          >
+                            Cancella
+                          </button>
+                        )}
                       </footer>
                     </>
                   )}

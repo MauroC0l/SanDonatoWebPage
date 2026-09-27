@@ -19,7 +19,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../../../db/client.js";
 import {
-  squadre, utenti, associazioniSquadra, richiesteIscrizione
+  squadre, utenti, associazioniSquadra, richiesteIscrizione, eventi
 } from "../../../../db/schema.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
 import { annota } from "../../../registro.js";
@@ -75,6 +75,15 @@ async function elenco(req, res) {
 
   const atletiPer = new Map(conteggi.map((c) => [c.squadraId, c.quanti]));
 
+  /* Quanti eventi ha in calendario: con gli iscritti e i gironi ufficiali
+     dice al pannello se la squadra è vuota, e quindi si può cancellare. */
+  const conteggiEventi = await db
+    .select({ squadraId: eventi.squadraId, quanti: sql`count(*)::int` })
+    .from(eventi)
+    .groupBy(eventi.squadraId);
+
+  const eventiPer = new Map(conteggiEventi.map((c) => [c.squadraId, c.quanti]));
+
   // Una riga per associazione diventa una squadra con dentro le persone
   const perSquadra = new Map();
 
@@ -89,6 +98,7 @@ async function elenco(req, res) {
         ordine: r.ordine,
         attiva: r.attiva,
         atleti: atletiPer.get(r.squadraId) ?? 0,
+        eventi: eventiPer.get(r.squadraId) ?? 0,
         gestori: []
       });
     }

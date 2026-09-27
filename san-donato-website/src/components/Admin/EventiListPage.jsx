@@ -4,7 +4,7 @@ import {
   FaPlus, FaPencilAlt, FaTrashAlt, FaExclamationCircle,
   FaCalendarAlt, FaMapMarkerAlt, FaTrophy, FaThLarge, FaBars, FaRegCalendarAlt
 } from "react-icons/fa";
-import { listEventi, listSquadre, deleteEvento, AuthError } from "../../api/adminApi";
+import { listEventi, listSquadre, deleteEvento, getCalendariUfficiali, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
@@ -116,6 +116,8 @@ export default function EventiListPage({ genere = "partite" }) {
   const [squadraId, setSquadraId] = useState("");
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState("");
+  // Le partite tolte dalla federazione, solo nella sezione Partite dell'admin
+  const [sparite, setSparite] = useState([]);
 
   // Fissato all'apertura: leggerlo mentre si disegna darebbe un risultato
   // diverso a ogni passaggio.
@@ -226,6 +228,36 @@ export default function EventiListPage({ genere = "partite" }) {
   // lunghissima in cui non si trova niente.
   const { pagina, pagine, setPagina, visibili: dellaPagina, totale } = usePaginazione(dellaSezione, 20);
 
+  useEffect(() => {
+    if (!ePartite || !perProvenienza) return undefined;
+    let attivo = true;
+
+    getCalendariUfficiali()
+      .then((risposta) => { if (attivo) setSparite(risposta.sparite); })
+      .catch(gestisciErrore);
+
+    return () => { attivo = false; };
+  }, [ePartite, perProvenienza, gestisciErrore]);
+
+  const togliSparita = async (partita) => {
+    const ok = await conferma({
+      titolo: `Togliere "${partita.titolo}" dal calendario?`,
+      testo: "La federazione non la elenca più. Dal sito è già sparita; qui la si toglie anche "
+        + "dal pannello. Se ricomparisse nel calendario ufficiale, tornerà da sola.",
+      conferma: "Togli",
+      pericolo: true
+    });
+    if (!ok) return;
+
+    try {
+      await deleteEvento(partita.id);
+      setSparite((prima) => prima.filter((p) => p.id !== partita.id));
+      setEventi((prima) => prima.filter((e) => e.id !== partita.id));
+    } catch (err) {
+      gestisciErrore(err);
+    }
+  };
+
   const elimina = async (evento) => {
     const ok = await conferma({
       titolo: "Eliminare questo evento?",
@@ -268,12 +300,47 @@ export default function EventiListPage({ genere = "partite" }) {
               <FaPlus /> {ePartite ? "Nuova partita" : "Nuovo evento"}
             </Link>
           ) : (
-            <Link to={`${area}/calendari`} className="adm-btn adm-btn-ghost">
-              Calendari ufficiali
+            <Link to={`${area}/squadre`} className="adm-btn adm-btn-ghost">
+              Calendari delle squadre
             </Link>
           )}
         </div>
       </div>
+
+      {/* Le partite che la federazione non elenca più: dal sito sono già
+          sparite, qui si decide se toglierle anche dal pannello. Stavano
+          nella pagina dei calendari ufficiali, che è stata unita a Squadre;
+          il posto giusto è questo, dove stanno tutte le partite ufficiali. */}
+      {ePartite && perProvenienza && sparite.length > 0 && (
+        <div className="adm-alert adm-alert-warn adm-sparite">
+          <FaExclamationCircle />
+          <div>
+            <strong>
+              {sparite.length === 1
+                ? "Una partita è stata tolta dal calendario ufficiale"
+                : `${sparite.length} partite sono state tolte dal calendario ufficiale`}
+            </strong>
+            {" "}— dal sito sono già sparite. Se è un rinvio senza data torneranno da sole; se sono
+            cancellate davvero, toglile anche da qui.
+            <ul className="adm-sparite-elenco">
+              {sparite.map((p) => (
+                <li key={p.id}>
+                  <span>
+                    <strong>{p.titolo}</strong>
+                    <span className="adm-hint"> · {p.squadra} · era il {dataLeggibile(p.inizio)}</span>
+                  </span>
+                  <span className="adm-sparite-azioni">
+                    <Link to={`${area}/partite/${p.id}`} className="adm-btn adm-btn-ghost">Apri</Link>
+                    <button type="button" className="adm-btn adm-btn-ghost" onClick={() => togliSparita(p)}>
+                      Togli
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Stessa barra dei filtri delle Notizie, con lo stesso stacco
           dall'elenco: prima le pillole toccavano la prima riga e si leggeva
@@ -304,6 +371,9 @@ export default function EventiListPage({ genere = "partite" }) {
           onChange={setSquadraId}
           opzioni={opzioniSquadra}
           segnaposto="Tutte le squadre"
+          // Senza ricerca: la pagina ha già la sua casella di ricerca, e sul
+          // telefono questa apriva la tastiera a ogni tocco della tendina
+          cercabile={false}
           etichettaAria="Filtra per squadra"
         />
       </div>

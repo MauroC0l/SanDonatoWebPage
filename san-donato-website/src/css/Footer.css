@@ -169,3 +169,19 @@
 
   .ft-fiscali { white-space: normal; }
 }
+
+/*
+ * Telefono: la società a tutta larghezza, sotto le colonne a due a due.
+ *
+ * La griglia di sopra chiede almeno 240px per la società e 170px per ogni
+ * colonna: su 358px non ci stavano nemmeno due colonne, la griglia
+ * sbordava di 60px e la pagina intera scorreva di lato — con il nome della
+ * società tagliato ("LA POLISPORTIV") e tutto il resto un po' fuori.
+ */
+@media (max-width: 600px) {
+  .ft-alto { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ft-alto > .ft-chi,
+  .ft-alto > .ft-dove { grid-column: 1 / -1; }
+  .ft-marchio { overflow-wrap: anywhere; }
+  .ft-colonna a { overflow-wrap: anywhere; }
+}

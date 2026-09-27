@@ -129,6 +129,24 @@ export async function fetchEventsByRange(start, end) {
 }
 
 /**
+ * Il prossimo evento in assoluto, di qualunque squadra e di qualunque mese.
+ *
+ * Il calendario carica un mese alla volta, e aperto su un mese vuoto non
+ * sapeva dire nulla: "Nessun evento futuro" con la prima partita della
+ * stagione a una settimana di distanza, solo perché cadeva nel mese dopo.
+ */
+export async function fetchProssimoEvento() {
+  try {
+    const parametri = new URLSearchParams({ da: new Date().toISOString(), limite: "1" });
+    const { eventi } = await chiedi(`/eventi?${parametri}`);
+    return eventi[0] ? normalizza(eventi[0]) : null;
+  } catch (errore) {
+    console.error("Prossimo evento non caricato:", errore.message);
+    return null;
+  }
+}
+
+/**
  * Eventi per la home: quelli di oggi e quelli che restano nella settimana.
  *
  * Una sola passata da mezzanotte a domenica sera, come prima: erano due

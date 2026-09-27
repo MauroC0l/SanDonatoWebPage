@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { indirizziCalendario } from "../utils/calendarioSquadra";
 import "../css/CalendarPage.css";
 import EventDetailsModal from "./EventDetailsModal"; 
-import { fetchEventsByRange } from '../api/calendarApi';
+import { fetchEventsByRange, fetchProssimoEvento } from '../api/calendarApi';
 import {
   FiChevronLeft, FiChevronRight, FiClock, FiMapPin, FiCheck, FiX, FiSliders
 } from "react-icons/fi";
@@ -150,6 +150,23 @@ export default function CalendarPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Il prossimo evento di tutta la stagione, oltre il mese mostrato
+  const [prossimo, setProssimo] = useState(null);
+
+  /* Con il pannello dei filtri aperto la pagina dietro sta ferma: il dito
+     che scorre l'elenco delle squadre muoveva anche il calendario. */
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return undefined;
+    const prima = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prima; };
+  }, [isMobileSidebarOpen]);
+
+  useEffect(() => {
+    let attivo = true;
+    fetchProssimoEvento().then((evento) => { if (attivo) setProssimo(evento); });
+    return () => { attivo = false; };
+  }, []);
 
   // Estratti dallo stato: il calendario ricarica quando cambia il mese
   // visualizzato, non a ogni cambio di giorno selezionato.
@@ -164,16 +181,19 @@ export default function CalendarPage() {
         const year = visibleYear;
         const month = visibleMonth;
 
-        // MODIFICA: Carica SOLO dal 1° all'ultimo giorno del mese esatto
-        // Questo evita di caricare e conteggiare eventi dei giorni "grigi" (mese prec/succ)
-        const startOfMonth = new Date(year, month, 1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        
-        const endOfMonth = new Date(year, month + 1, 0); // Giorno 0 del mese dopo = ultimo del mese corrente
-        endOfMonth.setHours(23, 59, 59, 999);
+        /* Tutti i giorni che la griglia mostra, compresi quelli grigi del
+           mese prima e del mese dopo: a fine settembre si vedono i primi
+           giorni di ottobre, e vederli vuoti quando ci sono partite era una
+           bugia. Nei conteggi del mese però contano solo i giorni del mese
+           (vedi eventiDelMese). Le 42 caselle sono le stesse di calendarDays. */
+        const inizioGriglia = new Date(year, month, 1 - getFirstDayOfMonth(year, month));
+        inizioGriglia.setHours(0, 0, 0, 0);
 
-        // API Call stretta sul mese corrente
-        const { events: mappedEvents, categories: categoriesArray } = await fetchEventsByRange(startOfMonth, endOfMonth);
+        const fineGriglia = new Date(inizioGriglia);
+        fineGriglia.setDate(fineGriglia.getDate() + 41);
+        fineGriglia.setHours(23, 59, 59, 999);
+
+        const { events: mappedEvents, categories: categoriesArray } = await fetchEventsByRange(inizioGriglia, fineGriglia);
 
         setEvents(mappedEvents);
         
@@ -206,6 +226,11 @@ export default function CalendarPage() {
   const filteredEvents = useMemo(() => {
     return events.filter(ev => activeFilters.includes(ev.category));
   }, [events, activeFilters]);
+
+  // Solo quelli del mese mostrato: sono gli "incontri per questo mese"
+  const eventiDelMese = useMemo(() => filteredEvents.filter(ev =>
+    ev.start.getFullYear() === visibleYear && ev.start.getMonth() === visibleMonth
+  ), [filteredEvents, visibleYear, visibleMonth]);
 
   const dailyEvents = useMemo(() => {
     return filteredEvents.filter(ev => isSameDay(ev.start, currentDate));
@@ -269,14 +294,27 @@ export default function CalendarPage() {
   }, [currentDate]);
 
   const nextMatch = useMemo(() => {
-    if (loading || filteredEvents.length === 0) return null;
+    if (loading) return null;
 
     const futureEvents = filteredEvents
       .filter(e => e.start >= new Date())
       .sort((a, b) => a.start - b.start);
 
-    return futureEvents.length > 0 ? futureEvents[0] : null;
-  }, [filteredEvents, loading]);
+    // Nel mese mostrato non c'è niente in arrivo: vale il prossimo in
+    // assoluto, anche se cade in un altro mese.
+    return futureEvents.length > 0 ? futureEvents[0] : prossimo;
+  }, [filteredEvents, loading, prossimo]);
+
+  /* Aperto su un mese vuoto, il calendario dice dove si trova il prossimo
+     evento e ci porta con un tocco. Succede a inizio stagione: il mese in
+     corso è ancora vuoto e le partite cominciano il mese dopo. */
+  const fineMese = new Date(visibleYear, visibleMonth + 1, 0, 23, 59, 59);
+  const meseVuotoConProssimo = !loading && view === 'month' && eventiDelMese.length === 0
+    && prossimo && prossimo.start > fineMese;
+
+  const vaiAlProssimo = () => {
+    setCurrentDate(new Date(prossimo.start.getFullYear(), prossimo.start.getMonth(), 1));
+  };
 
 
   if (error) {
@@ -321,7 +359,7 @@ export default function CalendarPage() {
               <div className="cp-stat-box">
                 <div className="cp-stat-icon">🏆</div>
                 <div>
-                  <div className="cp-stat-value">{loading ? "..." : filteredEvents.length}</div>
+                  <div className="cp-stat-value">{loading ? "..." : eventiDelMese.length}</div>
                   <div className="cp-stat-label">Incontri per questo mese</div>
                 </div>
               </div>
@@ -414,6 +452,18 @@ export default function CalendarPage() {
 
           <div className="cp-calendar-content">
             {loading && <div className="cp-loader"></div>}
+
+            {meseVuotoConProssimo && (
+              <div className="cp-mese-vuoto">
+                <span>
+                  Nessun evento a {MONTH_NAMES[visibleMonth].toLowerCase()}. Il prossimo è{" "}
+                  <strong>{formatDate(prossimo.start)}</strong>: {prossimo.title}.
+                </span>
+                <button type="button" className="cp-mese-vuoto-vai" onClick={vaiAlProssimo}>
+                  Vai a {MONTH_NAMES[prossimo.start.getMonth()].toLowerCase()} →
+                </button>
+              </div>
+            )}
 
             {!loading && view === 'month' && (
               <>
