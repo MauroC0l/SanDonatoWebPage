@@ -43,7 +43,7 @@ function cella(foglio, indirizzo) {
 function testo(foglio, indirizzo) {
   const v = cella(foglio, indirizzo);
   if (v === null) return "";
-  return String(v).replace(/ /g, " ").replace(/\s+/g, " ").trim();
+  return String(v).replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function numero(foglio, indirizzo) {

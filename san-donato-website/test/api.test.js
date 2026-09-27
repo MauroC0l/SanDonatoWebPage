@@ -51,7 +51,7 @@ function sessione() {
     if (arrivato.length) cookie = arrivato.map((c) => c.split(";")[0]).join("; ");
 
     const testo = await risposta.text();
-    let corpo = null;
+    let corpo;
     try { corpo = testo ? JSON.parse(testo) : null; } catch { corpo = testo; }
 
     return { stato: risposta.status, corpo };
@@ -612,5 +612,58 @@ describe("cancellare una squadra", () => {
   seAccesa("la segreteria non cancella squadre", async () => {
     const { chiedi } = await entra("segreteria");
     expect((await chiedi("/admin/squadre/1", { method: "DELETE" })).stato).toBe(403);
+  });
+});
+
+describe("allenatori", () => {
+  seAccesa("la segreteria li vede tutti, con la quota della stagione", async () => {
+    const { chiedi } = await entra("segreteria");
+    const esito = await chiedi("/admin/allenatori");
+
+    expect(esito.stato).toBe(200);
+    expect(esito.corpo.stagione.nome).toMatch(/^\d{4}\/\d{2}$/);
+    expect(esito.corpo.allenatori.length).toBeGreaterThan(0);
+    // Aprire l'elenco assegna la quota a chi non l'aveva: nessuno resta senza
+    expect(esito.corpo.allenatori.every((a) => a.quotaCentesimi != null)).toBe(true);
+  });
+
+  seAccesa("l'allenatore non vede l'elenco della cassa", async () => {
+    const { chiedi } = await entra("coach");
+    expect((await chiedi("/admin/allenatori")).stato).toBe(403);
+  });
+});
+
+describe("ritiro durante la stagione", () => {
+  seAccesa("segnato e annullato, il conto segue", async () => {
+    const { chiedi } = await entra("admin");
+    const elenco = await chiedi("/admin/atleti");
+    const atleta = elenco.corpo.atleti.find((a) => !a.ritirato && a.quotaStagionaleCentesimi);
+    expect(atleta, "serve un atleta con una quota").toBeTruthy();
+
+    const ritirato = await chiedi(`/admin/atleti/${atleta.utenteId}/ritiro`, {
+      method: "POST",
+      body: JSON.stringify({ motivo: "Prova automatica" })
+    });
+    expect(ritirato.stato).toBe(200);
+    expect(ritirato.corpo.atleta.ritirato).toBe(true);
+
+    // La stagione è appena cominciata: il ritiro è prima di gennaio solo
+    // fra luglio e dicembre, e allora la seconda metà non è dovuta.
+    const mese = Number(ritirato.corpo.atleta.ritiratoIl.slice(5, 7));
+    expect(ritirato.corpo.atleta.conto.secondaDovuta).toBe(mese < 7);
+
+    const annullato = await chiedi(`/admin/atleti/${atleta.utenteId}/ritiro`, { method: "DELETE" });
+    expect(annullato.stato).toBe(200);
+    expect(annullato.corpo.atleta.ritirato).toBe(false);
+  });
+
+  seAccesa("una data futura viene rifiutata", async () => {
+    const { chiedi } = await entra("admin");
+    const elenco = await chiedi("/admin/atleti");
+    const esito = await chiedi(`/admin/atleti/${elenco.corpo.atleti[0].utenteId}/ritiro`, {
+      method: "POST",
+      body: JSON.stringify({ data: "2099-01-01" })
+    });
+    expect(esito.stato).toBe(400);
   });
 });

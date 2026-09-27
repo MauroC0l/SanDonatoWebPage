@@ -14,8 +14,9 @@
 
 import { and, asc, eq, ne, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { tipiQuota, schedeAtleta } from "../db/schema.js";
+import { tipiQuota, iscrizioniStagione } from "../db/schema.js";
 import { ErroreHttp } from "./risposte.js";
+import { quotaDi, salvaQuotaStagione } from "./stagioni.js";
 
 /**
  * Le tariffe, con quante schede le stanno usando.
@@ -40,10 +41,11 @@ export async function elencaTipiQuota({ ancheSpente = true } = {}) {
       attiva: tipiQuota.attiva,
       ordine: tipiQuota.ordine,
       perAllenatori: tipiQuota.perAllenatori,
-      quanti: sql`count(${schedeAtleta.id})::int`
+      // In tutte le stagioni: una tariffa usata l'anno scorso è ancora nei conti di allora
+      quanti: sql`count(${iscrizioniStagione.id})::int`
     })
     .from(tipiQuota)
-    .leftJoin(schedeAtleta, eq(schedeAtleta.tipoQuotaId, tipiQuota.id))
+    .leftJoin(iscrizioniStagione, eq(iscrizioniStagione.tipoQuotaId, tipiQuota.id))
     .where(condizioni.length ? and(...condizioni) : undefined)
     .groupBy(
       tipiQuota.id, tipiQuota.nome, tipiQuota.descrizione,
@@ -171,43 +173,20 @@ export async function tariffaAllenatori() {
 export async function assicuraQuotaAllenatore(utente) {
   if (utente?.ruolo !== "coach") return null;
 
-  const db = getDb();
-
-  const [scheda] = await db
-    .select({
-      id: schedeAtleta.id,
-      quotaStagionaleCentesimi: schedeAtleta.quotaStagionaleCentesimi
-    })
-    .from(schedeAtleta)
-    .where(eq(schedeAtleta.utenteId, utente.id))
-    .limit(1);
-
-  if (scheda && scheda.quotaStagionaleCentesimi != null) return null;
+  /* Sulla stagione in corso: il 1° luglio la stagione nuova non ha ancora
+     la quota, e alla prima apertura gliela si assegna di nuovo. Quella
+     dell'anno prima resta dov'era. */
+  const attuale = await quotaDi(utente.id);
+  if (attuale.quotaCentesimi != null) return null;
 
   const tariffa = await tariffaAllenatori();
   if (!tariffa) return null;
 
-  const quota = {
-    quotaStagionaleCentesimi: tariffa.importoCentesimi,
-    tipoQuotaId: tariffa.id,
-    aggiornataIl: new Date()
-  };
-
-  if (scheda) {
-    await db.update(schedeAtleta).set(quota).where(eq(schedeAtleta.id, scheda.id));
-  } else {
-    /* La scheda di un allenatore nasce qui, vuota a parte la quota: i suoi
-       dati li scriverà lui, come fa ogni atleta.
-
-       onConflictDoNothing perché due richieste che arrivano insieme —
-       due schede aperte, o un doppio clic — proverebbero a inserirla
-       entrambe: l'indice unico su utente_id la rifiuterebbe con un errore
-       del database, cioè una pagina rotta al posto di una quota. Chi
-       perde la corsa non fa niente, ed è giusto: quella riga esiste già. */
-    await db.insert(schedeAtleta)
-      .values({ utenteId: utente.id, ...quota })
-      .onConflictDoNothing();
-  }
+  await salvaQuotaStagione(
+    utente.id,
+    { quotaCentesimi: tariffa.importoCentesimi, tipoQuotaId: tariffa.id },
+    null
+  );
 
   return tariffa;
 }
@@ -223,8 +202,8 @@ export async function eliminaTipoQuota(id) {
 
   const [{ quanti }] = await getDb()
     .select({ quanti: sql`count(*)::int` })
-    .from(schedeAtleta)
-    .where(eq(schedeAtleta.tipoQuotaId, numero));
+    .from(iscrizioniStagione)
+    .where(eq(iscrizioniStagione.tipoQuotaId, numero));
 
   if (quanti > 0) return { esito: "in_uso", quanti };
 

@@ -16,10 +16,11 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { getDb } from "../db/client.js";
 import {
-  utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media, tipiQuota
+  utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media
 } from "../db/schema.js";
 import { urlFile } from "./file.js";
 import { legamiPerSegreteria } from "./legami.js";
+import { quotePerUtenti, quotaDi, versamentiDi, storicoStagioni } from "./stagioni.js";
 
 /*
  * La tabella media entra due volte nella stessa interrogazione — una per il
@@ -119,33 +120,12 @@ const COLONNE_SCHEDA = {
   certificatoStato: schedeAtleta.certificatoStato,
   certificatoValidatoIl: schedeAtleta.certificatoValidatoIl,
   certificatoMotivo: schedeAtleta.certificatoMotivo,
-  quotaStagionaleCentesimi: schedeAtleta.quotaStagionaleCentesimi,
-  tipoQuotaId: schedeAtleta.tipoQuotaId,
   note: schedeAtleta.note
 };
 
-/**
- * Quanto ha versato ciascuno, in un'interrogazione sola.
- *
- * Separata e non in join con l'elenco: sommare dentro alla stessa query
- * significa raggruppare su tutte le colonne della scheda, e se qualcuno ha
- * due squadre la somma finirebbe contata due volte. Con qualche centinaio
- * di atleti, due interrogazioni costano meno di un errore nei conti.
- */
-async function versatoPerUtente(db, utentiIds) {
-  if (utentiIds.length === 0) return new Map();
-
-  const righe = await db
-    .select({
-      utenteId: pagamenti.utenteId,
-      versato: sql`coalesce(sum(${pagamenti.importoCentesimi}), 0)::int`
-    })
-    .from(pagamenti)
-    .where(inArray(pagamenti.utenteId, utentiIds))
-    .groupBy(pagamenti.utenteId);
-
-  return new Map(righe.map((r) => [r.utenteId, r.versato]));
-}
+/* La quota non sta più qui: è della stagione (server/stagioni.js). Quota,
+   versato e ritiro si leggono per la stagione in corso con quotePerUtenti,
+   in due interrogazioni per tutto l'elenco. */
 
 /**
  * L'elenco degli atleti visibili a chi chiede.
@@ -230,9 +210,7 @@ export async function elencaAtleti({ squadreAmmesse = null, squadraId = null, co
          * colonna lasciando il dato nella risposta significa consegnarlo
          * lo stesso a chiunque apra gli strumenti del browser.
          */
-        ...(conQuote
-          ? { quotaStagionaleCentesimi: r.quotaStagionaleCentesimi, versatoCentesimi: 0 }
-          : {})
+        ...(conQuote ? { quotaStagionaleCentesimi: null, versatoCentesimi: 0 } : {})
       };
       perUtente.set(r.utenteId, atleta);
     }
@@ -244,9 +222,20 @@ export async function elencaAtleti({ squadreAmmesse = null, squadraId = null, co
 
   const atleti = [...perUtente.values()];
 
-  if (conQuote) {
-    const versato = await versatoPerUtente(db, atleti.map((a) => a.utenteId));
-    for (const a of atleti) a.versatoCentesimi = versato.get(a.utenteId) ?? 0;
+  /* La stagione in corso di ciascuno. Il ritiro lo sanno tutti — anche un
+     allenatore deve sapere che un ragazzo ha smesso — i soldi solo chi
+     tiene i conti. */
+  const stagione = await quotePerUtenti(atleti.map((a) => a.utenteId));
+  for (const a of atleti) {
+    const q = stagione.get(a.utenteId);
+    a.ritirato = q?.stato === "ritirata";
+    a.ritiratoIl = q?.ritiratoIl ?? null;
+    if (conQuote) {
+      a.quotaStagionaleCentesimi = q?.quotaCentesimi ?? null;
+      a.versatoCentesimi = q?.versatoCentesimi ?? 0;
+      // Quanto è dovuto davvero: senza la seconda metà per chi ha smesso prima di gennaio
+      a.dovutoCentesimi = q?.dovutoCentesimi ?? null;
+    }
   }
 
   return atleti;
@@ -272,16 +261,12 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
       certificatoUrlWp: media.urlOriginaleWp,
       certificatoMime: media.mime,
       immagineChiave: immagineProfilo.chiave,
-      immagineUrlWp: immagineProfilo.urlOriginaleWp,
-      // Il nome della tariffa applicata: l'importo sta sulla scheda, ma
-      // "perché quella cifra" è metà della risposta su un conto.
-      tipoQuota: tipiQuota.nome
+      immagineUrlWp: immagineProfilo.urlOriginaleWp
     })
     .from(utenti)
     .leftJoin(schedeAtleta, eq(schedeAtleta.utenteId, utenti.id))
     .leftJoin(media, eq(media.id, schedeAtleta.certificatoMediaId))
     .leftJoin(immagineProfilo, eq(immagineProfilo.id, utenti.immagineId))
-    .leftJoin(tipiQuota, eq(tipiQuota.id, schedeAtleta.tipoQuotaId))
     .where(eq(utenti.id, id))
     .limit(1);
 
@@ -314,32 +299,27 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
     if (!suo) return null;
   }
 
-  // Vedi la nota in elencaAtleti: senza "quote.gestisci" i versamenti non
-  // partono proprio, non vengono nascosti a schermo.
-  const versamenti = conQuote ? await db
-    .select({
-      id: pagamenti.id,
-      importoCentesimi: pagamenti.importoCentesimi,
-      causale: pagamenti.causale,
-      pagatoIl: pagamenti.pagatoIl,
-      metodo: pagamenti.metodo,
-      registratoDa: pagamenti.registratoDa,
-      creatoIl: pagamenti.creatoIl
-    })
-    .from(pagamenti)
-    .where(eq(pagamenti.utenteId, id))
-    // I più recenti in cima: è l'ultimo versamento quello che si cerca
-    .orderBy(sql`${pagamenti.pagatoIl} desc`, sql`${pagamenti.id} desc`) : [];
+  /* La stagione in corso: quota, conto in due metà, ritiro. Il ritiro lo
+     vede anche un allenatore; soldi e versamenti solo chi tiene i conti —
+     vedi la nota in elencaAtleti: senza "quote.gestisci" non partono
+     proprio, non vengono nascosti a schermo. */
+  const stagione = await quotaDi(id);
 
-  const versatoCentesimi = versamenti.reduce((somma, v) => somma + v.importoCentesimi, 0);
+  const versamenti = conQuote ? await versamentiDi(id, stagione.stagione.id) : [];
 
   // Come i versamenti: si chiedono solo a chi li può vedere.
   const legami = conQuote ? await legamiPerSegreteria(id) : [];
 
-  /* La data di iscrizione e quella del PRIMO versamento: iscritti alla
-     societa lo si e da quando si e pagato. I versamenti arrivano dal piu
-     recente, quindi il primo e in fondo. */
-  const iscrittoDal = versamenti.length ? versamenti[versamenti.length - 1].pagatoIl : null;
+  // Le stagioni passate: squadre e ritiro per tutti, i conti solo a chi li tiene
+  const storico = await storicoStagioni(id, { conQuote });
+
+  /* La data di iscrizione è quella del PRIMO versamento di sempre: iscritti
+     alla società lo si è da quando si è pagato, in qualunque stagione. */
+  const [primo] = conQuote ? await db
+    .select({ pagatoIl: sql`min(${pagamenti.pagatoIl})` })
+    .from(pagamenti)
+    .where(eq(pagamenti.utenteId, id)) : [];
+  const iscrittoDal = primo?.pagatoIl ?? null;
 
   return {
     utenteId: anagrafica.utenteId,
@@ -392,11 +372,20 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
       : null,
     certificatoMime: anagrafica.certificatoMime ?? null,
 
+    // La stagione in corso e il ritiro, per tutti quelli che aprono la scheda
+    stagione: stagione.stagione,
+    ritirato: stagione.stato === "ritirata",
+    ritiratoIl: stagione.ritiratoIl,
+    storico,
+
     ...(conQuote ? {
-      quotaStagionaleCentesimi: anagrafica.quotaStagionaleCentesimi,
-      tipoQuotaId: anagrafica.tipoQuotaId ?? null,
-      tipoQuota: anagrafica.tipoQuota ?? null,
-      versatoCentesimi,
+      quotaStagionaleCentesimi: stagione.quotaCentesimi,
+      tipoQuotaId: stagione.tipoQuotaId,
+      tipoQuota: stagione.tipoQuota,
+      versatoCentesimi: stagione.versatoCentesimi,
+      // Le due metà della quota e quanto resta da versare, già calcolati
+      conto: stagione.conto,
+      motivoRitiro: stagione.motivoRitiro,
       pagamenti: versamenti,
       iscrittoDal,
 

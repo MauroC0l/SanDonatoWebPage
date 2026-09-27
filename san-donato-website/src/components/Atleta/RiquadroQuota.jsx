@@ -52,11 +52,17 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
   const versato = iscrizione?.versatoCentesimi ?? 0;
   const versamenti = iscrizione?.pagamenti ?? [];
 
+  /* Quanto si deve davvero: la quota è in due metà, e chi smette prima di
+     gennaio deve solo la prima. Il conto lo fa il server. */
+  const conto = iscrizione?.conto ?? null;
+  const dovuto = conto?.dovuto ?? quota;
+  const stagione = iscrizione?.stagione ?? null;
+
   // Il residuo esiste solo se la quota è stata decisa: senza, "manca tutto"
   // e "non manca niente" sarebbero la stessa cosa scritta a caso.
-  const manca = quota == null ? null : quota - versato;
+  const manca = dovuto == null ? null : dovuto - versato;
   const saldata = manca != null && manca <= 0;
-  const percentuale = quota ? Math.min(100, Math.round((versato / quota) * 100)) : 0;
+  const percentuale = dovuto ? Math.min(100, Math.round((versato / dovuto) * 100)) : 0;
 
   // I versamenti arrivano dal più vecchio: l'ultimo è in fondo.
   const ultimo = versamenti.length ? versamenti[versamenti.length - 1] : null;
@@ -69,6 +75,7 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
         <div className="qta-testata">
           <span className="qta-occhiello">
             <FaEuroSign aria-hidden="true" /> La tua quota
+            {stagione && <> · stagione {stagione.nome}</>}
           </span>
 
           {quota == null ? (
@@ -84,7 +91,7 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
                 <FaCheckCircle aria-hidden="true" /> Saldata
               </span>
               <span className="qta-sotto">
-                Hai versato {euro(versato)} su {euro(quota)}.
+                Hai versato {euro(versato)} su {euro(dovuto)}.
               </span>
             </>
           ) : (
@@ -93,6 +100,13 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
               <span className="qta-sotto">
                 ancora da versare, su una quota di {euro(quota)}
               </span>
+              {conto?.quota != null && (
+                <span className="qta-sotto">
+                  {conto.secondaDovuta
+                    ? <>In due metà: {euro(conto.primaMeta)} a inizio stagione e {euro(conto.secondaMeta)} da gennaio{stagione ? " " + stagione.inizioSecondaMeta.slice(0, 4) : ""}.</>
+                    : <>Hai smesso prima di gennaio: la seconda metà ({euro(conto.secondaMeta)}) non è dovuta.</>}
+                </span>
+              )}
             </>
           )}
         </div>
@@ -103,7 +117,7 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
             <div
               className="qta-barra"
               role="img"
-              aria-label={`Versati ${euro(versato)} su ${euro(quota)}`}
+              aria-label={`Versati ${euro(versato)} su ${euro(dovuto)}`}
             >
               <span
                 className={`qta-barra-piena ${saldata ? "is-saldata" : ""}`}
@@ -177,7 +191,7 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
 
       {pagamentoAperto && (
         <SchermataPagamento
-          quota={quota}
+          quota={dovuto}
           versato={versato}
           onChiudi={() => setPagamentoAperto(false)}
         />

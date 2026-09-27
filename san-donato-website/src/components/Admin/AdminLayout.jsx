@@ -6,7 +6,8 @@ import {
   FaImages,
   FaClipboardCheck,
   FaCalendarCheck,
-  FaUserCircle
+  FaUserCircle,
+  FaChalkboardTeacher
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -45,6 +46,8 @@ const SEZIONI = [
   { a: "atleti", etichetta: "Atleti", Icona: FaRunning, capacita: ["atleti.leggi"] },
   { a: "squadre", etichetta: "Squadre", Icona: FaSitemap, capacita: ["squadre.gestisci"] },
   { a: "quote", etichetta: "Quote", Icona: FaEuroSign, capacita: ["quote.gestisci"] },
+  // Chi allena e la sua quota: nell'elenco Atleti non compare, qui sì
+  { a: "allenatori", etichetta: "Allenatori", Icona: FaChalkboardTeacher, capacita: ["quote.gestisci"] },
   { a: "utenti", etichetta: "Utenti", Icona: FaUsers, capacita: ["utenti.gestisci"] },
   { a: "libreria", etichetta: "Libreria", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
   { a: "registro", etichetta: "Registro", Icona: FaHistory, capacita: ["registro.leggi"] },
@@ -68,7 +71,7 @@ const SEZIONI = [
  */
 const PRIORITA_MOBILE = [
   "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
-  "eventi", "iscrizione", "squadre", "calendari", "utenti", "registro"
+  "eventi", "iscrizione", "allenatori", "squadre", "calendari", "utenti", "registro"
 ];
 
 /**

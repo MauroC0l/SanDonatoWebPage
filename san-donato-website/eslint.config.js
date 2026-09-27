@@ -19,8 +19,11 @@ export default defineConfig([
   },
   // Schema, connessione al database e script di manutenzione: anche questi
   // girano su Node, fuori dal browser.
+  // Il server (le rotte e i moduli che usano) e i test. Mancavano, ed era il
+  // pezzo più grosso: una variabile non importata nel server passava il lint
+  // e saltava fuori solo alla prima richiesta, come errore 500.
   {
-    files: ['db/**/*.js', 'scripts/**/*.{js,mjs}'],
+    files: ['db/**/*.js', 'scripts/**/*.{js,mjs}', 'server/**/*.js', 'test/**/*.js', '*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: {
       ecmaVersion: 'latest',

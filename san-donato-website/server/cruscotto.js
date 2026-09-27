@@ -17,11 +17,12 @@
 import { and, asc, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import {
-  notizie, eventi, squadre, utenti, richiesteIscrizione, schedeAtleta, pagamenti
+  notizie, eventi, squadre, utenti, richiesteIscrizione, schedeAtleta
 } from "../db/schema.js";
 import {
   puo, squadreGestibili, squadreConAtletiVisibili, sportGestibili
 } from "./autorizzazioni.js";
+import { quotePerUtenti } from "./stagioni.js";
 
 /** Fra quanti giorni un certificato è "in scadenza". Stessa soglia del pannello. */
 const GIORNI_PREAVVISO = 30;
@@ -101,30 +102,18 @@ async function quoteAperte(utente) {
   const condizioni = [eq(richiesteIscrizione.stato, "approvata")];
   if (Array.isArray(ammesse)) condizioni.push(inArray(richiesteIscrizione.squadraId, ammesse));
 
-  const db = getDb();
-
-  /* Il versato si somma in una interrogazione a parte e si riporta qui con
-     una sottoselezione: in join diretto, un atleta con tre versamenti
-     comparirebbe tre volte e la sua quota sarebbe contata tre volte. */
-  const versato = db
-    .select({
-      utenteId: pagamenti.utenteId,
-      totale: sql`sum(${pagamenti.importoCentesimi})`.as("totale")
-    })
-    .from(pagamenti)
-    .groupBy(pagamenti.utenteId)
-    .as("versato");
-
-  const righe = await db
-    .select({
-      manca: sql`${schedeAtleta.quotaStagionaleCentesimi} - coalesce(${versato.totale}, 0)`.as("manca")
-    })
+  const righe = await getDb()
+    .selectDistinct({ utenteId: richiesteIscrizione.utenteId })
     .from(richiesteIscrizione)
-    .innerJoin(schedeAtleta, eq(schedeAtleta.utenteId, richiesteIscrizione.utenteId))
-    .leftJoin(versato, eq(versato.utenteId, richiesteIscrizione.utenteId))
-    .where(and(...condizioni, sql`${schedeAtleta.quotaStagionaleCentesimi} is not null`));
+    .where(and(...condizioni));
 
-  const aperte = righe.map((r) => Number(r.manca)).filter((n) => n > 0);
+  /* Il conto della stagione in corso, lo stesso della scheda di ciascuno:
+     chi si è ritirato prima di gennaio non deve la seconda metà, e non va
+     contato fra chi deve dei soldi per una cifra che non deve. */
+  const quote = await quotePerUtenti(righe.map((r) => r.utenteId));
+  const conti = [...quote.values()];
+
+  const aperte = conti.map((q) => q.residuoCentesimi).filter((n) => n != null && n > 0);
 
   /*
    * Gli atleti a cui la quota non è ancora stata decisa.
@@ -132,16 +121,10 @@ async function quoteAperte(utente) {
    * Sono invisibili in ogni altro conto: non risultano fra chi deve dei
    * soldi, perché non si sa quanti, e non risultano fra chi è a posto,
    * perché non lo è. Restano fermi lì finché qualcuno non ci pensa — ed è
-   * la segreteria che deve pensarci, quindi glielo si dice.
-   *
-   * "Senza scheda" vale come "senza quota": chi non ha ancora una riga in
-   * tabella una quota non ce l'ha di sicuro. Da qui il left join.
+   * la segreteria che deve pensarci, quindi glielo si dice. Chi si è
+   * ritirato non conta: una quota a chi ha smesso non la decide nessuno.
    */
-  const [{ senzaQuota }] = await db
-    .select({ senzaQuota: sql`count(*)::int` })
-    .from(richiesteIscrizione)
-    .leftJoin(schedeAtleta, eq(schedeAtleta.utenteId, richiesteIscrizione.utenteId))
-    .where(and(...condizioni, sql`${schedeAtleta.quotaStagionaleCentesimi} is null`));
+  const senzaQuota = conti.filter((q) => q.quotaCentesimi == null && q.stato !== "ritirata").length;
 
   return {
     daIncassare: aperte.reduce((s, n) => s + n, 0),
@@ -303,8 +286,7 @@ async function cruscottoAtleta(utente) {
       telefono: schedeAtleta.telefono,
       certificatoScadenza: schedeAtleta.certificatoScadenza,
       certificatoMediaId: schedeAtleta.certificatoMediaId,
-      certificatoStato: schedeAtleta.certificatoStato,
-      quota: schedeAtleta.quotaStagionaleCentesimi
+      certificatoStato: schedeAtleta.certificatoStato
     })
     .from(schedeAtleta)
     .where(eq(schedeAtleta.utenteId, utente.id))

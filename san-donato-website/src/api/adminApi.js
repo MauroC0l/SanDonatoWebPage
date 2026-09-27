@@ -812,6 +812,32 @@ export async function decidiParentela(utenteId, { legameId, conferma, motivo } =
   return atleta;
 }
 
+/**
+ * Segna il ritiro durante la stagione. Senza data vale oggi.
+ * Torna la scheda aggiornata, con il conto rifatto.
+ */
+export async function segnaRitiro(utenteId, { data, motivo } = {}) {
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/ritiro`, {
+    method: "POST",
+    body: JSON.stringify({ data, motivo })
+  });
+  return atleta;
+}
+
+export async function annullaRitiro(utenteId) {
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/ritiro`, { method: "DELETE" });
+  return atleta;
+}
+
+/* =====================================================
+   Allenatori
+   ===================================================== */
+
+/** Gli allenatori con la quota della stagione in corso: { stagione, allenatori }. */
+export async function listAllenatori() {
+  return chiedi("/admin/allenatori");
+}
+
 /* =====================================================
    Tariffe della stagione
    ===================================================== */

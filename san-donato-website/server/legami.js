@@ -24,13 +24,20 @@
  * di una persona qualsiasi, può scoprire se quella persona fa sport qui.
  * Non è un dato suo. La risposta è sempre la stessa: la segreteria
  * controllerà.
+ *
+ * OGNI DICHIARAZIONE È DI UNA STAGIONE. La tariffa fratelli vale per
+ * l'anno in cui è concessa: la stagione dopo si dichiara di nuovo, e alla
+ * segreteria il sito dice se il fratello quella stagione è ancora iscritto.
+ * Non respinge da solo: un fratello che rinnova a ottobre non è ancora
+ * iscritto a settembre, e lo sa solo chi conosce la famiglia.
  */
 
 import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { legamiFamiliari, schedeAtleta, utenti } from "../db/schema.js";
+import { legamiFamiliari, schedeAtleta, utenti, stagioni, iscrizioniStagione } from "../db/schema.js";
 import { codiceFiscaleValido, normalizzaCodiceFiscale } from "./codice-fiscale.js";
 import { ErroreHttp } from "./risposte.js";
+import { stagioneCorrente } from "./stagioni.js";
 
 /**
  * Quello che torna a chi ha dichiarato.
@@ -48,8 +55,9 @@ function versoChiDichiara(riga) {
   };
 }
 
-/** Le dichiarazioni di una persona, come le vede lei. */
+/** Le dichiarazioni di una persona per la stagione in corso, come le vede lei. */
 export async function legamiDichiaratiDa(utenteId) {
+  const stagione = await stagioneCorrente();
   const righe = await getDb()
     .select({
       id: legamiFamiliari.id,
@@ -59,7 +67,10 @@ export async function legamiDichiaratiDa(utenteId) {
       creatoIl: legamiFamiliari.creatoIl
     })
     .from(legamiFamiliari)
-    .where(eq(legamiFamiliari.utenteId, Number(utenteId)))
+    .where(and(
+      eq(legamiFamiliari.utenteId, Number(utenteId)),
+      eq(legamiFamiliari.stagioneId, stagione.id)
+    ))
     .orderBy(desc(legamiFamiliari.creatoIl));
 
   return righe.map(versoChiDichiara);
@@ -114,10 +125,13 @@ export async function dichiaraLegame(utente, codiceFiscaleGrezzo) {
     .where(eq(sql`upper(replace(${schedeAtleta.codiceFiscale}, ' ', ''))`, cf))
     .limit(1);
 
+  const stagione = await stagioneCorrente();
+
   const [creato] = await db
     .insert(legamiFamiliari)
     .values({
       utenteId: utente.id,
+      stagioneId: stagione.id,
       codiceFiscaleDichiarato: cf,
       utenteCollegatoId: trovato?.utenteId ?? null
     })
@@ -195,10 +209,13 @@ export async function legamiPerSegreteria(utenteId) {
       motivo: legamiFamiliari.motivo,
       decisoIl: legamiFamiliari.decisoIl,
       creatoIl: legamiFamiliari.creatoIl,
+      stagioneId: legamiFamiliari.stagioneId,
+      stagione: stagioni.nome,
       ...chiDichiara
     })
     .from(legamiFamiliari)
     .innerJoin(utenti, eq(utenti.id, legamiFamiliari.utenteId))
+    .leftJoin(stagioni, eq(stagioni.id, legamiFamiliari.stagioneId))
     .where(or(
       eq(legamiFamiliari.utenteId, id),
       eq(legamiFamiliari.utenteCollegatoId, id)
@@ -230,6 +247,21 @@ export async function legamiPerSegreteria(utenteId) {
       .map((s) => [s.utenteId, s])
   );
 
+  /* Il fratello trovato è iscritto nella stagione della dichiarazione? Non
+     ritirato, cioè: chi ha smesso a novembre non dà più diritto allo
+     sconto a chi si iscrive a febbraio. */
+  const iscritti = new Set(
+    (await db
+      .select({ utenteId: iscrizioniStagione.utenteId, stagioneId: iscrizioniStagione.stagioneId })
+      .from(iscrizioniStagione)
+      .where(and(
+        inArray(iscrizioniStagione.utenteId, idsCoinvolti),
+        eq(iscrizioniStagione.stato, "attiva")
+      )))
+      .map((i) => `${i.utenteId}:${i.stagioneId}`)
+  );
+  const corrente = await stagioneCorrente();
+
   return righe.map((r) => {
     const uno = schede.get(r.utenteId);
     const altro = r.utenteCollegatoId ? schede.get(r.utenteCollegatoId) : null;
@@ -241,6 +273,9 @@ export async function legamiPerSegreteria(utenteId) {
       creatoIl: r.creatoIl,
       decisoIl: r.decisoIl,
       codiceFiscale: r.codiceFiscaleDichiarato,
+      stagione: r.stagione,
+      // Le dichiarazioni delle stagioni passate restano come storia
+      stagioneCorrente: r.stagioneId === corrente.id,
 
       // Chi ha scritto la dichiarazione, e se è la persona di questa scheda
       dichiarataDa: [r.nome, r.cognome].filter(Boolean).join(" ") || r.email,
@@ -256,7 +291,8 @@ export async function legamiPerSegreteria(utenteId) {
           utenteId: r.utenteCollegatoId,
           nomeCompleto: [altro.nome, altro.cognome].filter(Boolean).join(" "),
           stessoCognome: confronta(uno?.cognome, altro.cognome),
-          stessoIndirizzo: confrontaIndirizzo(uno, altro)
+          stessoIndirizzo: confrontaIndirizzo(uno, altro),
+          iscrittoNellaStagione: iscritti.has(`${r.utenteCollegatoId}:${r.stagioneId}`)
         }
         : null
     };

@@ -27,7 +27,9 @@ const FILTRI = [
   { chiave: "cert_scaduto", etichetta: "Certificato scaduto" },
   { chiave: "cert_scadenza", etichetta: "In scadenza" },
   // Solo per chi tiene i conti: agli altri le quote non arrivano nemmeno.
-  { chiave: "quota_aperta", etichetta: "Quota da saldare", conQuote: true }
+  { chiave: "quota_aperta", etichetta: "Quota da saldare", conQuote: true },
+  // Chi ha smesso durante la stagione: resta in elenco, ma va riconosciuto
+  { chiave: "ritirati", etichetta: "Ritirati" }
 ];
 
 function eta(dataNascita, oggi) {
@@ -41,10 +43,15 @@ function eta(dataNascita, oggi) {
   return anni;
 }
 
-/** Quanto manca da versare, o null se la quota non è stata impostata. */
+/**
+ * Quanto manca da versare, o null se la quota non è stata impostata.
+ *
+ * Sul DOVUTO e non sulla quota intera: chi si è ritirato prima di gennaio
+ * deve solo la prima metà, e il conto lo fa il server.
+ */
 function daSaldare(atleta) {
-  if (atleta.quotaStagionaleCentesimi == null) return null;
-  return atleta.quotaStagionaleCentesimi - atleta.versatoCentesimi;
+  if (atleta.dovutoCentesimi == null) return null;
+  return atleta.dovutoCentesimi - atleta.versatoCentesimi;
 }
 
 export default function AtletiPage() {
@@ -169,7 +176,8 @@ export default function AtletiPage() {
       if (filtro === "cert_scadenza" && a.cert.chiave !== "in_scadenza") return false;
       if (filtro === "quota_aperta" && !(a.manca > 0)) return false;
       if (filtro === "cert_da_validare" && !(a.certificatoStato === "da_validare" && a.certificatoCaricato)) return false;
-      if (filtro === "quota_mancante" && a.quotaStagionaleCentesimi != null) return false;
+      if (filtro === "quota_mancante" && (a.quotaStagionaleCentesimi != null || a.ritirato)) return false;
+      if (filtro === "ritirati" && !a.ritirato) return false;
 
       if (!cercato) return true;
       return `${a.nomeCompleto} ${a.email} ${a.squadre.map((s) => s.nome).join(" ")}`
@@ -196,7 +204,7 @@ export default function AtletiPage() {
     /* Chi non ha ancora una quota decisa: non compare né fra chi deve dei
        soldi né fra chi è a posto, e resta fermo finché la segreteria non
        ci pensa. */
-    const quotaMancante = conStato.filter((a) => a.quotaStagionaleCentesimi == null).length;
+    const quotaMancante = conStato.filter((a) => a.quotaStagionaleCentesimi == null && !a.ritirato).length;
 
     return { scaduti, inScadenza, senzaQuota, daIncassare, daValidare, quotaMancante };
   }, [conStato]);
@@ -358,7 +366,10 @@ export default function AtletiPage() {
                   />
 
                   <div className="adm-atleta-chi">
-                    <span className="adm-atleta-nome">{a.nomeCompleto}</span>
+                    <span className="adm-atleta-nome">
+                      {a.nomeCompleto}
+                      {a.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
+                    </span>
                     <span className="adm-atleta-sotto">
                       {a.squadre.map((s) => s.nome).join(", ")}
                       {anni != null && ` · ${anni} anni`}
@@ -389,7 +400,8 @@ export default function AtletiPage() {
                           {a.manca > 0 ? `${euro(a.manca)} da versare` : "Saldata"}
                         </span>
                         <span className="adm-atleta-nota">
-                          {euro(a.versatoCentesimi)} di {euro(a.quotaStagionaleCentesimi)}
+                          {euro(a.versatoCentesimi)} di {euro(a.dovutoCentesimi)}
+                          {a.dovutoCentesimi !== a.quotaStagionaleCentesimi && " (metà quota)"}
                         </span>
                       </>
                     )}

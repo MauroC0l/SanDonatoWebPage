@@ -23,12 +23,13 @@
  * scrivibile per sbaglio.
  */
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db/client.js";
 import { squadre, richiesteIscrizione, schedeAtleta, media, pagamenti } from "../../db/schema.js";
 import { salvaScheda, cosaManca, minorenne } from "../atleti.js";
 import { assicuraQuotaAllenatore } from "../quote.js";
+import { quotaDi, versamentiDi } from "../stagioni.js";
 import { legamiDichiaratiDa } from "../legami.js";
 import { urlFile } from "../notizie.js";
 import { richiedeAccesso } from "../autenticazione.js";
@@ -162,7 +163,6 @@ async function leggi(req, res) {
       certificatoMotivo: schedeAtleta.certificatoMotivo,
       certificatoValidatoIl: schedeAtleta.certificatoValidatoIl,
       note: schedeAtleta.note,
-      quota: schedeAtleta.quotaStagionaleCentesimi,
       aggiornataIl: schedeAtleta.aggiornataIl,
       certificatoChiave: media.chiave,
       certificatoUrlWp: media.urlOriginaleWp
@@ -215,19 +215,17 @@ async function leggi(req, res) {
    * segreteria. Ma sono i SUOI soldi, e sapere quanto ha versato e quanto
    * manca è esattamente il motivo per cui uno apre questa pagina.
    */
-  const versamenti = await db
-    .select({
-      id: pagamenti.id,
-      importoCentesimi: pagamenti.importoCentesimi,
-      causale: pagamenti.causale,
-      pagatoIl: pagamenti.pagatoIl,
-      metodo: pagamenti.metodo
-    })
-    .from(pagamenti)
-    .where(eq(pagamenti.utenteId, req.utente.id))
-    .orderBy(asc(pagamenti.pagatoIl), asc(pagamenti.id));
+  /* Quelli della stagione in corso, con la quota della stagione e il conto
+     in due metà: il saldo dell'anno scorso non paga la quota di quest'anno. */
+  const stagione = await quotaDi(req.utente.id);
+  const versamenti = (await versamentiDi(req.utente.id, stagione.stagione.id)).reverse();
+  const versatoCentesimi = stagione.versatoCentesimi;
 
-  const versatoCentesimi = versamenti.reduce((s, v) => s + v.importoCentesimi, 0);
+  // Iscritti dal primo versamento di sempre, in qualunque stagione
+  const [primo] = await db
+    .select({ pagatoIl: sql`min(${pagamenti.pagatoIl})` })
+    .from(pagamenti)
+    .where(eq(pagamenti.utenteId, req.utente.id));
 
   /* Le parentele dichiarate, come le vede chi le ha dichiarate: il codice
      fiscale che ha scritto lui e a che punto è. Se quel codice fiscale
@@ -260,8 +258,14 @@ async function leggi(req, res) {
       appartenenza: appartenenza ?? null,
       appartenenze,
 
-      quotaStagionaleCentesimi: scheda?.quota ?? null,
+      stagione: stagione.stagione,
+      quotaStagionaleCentesimi: stagione.quotaCentesimi,
+      tipoQuota: stagione.tipoQuota,
       versatoCentesimi,
+      // Le due metà della quota: la seconda da gennaio, e non per chi smette prima
+      conto: stagione.conto,
+      ritirato: stagione.stato === "ritirata",
+      ritiratoIl: stagione.ritiratoIl,
       pagamenti: versamenti,
 
       /**
@@ -273,7 +277,7 @@ async function leggi(req, res) {
        * versato niente, l'iscrizione non ha una data — ed è giusto che sia
        * vuota invece di mostrarne una finta.
        */
-      iscrittoDal: versamenti[0]?.pagatoIl ?? null
+      iscrittoDal: primo?.pagatoIl ?? null
     }
   });
 }

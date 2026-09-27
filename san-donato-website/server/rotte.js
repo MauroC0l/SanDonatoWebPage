@@ -13,6 +13,7 @@
  */
 
 import rotta_accesso from "./rotte/accesso.js";
+import rotta_admin_allenatori from "./rotte/admin/allenatori.js";
 import rotta_admin_atleti_index from "./rotte/admin/atleti/index.js";
 import rotta_admin_calendari_index from "./rotte/admin/calendari/index.js";
 import rotta_admin_calendari_lettura from "./rotte/admin/calendari/lettura.js";
@@ -44,6 +45,7 @@ import rotta_uscita from "./rotte/uscita.js";
 import rotta_admin_atleti_id from "./rotte/admin/atleti/[id].js";
 import rotta_admin_atleti_id_certificato from "./rotte/admin/atleti/[id]/certificato.js";
 import rotta_admin_atleti_id_legami from "./rotte/admin/atleti/[id]/legami.js";
+import rotta_admin_atleti_id_ritiro from "./rotte/admin/atleti/[id]/ritiro.js";
 import rotta_admin_calendari_id from "./rotte/admin/calendari/[id].js";
 import rotta_admin_calendari_gironi_id from "./rotte/admin/calendari/gironi/[id].js";
 import rotta_admin_eventi_id from "./rotte/admin/eventi/[id].js";
@@ -63,6 +65,7 @@ import rotta_notizie_identificativo from "./rotte/notizie/[identificativo].js";
  */
 const TABELLA = [
   ["accesso",                        rotta_accesso],
+  ["admin/allenatori",               rotta_admin_allenatori],
   ["admin/atleti",                   rotta_admin_atleti_index],
   ["admin/calendari",                rotta_admin_calendari_index],
   ["admin/calendari/lettura",        rotta_admin_calendari_lettura],
@@ -94,6 +97,7 @@ const TABELLA = [
   ["admin/atleti/[id]",              rotta_admin_atleti_id],
   ["admin/atleti/[id]/certificato",  rotta_admin_atleti_id_certificato],
   ["admin/atleti/[id]/legami",       rotta_admin_atleti_id_legami],
+  ["admin/atleti/[id]/ritiro",       rotta_admin_atleti_id_ritiro],
   ["admin/calendari/[id]",           rotta_admin_calendari_id],
   ["admin/calendari/gironi/[id]",    rotta_admin_calendari_gironi_id],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],

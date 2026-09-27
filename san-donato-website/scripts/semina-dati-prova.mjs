@@ -22,12 +22,13 @@
  *   node --env-file=.env.demo scripts/semina-dati-prova.mjs --anche-remoto
  */
 
-import { eq, like, inArray } from "drizzle-orm";
+import { eq, like, inArray, sql } from "drizzle-orm";
 import { getDb, chiudiDb } from "../db/client.js";
 import {
   utenti, squadre, eventi, richiesteIscrizione, associazioniSquadra,
-  schedeAtleta, pagamenti, tipiQuota, legamiFamiliari
+  schedeAtleta, pagamenti, tipiQuota, legamiFamiliari, iscrizioniStagione
 } from "../db/schema.js";
+import { stagioneCorrente, stagionePer, oggiRoma } from "../server/stagioni.js";
 import { creaHashPassword } from "../server/password.js";
 import { carattereDiControllo } from "../server/codice-fiscale.js";
 
@@ -421,6 +422,11 @@ function codiceFiscaleFinto(nascita) {
 async function creaSchede(db, richiesteApprovate) {
   const schede = [];
   const versamenti = [];
+  const iscrizioni = [];
+
+  /* La quota e i versamenti sono della stagione, non della persona: tutto
+     quello che segue va sulla stagione in corso. */
+  const stagione = await stagioneCorrente();
 
   /*
    * Una scheda per PERSONA, non per richiesta.
@@ -442,7 +448,10 @@ async function creaSchede(db, richiesteApprovate) {
 
     // Uno su sei non ha proprio la scheda: è l'atleta appena inserito, che
     // nessuno ha ancora registrato. Deve comparire lo stesso nell'elenco.
-    if (sorte < 0.17) continue;
+    if (sorte < 0.17) {
+      iscrizioni.push({ utenteId: r.utenteId, stagioneId: stagione.id, quotaCentesimi: null });
+      continue;
+    }
 
     // Scadenza del certificato: un pezzo scaduto, un pezzo vicino
     const scadenza =
@@ -492,7 +501,6 @@ async function creaSchede(db, richiesteApprovate) {
       // la situazione di tutti, ed è anche quella che va vista.
       certificatoMediaId: null,
 
-      quotaStagionaleCentesimi: quota,
       note: Math.random() < 0.15
         ? scelta([
             "Allergia alle arachidi, l'adrenalina è nello zaino.",
@@ -501,6 +509,8 @@ async function creaSchede(db, richiesteApprovate) {
           ])
         : null
     });
+
+    iscrizioni.push({ utenteId: r.utenteId, stagioneId: stagione.id, quotaCentesimi: quota });
 
     if (quota == null) continue;
 
@@ -516,6 +526,7 @@ async function creaSchede(db, richiesteApprovate) {
         importoCentesimi: Math.round(quota * 0.4),
         causale: "Acconto iscrizione",
         pagatoIl: soloData(giorniFa(intero(60, 200))),
+        stagioneId: stagione.id,
         metodo: scelta(["bonifico", "contanti"])
       });
       continue;
@@ -527,6 +538,7 @@ async function creaSchede(db, richiesteApprovate) {
         importoCentesimi: quota,
         causale: "Quota stagionale",
         pagatoIl: soloData(giorniFa(intero(30, 220))),
+        stagioneId: stagione.id,
         metodo: scelta(["bonifico", "pos", "contanti"])
       });
     } else {
@@ -537,6 +549,7 @@ async function creaSchede(db, richiesteApprovate) {
           importoCentesimi: acconto,
           causale: "Acconto iscrizione",
           pagatoIl: soloData(giorniFa(intero(150, 250))),
+          stagioneId: stagione.id,
           metodo: "bonifico"
         },
         {
@@ -544,6 +557,7 @@ async function creaSchede(db, richiesteApprovate) {
           importoCentesimi: quota - acconto,
           causale: "Saldo",
           pagatoIl: soloData(giorniFa(intero(20, 140))),
+          stagioneId: stagione.id,
           metodo: scelta(["bonifico", "pos"])
         }
       );
@@ -566,8 +580,55 @@ async function creaSchede(db, richiesteApprovate) {
   if (schede.length) await db.insert(schedeAtleta).values(schede);
   if (versamenti.length) await db.insert(pagamenti).values(versamenti);
 
+  /* Due ritirati, per vedere il segno negli elenchi e la seconda metà che
+     non è più dovuta: la stagione è appena cominciata, quindi entrambi
+     prima di gennaio. */
+  for (const i of iscrizioni.filter((x) => x.quotaCentesimi != null).slice(-2)) {
+    const giorno = giorniFa(intero(3, 20));
+    const data = soloData(giorno) < stagione.inizio ? oggiRoma() : soloData(giorno);
+    Object.assign(i, { stato: "ritirata", ritiratoIl: data, motivoRitiro: "Si è trasferito in un'altra città" });
+  }
+
+  /* Una stagione passata per qualcuno: senza, lo storico della scheda non
+     si può nemmeno guardare. Saldata per intero, con la squadra di allora. */
+  const [anno] = stagione.inizio.split("-").map(Number);
+  const scorsa = await stagionePer(`${anno - 1}-09-01`);
+  const veterani = iscrizioni.slice(0, 6);
+  if (veterani.length) {
+    await db.insert(iscrizioniStagione).values(veterani.map((v) => ({
+      utenteId: v.utenteId,
+      stagioneId: scorsa.id,
+      quotaCentesimi: 20000,
+      squadre: sql`'[{"id":0,"nome":"Squadra della stagione scorsa","sport":"calcio"}]'::jsonb`
+    })));
+    await db.insert(pagamenti).values(veterani.map((v) => ({
+      utenteId: v.utenteId,
+      stagioneId: scorsa.id,
+      importoCentesimi: 20000,
+      causale: "Quota stagionale",
+      pagatoIl: `${anno - 1}-10-15`,
+      metodo: "bonifico"
+    })));
+  }
+
+  if (iscrizioni.length) {
+    await db.insert(iscrizioniStagione).values(iscrizioni.map((i) => ({
+      stato: "attiva", ritiratoIl: null, motivoRitiro: null, ...i
+    })));
+
+    // Le squadre di oggi, fotografate sulla stagione in corso
+    await db.execute(sql`
+      UPDATE iscrizioni_stagione i SET squadre = coalesce((
+        SELECT jsonb_agg(jsonb_build_object('id', sq.id, 'nome', sq.nome, 'sport', sq.sport) ORDER BY sq.ordine)
+        FROM richieste_iscrizione r JOIN squadre sq ON sq.id = r.squadra_id
+        WHERE r.utente_id = i.utente_id AND r.stato = 'approvata'
+      ), '[]'::jsonb)
+      WHERE i.stagione_id = ${stagione.id}`);
+  }
+
   const parentele = famiglie.map(([uno, due]) => ({
     utenteId: uno.utenteId,
+    stagioneId: stagione.id,
     codiceFiscaleDichiarato: due.codiceFiscale,
     utenteCollegatoId: due.utenteId
   }));
@@ -578,6 +639,7 @@ async function creaSchede(db, richiesteApprovate) {
   if (schede.length > 4) {
     parentele.push({
       utenteId: schede[4].utenteId,
+      stagioneId: stagione.id,
       codiceFiscaleDichiarato: "BNCLRA05T41L219V",
       utenteCollegatoId: null
     });

@@ -30,6 +30,7 @@ import { annota } from "../../registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../risposte.js";
 import { leggiCorpo, parametri } from "../../richiesta.js";
 import { schemaDecisione, valida } from "../../validazione.js";
+import { aggiornaSquadreStagione } from "../../stagioni.js";
 
 async function elenco(req, res) {
   const sportAmmessi = await sportGestibili(req.utente);
@@ -198,6 +199,10 @@ async function decidi(req, res) {
     // Su un rifiuto l'account resta "in_attesa" e non "sospeso": la persona
     // può essere ripresa in considerazione senza doverla riattivare a mano.
   });
+
+  /* La squadra entra anche nella stagione in corso: è così che fra tre
+     anni si sa ancora dove giocava, anche se la squadra non c'è più. */
+  if (dati.approvata) await aggiornaSquadreStagione(richiesta.utenteId);
 
   await annota(req.utente, {
     azione: dati.approvata ? "iscrizioni.accoglie" : "iscrizioni.respinge",

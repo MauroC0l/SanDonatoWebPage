@@ -30,6 +30,7 @@ import { json, errore, conGestioneErrori, ErroreHttp } from "../../../risposte.j
 import { leggiCorpo, parametri } from "../../../richiesta.js";
 import { valida } from "../../../validazione.js";
 import { trovaTipoQuota } from "../../../quote.js";
+import { salvaQuotaStagione } from "../../../stagioni.js";
 
 /**
  * Quello che può scrivere chi tiene i conti: la quota, e basta.
@@ -148,7 +149,18 @@ async function modifica(req, res) {
     );
   }
 
-  await salvaScheda(id, dati, req.utente.id);
+  /* La quota è della stagione in corso, il certificato della persona: due
+     posti diversi, e ciascuno riceve solo la sua parte. */
+  const { quotaStagionaleCentesimi, tipoQuotaId, ...perLaScheda } = dati;
+
+  if (tipoQuotaId !== undefined) {
+    await salvaQuotaStagione(
+      id,
+      { quotaCentesimi: quotaStagionaleCentesimi ?? null, tipoQuotaId },
+      req.utente.id
+    );
+  }
+  if (Object.keys(perLaScheda).length) await salvaScheda(id, perLaScheda, req.utente.id);
 
   const tocca = Object.keys(dati);
   const soloQuota = tocca.every((c) => c === "quotaStagionaleCentesimi" || c === "tipoQuotaId");

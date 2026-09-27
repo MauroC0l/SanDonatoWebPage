@@ -4,11 +4,12 @@ import {
   FaArrowLeft, FaSave, FaExclamationCircle, FaHeartbeat, FaEuroSign,
   FaUserCircle, FaPlus, FaTrashAlt, FaFileMedical, FaExternalLinkAlt,
   FaInfoCircle, FaUsers, FaClock, FaUpload, FaCheckCircle, FaTimesCircle,
-  FaHourglassHalf, FaPhoneAlt
+  FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory
 } from "react-icons/fa";
 import {
   getAtleta, salvaSchedaAtleta,
-  uploadMedia, validaCertificato, decidiParentela, listTariffe, AuthError
+  uploadMedia, validaCertificato, decidiParentela, listTariffe,
+  segnaRitiro, annullaRitiro, AuthError
 } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -164,6 +165,9 @@ export default function SchedaAtletaPage() {
   const [errore, setErrore] = useState("");
 
   const [caricandoFile, setCaricandoFile] = useState(false);
+
+  // Il giorno del ritiro: vuoto vuol dire oggi, il caso normale
+  const [dataRitiro, setDataRitiro] = useState("");
   const inputFile = useRef(null);
 
   // Fissato all'apertura: leggere l'orologio mentre si disegna darebbe al
@@ -341,6 +345,47 @@ export default function SchedaAtletaPage() {
     }
   };
 
+  /**
+   * Segna che la persona ha smesso durante la stagione.
+   *
+   * Non la toglie dalla squadra né chiude l'account: cambia il conto — prima
+   * di gennaio la seconda metà non è più dovuta — e mette il segno accanto
+   * al nome. Si annulla, per chi ci ripensa.
+   */
+  const ritira = async () => {
+    const motivo = await chiediTesto({
+      titolo: `Segnare il ritiro di ${atleta.nomeCompleto}?`,
+      testo: "Resta nell'elenco con i suoi conti. Il motivo è facoltativo e lo legge solo lo staff.",
+      segnaposto: "Es. si è trasferito, ha cambiato sport.",
+      conferma: "Segna il ritiro",
+      obbligatorio: false
+    });
+    if (motivo === null) return;
+
+    setSalvataggio(true);
+    try {
+      setAtleta(await segnaRitiro(id, { data: dataRitiro || undefined, motivo: motivo || undefined }));
+      setDataRitiro("");
+      avvisa("Ritiro segnato.", "ok");
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      setSalvataggio(false);
+    }
+  };
+
+  const riapri = async () => {
+    setSalvataggio(true);
+    try {
+      setAtleta(await annullaRitiro(id));
+      avvisa("Ritiro annullato: l'iscrizione è di nuovo attiva.", "ok");
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      setSalvataggio(false);
+    }
+  };
+
   /* ---------- Copia del certificato ---------- */
 
   const caricaCertificato = async (evento) => {
@@ -441,9 +486,10 @@ export default function SchedaAtletaPage() {
    * diceva "controllato e accettato" accanto a "file non caricato".
    */
   const haCertificato = Boolean(atleta.certificatoMediaId);
-  const manca = atleta.quotaStagionaleCentesimi == null
-    ? null
-    : atleta.quotaStagionaleCentesimi - atleta.versatoCentesimi;
+  /* Sul DOVUTO, non sulla quota intera: chi si è ritirato prima di gennaio
+     deve solo la prima metà. Il conto lo fa il server, qui si legge. */
+  const conto = atleta.conto ?? null;
+  const manca = conto?.dovuto == null ? null : conto.residuo;
 
   const tonoCert = cert.chiave === "scaduto" ? "is-allarme"
     : cert.chiave === "in_scadenza" ? "is-attenzione" : "";
@@ -471,7 +517,10 @@ export default function SchedaAtletaPage() {
             />
 
             <div className="adm-testata-atleta">
-              <h1 className="adm-page-title">{atleta.nomeCompleto}</h1>
+              <h1 className="adm-page-title">
+                {atleta.nomeCompleto}
+                {atleta.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
+              </h1>
 
               {/* Email, stato e data di apertura stavano in un riquadro
                   loro in fondo alla colonna di destra: tre righe che non si
@@ -534,7 +583,7 @@ export default function SchedaAtletaPage() {
           testo={manca == null
             ? "quota non impostata"
             : manca > 0
-              ? `versati ${euro(atleta.versatoCentesimi)} su ${euro(atleta.quotaStagionaleCentesimi)}`
+              ? `versati ${euro(atleta.versatoCentesimi)} su ${euro(conto.dovuto)}`
               : `${euro(atleta.versatoCentesimi)} incassati`}
           tono={manca > 0 ? "is-attenzione" : ""}
         />}
@@ -573,7 +622,7 @@ export default function SchedaAtletaPage() {
           l'allenatore l'avviso non compare: la quota non gli arriva
           proprio, e segnalargli una mancanza che non può colmare sarebbe
           solo un rimprovero a vuoto. */}
-      {tieneIConti && atleta.quotaStagionaleCentesimi == null && (
+      {tieneIConti && atleta.quotaStagionaleCentesimi == null && !atleta.ritirato && (
         <div className="adm-alert adm-alert-warn" role="status">
           <FaEuroSign aria-hidden="true" />
           <span>
@@ -749,6 +798,7 @@ export default function SchedaAtletaPage() {
             <section className="adm-panel">
               <h2 className="adm-panel-title">
                 <FaEuroSign aria-hidden="true" /> Quota e versamenti
+                {atleta.stagione && <span className="adm-panel-sotto"> · stagione {atleta.stagione.nome}</span>}
               </h2>
 
               <div className="adm-campi">
@@ -789,11 +839,28 @@ export default function SchedaAtletaPage() {
                   </p>
                 </div>
 
+                {/* Le due metà: la seconda è dovuta da gennaio, e solo da
+                    chi a gennaio c'è ancora. */}
+                {conto?.quota != null && (
+                  <div className="adm-field">
+                    <span className="adm-label">Due metà</span>
+                    <p className="adm-conto adm-conto-meta">
+                      <span>Prima metà {euro(conto.primaMeta)}</span>
+                      <span className={conto.secondaDovuta ? "" : "adm-meta-annullata"}>
+                        Seconda metà {euro(conto.secondaMeta)}
+                        {conto.secondaDovuta
+                          ? ` · da gennaio ${atleta.stagione?.inizioSecondaMeta?.slice(0, 4) ?? ""}`
+                          : " · non dovuta, ritirato prima di gennaio"}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
                 <div className="adm-field">
                   <span className="adm-label">Situazione</span>
                   <p className="adm-conto">
                     <span>{euro(atleta.versatoCentesimi)} versati</span>
-                    {atleta.quotaStagionaleCentesimi != null && (
+                    {conto?.dovuto != null && (
                       <span className={`adm-quota ${manca > 0 ? "is-aperta" : "is-saldata"}`}>
                         {manca > 0
                           ? `${euro(manca)} ancora da versare`
@@ -846,6 +913,87 @@ export default function SchedaAtletaPage() {
                 */}
             </section>)}
 
+            {/* ---------- Ritiro durante la stagione ----------
+                Sotto alla quota perché è lì che si vede cosa cambia: la
+                seconda metà che non è più dovuta. */}
+            {vista === "quota" && tieneIConti && (
+            <section className="adm-panel">
+              <h2 className="adm-panel-title">
+                <FaDoorOpen aria-hidden="true" /> Ritiro
+              </h2>
+
+              {atleta.ritirato ? (
+                <>
+                  <p className="adm-conto">
+                    <span>Ritirato il {dataLeggibile(atleta.ritiratoIl)}</span>
+                    {atleta.motivoRitiro && <span className="adm-hint">{atleta.motivoRitiro}</span>}
+                  </p>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-ghost"
+                    onClick={riapri}
+                    disabled={salvataggio}
+                  >
+                    <FaUndo /> Annulla il ritiro
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="adm-hint">
+                    Se smette durante la stagione. Resta nell&apos;elenco e nella
+                    squadra con i suoi conti; se smette prima di gennaio la
+                    seconda metà della quota non è più dovuta.
+                  </p>
+                  <div className="adm-ritiro-azioni">
+                    <CampoData
+                      valore={dataRitiro ? `${dataRitiro}T00:00:00` : ""}
+                      onChange={(v) => setDataRitiro(v ? giornoLocale(v) : "")}
+                      disabilitato={salvataggio}
+                      segnaposto="Oggi"
+                      etichettaAria="Giorno del ritiro"
+                    />
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn-secondary"
+                      onClick={ritira}
+                      disabled={salvataggio}
+                    >
+                      <FaDoorOpen /> Segna il ritiro
+                    </button>
+                  </div>
+                </>
+              )}
+            </section>)}
+
+            {/* ---------- Le stagioni passate ----------
+                Quello che resta per sempre: dove giocava, quanto doveva,
+                quanto ha versato. Non si modifica. */}
+            {vista === "quota" && tieneIConti && (atleta.storico ?? []).length > 0 && (
+            <section className="adm-panel">
+              <h2 className="adm-panel-title">
+                <FaHistory aria-hidden="true" /> Stagioni passate
+              </h2>
+              <ul className="adm-storico">
+                {atleta.storico.map((st) => (
+                  <li key={st.stagioneId} className="adm-storico-riga">
+                    <span className="adm-storico-nome">{st.nome}</span>
+                    <span className="adm-storico-squadre">
+                      {st.squadre.map((q) => q.nome).join(", ") || "—"}
+                    </span>
+                    <span className="adm-storico-conto">
+                      {st.conto?.dovuto == null
+                        ? "nessuna quota"
+                        : `${euro(st.conto.versato)} su ${euro(st.conto.dovuto)}`}
+                      {st.conto?.residuo > 0 && <strong> · mancano {euro(st.conto.residuo)}</strong>}
+                    </span>
+                    {st.stato === "ritirata" && (
+                      <span className="adm-badge-ritirato">Ritirato il {dataLeggibile(st.ritiratoIl)}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>)}
+
             {/* ---------- Fratelli e sorelle dichiarati ----------
 
                 Sotto alla quota e non altrove: è lì che serve, nel momento
@@ -876,6 +1024,7 @@ export default function SchedaAtletaPage() {
                         {l.laSua
                           ? <>Ha dichiarato <strong>{l.codiceFiscale}</strong></>
                           : <><strong>{l.dichiarataDa}</strong> ha dichiarato lui</>}
+                        {l.stagione && <span className="adm-hint"> · {l.stagione}</span>}
                       </span>
 
                       <span className="adm-legame-esito">
@@ -886,6 +1035,13 @@ export default function SchedaAtletaPage() {
                             {l.trovato.stessoIndirizzo && ", stesso indirizzo"}
                             {!l.trovato.stessoCognome && !l.trovato.stessoIndirizzo
                               && " — ma cognome e indirizzo non coincidono"}
+                            {/* Il sito lo segnala e basta: decide la
+                                segreteria, che sa se sta per rinnovare. */}
+                            {!l.trovato.iscrittoNellaStagione && (
+                              <strong className="adm-legame-avviso">
+                                {" "}Attenzione: nella stagione {l.stagione} non risulta iscritto.
+                              </strong>
+                            )}
                           </>
                         ) : (
                           /* Due cose diverse, e le distingue solo una

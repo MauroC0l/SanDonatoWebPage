@@ -25,6 +25,7 @@ const AttesaSquadraPage = lazy(() => import("./AttesaSquadraPage"));
 const RegistroPage = lazy(() => import("./RegistroPage"));
 const LibreriaPage = lazy(() => import("./LibreriaPage"));
 const QuotePage = lazy(() => import("./QuotePage"));
+const AllenatoriPage = lazy(() => import("./AllenatoriPage"));
 const SquadrePage = lazy(() => import("./SquadrePage"));
 const CalendariUfficialiPage = lazy(() => import("./CalendariUfficialiPage"));
 const RecuperoPasswordPage = lazy(() => import("./RecuperoPasswordPage"));
@@ -356,6 +357,16 @@ export default function AdminRoot({ section }) {
               element={
                 <Riservato una={["quote.gestisci"]}>
                   <Pigra cosa="delle tariffe"><QuotePage /></Pigra>
+                </Riservato>
+              }
+            />
+
+            {/* ---------- Allenatori e la loro quota ---------- */}
+            <Route
+              path="allenatori"
+              element={
+                <Riservato una={["quote.gestisci"]}>
+                  <Pigra cosa="degli allenatori"><AllenatoriPage /></Pigra>
                 </Riservato>
               }
             />

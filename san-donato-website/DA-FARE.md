@@ -21,16 +21,13 @@ medico a loro non si chiede.
 
 Resta aperto:
 
-- **la segreteria non li vede — DECISO il 27 settembre 2026, da fare.**
-  L'elenco "Atleti" nasce dalle richieste di iscrizione accolte
-  (`elencaAtleti` in `server/atleti.js`), e un allenatore che non gioca non
-  ne ha nessuna: la sua quota esiste, ma per chi tiene la cassa non c'è. La
-  società ha scelto una **sezione apposita, per amministratori e
-  segreteria, con tutti gli allenatori e solo loro**, ciascuno con la sua
-  quota. Non vanno mescolati all'elenco degli atleti;
-- **la quota si assegna quando l'allenatore entra nel sito.** Chi non entra
-  mai non risulta dovere niente. È la conseguenza dell'aver scelto di non
-  toccare i venti account esistenti con una migrazione;
+- **la segreteria li vede — FATTO.** C'è la sezione **Allenatori**
+  (`/admin/allenatori`, capacità `quote.gestisci`): tutti gli allenatori e
+  solo loro, con le squadre che allenano, quella in cui giocano, la quota
+  della stagione e il versato;
+- **chi non entra mai nel sito — FATTO.** Aprire la sezione Allenatori
+  assegna la tariffa degli allenatori a chi non ha ancora una quota per la
+  stagione in corso. Una quota già scritta, anche zero, non si tocca;
 - **chi altro paga?** Oggi la capacità `iscrizione.propria` ce l'hanno
   atleta e allenatore. Se anche dirigenti e segreteria versano qualcosa, è
   una riga in `server/autorizzazioni.js` — e un test che va aggiornato
@@ -39,10 +36,6 @@ Resta aperto:
   atleta se la segreteria gliel'ha messa, e quella degli allenatori solo se
   non ne ha nessuna. Non paga due volte. Se invece deve, serve una regola
   nuova: una quota per persona non basta più;
-- **la stagione non esiste come colonna.** `quota_stagionale_centesimi` vuol
-  dire "quella in corso", e il giorno che si cambia stagione i conti
-  dell'anno prima si perdono. Vale per tutti, non solo per gli allenatori.
-
 ### Tariffa per fratelli: cosa succede quando il primo si ritira
 
 Fatto: il giro completo — l'atleta dichiara il codice fiscale del fratello
@@ -52,12 +45,11 @@ tocca la quota: la tariffa si sceglie a parte, come sempre.
 
 Resta aperto:
 
-- **se il primo iscritto si ritira a novembre — DECISO il 27 settembre
-  2026.** Il secondo tiene la tariffa agevolata **per l'anno in corso**.
-  L'anno dopo, se ridichiara un fratello che non fa più parte della
-  società, il sistema lo **segnala** e la segreteria decide: nessun rifiuto
-  automatico. Non si può ancora scrivere, perché il sito non sa cos'è una
-  stagione: si fa insieme alle stagioni, qui sotto;
+- **se il primo iscritto si ritira a novembre — FATTO.** Ogni
+  dichiarazione è di una stagione e si rifà la stagione dopo. Sulla scheda
+  la segreteria legge "nella stagione X non risulta iscritto" quando il
+  fratello trovato non ha un'iscrizione attiva a quella stagione. Nessun
+  rifiuto automatico: decide lei;
 - **il proprio codice fiscale è ancora controllato solo nella lunghezza**
   (`server/rotte/iscrizione.js`). Quello del fratello no: lì il carattere di
   controllo si verifica. La differenza è voluta — stringere anche l'altro
@@ -73,34 +65,36 @@ Resta aperto:
 
 ### Stagioni, e chi smette
 
-Oggi il sito **non sa cos'è una stagione**, e ne seguono due buchi. Chi
-smette a metà anno o non rinnova resta attivo, con squadra, scheda e quota
-di prima: l'unica leva è sospendere l'account, che toglie l'accesso senza
-dire né quando né perché ha smesso. La quota invece è un campo solo, "quella
-in corso": il giorno che la si cambia, i conti dell'anno prima si perdono.
+Fatto (migrazione 0024): la tabella `stagioni`, dal 1° luglio al 30 giugno,
+che si crea da sola la prima volta che serve; `iscrizioni_stagione` con
+quota, tariffa, squadre di quell'anno e ritiro; `pagamenti` e
+`legami_familiari` con la loro stagione. La quota è in due metà (il
+centesimo dispari va alla prima) e chi si ritira prima del 1° gennaio non
+deve la seconda. La scheda mostra le due metà, il ritiro (si segna e si
+annulla) e le stagioni passate. Le regole stanno in `server/stagioni.js` e
+si provano in `test/stagioni.test.js`.
 
-La proposta accettata: una tabella `stagioni`, un'iscrizione per stagione
-(quota, versamenti, tariffa e dichiarazioni dei fratelli legati a quella) e
-un ritiro con data e motivo, segnato dalla segreteria. Le regole decise dalla
-società il 27 settembre 2026:
+La migrazione ha messo **tutti** i versamenti già registrati sulla stagione
+in corso, non in base alla data: finora ogni versamento contava contro "la
+quota in corso".
 
-1. **il cambio di stagione è automatico**: una stagione dura un anno intero,
-   dal 1° luglio al 30 giugno. Non ci sono buchi fra una stagione e l'altra;
-2. **i dati di un atleta restano per sempre legati alla stagione in cui ha
-   giocato**: squadra, quota, versamenti, tariffa, certificato di quell'anno.
-   La stagione nuova non li sovrascrive, ne apre di nuovi accanto: la
-   stagione 2026/27 di un ragazzo deve leggersi uguale anche nel 2030;
-3. **la quota è divisa in due metà, la seconda a gennaio**: chi smette prima
-   non paga la seconda;
-4. **per quanti anni si tengono i dati di chi non torna** lo deve dire chi
-   segue la privacy della società: non è ancora stato chiesto. "Legati alla
-   stagione" dice dove stanno, non quanto a lungo si possono tenere;
-5. **fratelli**: vedi sopra, il sistema segnala e la segreteria decide.
+Resta aperto:
 
-Da chiarire prima di scrivere codice: se "prima di gennaio" è la data del
-ritiro o quella del versamento; come si comporta il pagamento online con due
-rate; quali dati dell'anagrafica sono della persona (nome, codice fiscale,
-data di nascita) e quali della stagione (squadra, certificato, taglia).
+- **per quanti anni si tengono i dati di chi non torna**: lo deve dire chi
+  segue la privacy della società. Non è ancora stato chiesto;
+- **il rinnovo del 1° luglio.** Oggi la stagione nuova parte vuota: tutti
+  restano nelle loro squadre, ma nessuno ha la quota finché la segreteria
+  non la assegna, e a chi non torna va segnato il ritiro a mano. Da decidere
+  se serve un "rinnova" esplicito;
+- **"prima di gennaio" è la data del ritiro**, non quella dei versamenti:
+  scelta fatta nel codice, da confermare con la società;
+- **il pagamento online in due rate**: quando arriverà, deve scrivere
+  `pagamenti.stagione_id` e sapere quale metà sta pagando;
+- **certificato e taglia sono della persona**, non della stagione: una
+  scheda sola, come prima. Se servono per stagione, va spostato;
+- **le colonne della quota su `schede_atleta`** non si usano più: vanno
+  tolte con una migrazione, dopo aver controllato che la 0024 abbia copiato
+  tutto anche sul database vero.
 
 ---
 

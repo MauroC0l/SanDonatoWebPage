@@ -923,7 +923,13 @@ export const schedeAtleta = pgTable("schede_atleta", {
   certificatoValidatoIl: timestamp("certificato_validato_il", { withTimezone: true }),
   certificatoMotivo: text("certificato_motivo"),
 
-  /* ---------- Quota della stagione ---------- */
+  /* ---------- Quota della stagione: NON PIÙ USATE ----------
+
+     Dal 27 settembre 2026 la quota sta in iscrizioni_stagione, una riga
+     per stagione. Queste due colonne sono state copiate nella stagione
+     2026/27 dalla migrazione 0024 e da allora nessuno le legge né le
+     scrive. Restano per una stagione di prova, così un errore nella copia
+     si può ancora rimediare; poi vanno tolte con una migrazione. */
 
   /**
    * Quanto deve per la stagione in corso, in CENTESIMI.
@@ -980,10 +986,91 @@ export const pagamenti = pgTable("pagamenti", {
   pagatoIl: date("pagato_il").notNull(),
   metodo: metodoPagamento("metodo").notNull().default("bonifico"),
 
+  /* A quale stagione va il versamento. Di norma quella in cui è stato
+     fatto, ma non sempre: la quota di settembre si paga anche a fine
+     giugno. Per questo è una colonna e non una data da cui ricavarla. */
+  stagioneId: integer("stagione_id").references(() => stagioni.id, { onDelete: "restrict" }),
+
   registratoDa: integer("registrato_da").references(() => utenti.id, { onDelete: "set null" }),
   creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
-  index("idx_pagamenti_utente").on(t.utenteId, t.pagatoIl)
+  index("idx_pagamenti_utente").on(t.utenteId, t.pagatoIl),
+  index("idx_pagamenti_stagione").on(t.stagioneId, t.utenteId)
+]);
+
+/* =====================================================
+   Stagioni — i dati di un atleta restano nella stagione in cui ha giocato
+   ===================================================== */
+
+/**
+ * Una stagione sportiva: dal 1° luglio al 30 giugno, un anno intero.
+ *
+ * Nessuno la apre né la chiude a mano: la stagione in corso è quella che
+ * contiene la data di oggi, e la riga nasce da sola la prima volta che
+ * serve (vedi server/stagioni.js). Deciso dalla società il 27 settembre
+ * 2026, insieme a una regola che regge tutto il resto: i dati di un
+ * atleta restano per sempre legati alla stagione in cui ha giocato. La
+ * stagione nuova non li sovrascrive, ne apre di nuovi accanto.
+ */
+export const stagioni = pgTable("stagioni", {
+  id: serial("id").primaryKey(),
+  // "2026/27"
+  nome: text("nome").notNull().unique(),
+  inizio: date("inizio").notNull(),
+  fine: date("fine").notNull(),
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
+});
+
+export const statoIscrizioneStagione = pgEnum("stato_iscrizione_stagione", [
+  "attiva",
+  "ritirata" // ha smesso durante la stagione: la sua storia resta
+]);
+
+/**
+ * L'iscrizione di una persona a una stagione: quota, tariffa, squadre e
+ * ritiro di QUELL'anno.
+ *
+ * Prima la quota era un campo solo sulla scheda, "quella in corso": il
+ * giorno che la si cambiava per l'anno nuovo, i conti dell'anno prima si
+ * perdevano. Qui ogni stagione ha la sua riga, e la stagione 2026/27 di un
+ * ragazzo si legge uguale anche nel 2030.
+ *
+ * L'anagrafica, i recapiti e il certificato restano sulla scheda della
+ * persona: un codice fiscale non cambia con la stagione, e un certificato
+ * ha la sua scadenza, che attraversa le stagioni.
+ */
+export const iscrizioniStagione = pgTable("iscrizioni_stagione", {
+  id: serial("id").primaryKey(),
+
+  utenteId: integer("utente_id").notNull()
+    .references(() => utenti.id, { onDelete: "cascade" }),
+  stagioneId: integer("stagione_id").notNull()
+    .references(() => stagioni.id, { onDelete: "restrict" }),
+
+  // La quota della stagione, in centesimi, e la tariffa da cui viene.
+  // L'importo si copia e non si ricava: vedi la nota su tipi_quota.
+  quotaCentesimi: integer("quota_centesimi"),
+  tipoQuotaId: integer("tipo_quota_id").references(() => tipiQuota.id, { onDelete: "set null" }),
+
+  stato: statoIscrizioneStagione("stato").notNull().default("attiva"),
+
+  /* Il ritiro: quando e perché. La data decide anche la quota: chi smette
+     prima di gennaio non deve la seconda metà. */
+  ritiratoIl: date("ritirato_il"),
+  motivoRitiro: text("motivo_ritiro"),
+  ritiroRegistratoDa: integer("ritiro_registrato_da").references(() => utenti.id, { onDelete: "set null" }),
+
+  /* Le squadre in cui ha giocato quella stagione, copiate qui: le squadre
+     di oggi dicono dove gioca adesso, non dove giocava due anni fa. Si
+     aggiornano finché la stagione è in corso, poi restano com'erano. */
+  squadre: jsonb("squadre").notNull().default(sql`'[]'::jsonb`),
+
+  aggiornataDa: integer("aggiornata_da").references(() => utenti.id, { onDelete: "set null" }),
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow(),
+  aggiornataIl: timestamp("aggiornata_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  uniqueIndex("idx_iscrizione_stagione_unica").on(t.utenteId, t.stagioneId),
+  index("idx_iscrizioni_stagione").on(t.stagioneId, t.stato)
 ]);
 
 /* =====================================================
@@ -1047,6 +1134,11 @@ export const legamiFamiliari = pgTable("legami_familiari", {
      errore di battitura o una persona che non si è ancora iscritta. */
   codiceFiscaleDichiarato: text("codice_fiscale_dichiarato").notNull(),
 
+  /* La stagione della dichiarazione. La tariffa fratelli vale per l'anno
+     in cui è concessa: la stagione dopo si dichiara di nuovo, e il sito
+     segnala se il fratello non è più iscritto — decide la segreteria. */
+  stagioneId: integer("stagione_id").references(() => stagioni.id, { onDelete: "restrict" }),
+
   /* Chi il sistema ha trovato con quel codice fiscale, se l'ha trovato.
      Lo riempie il server al momento della dichiarazione e NON torna mai a
      chi ha dichiarato: la vede solo chi tiene le quote. */
@@ -1062,10 +1154,11 @@ export const legamiFamiliari = pgTable("legami_familiari", {
   decisoIl: timestamp("deciso_il", { withTimezone: true }),
   creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
-  /* La stessa persona non dichiara due volte lo stesso codice fiscale:
-     senza questo vincolo, premere due volte il pulsante lascerebbe due
-     righe identiche da controllare in segreteria. */
-  uniqueIndex("idx_legame_unico").on(t.utenteId, t.codiceFiscaleDichiarato),
+  /* La stessa persona non dichiara due volte lo stesso codice fiscale
+     nella stessa stagione: senza questo vincolo, premere due volte il
+     pulsante lascerebbe due righe identiche da controllare in segreteria.
+     La stagione dopo invece si dichiara di nuovo, e la riga è un'altra. */
+  uniqueIndex("idx_legame_unico").on(t.utenteId, t.stagioneId, t.codiceFiscaleDichiarato),
 
   // "Cosa c'è da controllare" è la domanda che si fa aprendo la segreteria.
   index("idx_legame_stato").on(t.stato, t.creatoIl),

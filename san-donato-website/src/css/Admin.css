@@ -3556,3 +3556,35 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
    dell'intestazione: i gironi restano visibili sotto */
 .adm-cal-torneo > .adm-cal-modulo { margin: 0; background: var(--adm-bg); }
 .adm-cal-girone-nome { flex-wrap: wrap; }
+
+/* Chi ha smesso durante la stagione: resta in elenco con i suoi conti, e
+   questo segno dice perché non va più cercato in campo. */
+.adm-badge-ritirato {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--adm-warn-soft);
+  color: var(--adm-warn);
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.adm-panel-sotto { font-weight: 400; color: var(--adm-muted); font-size: 0.9em; }
+
+.adm-meta-annullata { text-decoration: line-through; color: var(--adm-muted); }
+.adm-ritiro-azioni { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.6rem; }
+.adm-ritiro-azioni > :first-child { flex: 1 1 12rem; max-width: 16rem; }
+.adm-legame-avviso { color: var(--adm-warn); }
+
+/* Le stagioni passate: una riga ciascuna, quello che resta per sempre */
+.adm-storico { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.adm-storico-riga {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; align-items: baseline;
+  padding: 0.55rem 0; border-bottom: 1px solid var(--adm-line-soft);
+}
+.adm-storico-riga:last-child { border-bottom: 0; }
+.adm-storico-nome { font-weight: 700; min-width: 4.5rem; }
+.adm-storico-squadre { flex: 1 1 10rem; }
+.adm-storico-conto { color: var(--adm-muted); }
