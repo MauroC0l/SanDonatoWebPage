@@ -1,0 +1,43 @@
+/* =====================================================
+   Calendari ufficiali (/admin/calendari)
+   Quello che serve solo a questa pagina; il resto è in Admin.css.
+   ===================================================== */
+
+/* Il titolo dei gironi è anche l'interruttore che li apre e li chiude:
+   ha l'aspetto del titolo, non di un pulsante, ma tutta la riga si preme. */
+.adm-cal-apri {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.45rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.3rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.adm-cal-apri:hover { color: var(--adm-ink, inherit); }
+.adm-cal-apri:focus-visible { outline: 2px solid var(--adm-blue); outline-offset: 3px; border-radius: 4px; }
+
+.adm-cal-apri .adm-hint { margin: 0; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+/* La freccia punta a destra da chiusa e in giù da aperta */
+.adm-cal-freccia {
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform .15s ease;
+}
+
+.adm-cal-freccia.is-aperta { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-cal-freccia { transition: none; }
+}

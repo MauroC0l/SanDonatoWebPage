@@ -63,11 +63,22 @@ function ContoAllaRovescia({ quando, alTermine }) {
   );
 }
 
+/*
+ * Quello che la home ha mostrato l'ultima volta, finché la pagina resta
+ * aperta nel browser.
+ *
+ * Tornando alla home da un'altra pagina, notizie e partite comparivano
+ * dopo un attimo di rotella: la home le richiedeva da capo ogni volta.
+ * Adesso si mostrano subito quelle di prima, e intanto si chiedono quelle
+ * nuove: se nel frattempo è cambiato qualcosa, si aggiorna da sola.
+ */
+let ricordo = null;
+
 export default function HomePage() {
-  const [ultimeNotizie, setUltimeNotizie] = useState([]);
-  const [eventiSettimana, setEventiSettimana] = useState([]);
-  const [eventiOggi, setEventiOggi] = useState([]);
-  const [caricamento, setCaricamento] = useState(true);
+  const [ultimeNotizie, setUltimeNotizie] = useState(() => ricordo?.ultimeNotizie ?? []);
+  const [eventiSettimana, setEventiSettimana] = useState(() => ricordo?.eventiSettimana ?? []);
+  const [eventiOggi, setEventiOggi] = useState(() => ricordo?.eventiOggi ?? []);
+  const [caricamento, setCaricamento] = useState(() => !ricordo);
   const [erroreNotizie, setErroreNotizie] = useState("");
 
   const [eventoScelto, setEventoScelto] = useState(null);
@@ -120,9 +131,9 @@ export default function HomePage() {
         // "Nuova" si decide una volta sola, qui: la finestra è di giorni, e
         // ricalcolarla a ogni ridisegno non cambierebbe mai niente.
         const adesso = Date.now();
-        setUltimeNotizie(
-          tutte.slice(0, 5).map((post) => ({ ...post, recente: eRecente(post, adesso) }))
-        );
+        const ultime = tutte.slice(0, 5).map((post) => ({ ...post, recente: eRecente(post, adesso) }));
+        setUltimeNotizie(ultime);
+        ricordo = { ...ricordo, ultimeNotizie: ultime };
       } else {
         console.error("Errore caricamento notizie:", notizie.reason);
         setErroreNotizie(notizie.reason?.message || "Notizie non disponibili.");
@@ -131,6 +142,11 @@ export default function HomePage() {
       if (calendario.status === "fulfilled") {
         setEventiOggi(calendario.value.todayEvents || []);
         setEventiSettimana(calendario.value.weekEvents || []);
+        ricordo = {
+          ...ricordo,
+          eventiOggi: calendario.value.todayEvents || [],
+          eventiSettimana: calendario.value.weekEvents || []
+        };
       } else {
         console.error("Errore caricamento calendario:", calendario.reason);
       }

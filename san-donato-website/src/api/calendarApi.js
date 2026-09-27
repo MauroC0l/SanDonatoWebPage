@@ -94,7 +94,31 @@ function normalizza(e) {
   };
 }
 
+/*
+ * Gli ultimi intervalli chiesti, per un minuto.
+ *
+ * Andare e tornare dal calendario, o passare dalla home al calendario e
+ * indietro, richiedeva ogni volta gli stessi eventi e mostrava ogni volta
+ * la rotella. Un minuto basta a far sparire l'attesa fra una pagina e
+ * l'altra senza tenere a lungo un risultato vecchio: il server stesso li
+ * tiene in cache per un minuto.
+ */
+const DURATA_RICORDO = 60 * 1000;
+const ricordati = new Map();
+
 async function eventiTra(inizio, fine) {
+  const chiave = `${inizio.toISOString()}|${fine.toISOString()}`;
+  const trovato = ricordati.get(chiave);
+  if (trovato && Date.now() - trovato.quando < DURATA_RICORDO) return trovato.risultato;
+
+  const risultato = await eventiDalServer(inizio, fine);
+  ricordati.set(chiave, { quando: Date.now(), risultato });
+  // Non si accumulano all'infinito: bastano gli ultimi venti intervalli
+  if (ricordati.size > 20) ricordati.delete(ricordati.keys().next().value);
+  return risultato;
+}
+
+async function eventiDalServer(inizio, fine) {
   const parametri = new URLSearchParams({
     da: inizio.toISOString(),
     a: fine.toISOString(),

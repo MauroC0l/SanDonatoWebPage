@@ -306,3 +306,21 @@
   font-size: .84rem;
   color: var(--adm-ink);
 }
+
+/* ---------- La nota in fondo alla pagina della quota ----------
+
+   La "i" accanto al testo e non sopra: le icone del sito sono blocchi
+   (index.css), e dentro a un paragrafo andavano a capo da sole. Il testo
+   sta in una colonna sua, così le righe dopo la prima partono allineate
+   alla prima parola e non sotto all'icona. */
+.qta-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: .45rem;
+}
+
+.qta-nota svg {
+  flex-shrink: 0;
+  /* Centrata sulla prima riga: 0.78rem di testo per 1.45 di interlinea */
+  margin-top: .2em;
+}

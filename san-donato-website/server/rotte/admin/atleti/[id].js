@@ -30,7 +30,7 @@ import { json, errore, conGestioneErrori, ErroreHttp } from "../../../risposte.j
 import { leggiCorpo, parametri } from "../../../richiesta.js";
 import { valida } from "../../../validazione.js";
 import { trovaTipoQuota } from "../../../quote.js";
-import { salvaQuotaStagione } from "../../../stagioni.js";
+import { salvaQuotaStagione, stagioneRichiesta } from "../../../stagioni.js";
 
 /**
  * Quello che può scrivere chi tiene i conti: la quota, e basta.
@@ -85,7 +85,9 @@ async function leggi(req, res) {
   const atleta = await trovaAtleta(idRichiesto(req), {
     squadreAmmesse: ammesse,
     // Vedi la nota in server/atleti.js: al coach i conti non arrivano proprio
-    conQuote: puo(req.utente, "quote.gestisci")
+    conQuote: puo(req.utente, "quote.gestisci"),
+    // Il selettore della stagione: le passate si guardano, non si modificano
+    stagione: await stagioneRichiesta(parametri(req).stagione)
   });
 
   // 404 e non 403 quando l'atleta esiste ma è di un'altra squadra: dire

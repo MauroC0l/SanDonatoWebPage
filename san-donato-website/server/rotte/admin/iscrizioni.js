@@ -31,6 +31,7 @@ import { json, errore, conGestioneErrori, ErroreHttp } from "../../risposte.js";
 import { leggiCorpo, parametri } from "../../richiesta.js";
 import { schemaDecisione, valida } from "../../validazione.js";
 import { aggiornaSquadreStagione } from "../../stagioni.js";
+import { assegnaQuoteAutomatiche } from "../../quote.js";
 
 async function elenco(req, res) {
   const sportAmmessi = await sportGestibili(req.utente);
@@ -202,7 +203,11 @@ async function decidi(req, res) {
 
   /* La squadra entra anche nella stagione in corso: è così che fra tre
      anni si sa ancora dove giocava, anche se la squadra non c'è più. */
-  if (dati.approvata) await aggiornaSquadreStagione(richiesta.utenteId);
+  if (dati.approvata) {
+    await aggiornaSquadreStagione(richiesta.utenteId);
+    // E la quota: prima iscrizione o rinnovo, la sa il sito
+    await assegnaQuoteAutomatiche([richiesta.utenteId]);
+  }
 
   await annota(req.utente, {
     azione: dati.approvata ? "iscrizioni.accoglie" : "iscrizioni.respinge",

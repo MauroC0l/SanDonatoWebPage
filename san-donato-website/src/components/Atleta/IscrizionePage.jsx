@@ -10,7 +10,6 @@ import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import { statoCertificato, quantoManca } from "../../utils/certificato";
 import { anni } from "../../utils/eta";
-import RiquadroFratelli from "./RiquadroFratelli";
 import RiquadroQuota from "./RiquadroQuota";
 import Tendina from "../Admin/Tendina";
 import CampoData from "../Admin/CampoData";
@@ -622,21 +621,8 @@ export default function IscrizionePage() {
         </div>
       </form>
 
-      {/* Fuori dal modulo, e sotto: una parentela si dichiara subito e per
-          conto suo, mentre i propri dati si salvano col pulsante in cima.
-          Dentro allo stesso <form> sarebbero due salvataggi dietro a un
-          invio solo — e un <form> dentro a un altro non è nemmeno HTML
-          valido.
-
-          Solo a chi gioca: la tariffa agevolata è quella degli iscritti
-          dal secondo figlio in poi, e un allenatore non c'entra. */}
-      {iscrizione?.gioca && (
-        <RiquadroFratelli
-          fratelli={iscrizione?.fratelli ?? []}
-          onAggiornati={(elenco) => setIscrizione({ ...iscrizione, fratelli: elenco })}
-          onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
-        />
-      )}
+      {/* La richiesta della quota per la famiglia sta nella pagina della
+          quota (QuotaPage): è lì che si guarda quanto si paga. */}
     </div>
   );
 }

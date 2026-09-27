@@ -27,6 +27,7 @@ import { annota } from "../../../../registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../../../risposte.js";
 import { leggiCorpo } from "../../../../richiesta.js";
 import { valida } from "../../../../validazione.js";
+import { applicaTariffaFamiglia } from "../../../../quote.js";
 
 const schemaDecisione = z.object({
   legameId: z.coerce.number().int().positive(),
@@ -69,11 +70,18 @@ export default conGestioneErrori(
     const suo = (atleta.legami ?? []).some((l) => l.id === dati.legameId);
     if (!suo) throw new ErroreHttp(404, "Questa dichiarazione non riguarda questo atleta.");
 
-    await decidiLegame(
+    const deciso = await decidiLegame(
       dati.legameId,
       { stato: dati.conferma ? "confermato" : "respinto", motivo: dati.motivo ?? null },
       req.utente
     );
+
+    /* Deciso dalla società il 28 settembre 2026: confermare applica da sé
+       la tariffa famiglia a chi ha dichiarato, per la stagione in corso.
+       Una tariffa scelta a mano dalla segreteria però resta. */
+    const tariffa = dati.conferma
+      ? await applicaTariffaFamiglia(deciso.utenteId, deciso.stagioneId, req.utente.id)
+      : null;
 
     await annota(req.utente, {
       azione: dati.conferma ? "legame.conferma" : "legame.respinge",
@@ -86,7 +94,8 @@ export default conGestioneErrori(
     });
 
     return json(res, {
-      atleta: await trovaAtleta(id, { squadreAmmesse: ammesse, conQuote: true })
+      atleta: await trovaAtleta(id, { squadreAmmesse: ammesse, conQuote: true }),
+      tariffaApplicata: tariffa ? tariffa.nome : null
     });
   })
 );

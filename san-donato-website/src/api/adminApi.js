@@ -550,8 +550,17 @@ export async function listAttivita({ pagina = 1, perPagina = 40, utenteId, tipo,
  * altrimenti quali. Serve al pannello per proporre nel filtro solo le
  * squadre che daranno un risultato.
  */
-export async function listAtleti({ squadraId } = {}) {
-  const parametri = new URLSearchParams();
+/**
+ * La stagione scelta nel selettore in alto, come parametro dell'indirizzo.
+ * Null o vuota vuol dire "quella in corso": il server la sceglie da sé.
+ */
+function conStagione(parametri, stagioneId) {
+  if (stagioneId) parametri.set("stagione", String(stagioneId));
+  return parametri;
+}
+
+export async function listAtleti({ squadraId, stagioneId } = {}) {
+  const parametri = conStagione(new URLSearchParams(), stagioneId);
   if (squadraId) parametri.set("squadraId", String(squadraId));
 
   const risposta = await chiedi(`/admin/atleti?${parametri}`);
@@ -559,13 +568,24 @@ export async function listAtleti({ squadraId } = {}) {
     atleti: risposta.atleti,
     squadreAmmesse: risposta.squadreAmmesse,
     // false per un allenatore: quote e versamenti non gli arrivano affatto
-    conQuote: risposta.conQuote !== false
+    conQuote: risposta.conQuote !== false,
+    stagione: risposta.stagione ?? null
   };
 }
 
-export async function getAtleta(utenteId) {
-  const { atleta } = await chiedi(`/admin/atleti/${utenteId}`);
+export async function getAtleta(utenteId, { stagioneId } = {}) {
+  const parametri = conStagione(new URLSearchParams(), stagioneId);
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}?${parametri}`);
   return atleta;
+}
+
+/**
+ * Le stagioni, dalla più recente. A chi tiene i conti arrivano con i loro
+ * numeri (iscritti, rinnovi, quote); agli altri solo nome e date.
+ */
+export async function listStagioni() {
+  const { stagioni } = await chiedi("/admin/stagioni");
+  return stagioni;
 }
 
 /** Salva la scheda. Se non esisteva, la crea. */
@@ -804,12 +824,13 @@ export async function validaCertificato(utenteId, { approva, motivo } = {}) {
  * quota agevolata si applica un momento dopo, con il comando di sempre —
  * "sono fratelli?" e "quanto paga?" sono due domande diverse.
  */
+/** Torna { atleta, tariffaApplicata }: il nome della tariffa famiglia, se è stata applicata. */
 export async function decidiParentela(utenteId, { legameId, conferma, motivo } = {}) {
-  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/legami`, {
+  const { atleta, tariffaApplicata } = await chiedi(`/admin/atleti/${utenteId}/legami`, {
     method: "PATCH",
     body: JSON.stringify({ legameId, conferma, motivo })
   });
-  return atleta;
+  return { atleta, tariffaApplicata: tariffaApplicata ?? null };
 }
 
 /**
@@ -834,8 +855,9 @@ export async function annullaRitiro(utenteId) {
    ===================================================== */
 
 /** Gli allenatori con la quota della stagione in corso: { stagione, allenatori }. */
-export async function listAllenatori() {
-  return chiedi("/admin/allenatori");
+export async function listAllenatori({ stagioneId } = {}) {
+  const parametri = conStagione(new URLSearchParams(), stagioneId);
+  return chiedi(`/admin/allenatori?${parametri}`);
 }
 
 /* =====================================================

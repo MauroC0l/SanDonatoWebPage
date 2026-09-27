@@ -7,13 +7,16 @@ import {
   FaClipboardCheck,
   FaCalendarCheck,
   FaUserCircle,
-  FaChalkboardTeacher
+  FaChalkboardTeacher,
+  FaLayerGroup
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { AREA_ATLETA } from "../../utils/percorsi";
 import Ritratto from "./Ritratto";
 import NavigazioneMobile from "./NavigazioneMobile";
+import SelettoreStagione from "./SelettoreStagione";
+import StagioneProvider from "../../context/StagioneProvider";
 
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
@@ -48,6 +51,8 @@ const SEZIONI = [
   { a: "quote", etichetta: "Quote", Icona: FaEuroSign, capacita: ["quote.gestisci"] },
   // Chi allena e la sua quota: nell'elenco Atleti non compare, qui sì
   { a: "allenatori", etichetta: "Allenatori", Icona: FaChalkboardTeacher, capacita: ["quote.gestisci"] },
+  // I numeri di ogni stagione, quella in corso e le passate
+  { a: "stagioni", etichetta: "Stagioni", Icona: FaLayerGroup, capacita: ["quote.gestisci"] },
   { a: "utenti", etichetta: "Utenti", Icona: FaUsers, capacita: ["utenti.gestisci"] },
   { a: "libreria", etichetta: "Libreria", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
   { a: "registro", etichetta: "Registro", Icona: FaHistory, capacita: ["registro.leggi"] },
@@ -71,7 +76,7 @@ const SEZIONI = [
  */
 const PRIORITA_MOBILE = [
   "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
-  "eventi", "iscrizione", "allenatori", "squadre", "calendari", "utenti", "registro"
+  "eventi", "iscrizione", "allenatori", "stagioni", "squadre", "calendari", "utenti", "registro"
 ];
 
 /**
@@ -156,7 +161,11 @@ export default function AdminLayout() {
     .sort((x, y) => PRIORITA_MOBILE.indexOf(x.a) - PRIORITA_MOBILE.indexOf(y.a))
     .map(({ a, etichetta, Icona, esatta }) => ({ a: a ? `${area}/${a}` : area, etichetta, Icona, esatta }));
 
+  // Il selettore della stagione serve a chi vede atleti o quote
+  const conStagioni = !inAttesa && ["atleti.leggi", "quote.gestisci"].some((c) => capacita.includes(c));
+
   return (
+    <StagioneProvider attivo={conStagioni}>
     <div className="adm-shell">
       {/**
         * Due righe e non una.
@@ -177,6 +186,9 @@ export default function AdminLayout() {
             <span className="adm-brand-mark">PSD</span>
             <span className="adm-brand-text">Area riservata</span>
           </Link>
+
+          {/* Quale stagione si guarda: vale per atleti, schede e allenatori */}
+          {conStagioni && <SelettoreStagione />}
 
           <div className="adm-user">
             {/* Sul telefono "Vedi il sito" ed "Esci" stanno nel menu in basso:
@@ -236,5 +248,6 @@ export default function AdminLayout() {
         onEsci={handleLogout}
       />
     </div>
+    </StagioneProvider>
   );
 }

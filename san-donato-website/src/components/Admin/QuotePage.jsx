@@ -28,6 +28,13 @@ import "../../css/Admin.css";
  * devono di più senza che nessuno gliel'abbia detto.
  */
 
+/* Come si chiama, per chi legge il listino, ciascuna delle automatiche */
+const ETICHETTA_AUTOMATICA = {
+  prima_iscrizione: "chi la stagione prima non c'era",
+  rinnovo: "chi c'era anche la stagione prima",
+  famiglia: "fratello o sorella confermati"
+};
+
 const VUOTA = { nome: "", descrizione: "", importo: "", ordine: "", perAllenatori: false };
 
 export default function QuotePage() {
@@ -410,6 +417,16 @@ export default function QuotePage() {
                           {t.perAllenatori && (
                             <span className="adm-status adm-status-pending">Allenatori</span>
                           )}
+                          {/* Le tre che il sito assegna da solo: ci sono sempre,
+                              si rinominano e se ne cambia l'importo */}
+                          {t.automatica && (
+                            <span
+                              className="adm-status adm-status-pending"
+                              title={`La assegna il sito da solo: ${ETICHETTA_AUTOMATICA[t.automatica]}`}
+                            >
+                              Automatica
+                            </span>
+                          )}
                         </span>
                         {t.descrizione && (
                           <span className="qta-tariffa-nota">{t.descrizione}</span>
@@ -453,7 +470,7 @@ export default function QuotePage() {
                             {t.attiva ? <FaEyeSlash /> : <FaEye />}
                           </button>
 
-                          <button
+                          {!t.automatica && <button
                             type="button"
                             className="adm-icon-btn adm-icon-danger"
                             onClick={() => cancella(t)}
@@ -464,7 +481,7 @@ export default function QuotePage() {
                             aria-label={`Elimina ${t.nome}`}
                           >
                             <FaTrashAlt />
-                          </button>
+                          </button>}
                         </div>
                       )}
                     </div>

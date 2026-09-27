@@ -667,3 +667,42 @@ describe("ritiro durante la stagione", () => {
     expect(esito.stato).toBe(400);
   });
 });
+
+describe("stagioni e quote automatiche", () => {
+  seAccesa("chi tiene i conti vede i numeri di ogni stagione, l'allenatore solo l'elenco", async () => {
+    const segreteria = await entra("segreteria");
+    const conti = await segreteria.chiedi("/admin/stagioni");
+    expect(conti.stato).toBe(200);
+    const inCorso = conti.corpo.stagioni.find((s) => s.inCorso);
+    expect(inCorso).toBeTruthy();
+    expect(inCorso.quote).toBeTruthy();
+
+    const coach = await entra("coach");
+    const elenco = await coach.chiedi("/admin/stagioni");
+    expect(elenco.stato).toBe(200);
+    expect(elenco.corpo.stagioni[0].quote).toBeUndefined();
+  });
+
+  seAccesa("una stagione passata si guarda con le squadre di allora", async () => {
+    const { chiedi } = await entra("admin");
+    const { corpo } = await chiedi("/admin/stagioni");
+    const passata = corpo.stagioni.find((s) => s.passata);
+    if (!passata) return; // nessuna stagione passata in questo database
+
+    const atleti = await chiedi(`/admin/atleti?stagione=${passata.id}`);
+    expect(atleti.stato).toBe(200);
+    expect(atleti.corpo.stagione.id).toBe(passata.id);
+
+    expect((await chiedi("/admin/atleti?stagione=999999")).stato).toBe(404);
+  });
+
+  seAccesa("le tariffe automatiche non si cancellano", async () => {
+    const { chiedi } = await entra("admin");
+    const { corpo } = await chiedi("/admin/quote");
+    const automatica = corpo.tariffe.find((t) => t.automatica);
+    expect(automatica, "la migrazione 0025 le crea sempre").toBeTruthy();
+
+    const esito = await chiedi(`/admin/quote/${automatica.id}`, { method: "DELETE" });
+    expect(esito.stato).toBe(409);
+  });
+});

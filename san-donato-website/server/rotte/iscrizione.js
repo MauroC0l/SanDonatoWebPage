@@ -28,7 +28,7 @@ import { z } from "zod";
 import { getDb } from "../../db/client.js";
 import { squadre, richiesteIscrizione, schedeAtleta, media, pagamenti } from "../../db/schema.js";
 import { salvaScheda, cosaManca, minorenne } from "../atleti.js";
-import { assicuraQuotaAllenatore } from "../quote.js";
+import { assicuraQuotaAllenatore, assegnaQuoteAutomatiche } from "../quote.js";
 import { quotaDi, versamentiDi } from "../stagioni.js";
 import { legamiDichiaratiDa } from "../legami.js";
 import { urlFile } from "../notizie.js";
@@ -134,6 +134,14 @@ async function leggi(req, res) {
      volta dicendo "quota da definire" per poi mostrarla al secondo giro.
      Chi la vede una volta sola resterebbe con l'informazione sbagliata. */
   await assicuraQuotaAllenatore(req.utente);
+
+  // Chi gioca prende la sua automatica: prima iscrizione, rinnovo o famiglia
+  const [inSquadra] = await db
+    .select({ id: richiesteIscrizione.id })
+    .from(richiesteIscrizione)
+    .where(and(eq(richiesteIscrizione.utenteId, req.utente.id), eq(richiesteIscrizione.stato, "approvata")))
+    .limit(1);
+  if (inSquadra) await assegnaQuoteAutomatiche([req.utente.id]);
 
   const [scheda] = await db
     .select({

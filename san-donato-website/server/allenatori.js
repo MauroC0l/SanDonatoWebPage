@@ -19,7 +19,7 @@ import {
 import { urlFile } from "./file.js";
 import { quotePerUtenti } from "./stagioni.js";
 
-export async function elencaAllenatori() {
+export async function elencaAllenatori(stagione = null) {
   const db = getDb();
 
   const persone = await db
@@ -53,8 +53,8 @@ export async function elencaAllenatori() {
       .from(richiesteIscrizione)
       .innerJoin(squadre, eq(squadre.id, richiesteIscrizione.squadraId))
       .where(and(inArray(richiesteIscrizione.utenteId, ids), eq(richiesteIscrizione.stato, "approvata"))),
-    // Quota e versato della stagione in corso
-    quotePerUtenti(ids)
+    // Quota e versato della stagione chiesta (quella in corso se nessuna)
+    quotePerUtenti(ids, stagione)
   ]);
 
   const raggruppa = (righe) => {

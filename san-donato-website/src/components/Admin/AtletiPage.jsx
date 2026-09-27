@@ -8,6 +8,7 @@ import { listAtleti, listSquadre, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
+import { useStagione } from "../../context/stagione";
 import { euro } from "../../utils/soldi";
 import { statoCertificato, quantoManca } from "../../utils/certificato";
 import Tendina from "./Tendina";
@@ -62,6 +63,8 @@ export default function AtletiPage() {
   const puoValidare = (user?.capabilities ?? []).includes("certificato.registra");
   const area = useArea();
   const { avvisa } = useDialoghi();
+  const { stagioneId, stagione: stagioneScelta, scegli: scegliStagione } = useStagione();
+  const passata = Boolean(stagioneScelta && !stagioneScelta.inCorso);
 
   const [atleti, setAtleti] = useState([]);
   const [squadre, setSquadre] = useState([]);
@@ -113,7 +116,7 @@ export default function AtletiPage() {
   useEffect(() => {
     let attivo = true;
 
-    Promise.all([listAtleti(), listSquadre()])
+    Promise.all([listAtleti({ stagioneId }), listSquadre()])
       .then(([{ atleti: elenco, squadreAmmesse: ammesse, conQuote: quote }, elencoSquadre]) => {
         if (!attivo) return;
         setAtleti(elenco);
@@ -129,7 +132,7 @@ export default function AtletiPage() {
       });
 
     return () => { attivo = false; };
-  }, [gestisciErrore]);
+  }, [gestisciErrore, stagioneId]);
 
   /* Un allenatore vede nel filtro solo le proprie squadre: le altre gli
      tornerebbero sempre vuote. */
@@ -232,9 +235,23 @@ export default function AtletiPage() {
               ? "Nessun atleta assegnato alle squadre che vedi."
               : `${atleti.length} ${atleti.length === 1 ? "persona" : "persone"} in squadra`}
             {conQuote ? " · certificato medico, quote e versamenti." : " · certificato medico e stato dell iscrizione."}
+            {stagioneScelta && ` Stagione ${stagioneScelta.nome}.`}
           </p>
         </div>
       </div>
+
+      {/* Una stagione passata: chi c'era allora e nelle squadre di allora */}
+      {passata && (
+        <div className="adm-alert adm-alert-info" role="status">
+          <span>
+            Stai guardando la stagione <strong>{stagioneScelta.nome}</strong>: chi c&apos;era
+            e in quali squadre, con i conti di allora.{" "}
+            <button type="button" className="adm-link-btn" onClick={() => scegliStagione(null)}>
+              Torna alla stagione in corso
+            </button>
+          </span>
+        </div>
+      )}
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">

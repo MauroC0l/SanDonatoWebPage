@@ -3588,3 +3588,37 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-storico-nome { font-weight: 700; min-width: 4.5rem; }
 .adm-storico-squadre { flex: 1 1 10rem; }
 .adm-storico-conto { color: var(--adm-muted); }
+
+/* ---------- Selettore della stagione, in alto accanto al marchio ---------- */
+.adm-topbar-alta .adm-selettore-stagione { margin-right: auto; margin-left: 1rem; width: 13rem; }
+
+.adm-selettore-stagione.is-passata .tnd-bottone { border-color: var(--adm-warn); background: var(--adm-warn-soft); }
+@media (max-width: 600px) {
+  .adm-topbar-alta .adm-selettore-stagione { margin-left: 0.5rem; width: auto; flex: 1 1 auto; max-width: 11rem; }
+}
+
+/* Un pulsante che si legge come un collegamento, dentro a un avviso */
+.adm-link-btn {
+  background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
+  color: inherit; text-decoration: underline; cursor: pointer;
+}
+
+/* ---------- Pannello Stagioni ---------- */
+.adm-stg-elenco { display: grid; gap: 1rem; }
+.adm-stg.is-in-corso { border: 2px solid var(--adm-blue-soft); }
+.adm-stg-testa { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+.adm-stg-nome { margin: 0; font-size: 1.15rem; display: flex; gap: 0.6rem; align-items: center; }
+.adm-stg-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.2rem; }
+.adm-stg-titolo { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--adm-muted); }
+.adm-stg-numeri { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: 0.5rem; }
+.adm-stg-numero { display: flex; flex-direction: column; padding: 0.55rem 0.7rem; background: var(--adm-line-soft); border-radius: 9px; }
+.adm-stg-numero.is-attenzione { background: var(--adm-warn-soft); }
+.adm-stg-cifra { font-size: 1.25rem; font-weight: 700; color: var(--adm-ink); }
+.adm-stg-testo { font-size: 0.78rem; color: var(--adm-muted); }
+.adm-stg-var { display: inline-flex; gap: 0.3rem; align-items: center; margin-top: 0.5rem; font-size: 0.82rem; color: var(--adm-muted); }
+.adm-stg-var.is-su { color: var(--adm-ok); }
+.adm-stg-var.is-giu { color: var(--adm-danger); }
+.adm-stg-sport { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0; padding: 0; }
+.adm-stg-sport li { padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--adm-blue-soft); color: var(--adm-blue-dark); font-size: 0.82rem; }
+.adm-stg-barra { height: 0.55rem; border-radius: 999px; background: var(--adm-line-soft); overflow: hidden; margin: 0.8rem 0 0.35rem; }
+.adm-stg-barra > span { display: block; height: 100%; background: var(--adm-ok); }

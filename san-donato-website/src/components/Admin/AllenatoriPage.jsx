@@ -6,6 +6,7 @@ import {
 import { listAllenatori, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
+import { useStagione } from "../../context/stagione";
 import { euro } from "../../utils/soldi";
 import Ritratto from "./Ritratto";
 import "../../css/Admin.css";
@@ -37,6 +38,7 @@ export default function AllenatoriPage() {
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
   const { avvisa } = useDialoghi();
+  const { stagioneId } = useStagione();
 
   const [allenatori, setAllenatori] = useState([]);
   const [stagione, setStagione] = useState(null);
@@ -57,7 +59,7 @@ export default function AllenatoriPage() {
 
   useEffect(() => {
     let attivo = true;
-    listAllenatori()
+    listAllenatori({ stagioneId })
       .then(({ allenatori: elenco, stagione: s }) => {
         if (!attivo) return;
         setAllenatori(elenco);
@@ -70,7 +72,7 @@ export default function AllenatoriPage() {
         setCaricamento(false);
       });
     return () => { attivo = false; };
-  }, [gestisciErrore]);
+  }, [gestisciErrore, stagioneId]);
 
   const conConto = useMemo(
     () => allenatori.map((a) => ({ ...a, manca: residuo(a) })),

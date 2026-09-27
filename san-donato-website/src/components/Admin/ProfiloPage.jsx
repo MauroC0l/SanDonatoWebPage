@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaUserCircle, FaSave, FaKey, FaLock, FaUsers, FaClock,
   FaExclamationCircle, FaHourglassHalf, FaCheckCircle, FaTimesCircle,
-  FaCamera, FaTrash
+  FaCamera, FaTrash, FaEuroSign
 } from "react-icons/fa";
 import { getProfilo, aggiornaProfilo, uploadMedia, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -12,6 +12,7 @@ import { areaDi } from "../../utils/percorsi";
 import Ritratto from "./Ritratto";
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
+import "../../css/Profilo.css";
 
 const NOME_RUOLO = {
   admin: "Amministratore",
@@ -455,6 +456,36 @@ export default function ProfiloPage() {
                 </p>
               )}
 
+            </section>
+          )}
+
+          {/* Le regole della quota, scritte una volta sola dove si cercano:
+              la pagina della quota mostra i numeri, ma non dice perché la
+              seconda metà compare barrata o perché le due metà differiscono
+              di un centesimo. Solo per chi la quota la versa (atleti e
+              allenatori): a chi amministra e basta non serve. */}
+          {user?.capabilities?.includes("iscrizione.propria") && (
+            <section className="adm-panel prf-quota">
+              <h2 className="adm-panel-title">
+                <FaEuroSign aria-hidden="true" /> Come funziona la quota
+              </h2>
+              <ul className="prf-quota-punti">
+                <li>
+                  La stagione va dal <strong>1° luglio</strong> al <strong>30 giugno</strong> dell&apos;anno dopo.
+                </li>
+                <li>
+                  La quota è divisa in <strong>due metà</strong>: la prima si versa a inizio
+                  stagione, la seconda è dovuta da gennaio.
+                </li>
+                <li>
+                  Se smetti prima del 1° gennaio, la seconda metà non la devi: nella
+                  pagina della quota la vedrai barrata.
+                </li>
+                <li>
+                  Se la quota non si divide in due parti uguali, il centesimo in più
+                  va nella prima metà.
+                </li>
+              </ul>
             </section>
           )}
 

@@ -599,7 +599,7 @@ async function creaSchede(db, richiesteApprovate) {
       utenteId: v.utenteId,
       stagioneId: scorsa.id,
       quotaCentesimi: 20000,
-      squadre: sql`'[{"id":0,"nome":"Squadra della stagione scorsa","sport":"calcio"}]'::jsonb`
+      squadre: sql`'[{"id":0,"nome":"Squadra della stagione scorsa","sport":"Calcio"}]'::jsonb`
     })));
     await db.insert(pagamenti).values(veterani.map((v) => ({
       utenteId: v.utenteId,
@@ -759,9 +759,9 @@ async function creaEventi(db, creati, listaSquadre) {
  */
 async function creaTariffe(db) {
   const listino = [
-    { nome: "Prima iscrizione", descrizione: "Chi si iscrive per la prima volta", importoCentesimi: 25000, ordine: 1 },
-    { nome: "Rinnovo", descrizione: "Chi c'era anche l'anno scorso", importoCentesimi: 20000, ordine: 2 },
-    { nome: "Fratello o sorella", descrizione: "Dal secondo figlio iscritto", importoCentesimi: 15000, ordine: 3 },
+    { nome: "Prima iscrizione", descrizione: "Chi si iscrive per la prima volta", importoCentesimi: 25000, ordine: 1, automatica: "prima_iscrizione" },
+    { nome: "Rinnovo", descrizione: "Chi c'era anche l'anno scorso", importoCentesimi: 20000, ordine: 2, automatica: "rinnovo" },
+    { nome: "Famiglia", descrizione: "Chi ha un fratello o una sorella iscritti", importoCentesimi: 15000, ordine: 3, automatica: "famiglia" },
     { nome: "Minivolley", descrizione: "Corso propedeutico, un allenamento a settimana", importoCentesimi: 12000, ordine: 4 },
     { nome: "Solo tesseramento", descrizione: "Chi si allena altrove e gioca con noi", importoCentesimi: 5000, ordine: 5 },
 

@@ -26,6 +26,7 @@ import rotta_admin_notizie_index from "./rotte/admin/notizie/index.js";
 import rotta_admin_quote_index from "./rotte/admin/quote/index.js";
 import rotta_admin_registro from "./rotte/admin/registro.js";
 import rotta_admin_squadre_index from "./rotte/admin/squadre/index.js";
+import rotta_admin_stagioni from "./rotte/admin/stagioni.js";
 import rotta_admin_utenti from "./rotte/admin/utenti.js";
 import rotta_cambia_password from "./rotte/cambia-password.js";
 import rotta_cron_calendari from "./rotte/cron/calendari.js";
@@ -78,6 +79,7 @@ const TABELLA = [
   ["admin/quote",                    rotta_admin_quote_index],
   ["admin/registro",                 rotta_admin_registro],
   ["admin/squadre",                  rotta_admin_squadre_index],
+  ["admin/stagioni",                 rotta_admin_stagioni],
   ["admin/utenti",                   rotta_admin_utenti],
   ["cambia-password",                rotta_cambia_password],
   ["cron/calendari",                 rotta_cron_calendari],

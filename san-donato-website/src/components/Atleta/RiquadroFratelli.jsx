@@ -30,7 +30,7 @@ const ASPETTO = {
   },
   confermato: {
     Icona: FaCheckCircle,
-    testo: "Controllata: la segreteria ne terrà conto sulla tua quota."
+    testo: "Confermata: la tua quota è quella per la famiglia."
   },
   respinto: {
     Icona: FaTimesCircle,
@@ -83,11 +83,11 @@ export default function RiquadroFratelli({ fratelli = [], onAggiornati, onErrore
 
       <p className="adm-hint fra-spiega">
         Se un tuo fratello o una tua sorella sono già iscritti alla
-        Polisportiva, la società applica una <strong>tariffa ridotta</strong>.
+        Polisportiva, puoi chiedere la <strong>quota per la famiglia</strong>.
         Scrivi qui il suo codice fiscale: la segreteria controlla e, se
-        risulta, te ne tiene conto sulla quota. <strong>La cifra non cambia
-        da sola</strong>, e finché non l&apos;hanno guardata resta quella che
-        vedi in alto.
+        risulta, la tua quota diventa quella per la famiglia. Finché non
+        l&apos;ha guardata resta quella che vedi in alto. Vale per questa
+        stagione: la prossima si richiede di nuovo.
       </p>
 
       {fratelli.length > 0 && (

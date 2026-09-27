@@ -18,7 +18,8 @@
 
 import { assicuraQuotaAllenatore } from "../../quote.js";
 import { elencaAllenatori } from "../../allenatori.js";
-import { stagioneCorrente } from "../../stagioni.js";
+import { stagioneRichiesta, elencaStagioni } from "../../stagioni.js";
+import { parametri } from "../../richiesta.js";
 import { richiedeCapacita } from "../../autenticazione.js";
 import { json, errore, conGestioneErrori } from "../../risposte.js";
 
@@ -29,21 +30,21 @@ export default conGestioneErrori(
       return errore(res, 405, `Metodo ${req.method} non consentito.`);
     }
 
-    let allenatori = await elencaAllenatori();
+    const stagione = await stagioneRichiesta(parametri(req).stagione);
+    const descritta = (await elencaStagioni()).find((s) => s.id === stagione.id);
 
-    const senzaQuota = allenatori.filter((a) => a.quotaCentesimi == null);
+    let allenatori = await elencaAllenatori(stagione);
+
+    // Solo nella stagione in corso: il passato non si riscrive
+    const senzaQuota = descritta.inCorso ? allenatori.filter((a) => a.quotaCentesimi == null) : [];
     if (senzaQuota.length) {
       for (const a of senzaQuota) {
         await assicuraQuotaAllenatore({ id: a.utenteId, ruolo: "coach" });
       }
-      allenatori = await elencaAllenatori();
+      allenatori = await elencaAllenatori(stagione);
     }
 
-    const stagione = await stagioneCorrente();
     res.setHeader("Cache-Control", "no-store");
-    return json(res, {
-      stagione: { id: stagione.id, nome: stagione.nome },
-      allenatori
-    });
+    return json(res, { stagione: descritta, allenatori });
   })
 );

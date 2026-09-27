@@ -228,11 +228,45 @@ export async function quotePerUtenti(ids, stagione = null) {
   return risultato;
 }
 
-/** Quota e conto di una persona sola, per la stagione in corso. */
-export async function quotaDi(utenteId) {
-  const s = await stagioneCorrente();
+/** Quota e conto di una persona sola, per una stagione (quella in corso se non si dice). */
+export async function quotaDi(utenteId, stagione = null) {
+  const s = stagione ?? await stagioneCorrente();
   const q = (await quotePerUtenti([Number(utenteId)], s)).get(Number(utenteId));
-  return { ...q, stagione: { id: s.id, nome: s.nome, inizio: s.inizio, fine: s.fine, inizioSecondaMeta: s.inizioSecondaMeta } };
+  return { ...q, stagione: descriviStagione(s, await stagioneCorrente()) };
+}
+
+/** Quello che il pannello sa di una stagione: nome, date e se è quella in corso. */
+export function descriviStagione(s, corrente) {
+  return {
+    id: s.id,
+    nome: s.nome,
+    inizio: s.inizio,
+    fine: s.fine,
+    inizioSecondaMeta: s.inizioSecondaMeta ?? stagioneDi(s.inizio).inizioSecondaMeta,
+    inCorso: s.id === corrente.id,
+    // Una stagione futura non esiste: le righe nascono solo quando servono
+    passata: s.inizio < corrente.inizio
+  };
+}
+
+/**
+ * La stagione chiesta dal pannello con ?stagione=<id>, o quella in corso.
+ *
+ * Il selettore in alto nel pannello manda l'identificativo a ogni
+ * richiesta: senza, si guarda la stagione in corso come sempre.
+ */
+export async function stagioneRichiesta(id) {
+  if (id == null || id === "") return stagioneCorrente();
+  const s = await stagioneDaId(id);
+  if (!s) throw new ErroreHttp(404, "Questa stagione non esiste.");
+  return s;
+}
+
+/** Tutte le stagioni, dalla più recente: per il selettore del pannello. */
+export async function elencaStagioni() {
+  const corrente = await stagioneCorrente();
+  const righe = await getDb().select().from(stagioni).orderBy(desc(stagioni.inizio));
+  return righe.map((r) => descriviStagione(r, corrente));
 }
 
 /** I versamenti di una persona per una stagione, dal più recente. */

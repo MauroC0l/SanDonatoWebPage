@@ -28,7 +28,7 @@ const CONTATTI = [
 const CAMPI_CONTATTO = [
   { suffisso: "Nome", etichetta: "Nome e cognome", max: 120, seMinore: true },
   { suffisso: "Parentela", etichetta: "Chi è", tipo: "scelta" },
-  { suffisso: "Telefono", etichetta: "Telefono", max: 40, tipo: "tel", seMinore: true },
+  { suffisso: "Telefono", etichetta: "Telefono", tipo: "tel", seMinore: true },
   { suffisso: "Email", etichetta: "Email", max: 255, tipo: "email" }
 ];
 
@@ -45,9 +45,56 @@ const VUOTO = {
   tutore2Nome: "", tutore2Parentela: "", tutore2Telefono: "", tutore2Email: ""
 };
 
+/*
+ * I numeri di telefono: solo cifre, al massimo dieci (un cellulare
+ * italiano; un fisso ne ha meno). Spazi, trattini e barre li scrive chi
+ * copia il numero dalla rubrica, ma a chi lo compone servono le cifre.
+ *
+ * Il +39 (o 0039) davanti si toglie invece di trasformarlo in "39…": è il
+ * modo in cui la rubrica del telefono incolla quasi ogni numero, e tenerlo
+ * farebbe dodici cifre che non stanno nel campo.
+ */
+const CAMPI_TELEFONO = ["telefono", "tutoreTelefono", "tutore2Telefono"];
+const CIFRE_TELEFONO = 10;
+
+function cifreTelefono(valore) {
+  const testo = String(valore ?? "").trim();
+  const cifre = testo.replace(/\D/g, "");
+  if (testo.startsWith("+39")) return cifre.slice(2);
+  if (testo.startsWith("0039")) return cifre.slice(4);
+  return cifre;
+}
+
+/* Quello che si scrive o si incolla non va oltre le dieci cifre. Quello già
+   salvato no: tagliarlo senza dirlo cambierebbe il numero, e un numero
+   troppo lungo lo segnala il modulo al salvataggio. */
+const telefonoScritto = (valore) => cifreTelefono(valore).slice(0, CIFRE_TELEFONO);
+
+/* Le proprietà comuni a ogni casella di telefono della pagina */
+function propsTelefono(valore, cambia) {
+  return {
+    type: "tel",
+    inputMode: "numeric",
+    autoComplete: "tel-national",
+    maxLength: CIFRE_TELEFONO,
+    pattern: `[0-9]{6,${CIFRE_TELEFONO}}`,
+    title: "Solo cifre, senza spazi: al massimo dieci.",
+    value: valore,
+    onChange: (e) => cambia(telefonoScritto(e.target.value)),
+    /* maxLength taglierebbe l'incollato prima di togliergli spazi e +39:
+       "+39 345 1234567" diventerebbe "39345123". Qui si pulisce intero. */
+    onPaste: (e) => {
+      e.preventDefault();
+      cambia(telefonoScritto(e.clipboardData.getData("text")));
+    }
+  };
+}
+
 function daIscrizione(i) {
   const letto = { ...VUOTO };
   for (const chiave of Object.keys(VUOTO)) letto[chiave] = i?.[chiave] ?? "";
+  // "345 1234567" salvato prima di questa regola si mostra "3451234567"
+  for (const chiave of CAMPI_TELEFONO) letto[chiave] = cifreTelefono(letto[chiave]);
   return letto;
 }
 
@@ -205,11 +252,8 @@ export default function ContattiPage() {
                     <span className="adm-obbligatorio" title="Serve per completare l'iscrizione">*</span>
                   </span>
                   <input
-                    type="tel"
                     className="adm-input"
-                    value={form.telefono}
-                    maxLength={40}
-                    onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                    {...propsTelefono(form.telefono, (v) => setForm({ ...form, telefono: v }))}
                     disabled={salvataggio}
                   />
                 </label>
@@ -288,6 +332,13 @@ export default function ContattiPage() {
                                 disabilitato={salvataggio}
                                 etichettaAria={`${c.etichetta} (${contatto.titolo})`}
                                 segnaposto="Scegli…"
+                              />
+                            ) : c.tipo === "tel" ? (
+                              <input
+                                className="adm-input"
+                                {...propsTelefono(form[chiave], (v) => setForm({ ...form, [chiave]: v }))}
+                                disabled={salvataggio}
+                                aria-label={`${c.etichetta} (${contatto.titolo})`}
                               />
                             ) : (
                               <input

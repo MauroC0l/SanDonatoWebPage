@@ -8,23 +8,38 @@ import HomePage from "./components/Home/HomePage";
 import { usePublishedHeight } from "./hooks/usePublishedHeight";
 import FasciaDimostrativa from "./components/AllPages/FasciaDimostrativa";
 import SagomaAccesso from "./components/AllPages/SagomaAccesso";
+import { precaricaQuandoLibero } from "./utils/precarica";
 
 // La home resta nel bundle principale: è la pagina d'ingresso.
 // Tutte le altre vengono scaricate solo quando servono davvero.
-const News = lazy(() => import("./components/News/NewsPage"));
-const NewsDetailPage = lazy(() => import("./components/News/NewsDetail"));
-const ChiSiamoPage = lazy(() => import("./components/ChiSiamoPage"));
-const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
-const CalendarPage = lazy(() => import("./components/CalendarPage"));
-const ContactPage = lazy(() => import("./components/Contatti"));
-const PrivacyPage = lazy(() => import("./components/PrivacyPage"));
-const TutelaMinoriPage = lazy(() => import("./components/TutelaMinoriPage"));
-const ContributiPage = lazy(() => import("./components/ContributiPage"));
-const CinquePerMillePage = lazy(() => import("./components/CinquePerMillePage"));
-const SponsorPage = lazy(() => import("./components/SponsorPage"));
-const SportPage = lazy(() => import("./components/SportPage"));
-const GalleriaPage = lazy(() => import("./components/Galleria/GalleriaPage"));
-const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
+const importaNews = () => import("./components/News/NewsPage");
+const News = lazy(importaNews);
+const importaNewsDetailPage = () => import("./components/News/NewsDetail");
+const NewsDetailPage = lazy(importaNewsDetailPage);
+const importaChiSiamoPage = () => import("./components/ChiSiamoPage");
+const ChiSiamoPage = lazy(importaChiSiamoPage);
+const importaSubscriptionPage = () => import("./components/SubscriptionPage");
+const SubscriptionPage = lazy(importaSubscriptionPage);
+const importaCalendarPage = () => import("./components/CalendarPage");
+const CalendarPage = lazy(importaCalendarPage);
+const importaContactPage = () => import("./components/Contatti");
+const ContactPage = lazy(importaContactPage);
+const importaPrivacyPage = () => import("./components/PrivacyPage");
+const PrivacyPage = lazy(importaPrivacyPage);
+const importaTutelaMinoriPage = () => import("./components/TutelaMinoriPage");
+const TutelaMinoriPage = lazy(importaTutelaMinoriPage);
+const importaContributiPage = () => import("./components/ContributiPage");
+const ContributiPage = lazy(importaContributiPage);
+const importaCinquePerMillePage = () => import("./components/CinquePerMillePage");
+const CinquePerMillePage = lazy(importaCinquePerMillePage);
+const importaSponsorPage = () => import("./components/SponsorPage");
+const SponsorPage = lazy(importaSponsorPage);
+const importaSportPage = () => import("./components/SportPage");
+const SportPage = lazy(importaSportPage);
+const importaGalleriaPage = () => import("./components/Galleria/GalleriaPage");
+const GalleriaPage = lazy(importaGalleriaPage);
+const importaNotFoundPage = () => import("./components/NotFoundPage");
+const NotFoundPage = lazy(importaNotFoundPage);
 
 // Area riservata: nessun visitatore ne scarica una riga
 const AdminRoot = lazy(() => import("./components/Admin/AdminRoot"));
@@ -75,7 +90,29 @@ function PublicLayout() {
   );
 }
 
+/* Le pagine del sito pubblico, da scaricare in anticipo a browser fermo:
+   così la prima apertura di ciascuna non mostra la rotella. L'area
+   riservata no: un visitatore non la apre, e pesa quanto il resto. */
+const PAGINE_PUBBLICHE = [
+  importaNews,
+  importaNewsDetailPage,
+  importaChiSiamoPage,
+  importaSubscriptionPage,
+  importaCalendarPage,
+  importaContactPage,
+  importaPrivacyPage,
+  importaTutelaMinoriPage,
+  importaContributiPage,
+  importaCinquePerMillePage,
+  importaSponsorPage,
+  importaSportPage,
+  importaGalleriaPage,
+  importaNotFoundPage
+];
+
 export default function App() {
+  useEffect(() => { precaricaQuandoLibero(PAGINE_PUBBLICHE); }, []);
+
   return (
     <>
       <ScrollToTop />

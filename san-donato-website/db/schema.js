@@ -770,6 +770,10 @@ export const statoCertificato = pgEnum("stato_certificato", [
  * accordi presi con le famiglie, e riscriverli tutti insieme perché il
  * listino è cambiato a gennaio sarebbe un guaio, non una comodità.
  */
+export const tipoTariffaAutomatica = pgEnum("tipo_tariffa_automatica", [
+  "prima_iscrizione", "rinnovo", "famiglia"
+]);
+
 export const tipiQuota = pgTable("tipi_quota", {
   id: serial("id").primaryKey(),
 
@@ -806,9 +810,23 @@ export const tipiQuota = pgTable("tipi_quota", {
    */
   perAllenatori: boolean("per_allenatori").notNull().default(false),
 
+  /**
+   * Le tariffe che il sistema assegna da solo, deciso dalla società il 28
+   * settembre 2026: "prima_iscrizione" a chi la stagione prima non c'era,
+   * "rinnovo" a chi c'era, "famiglia" a chi ha un fratello o una sorella
+   * confermati dalla segreteria. Ci sono sempre — la migrazione le crea —
+   * e non si cancellano: si rinominano e se ne cambia l'importo.
+   *
+   * Una colonna e non il nome, per la stessa ragione di "perAllenatori".
+   */
+  automatica: tipoTariffaAutomatica("automatica"),
+
   creataDa: integer("creata_da").references(() => utenti.id, { onDelete: "set null" }),
   creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
-});
+}, (t) => [
+  // Una sola per tipo: due "rinnovo" vorrebbero dire un importo a caso
+  uniqueIndex("idx_tariffa_automatica").on(t.automatica)
+]);
 
 export const metodoPagamento = pgEnum("metodo_pagamento", [
   "contanti", "bonifico", "pos", "altro"

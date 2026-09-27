@@ -16,11 +16,14 @@ import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { getDb } from "../db/client.js";
 import {
-  utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media
+  utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media, iscrizioniStagione
 } from "../db/schema.js";
 import { urlFile } from "./file.js";
 import { legamiPerSegreteria } from "./legami.js";
-import { quotePerUtenti, quotaDi, versamentiDi, storicoStagioni } from "./stagioni.js";
+import {
+  quotePerUtenti, quotaDi, versamentiDi, storicoStagioni, stagioneCorrente
+} from "./stagioni.js";
+import { assegnaQuoteAutomatiche } from "./quote.js";
 
 /*
  * La tabella media entra due volte nella stessa interrogazione — una per il
@@ -133,8 +136,17 @@ const COLONNE_SCHEDA = {
  * `squadreAmmesse` null significa tutte (amministratori e segreteria); un
  * elenco limita alle squadre indicate (un allenatore vede i propri).
  */
-export async function elencaAtleti({ squadreAmmesse = null, squadraId = null, conQuote = true } = {}) {
+export async function elencaAtleti({
+  squadreAmmesse = null, squadraId = null, conQuote = true, stagione = null
+} = {}) {
   const db = getDb();
+  const corrente = await stagioneCorrente();
+
+  /* Una stagione passata si legge da quello che è rimasto scritto allora:
+     le squadre di quell'anno, non quelle di oggi. */
+  if (stagione && stagione.id !== corrente.id) {
+    return elencaAtletiDiStagione({ squadreAmmesse, squadraId, conQuote, stagione });
+  }
 
   const condizioni = [eq(richiesteIscrizione.stato, "approvata")];
 
@@ -222,12 +234,81 @@ export async function elencaAtleti({ squadreAmmesse = null, squadraId = null, co
 
   const atleti = [...perUtente.values()];
 
-  /* La stagione in corso di ciascuno. Il ritiro lo sanno tutti — anche un
+  /* Chi gioca e non ha ancora una quota prende quella automatica: prima
+     iscrizione, rinnovo o famiglia. Non la sceglie più nessuno. */
+  await assegnaQuoteAutomatiche(atleti.map((a) => a.utenteId));
+
+  await aggiungiConti(atleti, { conQuote, stagione: corrente });
+  return atleti;
+}
+
+/**
+ * Gli atleti di una stagione passata: chi aveva un'iscrizione con almeno
+ * una squadra. Le squadre sono quelle fotografate allora — la squadra può
+ * non esistere più, o chiamarsi in un altro modo — mentre nome e
+ * certificato sono quelli di oggi: sono della persona, non della stagione.
+ */
+async function elencaAtletiDiStagione({ squadreAmmesse, squadraId, conQuote, stagione }) {
+  if (Array.isArray(squadreAmmesse) && squadreAmmesse.length === 0) return [];
+
+  const righe = await getDb()
+    .select({
+      utenteId: utenti.id,
+      email: utenti.email,
+      nome: utenti.nome,
+      cognome: utenti.cognome,
+      ruolo: utenti.ruolo,
+      stato: utenti.stato,
+      ultimoAccesso: utenti.ultimoAccesso,
+      squadreAllora: iscrizioniStagione.squadre,
+      immagineChiave: immagineProfilo.chiave,
+      immagineUrlWp: immagineProfilo.urlOriginaleWp,
+      ...COLONNE_SCHEDA
+    })
+    .from(iscrizioniStagione)
+    .innerJoin(utenti, eq(utenti.id, iscrizioniStagione.utenteId))
+    .leftJoin(immagineProfilo, eq(immagineProfilo.id, utenti.immagineId))
+    .leftJoin(schedeAtleta, eq(schedeAtleta.utenteId, utenti.id))
+    .where(eq(iscrizioniStagione.stagioneId, stagione.id))
+    .orderBy(asc(utenti.cognome), asc(utenti.nome), asc(utenti.id));
+
+  const atleti = righe
+    .map((r) => ({ ...r, squadreAllora: Array.isArray(r.squadreAllora) ? r.squadreAllora : [] }))
+    .filter((r) => r.squadreAllora.length > 0)
+    .filter((r) => !Array.isArray(squadreAmmesse) || r.squadreAllora.some((q) => squadreAmmesse.includes(q.id)))
+    .filter((r) => !squadraId || r.squadreAllora.some((q) => q.id === Number(squadraId)))
+    .map((r) => ({
+      utenteId: r.utenteId,
+      email: r.email,
+      nome: r.nome,
+      cognome: r.cognome,
+      nomeCompleto: [r.nome, r.cognome].filter(Boolean).join(" ") || r.email,
+      ruolo: r.ruolo,
+      stato: r.stato,
+      ultimoAccesso: r.ultimoAccesso,
+      immagineUrl: urlFile(r.immagineChiave, r.immagineUrlWp),
+      squadre: r.squadreAllora.map((q) => ({ id: q.id, nome: q.nome, sport: q.sport, colore: q.colore ?? null })),
+      haScheda: r.schedaId != null,
+      dataNascita: r.dataNascita,
+      telefono: r.telefono,
+      tipoCertificato: r.tipoCertificato,
+      certificatoScadenza: r.certificatoScadenza,
+      certificatoCaricato: r.certificatoMediaId != null,
+      certificatoStato: r.certificatoStato
+    }));
+
+  await aggiungiConti(atleti, { conQuote, stagione });
+  return atleti;
+}
+
+/** Ritiro per tutti, quota e versato solo a chi tiene i conti. */
+async function aggiungiConti(atleti, { conQuote, stagione }) {
+  /* La stagione di ciascuno. Il ritiro lo sanno tutti — anche un
      allenatore deve sapere che un ragazzo ha smesso — i soldi solo chi
      tiene i conti. */
-  const stagione = await quotePerUtenti(atleti.map((a) => a.utenteId));
+  const conti = await quotePerUtenti(atleti.map((a) => a.utenteId), stagione);
   for (const a of atleti) {
-    const q = stagione.get(a.utenteId);
+    const q = conti.get(a.utenteId);
     a.ritirato = q?.stato === "ritirata";
     a.ritiratoIl = q?.ritiratoIl ?? null;
     if (conQuote) {
@@ -237,12 +318,10 @@ export async function elencaAtleti({ squadreAmmesse = null, squadraId = null, co
       a.dovutoCentesimi = q?.dovutoCentesimi ?? null;
     }
   }
-
-  return atleti;
 }
 
 /** La scheda completa di una persona, versamenti inclusi. */
-export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = true } = {}) {
+export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = true, stagione: chiesta = null } = {}) {
   const db = getDb();
   const id = Number(utenteId);
 
@@ -303,7 +382,7 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
      vede anche un allenatore; soldi e versamenti solo chi tiene i conti —
      vedi la nota in elencaAtleti: senza "quote.gestisci" non partono
      proprio, non vengono nascosti a schermo. */
-  const stagione = await quotaDi(id);
+  const stagione = await quotaDi(id, chiesta);
 
   const versamenti = conQuote ? await versamentiDi(id, stagione.stagione.id) : [];
 

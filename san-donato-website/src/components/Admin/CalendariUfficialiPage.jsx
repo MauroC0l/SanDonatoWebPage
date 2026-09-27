@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaPlus, FaSyncAlt, FaPencilAlt, FaSave, FaExternalLinkAlt, FaExclamationCircle,
-  FaExclamationTriangle, FaCheckCircle, FaFolderOpen, FaTimes
+  FaExclamationTriangle, FaCheckCircle, FaFolderOpen, FaTimes, FaChevronDown
 } from "react-icons/fa";
 import {
   getCalendariUfficiali, creaFonteCalendario, aggiornaFonteCalendario, eliminaFonteCalendario,
@@ -13,6 +13,7 @@ import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import "../../css/Admin.css";
+import "../../css/CalendariUfficiali.css";
 
 /*
  * I calendari ufficiali: i tornei delle federazioni e i loro gironi.
@@ -28,6 +29,9 @@ const formatoData = new Intl.DateTimeFormat("it-IT", {
   weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
 });
 const quando = (d) => (d ? formatoData.format(new Date(d)) : "—");
+
+const NOME_SPORT = { Societa: "Società" };
+const sportLeggibile = (s) => NOME_SPORT[s] ?? s;
 
 const righe = (testo) => testo.split("\n").map((r) => r.trim()).filter(Boolean);
 
@@ -273,6 +277,9 @@ export default function CalendariUfficialiPage() {
   const [salvataggio, setSalvataggio] = useState(false);
   const [inLettura, setInLettura] = useState(null); // "tutte" | id della fonte
   const [occupati, setOccupati] = useState(() => new Set());
+  const [sportScelto, setSportScelto] = useState(""); // "" = tutti
+  // Solo i tornei aperti o chiusi a mano: gli altri seguono apertoDiSolito()
+  const [aperture, setAperture] = useState({});
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -440,7 +447,24 @@ export default function CalendariUfficialiPage() {
 
   const formatoDi = (codice) => dati.formati.find((f) => f.codice === codice);
   const letturaInCorso = inLettura !== null;
-  const senzaSquadra = dati.gironi.filter((g) => !g.squadraId && !g.ignorato && !g.sparitoIl);
+  const daAssegnare = (g) => !g.squadraId && !g.ignorato && !g.sparitoIl;
+  const senzaSquadra = dati.gironi.filter(daAssegnare);
+
+  /* Lo sport di un torneo non è un campo suo: viene dal formato dei file,
+     che è di una federazione e di uno sport (lo stesso che il server usa
+     per non collegare un girone di pallavolo a una squadra di calcio). */
+  const sportDi = (fonte) => formatoDi(fonte.formato)?.sport ?? null;
+  const sportPresenti = [...new Set(dati.fonti.map(sportDi).filter(Boolean))];
+  // Se l'ultimo torneo di quello sport se n'è andato, il filtro torna su tutti
+  const sportAttivo = sportPresenti.includes(sportScelto) ? sportScelto : "";
+  const fontiVisibili = dati.fonti.filter((f) => !sportAttivo || sportDi(f) === sportAttivo);
+
+  /* Chiusi di norma: a stagione avviata i gironi sono tutti assegnati e la
+     pagina serve a vedere a colpo d'occhio se ogni torneo si è letto. Si
+     apre da sé il torneo che ha ancora gironi senza squadra, perché lì c'è
+     qualcosa da fare, e quello che è l'unico: chiuderlo non farebbe ordine. */
+  const apertoDiSolito = (suoi) => dati.fonti.length === 1 || suoi.some(daAssegnare);
+  const apriChiudi = (id, aperto) => setAperture((prima) => ({ ...prima, [id]: !aperto }));
 
   return (
     <div className="adm-page">
@@ -517,7 +541,34 @@ export default function CalendariUfficialiPage() {
         </div>
       )}
 
-      {dati.fonti.map((fonte) => {
+      {sportPresenti.length > 0 && (
+        <div className="adm-toolbar">
+          <div className="adm-chip-group">
+            {/* Filtro per sport: solo quelli di cui c'è almeno un torneo */}
+            <button
+              type="button"
+              className={`adm-chip ${!sportAttivo ? "is-active" : ""}`}
+              onClick={() => setSportScelto("")}
+              aria-pressed={!sportAttivo}
+            >
+              Tutti
+            </button>
+            {sportPresenti.map((sport) => (
+              <button
+                key={sport}
+                type="button"
+                className={`adm-chip ${sportAttivo === sport ? "is-active" : ""}`}
+                onClick={() => setSportScelto(sportAttivo === sport ? "" : sport)}
+                aria-pressed={sportAttivo === sport}
+              >
+                {sportLeggibile(sport)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {fontiVisibili.map((fonte) => {
         /* In modifica il modulo prende il posto della sola intestazione: i
            gironi restano dentro alla scheda del torneo anche mentre la si
            modifica, invece di sparire finché non si salva. */
@@ -527,6 +578,8 @@ export default function CalendariUfficialiPage() {
         const errori = fonte.riepilogo?.errori ?? [];
         const suoi = dati.gironi.filter((g) => g.fonteId === fonte.id);
         const iscritte = suoi.filter((g) => g.squadraId).length;
+        const aperto = aperture[fonte.id] ?? apertoDiSolito(suoi);
+        const idGironi = `cal-gironi-${fonte.id}`;
 
         return (
           <section key={fonte.id} className={`adm-panel adm-cal-torneo ${fonte.attiva || inModifica ? "" : "is-disattivato"}`}>
@@ -577,11 +630,24 @@ export default function CalendariUfficialiPage() {
             )}
             </>)}
 
+            {/* L'interruttore sta sul titolo dei gironi e non sull'intestazione
+                del torneo: così c'è anche mentre la scheda è in modifica, quando
+                l'intestazione lascia il posto al modulo */}
             <h3 className="adm-panel-title adm-cal-gironi-titolo">
-              Gironi con una nostra squadra · {suoi.length}
-              {suoi.length > 0 && <span className="adm-hint"> ({iscritte} con la squadra iscritta)</span>}
+              <button
+                type="button" className="adm-cal-apri"
+                aria-expanded={aperto} aria-controls={idGironi}
+                onClick={() => apriChiudi(fonte.id, aperto)}
+              >
+                <FaChevronDown className={`adm-cal-freccia ${aperto ? "is-aperta" : ""}`} aria-hidden="true" />
+                <span>Gironi con una nostra squadra · {suoi.length}</span>
+                {suoi.length > 0 && <span className="adm-hint">({iscritte} con la squadra iscritta)</span>}
+              </button>
             </h3>
 
+            {/* Nascosti e non smontati: un girone a metà rinomina, chiuso e
+                riaperto, ritrova il nome che si stava scrivendo */}
+            <div id={idGironi} hidden={!aperto}>
             {suoi.length === 0 ? (
               <p className="adm-hint">
                 {fonte.ultimaLettura
@@ -598,6 +664,7 @@ export default function CalendariUfficialiPage() {
                 ))}
               </ul>
             )}
+            </div>
 
             {!inModifica && <footer className="adm-cal-fonte-azioni">
               <button type="button" className="adm-btn adm-btn-ghost" onClick={() => leggi(fonte)} disabled={letturaInCorso}>

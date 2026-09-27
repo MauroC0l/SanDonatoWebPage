@@ -78,14 +78,33 @@ La migrazione ha messo **tutti** i versamenti già registrati sulla stagione
 in corso, non in base alla data: finora ogni versamento contava contro "la
 quota in corso".
 
+Fatto il 28 settembre 2026 (migrazione 0025):
+
+- **quote automatiche.** Tre tariffe ci sono sempre, si rinominano e se ne
+  cambia l'importo ma non si cancellano: *Prima iscrizione* (chi la stagione
+  prima non c'era), *Rinnovo* (chi c'era) e *Famiglia* (fratello o sorella
+  confermati dalla segreteria). Il sito le assegna da solo a chi gioca e non
+  ha ancora una quota; una quota scelta a mano resta. Quelle create dalla
+  migrazione nascono **spente e a zero**: vanno accese dopo averne deciso
+  l'importo, altrimenti non si assegna niente;
+- **quota famiglia**: l'atleta la chiede dalla pagina della quota scrivendo
+  il codice fiscale; confermata dalla segreteria, la tariffa Famiglia si
+  applica da sola (solo al posto di un'automatica o di una quota vuota);
+- **selettore della stagione** in alto nel pannello: atleti, schede e
+  allenatori di una stagione passata, in sola lettura;
+- **pannello Stagioni**: iscritti, prime iscrizioni, rinnovi, ritirati, per
+  sport, incassato e da incassare, stagione per stagione.
+
 Resta aperto:
 
 - **per quanti anni si tengono i dati di chi non torna**: lo deve dire chi
   segue la privacy della società. Non è ancora stato chiesto;
-- **il rinnovo del 1° luglio.** Oggi la stagione nuova parte vuota: tutti
-  restano nelle loro squadre, ma nessuno ha la quota finché la segreteria
-  non la assegna, e a chi non torna va segnato il ritiro a mano. Da decidere
-  se serve un "rinnova" esplicito;
+- **il rinnovo del 1° luglio — DA DECIDERE.** Oggi chi resta in squadra
+  entra da solo nella stagione nuova con la quota Rinnovo, e a chi non torna
+  va segnato il ritiro a mano. Le alternative proposte: A) così com'è,
+  automatico; B) lo conferma l'atleta dalla sua area ("Rinnovo per la
+  2027/28"), e chi non conferma non entra; C) lo fa la segreteria,
+  selezionando chi rinnova. Consigliata la B;
 - **"prima di gennaio" è la data del ritiro**, non quella dei versamenti:
   scelta fatta nel codice, da confermare con la società;
 - **il pagamento online in due rate**: quando arriverà, deve scrivere
@@ -95,6 +114,32 @@ Resta aperto:
 - **le colonne della quota su `schede_atleta`** non si usano più: vanno
   tolte con una migrazione, dopo aver controllato che la 0024 abbia copiato
   tutto anche sul database vero.
+
+---
+
+## Segnalati dalla società il 28 settembre 2026
+
+### Recupero della password via email
+
+Non esiste: la pagina "Password dimenticata" dice che non è ancora attivo.
+Servono un servizio da cui spedire le email (oggi le email partono solo da
+MailerLite, per la newsletter), una tabella di gettoni a scadenza breve e
+una risposta identica sia che l'indirizzo esista sia che no.
+
+### Caricamento dei file (es. certificato medico)
+
+Sulla demo e in produzione i caricamenti non funzionano: manca l'archivio
+dei file (Cloudflare R2, vedi sotto) e ogni caricamento risponde 503. In
+locale funziona con `ARCHIVIO_LOCALE=1`. Da verificare, una volta collegato
+R2, anche il percorso completo del certificato: caricamento, anteprima,
+controllo della segreteria.
+
+### Telefono: il limite di 10 cifre è solo nel browser
+
+I campi del telefono accettano solo cifre, al massimo 10. Il server però
+controlla solo la lunghezza (40 caratteri): chi scrive a mano una richiesta
+passa lo stesso. Da stringere anche lì, normalizzando i numeri già salvati
+con gli spazi.
 
 ---
 

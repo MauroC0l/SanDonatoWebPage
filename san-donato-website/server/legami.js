@@ -345,6 +345,7 @@ export async function decidiLegame(id, { stato, motivo = null }, decisore) {
     .returning({
       id: legamiFamiliari.id,
       utenteId: legamiFamiliari.utenteId,
+      stagioneId: legamiFamiliari.stagioneId,
       stato: legamiFamiliari.stato
     });
 

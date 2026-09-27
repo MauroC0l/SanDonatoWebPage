@@ -13,13 +13,16 @@ import { puo, squadreConAtletiVisibili } from "../../../autorizzazioni.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
 import { json, conGestioneErrori, soloMetodi } from "../../../risposte.js";
 import { parametri } from "../../../richiesta.js";
+import { stagioneRichiesta, elencaStagioni } from "../../../stagioni.js";
 
 export default conGestioneErrori(
   richiedeCapacita("atleti.leggi", async (req, res) => {
     if (!soloMetodi(req, res, ["GET"])) return;
 
     const ammesse = await squadreConAtletiVisibili(req.utente);
-    const { squadraId } = parametri(req);
+    const { squadraId, stagione: stagioneId } = parametri(req);
+    // Il selettore in alto nel pannello: senza, la stagione in corso
+    const stagione = await stagioneRichiesta(stagioneId);
 
     // Quote e versamenti solo a chi li tiene: un allenatore riceve la
     // scheda sportiva dei suoi, non i conti delle loro famiglie.
@@ -28,7 +31,8 @@ export default conGestioneErrori(
     const atleti = await elencaAtleti({
       squadreAmmesse: ammesse,
       squadraId: squadraId ? Number(squadraId) : null,
-      conQuote
+      conQuote,
+      stagione
     });
 
     // Mai in cache: quote e certificati cambiano mentre qualcuno guarda
@@ -39,7 +43,8 @@ export default conGestioneErrori(
       // Serve al pannello per proporre nel filtro solo le squadre giuste
       squadreAmmesse: ammesse,
       // Il pannello lo usa per non disegnare colonne che resterebbero vuote
-      conQuote
+      conQuote,
+      stagione: (await elencaStagioni()).find((s) => s.id === stagione.id)
     });
   })
 );

@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import { precaricaQuandoLibero } from "../../utils/precarica";
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "../../context/AuthProvider";
 import { DialoghiProvider } from "./DialoghiProvider";
@@ -13,32 +14,58 @@ import EventiListPage from "./EventiListPage";
 
 // L'editor delle notizie porta con sé TipTap: si carica solo quando si apre
 // davvero una notizia, non all'ingresso nell'area riservata.
-const PostEditorPage = lazy(() => import("./PostEditorPage"));
-const EventoEditorPage = lazy(() => import("./EventoEditorPage"));
-const PersonePage = lazy(() => import("./PersonePage"));
-const AtletiPage = lazy(() => import("./AtletiPage"));
-const SchedaAtletaPage = lazy(() => import("./SchedaAtletaPage"));
-const IscrizioniPage = lazy(() => import("./IscrizioniPage"));
-const CambioPasswordPage = lazy(() => import("./CambioPasswordPage"));
-const ProfiloPage = lazy(() => import("./ProfiloPage"));
-const AttesaSquadraPage = lazy(() => import("./AttesaSquadraPage"));
-const RegistroPage = lazy(() => import("./RegistroPage"));
-const LibreriaPage = lazy(() => import("./LibreriaPage"));
-const QuotePage = lazy(() => import("./QuotePage"));
-const AllenatoriPage = lazy(() => import("./AllenatoriPage"));
-const SquadrePage = lazy(() => import("./SquadrePage"));
-const CalendariUfficialiPage = lazy(() => import("./CalendariUfficialiPage"));
-const RecuperoPasswordPage = lazy(() => import("./RecuperoPasswordPage"));
-const SceltaPasswordPage = lazy(() => import("./SceltaPasswordPage"));
-const HomePannello = lazy(() => import("./HomePannello"));
+const importaPostEditorPage = () => import("./PostEditorPage");
+const PostEditorPage = lazy(importaPostEditorPage);
+const importaEventoEditorPage = () => import("./EventoEditorPage");
+const EventoEditorPage = lazy(importaEventoEditorPage);
+const importaPersonePage = () => import("./PersonePage");
+const PersonePage = lazy(importaPersonePage);
+const importaAtletiPage = () => import("./AtletiPage");
+const AtletiPage = lazy(importaAtletiPage);
+const importaSchedaAtletaPage = () => import("./SchedaAtletaPage");
+const SchedaAtletaPage = lazy(importaSchedaAtletaPage);
+const importaIscrizioniPage = () => import("./IscrizioniPage");
+const IscrizioniPage = lazy(importaIscrizioniPage);
+const importaCambioPasswordPage = () => import("./CambioPasswordPage");
+const CambioPasswordPage = lazy(importaCambioPasswordPage);
+const importaProfiloPage = () => import("./ProfiloPage");
+const ProfiloPage = lazy(importaProfiloPage);
+const importaAttesaSquadraPage = () => import("./AttesaSquadraPage");
+const AttesaSquadraPage = lazy(importaAttesaSquadraPage);
+const importaRegistroPage = () => import("./RegistroPage");
+const RegistroPage = lazy(importaRegistroPage);
+const importaLibreriaPage = () => import("./LibreriaPage");
+const LibreriaPage = lazy(importaLibreriaPage);
+const importaQuotePage = () => import("./QuotePage");
+const QuotePage = lazy(importaQuotePage);
+const importaAllenatoriPage = () => import("./AllenatoriPage");
+const AllenatoriPage = lazy(importaAllenatoriPage);
+const importaStagioniPage = () => import("./StagioniPage");
+const StagioniPage = lazy(importaStagioniPage);
+const importaSquadrePage = () => import("./SquadrePage");
+const SquadrePage = lazy(importaSquadrePage);
+const importaCalendariUfficialiPage = () => import("./CalendariUfficialiPage");
+const CalendariUfficialiPage = lazy(importaCalendariUfficialiPage);
+const importaRecuperoPasswordPage = () => import("./RecuperoPasswordPage");
+const RecuperoPasswordPage = lazy(importaRecuperoPasswordPage);
+const importaSceltaPasswordPage = () => import("./SceltaPasswordPage");
+const SceltaPasswordPage = lazy(importaSceltaPasswordPage);
+const importaHomePannello = () => import("./HomePannello");
+const HomePannello = lazy(importaHomePannello);
 
 // Area dell'atleta
-const AreaAtletaLayout = lazy(() => import("../Atleta/AreaAtletaLayout"));
-const SquadraPage = lazy(() => import("../Atleta/SquadraPage"));
-const IscrizionePage = lazy(() => import("../Atleta/IscrizionePage"));
-const ContattiPage = lazy(() => import("../Atleta/ContattiPage"));
-const QuotaPage = lazy(() => import("../Atleta/QuotaPage"));
-const HomeAtleta = lazy(() => import("../Atleta/HomeAtleta"));
+const importaAreaAtletaLayout = () => import("../Atleta/AreaAtletaLayout");
+const AreaAtletaLayout = lazy(importaAreaAtletaLayout);
+const importaSquadraPage = () => import("../Atleta/SquadraPage");
+const SquadraPage = lazy(importaSquadraPage);
+const importaIscrizionePage = () => import("../Atleta/IscrizionePage");
+const IscrizionePage = lazy(importaIscrizionePage);
+const importaContattiPage = () => import("../Atleta/ContattiPage");
+const ContattiPage = lazy(importaContattiPage);
+const importaQuotaPage = () => import("../Atleta/QuotaPage");
+const QuotaPage = lazy(importaQuotaPage);
+const importaHomeAtleta = () => import("../Atleta/HomeAtleta");
+const HomeAtleta = lazy(importaHomeAtleta);
 
 function Attesa({ cosa }) {
   return (
@@ -130,7 +157,42 @@ function AllIngresso() {
  * così autenticazione e chiamate di scrittura restano in un bundle unico:
  * chi visita il sito pubblico non ne scarica una riga.
  */
+/* Le schermate dell'area, da scaricare in anticipo una volta entrati: il
+   primo clic su ciascuna non deve più mostrare la rotella. */
+const SCHERMATE = [
+  importaEventoEditorPage,
+  importaPersonePage,
+  importaAtletiPage,
+  importaSchedaAtletaPage,
+  importaIscrizioniPage,
+  importaCambioPasswordPage,
+  importaProfiloPage,
+  importaAttesaSquadraPage,
+  importaRegistroPage,
+  importaLibreriaPage,
+  importaQuotePage,
+  importaAllenatoriPage,
+  importaStagioniPage,
+  importaSquadrePage,
+  importaCalendariUfficialiPage,
+  importaRecuperoPasswordPage,
+  importaSceltaPasswordPage,
+  importaHomePannello,
+  importaAreaAtletaLayout,
+  importaSquadraPage,
+  importaIscrizionePage,
+  importaContattiPage,
+  importaQuotaPage,
+  importaHomeAtleta,
+  importaPostEditorPage
+];
+
 export default function AdminRoot({ section }) {
+  // Solo dentro all'area: dalla pagina di accesso non si sa ancora chi entra
+  useEffect(() => {
+    if (section === "staff" || section === "atleta") precaricaQuandoLibero(SCHERMATE);
+  }, [section]);
+
   if (section === "login") {
     return (
       <AuthProvider>
@@ -367,6 +429,16 @@ export default function AdminRoot({ section }) {
               element={
                 <Riservato una={["quote.gestisci"]}>
                   <Pigra cosa="degli allenatori"><AllenatoriPage /></Pigra>
+                </Riservato>
+              }
+            />
+
+            {/* ---------- Le stagioni e i loro numeri ---------- */}
+            <Route
+              path="stagioni"
+              element={
+                <Riservato una={["quote.gestisci"]}>
+                  <Pigra cosa="delle stagioni"><StagioniPage /></Pigra>
                 </Riservato>
               }
             />

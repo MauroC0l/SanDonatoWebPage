@@ -1,0 +1,16 @@
+/* La pagina del profilo: quello che non sta già in Admin.css. */
+
+/* ---------- Come funziona la quota ----------
+
+   Quattro regole brevi, una per riga: in un paragrafo solo si leggevano
+   come un regolamento, divise si trovano a colpo d'occhio. */
+.prf-quota-punti {
+  display: grid;
+  gap: .55rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.prf-quota-punti li::marker { color: var(--adm-blue); }

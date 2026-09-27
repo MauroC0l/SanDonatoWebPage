@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
+import { useStagione } from "../../context/stagione";
 import { euro } from "../../utils/soldi";
 import { raggruppaPerAnno } from "../../utils/versamenti";
 import { statoCertificato, quantoManca } from "../../utils/certificato";
@@ -149,6 +150,8 @@ export default function SchedaAtletaPage() {
   const { user, sessionExpired } = useAuth();
   const area = useArea();
   const { avvisa, chiediTesto } = useDialoghi();
+  // La stagione scelta in alto: le passate si guardano e basta
+  const { stagioneId, scegli: scegliStagione } = useStagione();
 
   const [atleta, setAtleta] = useState(null);
   const [tariffe, setTariffe] = useState([]);
@@ -227,7 +230,7 @@ export default function SchedaAtletaPage() {
   }, [tieneIConti]);
 
   const carica = useCallback(() => {
-    return getAtleta(id)
+    return getAtleta(id, { stagioneId })
       .then((a) => {
         setAtleta(a);
         setForm(daAtleta(a));
@@ -237,7 +240,7 @@ export default function SchedaAtletaPage() {
         gestisciErrore(err);
         setCaricamento(false);
       });
-  }, [id, gestisciErrore]);
+  }, [id, stagioneId, gestisciErrore]);
 
   useEffect(() => { carica(); }, [carica]);
 
@@ -331,11 +334,16 @@ export default function SchedaAtletaPage() {
 
     setSalvataggio(true);
     try {
-      setAtleta(await decidiParentela(id, { legameId, conferma, motivo }));
+      const esito = await decidiParentela(id, { legameId, conferma, motivo });
+      setAtleta(esito.atleta);
+      setForm(daAtleta(esito.atleta));
       avvisa(
-        conferma
-          ? "Parentela confermata. La tariffa si sceglie qui sopra."
-          : "Parentela respinta.",
+        !conferma
+          ? "Parentela respinta."
+          : esito.tariffaApplicata
+            ? `Parentela confermata: applicata la tariffa "${esito.tariffaApplicata}".`
+            // Una tariffa scelta a mano resta, oppure la famiglia è spenta
+            : "Parentela confermata. La tariffa attuale è stata lasciata com'era.",
         conferma ? "ok" : "info"
       );
     } catch (err) {
@@ -489,6 +497,8 @@ export default function SchedaAtletaPage() {
   /* Sul DOVUTO, non sulla quota intera: chi si è ritirato prima di gennaio
      deve solo la prima metà. Il conto lo fa il server, qui si legge. */
   const conto = atleta.conto ?? null;
+  // Una stagione passata si legge e basta: quota e ritiro non si toccano più
+  const soloLettura = Boolean(atleta.stagione && !atleta.stagione.inCorso);
   const manca = conto?.dovuto == null ? null : conto.residuo;
 
   const tonoCert = cert.chiave === "scaduto" ? "is-allarme"
@@ -600,6 +610,19 @@ export default function SchedaAtletaPage() {
           testo="ultimo accesso al sito"
         />
       </div>
+
+      {soloLettura && (
+        <div className="adm-alert adm-alert-info" role="status">
+          <FaHistory aria-hidden="true" />
+          <span>
+            Stai guardando la stagione <strong>{atleta.stagione.nome}</strong>: quota,
+            versamenti e ritiro sono quelli di allora e non si modificano.{" "}
+            <button type="button" className="adm-link-btn" onClick={() => scegliStagione(null)}>
+              Torna alla stagione in corso
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* Cosa manca perché l'iscrizione sia completa.
 
@@ -814,14 +837,16 @@ export default function SchedaAtletaPage() {
                       valore={form.tipoQuotaId}
                       onChange={(v) => setForm({ ...form, tipoQuotaId: v })}
                       opzioni={opzioniTariffa}
-                      disabilitato={salvataggio}
+                      disabilitato={salvataggio || soloLettura}
                       segnaposto="Nessuna quota"
                       etichettaAria="Tariffa applicata"
                     />
                     <span className="adm-hint">
                       {tariffe.length === 0
                         ? "Non c'è ancora nessuna tariffa: le crea un amministratore dalla sezione Quote."
-                        : "Le tariffe si decidono nella sezione Quote. Cambiandone una là, le quote già assegnate restano quelle."}
+                        : soloLettura
+                          ? "Stagione passata: la quota di allora resta com'era."
+                          : "Prima iscrizione, rinnovo o famiglia li assegna il sito da solo. Si cambia qui solo per un caso particolare."}
                     </span>
                   </label>
                 )}
@@ -916,7 +941,7 @@ export default function SchedaAtletaPage() {
             {/* ---------- Ritiro durante la stagione ----------
                 Sotto alla quota perché è lì che si vede cosa cambia: la
                 seconda metà che non è più dovuta. */}
-            {vista === "quota" && tieneIConti && (
+            {vista === "quota" && tieneIConti && !soloLettura && (
             <section className="adm-panel">
               <h2 className="adm-panel-title">
                 <FaDoorOpen aria-hidden="true" /> Ritiro
