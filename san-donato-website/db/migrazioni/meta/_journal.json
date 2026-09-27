@@ -162,6 +162,13 @@
       "when": 1790517471938,
       "tag": "0022_early_ma_gnuci",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790531760307,
+      "tag": "0023_slimy_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

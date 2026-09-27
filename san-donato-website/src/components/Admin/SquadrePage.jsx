@@ -9,7 +9,7 @@ import {
   listUtenti, associaSquadra, dissociaSquadra,
   getCalendariUfficiali, aggiornaGironeCalendario, AuthError
 } from "../../api/adminApi";
-import FontiCalendari from "./FontiCalendari";
+
 import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
@@ -83,6 +83,7 @@ export default function SquadrePage() {
   const [nuova, setNuova] = useState(null);
   const [modifica, setModifica] = useState(null);
   const [mostraSpente, setMostraSpente] = useState(false);
+  const [sportScelto, setSportScelto] = useState(""); // "" = tutti
   const [vista, setVista] = useVista("squadre", "lista", ["lista", "griglia"]);
 
   const gestisciErrore = useCallback((err) => {
@@ -128,15 +129,22 @@ export default function SquadrePage() {
      senza perdere niente. Quelli messi da parte no: prima si riprendono. */
   const gironiDi = (squadraId) => (calendari?.gironi ?? []).filter((g) => g.squadraId === squadraId);
 
-  const collegabiliA = (squadraId) => (calendari?.gironi ?? [])
-    .filter((g) => g.squadraId !== squadraId && !g.ignorato && !g.sparitoIl)
+  /* Solo i gironi dello sport della squadra: a una squadra di pallavolo
+     non si propone un girone di calcio. Lo sport del girone viene dal
+     formato del suo torneo; se non si sa, si propone lo stesso. */
+  const collegabiliA = (squadra) => (calendari?.gironi ?? [])
+    .filter((g) => g.squadraId !== squadra.id && !g.ignorato && !g.sparitoIl)
+    .filter((g) => !g.sport || g.sport === squadra.sport)
     .map((g) => ({
       valore: String(g.id),
-      etichetta: g.titolo || g.nomeFile,
+      etichetta: g.nome,
       nota: g.squadraId
         ? `ora in ${g.squadraNome}`
         : `${g.nomeNelGirone} · ${g.partite} partite`
     }));
+
+  // I gironi con una nostra squadra che nessuno ha ancora collegato
+  const senzaSquadra = (calendari?.gironi ?? []).filter((g) => !g.squadraId && !g.ignorato && !g.sparitoIl);
 
   const collega = async (girone, squadraId) => {
     const squadra = squadre.find((s) => s.id === squadraId);
@@ -344,7 +352,8 @@ export default function SquadrePage() {
   /* ---------- Raggruppamento ---------- */
 
   const perSport = useMemo(() => {
-    const visibili = mostraSpente ? squadre : squadre.filter((s) => s.attiva);
+    const visibili = (mostraSpente ? squadre : squadre.filter((s) => s.attiva))
+      .filter((s) => !sportScelto || s.sport === sportScelto);
     const gruppi = new Map();
 
     for (const s of visibili) {
@@ -352,7 +361,10 @@ export default function SquadrePage() {
       gruppi.get(s.sport).push(s);
     }
     return [...gruppi];
-  }, [squadre, mostraSpente]);
+  }, [squadre, mostraSpente, sportScelto]);
+
+  // Gli sport che ci sono davvero, nell'ordine in cui compaiono
+  const sportPresenti = useMemo(() => [...new Set(squadre.map((s) => s.sport))], [squadre]);
 
   const spente = useMemo(() => squadre.filter((s) => !s.attiva).length, [squadre]);
 
@@ -458,32 +470,52 @@ export default function SquadrePage() {
         </form>
       )}
 
-      {calendari && (
-        <FontiCalendari
-          dati={calendari}
-          opzioniSquadre={squadre
-            .filter((s) => s.attiva && s.sport !== "Societa")
-            .map((s) => ({ valore: String(s.id), etichetta: s.nome, nota: s.sport }))}
-          onCollega={collega}
-          onCambio={ricarica}
-          onErrore={gestisciErrore}
-          occupati={occupati}
-        />
+      {/* I gironi trovati nei calendari ufficiali che aspettano una squadra:
+          l'iscrizione si fa qui, dalla riga "Calendario ufficiale". */}
+      {senzaSquadra.length > 0 && (
+        <p className="adm-cal-didascalia adm-cal-avviso">
+          {senzaSquadra.length === 1
+            ? "C'è un girone ufficiale in cui risulta iscritta una squadra della Polisportiva, ancora senza squadra del sito"
+            : `Ci sono ${senzaSquadra.length} gironi ufficiali in cui risulta iscritta una squadra della Polisportiva, ancora senza squadra del sito`}
+          {" "}({senzaSquadra.map((g) => g.nome).join("; ")}). Assegnali dalla riga
+          &quot;Calendario ufficiale&quot; della squadra giusta: da lì in poi le partite si aggiornano da sole.
+        </p>
       )}
 
       <div className="adm-toolbar">
-        {spente > 0 ? (
-          <div className="adm-chip-group">
+        <div className="adm-chip-group">
+          {/* Filtro per sport: con venti squadre si cerca prima la disciplina */}
+          <button
+            type="button"
+            className={`adm-chip ${!sportScelto ? "is-active" : ""}`}
+            onClick={() => setSportScelto("")}
+            aria-pressed={!sportScelto}
+          >
+            Tutti gli sport
+          </button>
+          {sportPresenti.map((sport) => (
+            <button
+              key={sport}
+              type="button"
+              className={`adm-chip ${sportScelto === sport ? "is-active" : ""}`}
+              onClick={() => setSportScelto(sportScelto === sport ? "" : sport)}
+              aria-pressed={sportScelto === sport}
+            >
+              {sportLeggibile(sport)}
+            </button>
+          ))}
+
+          {spente > 0 && (
             <button
               type="button"
               className={`adm-chip ${mostraSpente ? "is-active" : ""}`}
               onClick={() => setMostraSpente((v) => !v)}
               aria-pressed={mostraSpente}
             >
-              {mostraSpente ? "Nascondi le disattivate" : `Mostra anche le disattivate (${spente})`}
+              {mostraSpente ? "Nascondi le disattivate" : `Anche le disattivate (${spente})`}
             </button>
-          </div>
-        ) : <span />}
+          )}
+        </div>
 
         <ScambiaVista vista={vista} onCambia={setVista} opzioni={VISTE} />
       </div>
@@ -642,7 +674,7 @@ export default function SquadrePage() {
                               className={`adm-chip adm-chip-squadra adm-chip-girone ${occupati.has(g.id) ? "is-busy" : ""}`}
                               title={`${g.nomeFile} · ${g.nomeNelGirone}`}
                             >
-                              {g.titolo || g.nomeFile}
+                              {g.nome}
                               <span className="adm-chip-nota">{g.partite} partite</span>
                               <button
                                 type="button"
@@ -663,9 +695,9 @@ export default function SquadrePage() {
                               const girone = calendari.gironi.find((g) => String(g.id) === v);
                               if (girone) collega(girone, s.id);
                             }}
-                            opzioni={collegabiliA(s.id)}
+                            opzioni={collegabiliA(s)}
                             segnaposto="+ collega un girone…"
-                            vuoto="Nessun girone da collegare: aggiungi una fonte qui sopra."
+                            vuoto="Nessun girone di questo sport da collegare: i tornei si aggiungono in Calendari ufficiali."
                             etichettaAria={`Collega un calendario ufficiale a ${s.nome}`}
                           />
                         </div>
@@ -700,7 +732,7 @@ export default function SquadrePage() {
                         {siCancella(s) && (
                           <button
                             type="button"
-                            className="adm-btn adm-btn-ghost adm-btn-pericolo"
+                            className="adm-btn adm-btn-ghost adm-btn-cancella"
                             onClick={() => cancella(s)}
                             title="Si cancella solo una squadra senza partite, iscritti né calendari"
                           >

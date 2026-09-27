@@ -5,6 +5,7 @@
  *                              le sue partite entrano subito nel calendario
  *          { squadraId: null } lo scollega: torna da collegare, e le sue
  *                              partite escono dal calendario
+ *          { nome }            il nome da mostrare nel pannello (null = quello del foglio)
  *          { ignorato: true }  "questo girone non ci riguarda"
  *          { ignorato: false } ci si ripensa
  */
@@ -35,7 +36,11 @@ export default conGestioneErrori(
     const nomeGirone = `"${girone.nomeNelGirone}" in ${girone.nomeFile || girone.titolo || "un girone"}`;
     let descrizione;
 
-    if (dati.squadraId === null && prima.squadraId) {
+    if (dati.nome !== undefined && dati.squadraId === undefined && dati.ignorato === undefined) {
+      descrizione = girone.nome
+        ? `Ha rinominato ${nomeGirone} in "${girone.nome}"`
+        : `Ha tolto il nome personalizzato di ${nomeGirone}`;
+    } else if (dati.squadraId === null && prima.squadraId) {
       const [squadra] = await getDb().select({ nome: squadre.nome })
         .from(squadre).where(eq(squadre.id, prima.squadraId)).limit(1);
 

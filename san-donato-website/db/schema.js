@@ -613,6 +613,12 @@ export const gironiUfficiali = pgTable("gironi_ufficiali", {
   nomeFile: text("nome_file"),
   // "XX Torneo Autunno/Cossalter - Under 14 FEMMINILE GIRONE A"
   titolo: text("titolo"),
+
+  /* Il nome che gli dà l'amministratore, se vuole: "Under 14 A" invece del
+     titolo intero del foglio. Una colonna a parte perché il titolo lo
+     riscrive la lettura notturna a ogni giro; questo no. Vuoto = si usa il
+     titolo del foglio. */
+  nome: text("nome"),
   nomeNelGirone: text("nome_nel_girone").notNull(),
 
   // Vuota finché l'amministratore non sceglie. Fino ad allora le partite

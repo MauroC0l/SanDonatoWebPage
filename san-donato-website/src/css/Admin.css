@@ -3170,26 +3170,8 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-legame-azioni { display: flex; gap: .4rem; flex-wrap: wrap; }
 
 /* =========================================
-   Calendari ufficiali (dentro a Squadre)
+   Calendari ufficiali: tornei e gironi
    ========================================= */
-
-/* Il riquadro in cima alla pagina Squadre: le fonti e i gironi da assegnare */
-.adm-cal-pannello { margin-bottom: 1.5rem; display: grid; gap: 0.9rem; }
-.adm-cal-pannello > .adm-alert { margin: 0; }
-
-.adm-cal-testa {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem 1rem;
-  flex-wrap: wrap;
-}
-.adm-cal-testa .adm-gruppo-titolo { margin: 0; }
-.adm-cal-testa-azioni { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-
-.adm-cal-spiega { margin: 0; max-width: 60rem; }
-.adm-cal-sezione { display: grid; gap: 0.6rem; }
-.adm-cal-sezione .adm-panel-title { margin: 0; }
 
 /* La spiegazione dei gironi da assegnare: è la prima cosa da fare, e da
    semplice nota grigia passava inosservata. */
@@ -3204,47 +3186,40 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   font-size: 0.88rem;
   line-height: 1.5;
 }
+.adm-cal-didascalia a { color: inherit; font-weight: 700; }
+.adm-cal-avviso { margin-bottom: 1.25rem; }
 
-.adm-cal-modulo {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
-  background: var(--adm-bg);
-}
-.adm-cal-modulo .adm-panel-title { margin: 0; }
+.adm-cal-modulo { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
 .adm-cal-azioni-modulo { justify-content: flex-end; margin-top: 0; }
 
-/* ---------- Le fonti ---------- */
+/* ---------- Un torneo ---------- */
 
-.adm-cal-fonti { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
-
-.adm-cal-fonte {
-  display: grid;
-  gap: 0.5rem;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
-  background: var(--adm-surface);
-}
-.adm-cal-fonte.is-disattivato { opacity: .7; }
+.adm-cal-torneo { display: grid; gap: 0.75rem; margin-bottom: 1.25rem; }
+.adm-cal-torneo.is-disattivato { opacity: .7; }
 
 .adm-cal-fonte-testa { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.adm-cal-fonte-nome { font-size: 0.98rem; overflow-wrap: anywhere; }
-.adm-cal-fonte .adm-status svg { vertical-align: -1px; }
+.adm-cal-fonte-nome { margin: 0; font-size: 1.1rem; overflow-wrap: anywhere; }
 .adm-cal-fonte-riga { margin: 0; }
-.adm-cal-fonte-azioni { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.adm-cal-fonte-azioni {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
 
 .adm-cal-errori { margin: 0; align-items: flex-start; }
 .adm-cal-errori ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.85rem; }
 .adm-cal-errori li + li { margin-top: 0.2rem; }
 
-/* ---------- I gironi senza squadra ---------- */
+.adm-cal-gironi-titolo { margin: 0.25rem 0 0; }
+.adm-cal-gironi-titolo .adm-hint { margin: 0; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+/* ---------- I gironi di un torneo ---------- */
 
 .adm-cal-gironi { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
 
-.adm-cal-girone-libero {
+.adm-cal-girone {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3255,17 +3230,20 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   border-radius: var(--adm-radius);
   background: var(--adm-surface);
 }
-.adm-cal-girone-libero.is-busy { opacity: .55; pointer-events: none; }
-.adm-cal-girone-libero.is-disattivato { opacity: .65; }
-.adm-cal-girone-testo { display: grid; gap: 0.15rem; min-width: 0; flex: 1 1 16rem; overflow-wrap: anywhere; }
+.adm-cal-girone.is-busy { opacity: .55; pointer-events: none; }
+.adm-cal-girone.is-disattivato { opacity: .6; }
+
+.adm-cal-girone-testo { display: grid; gap: 0.2rem; min-width: 0; flex: 1 1 18rem; overflow-wrap: anywhere; }
 .adm-cal-girone-testo .adm-hint { margin: 0; }
-.adm-cal-girone-azioni { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.adm-cal-girone-azioni .tnd-mini { min-width: 12rem; }
+.adm-cal-girone-nome { display: flex; align-items: center; gap: 0.35rem; }
+.adm-cal-rinomina { width: 1.9rem; height: 1.9rem; flex-shrink: 0; }
+.adm-cal-girone-modulo { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.adm-cal-girone-modulo .adm-input { flex: 1 1 14rem; min-width: 0; }
 
-.adm-cal-ignorati { display: grid; gap: 0.6rem; justify-items: start; }
-.adm-cal-ignorati .adm-cal-gironi { width: 100%; }
+.adm-cal-girone-squadra { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+.adm-cal-girone-squadra .adm-chip { text-decoration: none; }
 
-/* ---------- Il calendario ufficiale di una squadra ---------- */
+/* ---------- Il calendario ufficiale di una squadra (in Squadre) ---------- */
 
 /* La targhetta di un girone collegato, nella riga della squadra: stesso
    disegno degli allenatori, con in più quante partite porta */
@@ -3287,13 +3265,15 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 }
 .adm-sparite-azioni { display: flex; gap: 0.4rem; }
 
-/* "Cancella" di una squadra vuota: si distingue dagli altri pulsanti */
-.adm-btn-pericolo { color: var(--adm-danger); }
+/* "Cancella" di una squadra vuota: bianco come gli altri, ma con testo e
+   bordo rossi. (Prima riusava .adm-btn-pericolo cambiandogli il colore del
+   testo: veniva rosso su rosso, e la scritta non si leggeva.) */
+.adm-btn-cancella { color: var(--adm-danger); border-color: #f1c4bf; }
+.adm-btn-cancella:hover:not(:disabled) { background: var(--adm-danger-soft); border-color: var(--adm-danger); }
 
 @media (max-width: 760px) {
-  .adm-cal-testa-azioni, .adm-cal-testa-azioni .adm-btn { flex: 1 1 auto; }
-  .adm-cal-girone-azioni { flex: 1 1 100%; }
-  .adm-cal-girone-azioni .tnd-mini { flex: 1 1 12rem; min-width: 0; }
+  .adm-cal-girone-squadra { flex: 1 1 100%; }
+  .adm-cal-fonte-azioni .adm-btn { flex: 1 1 auto; }
 }
 
 /* L'icona che gira mentre la lettura è in corso */
@@ -3568,3 +3548,6 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
    "2 iscritti" l'icona finiva sopra alla parola. */
 .adm-status:has(svg),
 .adm-sport-tag:has(svg) { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+/* Il conteggio dei gironi va a capo intero, non spezzato a metà */
+.adm-cal-gironi-titolo { flex-wrap: wrap; row-gap: 0.15rem; }

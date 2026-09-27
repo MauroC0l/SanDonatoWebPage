@@ -282,6 +282,9 @@ describe("moduli dei calendari", () => {
     expect(schemaGirone.parse({ squadraId: "4" })).toEqual({ squadraId: 4 });
     // null è scollegare, non "zero": il girone torna da collegare
     expect(schemaGirone.parse({ squadraId: null })).toEqual({ squadraId: null });
+    // Il nome personalizzato: vuoto torna a quello del foglio
+    expect(schemaGirone.parse({ nome: "  Under 14 A  " })).toEqual({ nome: "Under 14 A" });
+    expect(schemaGirone.parse({ nome: "" })).toEqual({ nome: null });
     expect(schemaGirone.safeParse({}).success).toBe(false);
   });
 });

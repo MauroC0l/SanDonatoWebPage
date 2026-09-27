@@ -5,6 +5,7 @@ import {
   FaEuroSign,
   FaImages,
   FaClipboardCheck,
+  FaCalendarCheck,
   FaUserCircle
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
@@ -37,6 +38,9 @@ const SEZIONI = [
   // Finiscono sullo stesso calendario del sito.
   { a: "partite", etichetta: "Partite", Icona: FaFutbol, capacita: ["eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
   { a: "eventi", etichetta: "Eventi", Icona: FaCalendarAlt, capacita: ["eventi.gestisci_tutte"] },
+  // I tornei delle federazioni e i loro gironi. Quale squadra gioca in quale
+  // girone si decide invece da Squadre.
+  { a: "calendari", etichetta: "Calendari ufficiali", Icona: FaCalendarCheck, capacita: ["calendari.gestisci"] },
   { a: "richieste", etichetta: "Richieste", Icona: FaUserCheck, capacita: ["iscrizioni.decidi_tutte", "iscrizioni.decidi_proprie"] },
   { a: "atleti", etichetta: "Atleti", Icona: FaRunning, capacita: ["atleti.leggi"] },
   { a: "squadre", etichetta: "Squadre", Icona: FaSitemap, capacita: ["squadre.gestisci"] },
@@ -64,7 +68,7 @@ const SEZIONI = [
  */
 const PRIORITA_MOBILE = [
   "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
-  "eventi", "iscrizione", "squadre", "utenti", "registro"
+  "eventi", "iscrizione", "squadre", "calendari", "utenti", "registro"
 ];
 
 /**

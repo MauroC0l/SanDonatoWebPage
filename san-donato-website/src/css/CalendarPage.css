@@ -763,17 +763,6 @@ body.cp-modal-open { overflow: hidden; }
 
 /* ---------- Il calendario sul telefono ---------- */
 
-.cp-abbona-scelta {
-  width: 100%;
-  padding: .6rem .75rem;
-  border: 1px solid var(--cp-bordo);
-  border-radius: 10px;
-  background: var(--cp-carta);
-  color: var(--cp-inchiostro);
-  font: inherit;
-  font-size: .9rem;
-}
-
 .cp-abbona-azioni {
   display: flex;
   flex-wrap: wrap;
@@ -850,3 +839,120 @@ body.cp-modal-open { overflow: hidden; }
 .cp-other-month .cp-event-pill { opacity: .45; }
 .cp-other-month .cp-event-pill:hover,
 .cp-other-month .cp-event-pill:focus-visible { opacity: .8; }
+
+/* ---------- Sul tuo telefono: dove sta ---------- */
+
+/* Sul computer nella colonna di sinistra; sul telefono sotto al calendario,
+   e non dentro al pannello dei filtri, dove nessuno lo cercava. */
+.cp-abbona-sotto { display: none; }
+
+@media (max-width: 820px) {
+  .cp-abbona-lato { display: none; }
+  .cp-abbona-sotto { display: block; }
+}
+
+/* ---------- La tendina delle squadre ---------- */
+
+.cp-scelta { position: relative; }
+
+.cp-scelta-bottone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  width: 100%;
+  min-height: 2.9rem;
+  padding: .6rem .8rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 10px;
+  background: var(--cp-carta);
+  color: var(--cp-inchiostro);
+  font: inherit;
+  font-size: .92rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.cp-scelta-bottone:hover { border-color: #cfd8e5; }
+.cp-scelta-bottone.is-aperta,
+.cp-scelta-bottone:focus-visible {
+  outline: none;
+  border-color: var(--cp-arancio);
+  box-shadow: 0 0 0 3px rgba(255, 102, 0, .15);
+}
+
+.cp-scelta-valore {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+.cp-scelta-valore.is-vuoto { color: var(--cp-tenue); font-weight: 400; }
+
+.cp-scelta-freccia { flex-shrink: 0; color: var(--cp-tenue); font-size: .8rem; transition: transform .15s ease; }
+.cp-scelta-bottone.is-aperta .cp-scelta-freccia { transform: rotate(180deg); }
+
+.cp-scelta-pallino { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; }
+
+.cp-scelta-pannello {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: .35rem;
+  border: 1px solid var(--cp-bordo);
+  border-radius: 12px;
+  background: var(--cp-carta);
+  box-shadow: var(--cp-ombra-alta);
+  animation: cp-scelta-apre .14s ease-out;
+}
+
+.cp-scelta-gruppo + .cp-scelta-gruppo { margin-top: .2rem; padding-top: .2rem; border-top: 1px solid var(--cp-bordo-tenue); }
+
+.cp-scelta-gruppo-titolo {
+  margin: .45rem .55rem .2rem;
+  color: var(--cp-tenue);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cp-scelta-voce {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  min-height: 2.6rem;
+  padding: .5rem .55rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--cp-inchiostro);
+  font: inherit;
+  font-size: .92rem;
+  text-align: left;
+  cursor: pointer;
+}
+.cp-scelta-voce:hover,
+.cp-scelta-voce:focus-visible { outline: none; background: var(--cp-bg); }
+.cp-scelta-voce.is-scelta { font-weight: 700; }
+.cp-scelta-voce-nome { flex: 1; min-width: 0; }
+.cp-scelta-spunta { color: var(--cp-arancio); }
+
+.cp-abbona-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
+
+@keyframes cp-scelta-apre { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cp-scelta-pannello { animation: none; }
+  .cp-scelta-freccia { transition: none; }
+}

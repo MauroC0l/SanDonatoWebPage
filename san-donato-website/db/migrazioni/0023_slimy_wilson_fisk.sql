@@ -1,0 +1,1 @@
+ALTER TABLE "gironi_ufficiali" ADD COLUMN "nome" text;

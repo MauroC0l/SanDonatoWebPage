@@ -18,7 +18,7 @@ import { z } from "zod";
 import { getDb } from "../../db/client.js";
 import { eventi, fontiCalendario, gironiUfficiali, registroAttivita, squadre } from "../../db/schema.js";
 import { ErroreHttp } from "../risposte.js";
-import { CODICI_FORMATO, formatiPerPannello } from "./formati/index.js";
+import { CODICI_FORMATO, FORMATI, formatiPerPannello } from "./formati/index.js";
 import { idCartella, indirizzoCartella } from "./drive.js";
 import { applicaGirone } from "./sincronizza.js";
 
@@ -62,8 +62,12 @@ export const schemaFonteModifica = z.object(
 export const schemaGirone = z.object({
   // null = scollega: il girone torna "da collegare"
   squadraId: z.union([z.null(), z.coerce.number().int().positive()]).optional(),
-  ignorato: z.boolean().optional()
-}).refine((d) => d.squadraId !== undefined || d.ignorato !== undefined, {
+  ignorato: z.boolean().optional(),
+  // Il nome scelto dall'amministratore. Vuoto o null = torna il titolo del foglio
+  nome: z.union([z.null(), z.string().trim().max(120, "Il nome è troppo lungo.")])
+    .transform((v) => (v ? v : null))
+    .optional()
+}).refine((d) => d.squadraId !== undefined || d.ignorato !== undefined || d.nome !== undefined, {
   message: "Non c'è niente da salvare."
 });
 
@@ -105,15 +109,18 @@ async function gironi(db) {
       fonteId: gironiUfficiali.fonteId,
       nomeFile: gironiUfficiali.nomeFile,
       titolo: gironiUfficiali.titolo,
+      nomePersonale: gironiUfficiali.nome,
       nomeNelGirone: gironiUfficiali.nomeNelGirone,
       squadraId: gironiUfficiali.squadraId,
       squadraNome: squadre.nome,
       ignorato: gironiUfficiali.ignorato,
       partite: gironiUfficiali.partite,
       ultimaLettura: gironiUfficiali.ultimaLettura,
-      sparitoIl: gironiUfficiali.sparitoIl
+      sparitoIl: gironiUfficiali.sparitoIl,
+      formato: fontiCalendario.formato
     })
     .from(gironiUfficiali)
+    .innerJoin(fontiCalendario, eq(fontiCalendario.id, gironiUfficiali.fonteId))
     .leftJoin(squadre, eq(squadre.id, gironiUfficiali.squadraId))
     .orderBy(asc(gironiUfficiali.fonteId), asc(gironiUfficiali.nomeFile), asc(gironiUfficiali.nomeNelGirone));
 
@@ -140,7 +147,7 @@ async function gironi(db) {
 
   // Le partite complete non servono al pannello: bastano quante sono e
   // quando si gioca la prossima, per riconoscere il girone giusto.
-  return righe.map(({ partite, ...g }) => {
+  return righe.map(({ partite, formato, ...g }) => {
     const future = (partite ?? [])
       .map((p) => p.inizio)
       .filter((d) => new Date(d).getTime() >= adesso)
@@ -148,6 +155,12 @@ async function gironi(db) {
 
     return {
       ...g,
+      /* Il nome da mostrare: quello scelto dall'amministratore, altrimenti
+         il titolo del foglio, altrimenti il nome del file. */
+      nome: g.nomePersonale || g.titolo || g.nomeFile,
+      /* Lo sport del girone, dal formato della sua fonte: serve a proporre
+         a una squadra di pallavolo solo i gironi di pallavolo. */
+      sport: FORMATI[formato]?.sport ?? null,
       partite: (partite ?? []).length,
       prossima: future[0] ?? null,
       nelCalendario: perGirone.get(g.id)?.quante ?? 0,
@@ -298,10 +311,19 @@ export async function eliminaFonte(id) {
  * Per un collegamento sbagliato basta scegliere la squadra giusta, e le
  * partite si spostano con lui senza perdere niente.
  */
-export async function aggiornaGirone(id, { squadraId, ignorato }) {
+export async function aggiornaGirone(id, { squadraId, ignorato, nome }) {
   const db = getDb();
-  const [girone] = await db.select().from(gironiUfficiali).where(eq(gironiUfficiali.id, Number(id))).limit(1);
+  let [girone] = await db.select().from(gironiUfficiali).where(eq(gironiUfficiali.id, Number(id))).limit(1);
   if (!girone) throw new ErroreHttp(404, "Girone non trovato.");
+  const prima = girone;
+
+  /* Il nome si cambia da solo, senza toccare squadra né partite: è solo
+     come il girone si chiama nel pannello. */
+  if (nome !== undefined) {
+    [girone] = await db.update(gironiUfficiali).set({ nome })
+      .where(eq(gironiUfficiali.id, girone.id)).returning();
+    if (squadraId === undefined && ignorato === undefined) return { girone, prima, conto: null };
+  }
 
   if (ignorato === true && girone.squadraId) {
     throw new ErroreHttp(
@@ -312,22 +334,32 @@ export async function aggiornaGirone(id, { squadraId, ignorato }) {
   }
 
   if (squadraId === null) {
-    if (!girone.squadraId) return { girone, prima: girone, conto: null };
+    if (!girone.squadraId) return { girone, prima, conto: null };
 
     const tolte = await db.delete(eventi).where(eq(eventi.gironeId, girone.id)).returning({ id: eventi.id });
     const [scollegato] = await db.update(gironiUfficiali).set({ squadraId: null })
       .where(eq(gironiUfficiali.id, girone.id)).returning();
 
-    return { girone: scollegato, prima: girone, conto: { tolte: tolte.length } };
+    return { girone: scollegato, prima, conto: { tolte: tolte.length } };
   }
 
   const modifiche = {};
 
   if (squadraId !== undefined) {
-    const [squadra] = await db.select({ id: squadre.id, attiva: squadre.attiva })
+    const [squadra] = await db.select({ id: squadre.id, attiva: squadre.attiva, sport: squadre.sport, nome: squadre.nome })
       .from(squadre).where(eq(squadre.id, squadraId)).limit(1);
     if (!squadra) throw new ErroreHttp(400, "Squadra non trovata.");
     if (!squadra.attiva) throw new ErroreHttp(400, "Questa squadra è disattivata: riattivala prima di collegarle un girone.");
+
+    /* Un girone di pallavolo non va nel calendario di una squadra di calcio.
+       Il pannello propone già solo i gironi dello sport giusto; qui lo si
+       garantisce anche a chi chiamasse l'indirizzo a mano. */
+    const [fonte] = await db.select({ formato: fontiCalendario.formato })
+      .from(fontiCalendario).where(eq(fontiCalendario.id, girone.fonteId)).limit(1);
+    const sportGirone = FORMATI[fonte?.formato]?.sport;
+    if (sportGirone && sportGirone !== squadra.sport) {
+      throw new ErroreHttp(400, `Questo è un girone di ${sportGirone}: non si collega a "${squadra.nome}", che è ${squadra.sport}.`);
+    }
 
     modifiche.squadraId = squadraId;
     modifiche.ignorato = false;
@@ -344,6 +376,6 @@ export async function aggiornaGirone(id, { squadraId, ignorato }) {
     ? await applicaGirone(aggiornato, aggiornato.partite ?? [], { completo: !aggiornato.sparitoIl })
     : null;
 
-  return { girone: aggiornato, prima: girone, conto };
+  return { girone: aggiornato, prima, conto };
 }
 

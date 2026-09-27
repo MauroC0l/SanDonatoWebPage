@@ -300,8 +300,8 @@ export default function EventiListPage({ genere = "partite" }) {
               <FaPlus /> {ePartite ? "Nuova partita" : "Nuovo evento"}
             </Link>
           ) : (
-            <Link to={`${area}/squadre`} className="adm-btn adm-btn-ghost">
-              Calendari delle squadre
+            <Link to={`${area}/calendari`} className="adm-btn adm-btn-ghost">
+              Calendari ufficiali
             </Link>
           )}
         </div>

@@ -26,6 +26,7 @@ const RegistroPage = lazy(() => import("./RegistroPage"));
 const LibreriaPage = lazy(() => import("./LibreriaPage"));
 const QuotePage = lazy(() => import("./QuotePage"));
 const SquadrePage = lazy(() => import("./SquadrePage"));
+const CalendariUfficialiPage = lazy(() => import("./CalendariUfficialiPage"));
 const RecuperoPasswordPage = lazy(() => import("./RecuperoPasswordPage"));
 const SceltaPasswordPage = lazy(() => import("./SceltaPasswordPage"));
 const HomePannello = lazy(() => import("./HomePannello"));
@@ -109,12 +110,6 @@ function VecchiaModifica() {
   const { id } = useParams();
   const area = useArea();
   return <Navigate to={`${area}/notizie/${id}`} replace />;
-}
-
-/** Rimanda a una sezione della propria area: per gli indirizzi che hanno cambiato posto. */
-function AllaSezione({ a }) {
-  const area = useArea();
-  return <Navigate to={`${area}/${a}`} replace />;
 }
 
 /** Rimanda all'ingresso della propria area, qualunque essa sia. */
@@ -292,9 +287,16 @@ export default function AdminRoot({ section }) {
             />
 
             {/* ---------- Calendari ufficiali ----------
-                Erano una pagina a sé; ora stanno in Squadre, dove si decide
-                quale girone è di quale squadra. L'indirizzo vecchio porta lì. */}
-            <Route path="calendari" element={<AllaSezione a="squadre" />} />
+                I tornei e i loro gironi: si gestiscono qui. L'iscrizione di
+                una squadra a un girone invece si fa da Squadre. */}
+            <Route
+              path="calendari"
+              element={
+                <Riservato una={["calendari.gestisci"]}>
+                  <Pigra cosa="dei calendari"><CalendariUfficialiPage /></Pigra>
+                </Riservato>
+              }
+            />
 
             {/* ---------- Richieste di appartenenza ---------- */}
             <Route
