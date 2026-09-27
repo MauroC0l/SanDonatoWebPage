@@ -22,6 +22,11 @@ import "../../css/Admin.css";
    federazione non lo conosce, quindi non lo riscrive. Il resto è suo. */
 const CAMPI_LIBERI = new Set(["descrizione", "marcatori", "diretta"]);
 
+/* Cosa dicono i campi del risultato, vuoti, in una partita ufficiale.
+   Con l'esempio di sempre ("3 - 1", "25-20, 25-18, 23-25") un campo bloccato
+   sembrava compilato: si leggeva un risultato per partite non ancora giocate. */
+const DALLA_FEDERAZIONE = "Arriva dalla federazione";
+
 /*
  * I tipi, divisi fra le due sezioni.
  *
@@ -69,15 +74,15 @@ const SPORT_SQUADRA = ["Calcio", "Pallavolo", "Basket", "Societa"];
 const ESITO_PER_SPORT = {
   Calcio: {
     risultato: { etichetta: "Risultato", segnaposto: "Es. 3 - 1" },
-    marcatori: { etichetta: "Marcatori", segnaposto: "Rossi, Bianchi, Verdi" }
+    marcatori: { etichetta: "Marcatori", segnaposto: "Es. Rossi, Bianchi, Verdi" }
   },
   Pallavolo: {
     risultato: { etichetta: "Set vinti", segnaposto: "Es. 3 - 1" },
-    parziali: { etichetta: "Parziali dei set", segnaposto: "25-20, 25-18, 23-25" }
+    parziali: { etichetta: "Parziali dei set", segnaposto: "Es. 25-20, 25-18, 23-25" }
   },
   Basket: {
     risultato: { etichetta: "Punteggio", segnaposto: "Es. 74 - 68" },
-    parziali: { etichetta: "Parziali dei quarti", segnaposto: "18-15, 22-20, 14-19, 20-17" }
+    parziali: { etichetta: "Parziali dei quarti", segnaposto: "Es. 18-15, 22-20, 14-19, 20-17" }
   }
 };
 
@@ -86,8 +91,8 @@ const ESITO_PER_SPORT = {
    campo rischia di togliere proprio quello che serviva. */
 const ESITO_GENERICO = {
   risultato: { etichetta: "Risultato", segnaposto: "Es. 3 - 1" },
-  parziali: { etichetta: "Parziali", segnaposto: "25-20, 25-18, 23-25" },
-  marcatori: { etichetta: "Marcatori", segnaposto: "Rossi, Bianchi, Verdi" }
+  parziali: { etichetta: "Parziali", segnaposto: "Es. 25-20, 25-18, 23-25" },
+  marcatori: { etichetta: "Marcatori", segnaposto: "Es. Rossi, Bianchi, Verdi" }
 };
 
 const VUOTO = {
@@ -664,7 +669,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
                   className="adm-input"
                   value={form.risultato}
                   onChange={(e) => aggiorna({ risultato: e.target.value })}
-                  placeholder={esito.risultato.segnaposto}
+                  placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.risultato.segnaposto}
                   disabled={bloccato}
                 />
               </label>
@@ -678,10 +683,12 @@ export default function EventoEditorPage({ genere = "partite" }) {
                   className="adm-input"
                   value={form.parziali}
                   onChange={(e) => aggiorna({ parziali: e.target.value })}
-                  placeholder={esito.parziali.segnaposto}
+                  placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.parziali.segnaposto}
                   disabled={bloccato}
                 />
-                <span className="adm-hint">Separati da virgola, nell&apos;ordine in cui si sono giocati.</span>
+                {!ufficiale && (
+                  <span className="adm-hint">Separati da virgola, nell&apos;ordine in cui si sono giocati.</span>
+                )}
               </label>
             )}
 
