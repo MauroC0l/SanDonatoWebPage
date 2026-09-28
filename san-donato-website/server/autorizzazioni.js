@@ -44,14 +44,9 @@ const CAPACITA = {
        sono atti ufficiali della società, e li cambia chi amministra. */
     "documenti.gestisci",
 
-    /* Correggere l'anagrafica di un iscritto (dati, residenza, recapiti,
-       tutori): deciso dalla società il 28 settembre 2026, al posto della
-       regola di prima per cui i dati li scriveva solo l'interessato. */
-    "anagrafica.modifica",
-
     /* Cancellare per sempre una notizia dal cestino prima dei 30 giorni:
-       un gesto che non si annulla, e lo fanno solo amministratore e
-       segreteria (28 settembre 2026). */
+       un gesto che non si annulla, e lo fa solo l'amministratore (28
+       settembre 2026; la segreteria non ha la sezione Notizie). */
     "notizie.elimina"
   ],
 
@@ -83,12 +78,10 @@ const CAPACITA = {
      * nel sito. La segreteria puo caricare la copia e scrivere tipo e
      * scadenza, che sono gli unici dati leggibili sul foglio stesso.
      *
-     * Dal 28 settembre 2026 la segreteria corregge anche anagrafica e
-     * recapiti (vedi "anagrafica.modifica" sotto).
+     * Anagrafica, recapiti e note restano dell'atleta anche qui: la società
+     * l'ha ribadito il 28 settembre 2026, dopo averlo aperto per un giorno.
      */
-    "certificato.registra",
-    "anagrafica.modifica",
-    "notizie.elimina"
+    "certificato.registra"
   ],
   editor: [
     "notizie.leggi_bozze",

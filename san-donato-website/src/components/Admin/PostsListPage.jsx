@@ -90,8 +90,8 @@ const formatDateOra = (iso) => {
 
 export default function PostsListPage() {
   const { user, sessionExpired } = useAuth();
-  /* Cancellare per sempre prima dei 30 giorni: solo amministratore e
-     segreteria (28 settembre 2026). Gli altri ripristinano e aspettano. */
+  /* Cancellare per sempre prima dei 30 giorni: solo l'amministratore (28
+     settembre 2026). Gli altri ripristinano e aspettano. */
   const puoEliminare = (user?.capabilities ?? []).includes("notizie.elimina");
   const area = useArea();
   const { avvisa, conferma } = useDialoghi();
@@ -320,7 +320,7 @@ export default function PostsListPage() {
           <p>
             Qui le notizie restano <strong>{giorniCestino} giorni</strong>, poi si cancellano
             da sole. Fino ad allora, <strong>Ripristina</strong> le rimette fra le bozze.
-            {!puoEliminare && " Cancellarle prima lo possono fare solo amministratore e segreteria."}
+            {!puoEliminare && " Cancellarle prima lo può fare solo l'amministratore."}
           </p>
           {total > 0 && puoEliminare && (
             <button

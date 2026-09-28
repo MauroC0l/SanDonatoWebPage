@@ -5,7 +5,7 @@ import {
   FaTrophy, FaExclamationCircle, FaCheckCircle, FaArrowRight, FaClock,
   FaCheckDouble, FaTag, FaRunning, FaPlus, FaSearch, FaPen, FaSitemap,
   FaUserClock, FaMapMarkerAlt,
-  FaUsers
+  FaUsers, FaCalendarCheck, FaChalkboardTeacher, FaPiggyBank
 } from "react-icons/fa";
 import { getCruscotto, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -82,6 +82,34 @@ function daFare(dati, { area, puoValidare, soloProprie }) {
         ? "Nuovi iscritti del tuo sport: scegli in quale squadra metterli."
         : "Persone registrate che aspettano una squadra.",
       a: `${area}/richieste`,
+      tono: "is-attenzione"
+    });
+  }
+
+  /* I gironi dei calendari ufficiali in cui compare una nostra squadra e
+     che nessuno ha ancora collegato né scartato: finché restano così, le
+     loro partite non arrivano nel calendario del sito. */
+  if (dati.calendari?.daAssegnare > 0) {
+    const { daAssegnare, tornei } = dati.calendari;
+    voci.push({
+      chiave: "gironi",
+      icona: FaCalendarCheck,
+      titolo: "Gironi da assegnare",
+      conta: daAssegnare,
+      testo: `${tornei === 1 ? "In un torneo" : `In ${tornei} tornei`}: scegli la squadra, oppure scartali se non ci riguardano.`,
+      a: `${area}/calendari`,
+      tono: "is-attenzione"
+    });
+  }
+
+  if (dati.calendari?.nonRiuscite > 0) {
+    voci.push({
+      chiave: "letture",
+      icona: FaCalendarCheck,
+      titolo: "Tornei non letti",
+      conta: dati.calendari.nonRiuscite,
+      testo: "L'ultima lettura dei file non è riuscita: le partite potrebbero non essere aggiornate.",
+      a: `${area}/calendari`,
       tono: "is-attenzione"
     });
   }
@@ -173,6 +201,31 @@ function daFare(dati, { area, puoValidare, soloProprie }) {
     });
   }
 
+  // Gli allenatori versano la quota anche loro, ma non stanno fra gli atleti
+  if (dati.allenatori?.quanti > 0) {
+    voci.push({
+      chiave: "allenatori",
+      icona: FaChalkboardTeacher,
+      titolo: "Quote allenatori da incassare",
+      conta: dati.allenatori.quanti,
+      testo: `In tutto ${euro(dati.allenatori.daIncassare)} ancora da ricevere dagli allenatori.`,
+      a: `${area}/allenatori?quota=da_versare`,
+      tono: ""
+    });
+  }
+
+  if (dati.squadre?.senzaAllenatore > 0) {
+    voci.push({
+      chiave: "senza_allenatore",
+      icona: FaSitemap,
+      titolo: "Squadre senza allenatore",
+      conta: dati.squadre.senzaAllenatore,
+      testo: "Nessuno può segnare partite e risultati per loro: associa un allenatore.",
+      a: `${area}/squadre`,
+      tono: ""
+    });
+  }
+
   if (dati.notizie?.bozze > 0) {
     voci.push({
       chiave: "bozze",
@@ -196,15 +249,11 @@ function scorciatoie(capacita, area) {
   const ha = (c) => capacita.includes(c);
   const voci = [];
 
-  if (ha("eventi.gestisci_tutte") || ha("eventi.gestisci_proprie")) {
-    voci.push({ a: `${area}/partite/nuova`, icona: FaPlus, testo: "Nuova partita" });
-  }
+  /* "Nuova partita" non c'è più (28 settembre 2026): le partite arrivano
+     quasi tutte dai calendari ufficiali, e chi ne aggiunge una a mano la
+     trova in Partite. */
   if (ha("notizie.scrivi")) {
-    const notizia = { a: `${area}/notizie/nuova`, icona: FaPen, testo: "Scrivi una notizia" };
-    // Per chi scrive e basta, scrivere è la prima cosa; per chi gestisce
-    // tutto il calendario viene dopo le partite
-    if (ha("eventi.gestisci_tutte")) voci.push(notizia);
-    else voci.unshift(notizia);
+    voci.push({ a: `${area}/notizie/nuova`, icona: FaPen, testo: "Scrivi una notizia" });
   }
   if (ha("atleti.leggi")) {
     voci.push({ a: `${area}/atleti`, icona: FaSearch, testo: "Cerca un atleta" });
@@ -381,20 +430,17 @@ export default function HomePannello() {
   const nome = (user?.name ?? "").split(" ")[0] || "";
   const prossimo = dati.prossimi?.[0];
 
-  /* La riga sotto al saluto: quante cose aspettano e, per chi allena, il
-     prossimo impegno — la domanda che si fa aprendo il telefono prima
-     dell'allenamento. */
-  let riassunto = voci.length === 0
-    ? "Tutto in ordine: non c'è niente che ti aspetta."
-    : voci.length === 1
-      ? "C'è una cosa da sistemare: la trovi qui sotto."
-      : `Ci sono ${voci.length} cose da sistemare. Parti dalla prima: è la più urgente.`;
+  /* La riga sotto al saluto. Il conto delle cose da fare non c'è più (lo
+     dice già la sezione qui sotto, 28 settembre 2026); resta, per chi
+     allena, il prossimo impegno — la domanda che si fa aprendo il telefono
+     prima dell'allenamento. */
+  let riassunto = voci.length === 0 ? "Tutto in ordine: non c'è niente che ti aspetta." : "";
 
   if (soloProprie && prossimo) {
     const giorno = new Date(prossimo.inizio).toLocaleDateString("it-IT", {
       weekday: "long", day: "numeric", month: "long"
     });
-    riassunto += ` Il prossimo impegno è ${giorno}${prossimo.tuttoIlGiorno ? "" : ` alle ${ora(prossimo.inizio)}`}.`;
+    riassunto = `${riassunto} Il prossimo impegno è ${giorno}${prossimo.tuttoIlGiorno ? "" : ` alle ${ora(prossimo.inizio)}`}.`.trim();
   }
 
   const sezioneProssimi = dati.prossimi && (
@@ -450,10 +496,23 @@ export default function HomePannello() {
       <Numero key="squadre" icona={FaSitemap} valore={dati.squadre.attive} etichetta="squadre attive" a={`${area}/squadre`} />
     );
   }
-  if (dati.notizie) {
+  /* Le notizie qui non ci sono più (28 settembre 2026): contarle non dice
+     niente su come va la società. Al loro posto gli allenatori e quanto è
+     entrato in cassa nella stagione. */
+  if (dati.allenatori) {
     numeri.push(
-      <Numero key="online" icona={FaNewspaper} valore={dati.notizie.online} etichetta="notizie sul sito" a={`${area}/notizie`} />,
-      <Numero key="programmate" icona={FaClock} valore={dati.notizie.programmate} etichetta="notizie programmate" a={`${area}/notizie`} />
+      <Numero key="allenatori" icona={FaChalkboardTeacher} valore={dati.allenatori.iscritti} etichetta="allenatori iscritti" a={`${area}/allenatori`} />
+    );
+  }
+  if (dati.quote) {
+    numeri.push(
+      <Numero
+        key="incassato"
+        icona={FaPiggyBank}
+        valore={euro((dati.quote.incassato ?? 0) + (dati.allenatori?.incassato ?? 0))}
+        etichetta="incassati in questa stagione"
+        a={`${area}/stagioni`}
+      />
     );
   }
   if (dati.account) {
@@ -467,7 +526,7 @@ export default function HomePannello() {
       <header className="adm-benvenuto">
         <p className="adm-occhiello">{NOME_RUOLO[user?.role] ?? "Area riservata"}</p>
         <h1 className="adm-benvenuto-titolo">Ciao{nome && <>, <em>{nome}</em></>}</h1>
-        <p className="adm-benvenuto-testo">{riassunto}</p>
+        {riassunto && <p className="adm-benvenuto-testo">{riassunto}</p>}
 
         {azioni.length > 0 && (
           <div className="adm-benvenuto-azioni">

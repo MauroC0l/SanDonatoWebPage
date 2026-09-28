@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FaSearch, FaChalkboardTeacher, FaExclamationCircle, FaEuroSign,
   FaArrowRight, FaCheckCircle, FaUserClock
@@ -48,7 +48,9 @@ export default function AllenatoriPage() {
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState("");
   const [ricerca, setRicerca] = useState("");
-  const [filtro, setFiltro] = useState("");
+  // Dalla home si arriva già filtrati: ?quota=da_versare
+  const [parametri] = useSearchParams();
+  const [filtro, setFiltro] = useState(() => (parametri.get("quota") === "da_versare" ? "da_versare" : ""));
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {

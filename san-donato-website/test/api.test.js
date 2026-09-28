@@ -851,16 +851,20 @@ describe("documenti del sito", () => {
 });
 
 describe("regole del 28 settembre", () => {
-  seAccesa("la segreteria corregge l'anagrafica, l'allenatore no", async () => {
-    const segr = await entra("segreteria");
-    const elenco = await segr.chiedi("/admin/atleti");
-    const atleta = elenco.corpo.atleti.find((a) => a.haScheda);
-    const prima = (await segr.chiedi(`/admin/atleti/${atleta.utenteId}`)).corpo.atleta;
+  seAccesa("nessuno dello staff corregge l'anagrafica di un atleta", async () => {
+    for (const ruolo of ["segreteria", "admin"]) {
+      const staff = await entra(ruolo);
+      const elenco = await staff.chiedi("/admin/atleti");
+      const atleta = elenco.corpo.atleti.find((a) => a.haScheda);
 
-    const ok = await segr.chiedi(`/admin/atleti/${atleta.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: "+39 333 123 4567" }) });
-    expect(ok.stato).toBe(200);
-    expect(ok.corpo.atleta.telefono).toBe("3331234567");
-    await segr.chiedi(`/admin/atleti/${atleta.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: prima.telefono ?? "" }) });
+      const esito = await staff.chiedi(`/admin/atleti/${atleta.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: "+39 333 123 4567" }) });
+      if (esito.stato === 200) {
+        const dopo = (await staff.chiedi(`/admin/atleti/${atleta.utenteId}`)).corpo.atleta;
+        expect(dopo.telefono).not.toBe("3331234567");
+      } else {
+        expect([400, 403]).toContain(esito.stato);
+      }
+    }
 
     const coach = await entra("coach");
     const suoi = await coach.chiedi("/admin/atleti");
@@ -869,7 +873,17 @@ describe("regole del 28 settembre", () => {
     expect(no.stato).toBe(403);
   });
 
-  seAccesa("solo amministratore e segreteria cancellano per sempre dal cestino", async () => {
+  seAccesa("da Utenti l'amministratore non cambia nome o email di un atleta, la password sì", async () => {
+    const admin = await entra("admin");
+    const elenco = (await admin.chiedi("/admin/utenti")).corpo;
+    const atleta = (elenco.utenti ?? elenco).find((u) => u.ruolo === "atleta" && u.email !== "p051@prova.psd");
+
+    expect((await admin.chiedi("/admin/utenti", { method: "PATCH", body: JSON.stringify({ id: atleta.id, nome: "Cambiato" }) })).stato).toBe(403);
+    expect((await admin.chiedi("/admin/utenti", { method: "PATCH", body: JSON.stringify({ id: atleta.id, email: "altra@prova.psd" }) })).stato).toBe(403);
+    expect((await admin.chiedi("/admin/utenti", { method: "PATCH", body: JSON.stringify({ id: atleta.id, password: "provvisoria2026" }) })).stato).toBe(200);
+  });
+
+  seAccesa("solo l'amministratore cancella per sempre dal cestino", async () => {
     const admin = await entra("admin");
     const creata = await admin.chiedi("/admin/notizie", { method: "POST", body: JSON.stringify({ titolo: "Da cancellare per prova", contenuto: "<p>x</p>" }) });
     const id = creata.corpo.notizia.id;
@@ -879,6 +893,9 @@ describe("regole del 28 settembre", () => {
     await editor("/accesso", { method: "POST", body: JSON.stringify({ email: "p004@prova.psd", password: "provapsd2026" }) });
     expect((await editor(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(403);
     expect((await editor("/admin/notizie", { method: "DELETE" })).stato).toBe(403);
+
+    const segr = await entra("segreteria");
+    expect((await segr.chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(403);
 
     expect((await admin.chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(200);
   });

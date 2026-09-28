@@ -4,7 +4,7 @@ import {
   FaArrowLeft, FaArrowRight, FaSave, FaExclamationCircle, FaHeartbeat, FaEuroSign,
   FaUserCircle, FaFileMedical, FaExternalLinkAlt,
   FaInfoCircle, FaUsers, FaUpload, FaCheckCircle, FaTimesCircle,
-  FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory, FaPencilAlt,
+  FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory,
   FaExclamationTriangle
 } from "react-icons/fa";
 import {
@@ -23,7 +23,6 @@ import { anni } from "../../utils/eta";
 import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import Ritratto from "./Ritratto";
-import ModificaAnagrafica from "./ModificaAnagrafica";
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
 import "../../css/admin/Persone.css";
@@ -118,25 +117,22 @@ function Dato({ etichetta, children }) {
 /**
  * La scheda di un atleta: chi è, se può giocare, se ha pagato.
  *
- * Si apre soprattutto per LEGGERE. Anagrafica, recapiti e tutore li scrive
- * di norma la persona stessa dalla propria area; le note restano solo sue.
+ * Si LEGGE, quasi tutto. Anagrafica, recapiti, tutore e note sono dati della
+ * persona e li scrive lei dalla propria area: nemmeno un amministratore li
+ * tocca da qui. La società l'ha ribadito il 28 settembre 2026, dopo averlo
+ * aperto per un giorno.
  *
- * Si scrivono da qui tre cose, ognuna col suo permesso:
+ * Restano scrivibili due cose, con due permessi diversi:
  *
  *   quote.gestisci        la quota della stagione e i versamenti, che non
  *                         sono dati personali ma i conti della società
  *   certificato.registra  tipo, scadenza e copia del certificato, per chi
  *                         lo consegna su carta in sede
- *   anagrafica.modifica   dati, residenza, recapiti e tutori, per chi porta
- *                         il modulo in sede o detta un numero al telefono.
- *                         Deciso dalla società il 28 settembre 2026: prima
- *                         nemmeno un amministratore li toccava, e un errore
- *                         si correggeva solo chiedendolo all'interessato.
  *
- * Amministratore e segreteria li hanno tutti e tre. Un allenatore nessuno, e
- * le quote non gli arrivano proprio: il server non gliele manda. I pulsanti
- * seguono la stessa regola del server — un modulo che il salvataggio
- * rifiuterebbe sarebbe solo un modo elaborato di far perdere tempo.
+ * Un allenatore non ha né l uno né l altro, e le quote non gli arrivano
+ * proprio: il server non gliele manda. I campi in sola lettura sono la stessa
+ * regola che applica il server — un modulo che il salvataggio rifiuterebbe
+ * sarebbe solo un modo elaborato di far perdere tempo a chi lo compila.
  */
 export default function SchedaAtletaPage() {
   const { id } = useParams();
@@ -184,16 +180,6 @@ export default function SchedaAtletaPage() {
   const tieneIConti = capacita.includes("quote.gestisci");
   const registraCertificati = capacita.includes("certificato.registra");
   const puoScrivere = tieneIConti || registraCertificati;
-  // Dal 28 settembre 2026: amministratore e segreteria correggono i dati
-  const correggeAnagrafica = capacita.includes("anagrafica.modifica");
-  // Nome, cognome ed email stanno sull'account, che si cambia da Utenti
-  const gestisceUtenti = capacita.includes("utenti.gestisci");
-
-  /* La correzione dei dati: null a scheda normale, altrimenti il gruppo da
-     cui si comincia ("persona", "contatti", "tutori"). Un modo della stessa
-     scheda e non una pagina nuova: salvando o annullando si torna dove si
-     era, con la stessa linguetta aperta. */
-  const [inCorrezione, setInCorrezione] = useState(null);
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -205,9 +191,7 @@ export default function SchedaAtletaPage() {
     avvisa(err.message || "Operazione non riuscita.", "errore");
   }, [navigate, sessionExpired, avvisa]);
 
-  /* Solo quello che si scrive dalla scheda stessa: l'anagrafica ha il suo
-     modulo (ModificaAnagrafica), e tenerne qui una copia vorrebbe dire
-     vedere "modifiche da salvare" dopo averla salvata dall'altra parte. */
+  // Solo quello che si scrive da qui: il resto della scheda si legge e basta
   const daAtleta = (a) => ({
     tipoCertificato: a.tipoCertificato ?? "",
     certificatoScadenza: a.certificatoScadenza ?? "",
@@ -262,26 +246,6 @@ export default function SchedaAtletaPage() {
       el.scrollIntoView({ behavior: piano ? "auto" : "smooth", block: "start" });
       el.focus?.({ preventScroll: true });
     }));
-  };
-
-  /* ---------- Correzione dei dati ---------- */
-
-  const correggi = (gruppo) => {
-    setErrore("");
-    setInCorrezione(gruppo);
-  };
-
-  // Si torna sulla linguetta da cui si era partiti, in cima alla scheda
-  const chiudiCorrezione = () => {
-    const daContatti = inCorrezione === "contatti" || inCorrezione === "tutori";
-    setInCorrezione(null);
-    vai(daContatti ? "contatti" : "scheda", daContatti ? "prs-contatti" : "prs-anagrafica");
-  };
-
-  const correzioneSalvata = (aggiornato) => {
-    setAtleta(aggiornato);
-    avvisa("Dati salvati.", "ok");
-    chiudiCorrezione();
   };
 
   /* ---------- Salvataggio della scheda ---------- */
@@ -698,8 +662,7 @@ export default function SchedaAtletaPage() {
       tono: "",
       Icona: FaInfoCircle,
       testo: <>Deve ancora inserire <strong>{altroChemanca.join(", ")}</strong> dalla sua area.</>,
-      // Chi può correggere i dati può anche scriverli al posto suo, se li ha
-      azione: correggeAnagrafica ? { etichetta: "Inseriscili tu", correggi: "persona" } : null
+      azione: null
     });
   }
 
@@ -711,9 +674,7 @@ export default function SchedaAtletaPage() {
       tono: "is-attenzione",
       Icona: FaPhoneAlt,
       testo: <>È minorenne e <strong>non ha indicato un adulto da chiamare</strong>.</>,
-      azione: correggeAnagrafica
-        ? { etichetta: "Aggiungi un contatto", correggi: "tutori" }
-        : { etichetta: "Vedi i contatti", vista: "contatti" }
+      azione: { etichetta: "Vedi i contatti", vista: "contatti" }
     });
   }
 
@@ -805,24 +766,6 @@ export default function SchedaAtletaPage() {
         </div>
       )}
 
-      {/* ---------- La correzione dei dati ----------
-          Prende il posto di tutto quello che sta sotto alla testata: chi
-          corregge un indirizzo non deve avere accanto certificato e quota
-          da salvare con un altro pulsante. Le modifiche lasciate a metà
-          nella scheda restano, e si ritrovano tornando indietro. */}
-      {inCorrezione ? (
-        <ModificaAnagrafica
-          key={inCorrezione}
-          id={id}
-          atleta={atleta}
-          partenza={inCorrezione}
-          puoCambiareAccount={gestisceUtenti}
-          onSalvato={correzioneSalvata}
-          onAnnulla={chiudiCorrezione}
-          onSessioneScaduta={() => { sessionExpired(); navigate("/login", { replace: true }); }}
-        />
-      ) : (<>
-
       {/* ---------- Le due domande ----------
           Può giocare? Ha pagato? Prima di leggere qualunque altra cosa. Sono
           anche pulsanti: toccarle porta dove si guarda il dettaglio. */}
@@ -877,9 +820,7 @@ export default function SchedaAtletaPage() {
                   <button
                     type="button"
                     className={`adm-btn ${d.azione.primaria ? "adm-btn-primary" : "adm-btn-ghost"}`}
-                    onClick={() => (d.azione.file ? scegliFile()
-                      : d.azione.correggi ? correggi(d.azione.correggi)
-                        : vai(d.azione.vista, d.azione.ancora))}
+                    onClick={() => (d.azione.file ? scegliFile() : vai(d.azione.vista, d.azione.ancora))}
                     disabled={salvataggio || caricandoFile}
                   >
                     {d.azione.etichetta} <FaArrowRight aria-hidden="true" />
@@ -938,28 +879,15 @@ export default function SchedaAtletaPage() {
         {vista === "scheda" && (
           <div className="adm-editor-grid prs-scheda-griglia">
             <div className="adm-editor-col">
-              <section className="adm-panel prs-ancora" id="prs-anagrafica" tabIndex={-1}>
-                <div className="prs-titolo-azione">
-                  <h2 className="adm-panel-title">
-                    <FaUserCircle aria-hidden="true" /> Anagrafica
-                  </h2>
-                  {/* Il pulsante accanto al titolo, e non in fondo: chi
-                      trova un dato sbagliato lo trova leggendo, e la
-                      correzione deve stare dove sta guardando. */}
-                  {correggeAnagrafica && (
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn-secondary adm-btn-piccolo"
-                      onClick={() => correggi("persona")}
-                    >
-                      <FaPencilAlt aria-hidden="true" /> Modifica i dati
-                    </button>
-                  )}
-                </div>
+              <section className="adm-panel">
+                <h2 className="adm-panel-title">
+                  <FaUserCircle aria-hidden="true" /> Anagrafica
+                </h2>
 
-                {/* Qui si legge soltanto: la correzione ha il suo modulo,
-                    che si apre col pulsante qui sopra per chi ha il
-                    permesso. Un allenatore il pulsante non lo vede. */}
+                {/* Sempre in sola lettura, per chiunque.
+                    I dati di una persona li scrive quella persona, dalla sua
+                    area: dall'altra parte si leggono e basta. Non è un
+                    permesso mancante da aggiungere un giorno, è la regola. */}
                 {GRUPPI.map((gruppo) => (
                   <div className="adm-gruppo" key={gruppo.titolo}>
                     <p className="adm-gruppo-titolo">{gruppo.titolo}</p>
@@ -981,13 +909,9 @@ export default function SchedaAtletaPage() {
                 )}
 
                 <p className="adm-hint">
-                  {correggeAnagrafica
-                    ? <>Li compila {atleta.nomeCompleto} dalla propria pagina
-                      Iscrizione; se c&apos;è un errore puoi correggerlo tu con
-                      &laquo;Modifica i dati&raquo;. Le note le scrive solo lui.</>
-                    : <>Questi dati li compila {atleta.nomeCompleto} dalla propria
-                      area, nella pagina Iscrizione. Se c&apos;è un errore, lo
-                      corregge lui oppure la segreteria.</>}
+                  Questi dati li compila {atleta.nomeCompleto} dalla propria area,
+                  nella pagina Iscrizione. Se c&apos;è un errore, il modo di
+                  correggerlo è chiederglielo.
                 </p>
               </section>
             </div>
@@ -1168,31 +1092,18 @@ export default function SchedaAtletaPage() {
             all'allenatore: è lui che è in campo quando serve davvero. Il
             numero è un pulsante grande: si preme col pollice, di corsa. */}
         {vista === "contatti" && (
-          <section className="adm-panel prs-contatti prs-ancora" id="prs-contatti" tabIndex={-1}>
-            <div className="prs-titolo-azione">
-              <h2 className="adm-panel-title">
-                <FaPhoneAlt aria-hidden="true" /> Contatti
-              </h2>
-              {correggeAnagrafica && (
-                <button
-                  type="button"
-                  className="adm-btn adm-btn-secondary adm-btn-piccolo"
-                  onClick={() => correggi("contatti")}
-                >
-                  <FaPencilAlt aria-hidden="true" /> Modifica i dati
-                </button>
-              )}
-            </div>
+          <section className="adm-panel prs-contatti">
+            <h2 className="adm-panel-title">
+              <FaPhoneAlt aria-hidden="true" /> Contatti
+            </h2>
 
             {minore && !atleta.tutoreTelefono && (
               <p className="adm-alert adm-alert-warn" role="status">
                 <FaExclamationCircle aria-hidden="true" />
                 <span>
                   {atleta.nomeCompleto} è minorenne e non ha indicato nessun
-                  adulto da chiamare.{" "}
-                  {correggeAnagrafica
-                    ? "Se il numero ce l'hai, puoi aggiungerlo tu con \"Modifica i dati\"; altrimenti lo compila lui dalla sua pagina Contatti."
-                    : "Glielo si può chiedere: lo compila dalla sua pagina Contatti."}
+                  adulto da chiamare. Glielo si può chiedere: lo compila
+                  dalla sua pagina Contatti.
                 </span>
               </p>
             )}
@@ -1247,12 +1158,8 @@ export default function SchedaAtletaPage() {
             </div>
 
             <p className="adm-hint">
-              {correggeAnagrafica
-                ? <>Li scrive {atleta.nomeCompleto} dalla propria area, secondo
-                  contatto compreso; un numero cambiato puoi correggerlo tu.</>
-                : <>Li scrive {atleta.nomeCompleto} dalla propria area, secondo
-                  contatto compreso. Un numero sbagliato lo corregge lui oppure
-                  la segreteria.</>}
+              Anche questi li scrive {atleta.nomeCompleto} dalla propria
+              area, secondo contatto compreso.
             </p>
           </section>
         )}
@@ -1685,7 +1592,6 @@ export default function SchedaAtletaPage() {
           </div>
         )}
       </form>
-      </>)}
     </div>
   );
 }

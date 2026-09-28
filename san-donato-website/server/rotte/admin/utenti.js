@@ -8,6 +8,11 @@
  * L'ultimo accesso era una richiesta esplicita: serve a capire chi usa
  * davvero il sito e chi ha un account fermo da mesi.
  *
+ * Nome, cognome ed email di un atleta o di un allenatore non si cambiano da
+ * qui: sono dati della persona, e li scrive lei dalla propria area (regola
+ * ribadita il 28 settembre 2026). Allo staff resta la password provvisoria,
+ * oltre a ruolo e sospensione, che riguardano l'accesso e non la persona.
+ *
  * Non esiste la cancellazione: un account si disattiva. Cancellarlo
  * lascerebbe senza autore le notizie che quella persona ha scritto.
  */
@@ -28,6 +33,8 @@ import { valida } from "../../validazione.js";
 
 const RUOLI = ["admin", "segreteria", "editor", "coach", "atleta"];
 const STATI = ["in_attesa", "attivo", "sospeso"];
+// Chi ha una scheda da iscritto: i suoi dati li scrive solo lui
+const DATI_PROPRI = ["atleta", "coach"];
 
 const schemaNuovo = z.object({
   email: z.string().trim().toLowerCase().email("Indirizzo email non valido.").max(255),
@@ -187,6 +194,17 @@ async function modifica(req, res) {
   }
 
   const db = getDb();
+
+  if (dati.nome !== undefined || dati.cognome !== undefined || dati.email !== undefined) {
+    const [attuale] = await db
+      .select({ ruolo: utenti.ruolo })
+      .from(utenti)
+      .where(eq(utenti.id, dati.id))
+      .limit(1);
+    if (attuale && DATI_PROPRI.includes(attuale.ruolo)) {
+      throw new ErroreHttp(403, "Nome, cognome ed email di un iscritto li cambia solo lui, dalla propria area. Da qui puoi dargli una password provvisoria.");
+    }
+  }
 
   const modifiche = { aggiornatoIl: new Date() };
   if (dati.ruolo !== undefined) modifiche.ruolo = dati.ruolo;

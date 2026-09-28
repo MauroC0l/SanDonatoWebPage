@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   FaFileAlt, FaPlus, FaPencilAlt, FaSave, FaTimes, FaTrashAlt, FaEye, FaEyeSlash,
   FaArrowUp, FaArrowDown, FaExternalLinkAlt, FaImages, FaUpload, FaLink,
-  FaExclamationCircle, FaMapMarkerAlt
+  FaExclamationCircle, FaMapMarkerAlt, FaChevronDown
 } from "react-icons/fa";
 import {
   listDocumenti, creaDocumento, modificaDocumento, eliminaDocumento,
@@ -16,6 +16,8 @@ import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import SceltaDallaLibreria from "./SceltaDallaLibreria";
 import "../../css/Admin.css";
+// I cassetti delle sezioni sono quelli dei tornei, identici
+import "../../css/CalendariUfficiali.css";
 import "../../css/admin/Documenti.css";
 
 /**
@@ -110,6 +112,18 @@ export default function DocumentiPage() {
   const [libreriaAperta, setLibreriaAperta] = useState(false);
   const [caricandoFile, setCaricandoFile] = useState(false);
 
+  /* Le sezioni aperte. Tutte chiuse all'arrivo, come i tornei dei
+     calendari: la pagina si legge come un indice, e si apre solo quella
+     che serve. */
+  const [aperte, setAperte] = useState(() => new Set());
+  const apri = (valore) => setAperte((a) => new Set(a).add(valore));
+  const apriChiudi = (valore) => setAperte((a) => {
+    const nuove = new Set(a);
+    if (nuove.has(valore)) nuove.delete(valore);
+    else nuove.add(valore);
+    return nuove;
+  });
+
   // Per chi usa un lettore di schermo: dove è finito il documento spostato
   const [annuncio, setAnnuncio] = useState("");
   const campoFile = useRef(null);
@@ -154,6 +168,7 @@ export default function DocumentiPage() {
   const apriNuovo = (sezione, posto) => {
     setModulo(moduloNuovo(sezione));
     setDove(posto);
+    if (posto !== "pagina") apri(sezione);
   };
 
   const apriModifica = (doc) => {
@@ -242,6 +257,8 @@ export default function DocumentiPage() {
         avvisa("Documento salvato.");
       }
       chiudiModulo();
+      // Il documento appena salvato si deve vedere: si apre la sua sezione
+      apri(m.sezione);
       await cambiato();
     } catch (err) {
       gestisciErrore(err);
@@ -702,49 +719,87 @@ export default function DocumentiPage() {
         </div>
       )}
 
+      {/* Un cassetto per sezione, come i tornei dei calendari ufficiali:
+          chiusi all'arrivo, si aprono col pulsante tondo a destra. Dentro,
+          l'elenco scorre per conto suo, così una sezione con venti
+          rendiconti non spinge le altre in fondo alla pagina. */}
       {sezioni.map((s) => {
         const elenco = diSezione(s.valore);
         const nascosti = elenco.filter((d) => !d.pubblicato).length;
+        // Un modulo aperto dentro alla sezione la tiene aperta
+        const conModulo = modulo && (dove === `sezione-${s.valore}` || elenco.some((d) => dove === `doc-${d.id}`));
+        const aperta = aperte.has(s.valore) || !!conModulo;
+        const idCassetto = `dcm-cassetto-${s.valore}`;
 
         return (
-          <section key={s.valore} className="adm-sezione dcm-sezione" aria-labelledby={`dcm-sez-${s.valore}`}>
-            <div className="adm-sezione-testa">
-              <div>
-                <h2 className="adm-sezione-titolo" id={`dcm-sez-${s.valore}`}>
-                  {s.etichetta}
+          <section key={s.valore} className="adm-panel adm-cal-torneo dcm-sezione" aria-labelledby={`dcm-sez-${s.valore}`}>
+            <div className="adm-cal-testata">
+              <div className="adm-cal-testata-testo dcm-testata-testo">
+                <header className="adm-cal-fonte-testa">
+                  <h2 className="adm-cal-fonte-nome" id={`dcm-sez-${s.valore}`}>{s.etichetta}</h2>
                   <span className="adm-badge-conta is-neutro" title="Documenti in questa sezione">
                     {elenco.length}
                   </span>
-                </h2>
-                <p className="adm-sezione-sotto">
+                  {nascosti > 0 && (
+                    <span className="adm-status adm-status-draft">
+                      {nascosti === 1 ? "1 nascosto" : `${nascosti} nascosti`}
+                    </span>
+                  )}
+                </header>
+                <p className="adm-hint dcm-dove">
                   <FaMapMarkerAlt aria-hidden="true" className="dcm-dove-icona" /> {s.dove}
-                  {nascosti > 0 && ` · ${nascosti === 1 ? "1 nascosto" : `${nascosti} nascosti`}`}
                 </p>
               </div>
-              {!modulo && (
-                <div className="adm-sezione-azioni">
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn-ghost adm-btn-piccolo"
-                    onClick={() => apriNuovo(s.valore, `sezione-${s.valore}`)}
-                  >
-                    <FaPlus aria-hidden="true" /> Aggiungi qui
-                  </button>
-                </div>
-              )}
+
+              <button
+                type="button"
+                className={`adm-cal-apri ${aperta ? "is-aperto" : ""}`}
+                aria-expanded={aperta}
+                aria-controls={idCassetto}
+                aria-label={aperta ? `Chiudi ${s.etichetta}` : `Apri ${s.etichetta}`}
+                title={aperta ? "Chiudi" : "Mostra i documenti"}
+                onClick={() => apriChiudi(s.valore)}
+                disabled={!!conModulo}
+              >
+                <FaChevronDown className="adm-cal-freccia" aria-hidden="true" />
+              </button>
             </div>
 
-            {modulo && dove === `sezione-${s.valore}` && disegnaModulo()}
+            {/* Nascosto e non smontato, per l'animazione; da chiuso è
+                "inert" (vedi CalendariUfficialiPage) */}
+            <div
+              id={idCassetto}
+              className={`adm-cal-cassetto ${aperta ? "is-aperto" : ""}`}
+              inert={aperta ? undefined : ""}
+            >
+              <div className="adm-cal-cassetto-dentro">
+                <div className="adm-cal-cassetto-contenuto dcm-cassetto">
+                  {!modulo && (
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn-ghost adm-btn-piccolo dcm-aggiungi-qui"
+                      onClick={() => apriNuovo(s.valore, `sezione-${s.valore}`)}
+                    >
+                      <FaPlus aria-hidden="true" /> Aggiungi qui
+                    </button>
+                  )}
 
-            {elenco.length > 0 ? (
-              <ul className="adm-schede dcm-elenco">
-                {elenco.map((doc, i) => disegnaDocumento(doc, i, elenco))}
-              </ul>
-            ) : (
-              <p className="dcm-vuoto">
-                Nessun documento: in questo punto il sito non mostra niente.
-              </p>
-            )}
+                  {modulo && dove === `sezione-${s.valore}` && disegnaModulo()}
+
+                  {elenco.length > 0 ? (
+                    <div className="dcm-scorrevole" tabIndex={-1}>
+                      <ul className="adm-schede dcm-elenco">
+                        {elenco.map((doc, i) => disegnaDocumento(doc, i, elenco))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="dcm-vuoto">
+                      Nessun documento: in questo punto il sito non mostra niente.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </section>
         );
       })}

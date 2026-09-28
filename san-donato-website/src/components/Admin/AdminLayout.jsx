@@ -58,7 +58,9 @@ const SEZIONI = [
   { a: "utenti", etichetta: "Utenti", gruppo: "Persone", Icona: FaUsers, capacita: ["utenti.gestisci"] },
   { a: "libreria", etichetta: "Libreria", gruppo: "Comunicazione", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
   // I file che il sito mette a disposizione: statuto, privacy, rendiconti
-  { a: "documenti", etichetta: "Documenti", gruppo: "Comunicazione", Icona: FaFileAlt, capacita: ["documenti.gestisci"] },
+
+  // I documenti ufficiali del sito: stanno con le cose di amministrazione
+  { a: "documenti", etichetta: "Documenti", gruppo: "Sistema", Icona: FaFileAlt, capacita: ["documenti.gestisci"] },
   { a: "registro", etichetta: "Registro", gruppo: "Sistema", Icona: FaHistory, capacita: ["registro.leggi"] },
 
   /* In fondo, dopo tutto quello che si amministra, perché è l'unica voce

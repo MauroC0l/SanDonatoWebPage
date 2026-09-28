@@ -2,15 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUserPlus, FaExclamationCircle, FaCheckCircle, FaUsers,
-  FaTimes, FaPlus, FaSearch, FaPencilAlt, FaKey, FaSave, FaChevronDown, FaUndo,
-  FaIdCard
+  FaTimes, FaPlus, FaSearch, FaPencilAlt, FaKey, FaSave, FaChevronDown, FaUndo
 } from "react-icons/fa";
 import {
   listUtenti, createUtente, updateUtente, listSquadre,
   associaSquadra, dissociaSquadra, riapriRichiesta, AuthError
 } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
-import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import Paginazione from "./Paginazione";
@@ -65,11 +63,9 @@ const GESTISCE_SQUADRE = ["admin", "editor", "coach"];
  * Chi ha una scheda da iscritto: atleti e allenatori, che versano la quota
  * anche loro (vedi IscrizionePage).
  *
- * Qui si cambiano solo i dati dell'ACCOUNT — nome, cognome, email con cui
- * si entra. Anagrafica, residenza e recapiti stanno sulla scheda, e dal 28
- * settembre 2026 amministratore e segreteria li correggono da lì: il
- * pulsante porta alla scheda invece di rifare qui lo stesso modulo, che
- * avrebbe voluto dire due posti dove un dato si corregge in due modi.
+ * I loro dati, nome ed email compresi, li scrive solo la persona dalla
+ * propria area: qui non si toccano (lo rifiuta anche il server). Allo staff
+ * resta la password provvisoria. Ribadito dalla società il 28 settembre 2026.
  */
 const HA_SCHEDA = ["atleta", "coach"];
 
@@ -151,7 +147,6 @@ function Dato({ etichetta, children }) {
 export default function PersonePage() {
   const navigate = useNavigate();
   const { user, sessionExpired } = useAuth();
-  const area = useArea();
 
   // Segreteria e amministratori: sono i due ruoli con "iscrizioni.decidi_tutte".
   const decideIscrizioni = (user?.capabilities ?? []).includes("iscrizioni.decidi_tutte");
@@ -464,9 +459,9 @@ export default function PersonePage() {
               ? `${visibili.length} di ${persone.length}`
               : `${persone.length} account`}
             {" "}· chi entra nel sito, con che ruolo e su quali squadre.
-            Con la freccia accanto a una persona le cambi ruolo, squadre,
-            nome, email o password; da lì si apre anche la scheda con i suoi
-            dati anagrafici. In fondo all&apos;elenco chi non entra da tempo.
+            Con la freccia accanto a una persona le cambi ruolo, squadre o
+            password. I dati di atleti e allenatori li scrivono solo loro.
+            In fondo all&apos;elenco chi non entra da tempo.
           </p>
         </div>
 
@@ -784,13 +779,6 @@ export default function PersonePage() {
                               </label>
                             </div>
 
-                            {HA_SCHEDA.includes(persona.ruolo) && (
-                              <p className="adm-hint">
-                                Data di nascita, codice fiscale, indirizzo e telefoni
-                                stanno sulla sua scheda: &laquo;Dati anagrafici e contatti&raquo;.
-                              </p>
-                            )}
-
                             <div className="adm-scheda-azioni">
                               <button
                                 type="button"
@@ -875,23 +863,16 @@ export default function PersonePage() {
                               <span className="adm-dato-etichetta">Azioni</span>
 
                               <div className="adm-scheda-azioni">
-                                <button
-                                  type="button"
-                                  className="adm-btn adm-btn-secondary"
-                                  onClick={() => apriModifica(persona)}
-                                  title="Nome, cognome ed email con cui entra"
-                                >
-                                  <FaPencilAlt /> Modifica i dati
-                                </button>
-
-                                {HA_SCHEDA.includes(persona.ruolo) && (
+                                {/* Solo per gli account dello staff: i dati
+                                    di atleti e allenatori sono loro. */}
+                                {!HA_SCHEDA.includes(persona.ruolo) && (
                                   <button
                                     type="button"
                                     className="adm-btn adm-btn-secondary"
-                                    onClick={() => navigate(`${area}/atleti/${persona.id}`)}
-                                    title="Data di nascita, codice fiscale, residenza, telefoni e genitori"
+                                    onClick={() => apriModifica(persona)}
+                                    title="Nome, cognome ed email con cui entra"
                                   >
-                                    <FaIdCard /> Dati anagrafici e contatti
+                                    <FaPencilAlt /> Modifica i dati
                                   </button>
                                 )}
 

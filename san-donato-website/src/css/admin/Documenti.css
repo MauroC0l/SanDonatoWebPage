@@ -11,8 +11,35 @@
 /* ---------- Attesa ---------- */
 .dcm-sagoma-sezione { margin-top: 2rem; }
 
-/* ---------- Sezione ---------- */
-.dcm-sezione .adm-sezione-titolo .adm-badge-conta { font-size: .78rem; }
+/* ---------- Sezione: un cassetto come quelli dei tornei ----------
+   Pulsante, animazione e "inert" vengono da CalendariUfficiali.css; qui
+   solo quello che cambia. */
+/* Senza spazio fra testata e cassetto: il margine negativo del cassetto
+   dei tornei, su una riga alta zero, lascia 12px vuoti sotto alla scheda
+   chiusa. Lo spazio da aperto lo dà il cassetto stesso. */
+.dcm-sezione { margin-bottom: 1rem; gap: 0; }
+.dcm-sezione .adm-cal-cassetto { margin-top: 0; }
+.dcm-sezione .adm-badge-conta { font-size: .78rem; }
+.dcm-testata-testo { gap: .35rem; }
+.dcm-dove { margin: 0; }
+
+.dcm-cassetto { display: grid; gap: .75rem; padding-top: 1rem; }
+.dcm-aggiungi-qui { justify-self: start; }
+
+/* L'elenco scorre dentro al cassetto: una sezione lunga non spinge le
+   altre in fondo alla pagina. Il bordo sfumato in basso dice che sotto
+   c'è altro. */
+.dcm-scorrevole {
+  max-height: min(34rem, 65vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 6px 2px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--adm-line-strong) transparent;
+}
+.dcm-scorrevole:focus { outline: none; }
+.dcm-scorrevole::-webkit-scrollbar { width: 8px; }
+.dcm-scorrevole::-webkit-scrollbar-thumb { background: var(--adm-line-strong); border-radius: 999px; }
 .dcm-dove-icona { display: inline-block; margin-right: .15rem; color: var(--adm-arancio-testo); font-size: .8em; vertical-align: -.05em; }
 
 /* Una sezione senza documenti: il riquadro tratteggiato dice "qui va

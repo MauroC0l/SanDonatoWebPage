@@ -17,7 +17,8 @@
 import { and, asc, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
 import {
-  notizie, eventi, squadre, utenti, richiesteIscrizione, schedeAtleta
+  notizie, eventi, squadre, utenti, richiesteIscrizione, schedeAtleta,
+  associazioniSquadra, fontiCalendario, gironiUfficiali
 } from "../db/schema.js";
 import {
   puo, squadreGestibili, squadreConAtletiVisibili, sportGestibili
@@ -133,11 +134,82 @@ async function quoteAperte(utente) {
   return {
     daIncassare: aperte.reduce((s, n) => s + n, 0),
     quanti: aperte.length,
+    // Già entrato in cassa quest'anno, per il riquadro "In breve"
+    incassato: conti.reduce((s, q) => s + (q.versatoCentesimi ?? 0), 0),
     senzaQuota,
     parenteleDaControllare: conParentela.length,
     // Con una sola, la home porta dritta alla sua scheda
     primaParentela: conParentela[0] ?? null
   };
+}
+
+/**
+ * Le quote degli allenatori. Non stanno nel conto degli atleti: quello nasce
+ * dalle iscrizioni accolte, e chi allena senza giocare non ne ha una (vedi
+ * server/allenatori.js). Senza questo conto, un allenatore che non ha
+ * versato non lo segnalava nessuno.
+ */
+async function quoteAllenatori() {
+  const righe = await getDb()
+    .select({ id: utenti.id })
+    .from(utenti)
+    .where(eq(utenti.ruolo, "coach"));
+  if (righe.length === 0) return { iscritti: 0, quanti: 0, daIncassare: 0, incassato: 0 };
+
+  const conti = [...(await quotePerUtenti(righe.map((r) => r.id))).values()];
+  const aperte = conti.map((q) => q.residuoCentesimi).filter((n) => n != null && n > 0);
+
+  return {
+    iscritti: righe.length,
+    quanti: aperte.length,
+    daIncassare: aperte.reduce((s, n) => s + n, 0),
+    incassato: conti.reduce((s, q) => s + (q.versatoCentesimi ?? 0), 0)
+  };
+}
+
+/**
+ * I calendari ufficiali che aspettano qualcuno: gironi in cui compare una
+ * nostra squadra ma che nessuno ha ancora collegato né scartato, e tornei
+ * la cui ultima lettura non è riuscita. La stessa regola dell'avviso in
+ * cima alla pagina dei calendari: un girone sparito dai file non conta.
+ */
+async function statoCalendari() {
+  const db = getDb();
+  const [gironi] = await db
+    .select({
+      daAssegnare: sql`count(*)::int`,
+      tornei: sql`count(distinct ${gironiUfficiali.fonteId})::int`
+    })
+    .from(gironiUfficiali)
+    .where(and(
+      isNull(gironiUfficiali.squadraId),
+      eq(gironiUfficiali.ignorato, false),
+      isNull(gironiUfficiali.sparitoIl)
+    ));
+
+  const [letture] = await db
+    .select({ nonRiuscite: sql`count(*)::int` })
+    .from(fontiCalendario)
+    .where(and(eq(fontiCalendario.attiva, true), eq(fontiCalendario.esito, "errore")));
+
+  return { ...gironi, nonRiuscite: letture.nonRiuscite };
+}
+
+/** Le squadre attive che non hanno nessun allenatore associato. */
+async function squadreSenzaAllenatore() {
+  const [{ quante }] = await getDb()
+    .select({ quante: sql`count(*)::int` })
+    .from(squadre)
+    .where(and(
+      eq(squadre.attiva, true),
+      sql`not exists (
+        select 1 from ${associazioniSquadra}
+        join ${utenti} on ${utenti.id} = ${associazioniSquadra.utenteId}
+        where ${associazioniSquadra.squadraId} = ${squadre.id}
+          and ${utenti.ruolo} = 'coach'
+      )`
+    ));
+  return quante;
 }
 
 /** I prossimi appuntamenti, già visibili sul sito o no. */
@@ -381,6 +453,11 @@ export async function componiCruscotto(utente) {
 
   if (puo(utente, "quote.gestisci")) {
     dati.quote = await quoteAperte(utente);
+    dati.allenatori = await quoteAllenatori();
+  }
+
+  if (puo(utente, "calendari.gestisci")) {
+    dati.calendari = await statoCalendari();
   }
 
   if (puo(utente, "eventi.gestisci_tutte") || puo(utente, "eventi.gestisci_proprie")) {
@@ -393,7 +470,7 @@ export async function componiCruscotto(utente) {
   }
 
   if (puo(utente, "squadre.gestisci")) {
-    dati.squadre = await quanteSquadre();
+    dati.squadre = { ...await quanteSquadre(), senzaAllenatore: await squadreSenzaAllenatore() };
   }
 
   if (puo(utente, "utenti.gestisci")) {
