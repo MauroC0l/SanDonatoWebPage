@@ -1,97 +1,108 @@
-/* --- TopHeader.css — la barra sopra al logo. Vedi TopHeader.jsx --- */
+/* --- TopHeader.css — la barra sottile sopra al menu. Vedi TopHeader.jsx --- */
 
 :root {
-  --th-bg: #002b5c;
-  --th-bg-scuro: #00224a;
-  --th-testo: #e8eefc;
+  --th-testo: rgba(232, 238, 252, .78);
   --th-arancio: #ff6600;
-  --th-arancio-chiaro: #ff8533;
-  --th-icona-bg: rgba(255, 255, 255, 0.1);
-  --th-altezza: 46px;
-  --th-altezza-mobile: 42px;
+  --th-arancio-chiaro: #ff8a3d;
+  /* Letta anche da MyNavbar.css: è di quanto l'intestazione "sale" prima
+     di attaccarsi in alto, cioè quanto di lei se ne va scorrendo. */
+  --th-altezza: 38px;
 }
 
 .top-header {
+  grid-column: 1 / -1;
   width: 100%;
-  /* Una sfumatura appena percettibile invece del blu piatto: stacca la
-     barra dal blocco del logo senza aggiungere una riga di bordo. */
-  background: linear-gradient(180deg, var(--th-bg) 0%, var(--th-bg-scuro) 100%);
+  /* Più scura della riga del menu: le due si leggono come due piani, senza
+     una riga di bordo in mezzo. */
+  background: #00132b;
   color: var(--th-testo);
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  font-size: 0.85rem;
-
-  opacity: 0;
-  animation: thEntra 0.6s ease forwards;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: .78rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
 }
 
 /*
- * Tre zone: social, contatti, accesso.
+ * Tre zone: social e slogan, recapiti, accesso.
  *
- * 1fr auto 1fr tiene il centro al centro della pagina anche quando le due
- * zone laterali hanno larghezze diverse — che è sempre. Con un flex e
- * space-between l'indirizzo si sposterebbe a ogni larghezza dello schermo.
+ * La prima prende lo spazio che avanza e taglia lo slogan con i puntini
+ * quando non ci sta; le altre due sono larghe quanto il loro contenuto e
+ * stanno a destra, accanto all'accesso, dove l'occhio cerca i recapiti.
  */
 .th-griglia {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
 
   max-width: 1400px;
   height: var(--th-altezza);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
 }
 
-/* ---------- Sinistra: i social ---------- */
+/* ---------- Sinistra: social e slogan ---------- */
 
 .th-social {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: .15rem;
+  min-width: 0;
 }
 
 .th-social a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
   width: 28px;
   height: 28px;
 
   border-radius: 50%;
-  background: var(--th-icona-bg);
   color: var(--th-testo);
-  font-size: 0.82rem;
+  font-size: .8rem;
   text-decoration: none;
 
-  transition: background-color .25s ease, color .25s ease, transform .25s ease;
+  transition: background-color .25s ease, color .25s ease;
 }
 
 .th-social a:hover {
-  background: var(--th-arancio);
+  background: rgba(255, 255, 255, .1);
   color: #fff;
-  transform: translateY(-2px);
 }
 
-.th-social a:focus-visible {
-  outline: 2px solid #fff;
+.th-social a:focus-visible,
+.th-contatto:focus-visible,
+.th-azione:focus-visible {
+  outline: 2px solid var(--th-arancio);
   outline-offset: 2px;
 }
 
-/* ---------- Centro: i contatti ---------- */
+/* Lo slogan è la prima cosa che si accorcia: con i puntini invece di
+   andare a capo, perché la barra ha un'altezza sola. */
+.th-slogan {
+  min-width: 0;
+  margin-left: .8rem;
+  padding-left: .95rem;
+  border-left: 1px solid rgba(255, 255, 255, .14);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+
+/* ---------- Centro: i recapiti ---------- */
 
 .th-contatti {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  gap: .7rem;
   min-width: 0;
 }
 
 .th-contatto {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: .4rem;
+  border-radius: 4px;
 
   color: var(--th-testo);
   text-decoration: none;
@@ -102,25 +113,17 @@
 .th-contatto svg {
   flex: 0 0 auto;
   color: var(--th-arancio);
-  font-size: 0.95rem;
-  transition: color .2s ease;
+  font-size: .9rem;
 }
 
 .th-contatto:hover { color: #fff; }
-.th-contatto:hover svg { color: var(--th-arancio-chiaro); }
-
-.th-contatto:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 4px;
-}
 
 .th-punto {
+  flex: 0 0 auto;
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
-  flex: 0 0 auto;
+  background: rgba(255, 255, 255, .3);
 }
 
 /* ---------- Destra: registrazione e accesso ---------- */
@@ -128,117 +131,76 @@
 .th-accesso {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.4rem;
+  gap: .3rem;
+  padding-left: 1.1rem;
+  border-left: 1px solid rgba(255, 255, 255, .14);
 }
 
 /*
- * Testo arancione che diventa pulsante al passaggio.
+ * Due voci piccole: la registrazione scritta, l'accesso come pillola.
  *
- * Il bordo c'è già da fermo, trasparente: se comparisse solo al passaggio
- * la scritta si sposterebbe di un pixel, e su due voci affiancate il
- * saltello si vede. Stesso motivo per il padding, che non cambia mai.
+ * L'accesso è il gesto di chi torna, ed è quello che si cerca a colpo
+ * d'occhio; la registrazione si fa una volta. Il bordo della prima c'è già
+ * da fermo, trasparente: se comparisse solo al passaggio la scritta si
+ * sposterebbe di un pixel.
  */
 .th-azione {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: .4rem;
 
-  padding: 5px 12px;
+  padding: 4px 11px;
   border: 1px solid transparent;
   border-radius: 999px;
 
-  color: var(--th-arancio);
-  font-size: 0.82rem;
+  color: var(--th-testo);
+  font-size: .78rem;
   font-weight: 600;
-  letter-spacing: .01em;
   text-decoration: none;
   white-space: nowrap;
 
-  transition: background-color .22s ease, border-color .22s ease,
-              color .22s ease, transform .22s ease;
+  transition: background-color .22s ease, border-color .22s ease, color .22s ease;
 }
 
-.th-azione svg { font-size: 0.95rem; }
+.th-azione svg { font-size: .9rem; }
 
 .th-azione:hover {
-  border-color: var(--th-arancio);
-  background: rgba(255, 102, 0, 0.12);
-  color: var(--th-arancio-chiaro);
-  transform: translateY(-1px);
-}
-
-/* L'accesso è il gesto di chi torna, la registrazione quello di chi arriva:
-   al passaggio il primo si riempie, il secondo resta contornato. */
-.th-azione-forte:hover {
-  background: var(--th-arancio);
   color: #fff;
+  background: rgba(255, 255, 255, .08);
 }
 
-.th-azione:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+.th-azione-forte {
+  color: #fff;
+  border-color: rgba(255, 102, 0, .6);
+  background: rgba(255, 102, 0, .14);
 }
 
-@keyframes thEntra {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.th-azione-forte:hover {
+  border-color: var(--th-arancio);
+  background: var(--th-arancio);
 }
 
 /* ---------- Schermi medi ---------- */
 
 @media (max-width: 1100px) {
-  /* L'indirizzo è la prima cosa che si sacrifica: l'email resta cliccabile
-     ed è quella che serve per scrivere. */
+  /* L'indirizzo si sacrifica prima dell'email: l'email è quella che serve
+     per scrivere, l'indirizzo sta anche nel piè di pagina e nei contatti. */
   .th-indirizzo,
   .th-punto { display: none; }
 }
 
-@media (max-width: 992px) {
-  .th-griglia { padding: 0 1rem; }
+@media (max-width: 900px) {
+  .th-slogan { display: none; }
 }
 
 /* ---------- Telefoni ---------- */
 
-@media (max-width: 720px) {
-  /*
-   * Due zone invece di tre, e l'email sotto ai social non ci sta: sparisce
-   * il centro e restano gli estremi, allineati ai bordi come nel resto del
-   * sito. L'email si trova comunque nella pagina Contatti e in fondo a
-   * ogni pagina, quindi non si perde niente.
-   */
-  .th-griglia {
-    grid-template-columns: auto 1fr;
-    height: var(--th-altezza-mobile);
-    padding: 0 12px;
-  }
-
-  .th-contatti { display: none; }
-
-  .th-social { gap: 0.35rem; }
-
-  .th-social a {
-    width: 26px;
-    height: 26px;
-    font-size: 0.74rem;
-  }
-
-  .th-azione {
-    padding: 4px 9px;
-    font-size: 0.76rem;
-  }
-}
-
-@media (max-width: 420px) {
-  /* Sotto i 420 px le due scritte più quattro social non stanno in riga:
-     resta l'icona, che su un tocco è comunque un bersaglio buono, e il
-     nome dell'azione va nell'etichetta per i lettori di schermo. */
-  .th-azione span { display: none; }
-
-  .th-azione {
-    padding: 5px 8px;
-    border-color: rgba(255, 102, 0, 0.45);
-  }
-
-  .th-azione svg { font-size: 1.05rem; }
+/*
+ * Sotto i 768 pixel la barra non c'è. Tutto quello che conteneva sta nel
+ * menu a tutto schermo, più in grande e più facile da toccare; la prima
+ * riga dello schermo resta al marchio e al pulsante del menu.
+ */
+@media (max-width: 767px) {
+  :root { --th-altezza: 0px; }
+  .top-header { display: none; }
 }

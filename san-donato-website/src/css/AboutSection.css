@@ -1,36 +1,39 @@
-/* ===========================
-   🏞️ About Section — prima schermata della home
-   =========================== */
+/* =====================================================
+   Prima schermata della home (prefisso hh-, più le classi about- del
+   carosello). Vedi AboutSection.jsx.
+   ===================================================== */
 
 /*
-  Occupa esattamente lo spazio che resta sotto l'intestazione, così la prima
-  schermata (contatti + hero + navbar + questa sezione) finisce al bordo
-  inferiore dello schermo su qualsiasi dispositivo.
+  Occupa esattamente lo spazio che resta sotto l'intestazione, così la
+  prima schermata finisce al bordo inferiore dello schermo su qualsiasi
+  dispositivo.
 
   --site-header-h è pubblicata da PublicLayout misurando l'intestazione vera:
   in CSS quell'altezza non è calcolabile, cambia con larghezza, font e
   orientamento. Il valore di riserva copre il primo istante prima della misura.
 */
 .about-section {
-  --about-fill: calc(100vh - var(--site-header-h, 260px));
+  --about-fill: calc(100vh - var(--site-header-h, 110px));
 
   position: relative;
+  isolation: isolate;
   width: 100%;
-  /* Il minimo evita che su schermi molto bassi (telefono in orizzontale)
-     la sezione si riduca a una striscia illeggibile. */
-  min-height: max(260px, var(--about-fill));
+  /* Il minimo evita che su schermi bassi (telefono in orizzontale) la
+     sezione si riduca a una striscia dove il titolo non ci sta. */
+  min-height: max(540px, var(--about-fill));
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  text-align: center;
   overflow: hidden;
-  background-color: #0b1b2b; /* si vede finché le immagini caricano */
+  color: #fff;
+  background-color: #001a38; /* si vede finché le immagini caricano */
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
 /* svh esclude le barre del browser mobile, che con vh fanno sbordare la pagina */
 @supports (height: 100svh) {
   .about-section {
-    --about-fill: calc(100svh - var(--site-header-h, 260px));
+    --about-fill: calc(100svh - var(--site-header-h, 110px));
   }
 }
 
@@ -42,7 +45,7 @@
 .about-layers {
   position: absolute;
   inset: -14% 0;
-  z-index: 0;
+  z-index: -3;
 }
 
 .about-layer {
@@ -52,65 +55,359 @@
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
-  transition: opacity 1.2s ease-in-out;
+  transform: scale(1.08);
+  transition: opacity 1.4s ease-in-out, transform 7s ease-out;
 }
 
-.about-layer.is-active { opacity: 1; }
+/* Mentre è in vista la foto si avvicina piano: un movimento che si nota
+   appena, ma toglie alla schermata l'aria di fotografia ferma. */
+.about-layer.is-active { opacity: 1; transform: scale(1); }
 
-/* overlay semitrasparente */
+/*
+ * Il velo blu: pieno a sinistra, dove sta il testo, sempre più leggero a
+ * destra, dove le foto si vedono. Così il bianco resta leggibile su
+ * qualunque immagine, anche le più chiare, e la schermata resta del blu
+ * della società come le testate delle altre pagine.
+ */
 .about-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.35) 0%,
-    rgba(0, 0, 0, 0.5) 55%,
-    rgba(0, 0, 0, 0.62) 100%
-  );
-  z-index: 1;
+  z-index: -2;
+  background:
+    linear-gradient(0deg, rgba(0, 18, 40, .95) 0%, rgba(0, 18, 40, 0) 38%),
+    linear-gradient(100deg, rgba(0, 26, 56, .96) 0%, rgba(0, 32, 70, .82) 42%, rgba(0, 43, 92, .38) 100%);
 }
 
-/* contenuto in primo piano */
-.about-content {
-  position: relative;
-  z-index: 2;
-  width: min(92%, 1000px);
-  padding: clamp(1rem, 3vw, 2rem);
-  color: #fff;
+.hh-aurora {
+  z-index: -1;
+  opacity: .7;
 }
 
-.about-subtitle {
-  font-size: clamp(1.1rem, 3vw, 2.4rem);
+.hh-griglia {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 60% 70% at 75% 35%, #000 15%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 75% 35%, #000 15%, transparent 75%);
+}
+
+/* La sigla enorme, vuota, che scorre più lenta del resto */
+.hh-fantasma {
+  position: absolute;
+  right: -1.5vw;
+  bottom: -4vw;
+  z-index: -1;
+  font-size: clamp(9rem, 34vw, 30rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.07em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .1);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* --- Contenuto --- */
+
+.hh-dentro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  align-items: end;
+  gap: clamp(2rem, 5vw, 4rem);
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5.5rem) clamp(1.25rem, 4vw, 2rem) clamp(4.5rem, 8vw, 6.5rem);
+}
+
+.hh-testi { min-width: 0; }
+
+.hh-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 1.5rem;
+  padding: .45rem .95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .15);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  font-size: .76rem;
   font-weight: 700;
-  margin-bottom: clamp(0.6rem, 1.5vw, 1rem);
-  color: #ffe5b4;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .88);
+}
+
+/* Il puntino che respira, come una diretta accesa */
+.hh-punto {
+  position: relative;
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--psd-arancio, #ff6600);
+}
+.hh-punto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: hh-respiro 2.2s var(--mv-curva, ease-out) infinite;
+}
+@keyframes hh-respiro {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+
+.hh-titolo {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: clamp(3.05rem, 8.4vw, 6.6rem);
+  font-weight: 900;
+  line-height: .92;
+  letter-spacing: -.05em;
   text-wrap: balance;
 }
 
-.about-text {
-  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
-  line-height: 1.6;
-  max-width: 60ch;
-  margin: 0 auto;
-  color: #fff;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+.hh-titolo-acceso {
+  /* Le discendenti non vengono tagliate dal ritaglio del gradiente */
+  padding-bottom: .1em;
+}
+
+.hh-testo {
+  max-width: 34rem;
+  margin: 1.5rem 0 0;
+  color: rgba(255, 255, 255, .8);
+  font-size: clamp(1.02rem, 1.7vw, 1.22rem);
+  line-height: 1.55;
   text-wrap: pretty;
 }
 
+.hh-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: clamp(1.6rem, 3.5vw, 2.4rem);
+}
+
+.hh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: 52px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.hh-btn:hover { color: #fff; }
+.hh-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.hh-btn-pieno {
+  background: linear-gradient(135deg, #ff7a1a, #ff3d00);
+  box-shadow: 0 14px 34px -10px rgba(255, 102, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.hh-btn-pieno svg { transition: transform .35s var(--mv-curva, ease); }
+.hh-btn-pieno:hover svg { transform: translateX(4px); }
+
+.hh-btn-vetro:hover { background: rgba(255, 255, 255, .2); }
+
+/* --- La scheda di destra --- */
+
+.hh-lato { min-width: 0; }
+
+.hh-scheda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  width: 100%;
+  padding: 1.3rem 1.35rem 1.2rem;
+  border-radius: 24px;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .3s ease, translate .3s ease;
+}
+.hh-scheda:hover { color: #fff; background: rgba(255, 255, 255, .17); translate: 0 -3px; }
+.hh-scheda:focus-visible { outline: 3px solid var(--psd-arancio, #ff6600); outline-offset: 3px; }
+
+/* Con l'inclinazione attiva la regola comune riscrive la transizione con
+   il solo transform: qui si rimettono sfondo e sollevamento. */
+.mv-attivo .hh-scheda[data-inclina] {
+  transition: transform .5s var(--mv-curva), background-color .3s ease, translate .3s ease;
+}
+
+.hh-scheda-attesa {
+  min-height: 190px;
+  cursor: default;
+  animation: hh-attesa 1.6s ease-in-out infinite alternate;
+}
+@keyframes hh-attesa { from { opacity: .45; } to { opacity: .9; } }
+
+.hh-scheda-etichetta {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  color: #ffb27a;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.hh-scheda-etichetta.is-onda { color: #ff8fa6; }
+.hh-scheda-etichetta.is-onda .hh-punto { background: #e11d48; }
+
+.hh-scheda-titolo {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+.hh-scheda-meta {
+  display: grid;
+  gap: .3rem;
+  color: rgba(255, 255, 255, .78);
+  font-size: .86rem;
+}
+.hh-scheda-meta > span {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  min-width: 0;
+}
+.hh-scheda-meta svg { flex: 0 0 auto; color: var(--psd-arancio, #ff6600); font-size: .8rem; }
+.hh-scheda-luogo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hh-scheda-apri {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: .2rem;
+  padding-top: .8rem;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  font-size: .86rem;
+  font-weight: 700;
+}
+.hh-scheda-apri svg { font-size: .75rem; transition: transform .35s var(--mv-curva, ease); }
+.hh-scheda:hover .hh-scheda-apri svg { transform: translateX(4px); }
+
+.hh-sport {
+  display: grid;
+  gap: .45rem;
+}
+.hh-sport-voce {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.hh-sport-voce svg { color: var(--psd-arancio, #ff6600); font-size: 1.05rem; }
+
+/* --- Invito a scorrere --- */
+
+.hh-scorri {
+  position: absolute;
+  left: 50%;
+  bottom: 2.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  translate: -50% 0;
+  color: rgba(255, 255, 255, .55);
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.hh-scorri-linea {
+  position: relative;
+  width: 1px;
+  height: 38px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .2);
+}
+.hh-scorri-linea::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 100%;
+  height: 40%;
+  background: var(--psd-arancio, #ff6600);
+  animation: hh-goccia 2s var(--mv-curva, ease) infinite;
+}
+@keyframes hh-goccia { to { top: 100%; } }
+
 /* --- Responsività --- */
 
-@media (max-width: 768px) {
-  .about-subtitle { font-size: clamp(1rem, 4.5vw, 1.6rem); }
-  .about-text { font-size: clamp(0.85rem, 3.5vw, 1rem); }
+@media (max-width: 900px) {
+  .hh-dentro {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 2rem;
+  }
+  .hh-lato { max-width: 440px; }
+  .hh-scorri { display: none; }
+}
+
+@media (max-width: 600px) {
+  .about-section { justify-content: flex-start; }
+  .hh-dentro { padding-top: 2.4rem; padding-bottom: 4.2rem; }
+  .hh-occhiello { margin-bottom: 1.2rem; font-size: .68rem; }
+  .hh-azioni { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .hh-scheda-titolo { font-size: 1.2rem; }
+  .hh-sport { grid-auto-flow: column; justify-content: start; gap: 1.1rem; }
+  .hh-sport-voce { font-size: 1rem; gap: .4rem; }
+  /* Sul telefono il velo scende dall'alto: il testo occupa tutta la
+     larghezza, e una sfumatura da sinistra lascerebbe chiaro il lato destro
+     delle righe lunghe. */
+  .about-overlay {
+    background:
+      linear-gradient(180deg, rgba(0, 26, 56, .9) 0%, rgba(0, 26, 56, .78) 55%, rgba(0, 18, 40, .96) 100%);
+  }
 }
 
 /* Schermi bassi e larghi (telefono in orizzontale): riempire tutta l'altezza
    spingerebbe fuori il resto della pagina senza aggiungere nulla. */
 @media (max-height: 520px) and (orientation: landscape) {
-  .about-section { min-height: 260px; }
+  .about-section { min-height: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-layer { transition: none; }
+  .about-layer { transition: none; transform: none; }
+  .hh-punto::after,
+  .hh-scorri-linea::after,
+  .hh-scheda-attesa { animation: none; }
+  .hh-scheda,
+  .hh-btn-pieno svg,
+  .hh-scheda-apri svg { transition: none; }
 }

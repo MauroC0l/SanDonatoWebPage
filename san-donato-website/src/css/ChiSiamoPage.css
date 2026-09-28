@@ -1,425 +1,1330 @@
-/* =========================================
-   MODERN SYSTEM 2.0 (Scoped: csp-)
-   ========================================= */
+/* =====================================================
+   Pagina Chi siamo — tutto sotto .chs
 
-.csp-avant-garde-wrapper {
-  --c-bg: #ffffff;
-  --c-surface: #f1f5f9;
-  --c-dark: #0f172a;       
-  --c-accent: #ff6600;     
-  --c-blue: #0056d6;       
-  --c-text-main: #1e293b;
-  --c-text-muted: #64748b;
-  --c-border: #e2e8f0;
-  
-  font-family: 'Inter', sans-serif;
-  color: var(--c-text-main);
+   Sette tempi: l'apertura scura con la foto nell'oblò, il nastro dei
+   valori, la storia che si disegna, il manifesto a mosaico, gli organi su
+   fondo scuro, lo staff e la membership, i numeri e l'invito finale.
+   È la stessa famiglia di Sport, Contatti e Sponsor: blu notte, arancio,
+   titoli enormi, schede che si inclinano.
+
+   I movimenti comuni vengono da Movimento.css (data-rivela, data-inclina,
+   data-magnete, .mv-nastro, .mv-aurora); qui ci sono le forme e i pochi
+   movimenti propri della pagina, che si spengono con
+   prefers-reduced-motion in fondo. Si anima solo transform e opacity: il
+   resto costringerebbe il browser a ricalcolare la pagina a ogni
+   fotogramma.
+   ===================================================== */
+
+.chs {
+  --chs-notte: #001a38;
+  --chs-blu: var(--psd-blu, #002b5c);
+  --chs-arancio: var(--psd-arancio, #ff6600);
+  /* L'arancio puro su fondo chiaro non arriva al contrasto minimo per le
+     scritte piccole: per quelle si usa questo, più scuro */
+  --chs-arancio-testo: #c24a00;
+  --chs-carta: #f4f6fb;
+  --chs-inchiostro: #0b1526;
+  --chs-grigio: #56627a;
+  --chs-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
   width: 100%;
-  background: var(--c-bg);
-  overflow-x: hidden;
+  overflow-x: clip;             /* niente scorrimento laterale su telefono */
+  background: var(--chs-carta);
+  color: var(--chs-inchiostro);
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* --- 1. HERO & BADGE --- */
-.csp-hero-block {
-  /* Immagine di sfondo */
-  background-image: url('/chiSiamoPage/Sfondo_sito.jpg');
-  background-size: cover;
-  background-position: center; /* Puoi cambiare in 'top' o 'bottom' se il soggetto è tagliato */
-  background-repeat: no-repeat;
-  
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  
-  /* Padding */
-  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem) clamp(2rem, 8vw, 4rem); 
-  text-align: left;
-  position: relative;
-}
-
-/* MODIFICA: La patina ora sfuma a zero molto prima */
-.csp-hero-block::before {
-  content: '';
+/* Il contatore di Sport scrive il valore vero in un testo nascosto per i
+   lettori di schermo: la sua classe sta nel CSS di Sport, che qui non è
+   caricato, quindi la si ridefinisce dentro la pagina. */
+.chs .sp-solo-lettori {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  
-  /* GRADIENTE AGGIORNATO:
-     - 0% (Sinistra): Bianco solido all'85% (per leggere il titolo)
-     - 50% (Centro): Completamente TRASPARENTE. 
-     Metà dell'immagine sarà al 100% originale senza filtri.
-  */
-  background: linear-gradient(
-    90deg, 
-    rgba(255, 255, 255, 0.85) 0%, 
-    rgba(255, 255, 255, 0.4) 30%, 
-    rgba(255, 255, 255, 0.0) 60% 
-  );
-  
-  z-index: 0;
-  /* Ho rimosso il backdrop-filter blur per rendere l'immagine nitida */
-}
-
-.csp-hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Badge con sfondo semi-trasparente per leggibilità */
-.csp-history-badge-container {
-  display: inline-block;
-  margin-bottom: 2rem;
-}
-
-.csp-history-badge-text {
-  background: linear-gradient(90deg, #ff6600, #ff8533);
-  color: #fff;
-  padding: 8px 20px;
-  border-radius: 40px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.csp-hero-title {
-  font-size: clamp(2.5rem, 8vw, 5rem); 
-  font-weight: 900;
-  line-height: 1;
-  margin: 0 0 1.5rem 0;
-  color: var(--c-dark);
-  
-  /* Aumentata l'ombra bianca dietro al testo per staccarlo dall'immagine */
-  text-shadow: 0px 0px 20px rgba(255, 255, 255, 1), 
-               0px 0px 40px rgba(255, 255, 255, 1);
-}
-
-.csp-hero-subtitle {
-  font-size: 1.25rem;
-  max-width: 600px; /* Ridotto leggermente per stare nella zona "chiara" a sinistra */
-  
-  /* Testo scuro e grassetto per contrasto massimo */
-  color: #0f172a; 
-  font-weight: 600; 
-  line-height: 1.6;
-  
-  /* Alone bianco dietro al sottotitolo */
-  text-shadow: 0 0 15px rgba(255, 255, 255, 1), 
-               0 0 5px rgba(255, 255, 255, 1);
-}
-
-/* --- 2. MANIFESTO (Clean Grid) --- */
-.csp-manifesto-section {
-  /* Padding fluido */
-  padding: clamp(2rem, 8vw, 4rem) clamp(1rem, 5vw, 2rem); 
-  background: #fff;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.csp-section-header { margin-bottom: 3rem; }
-.csp-section-header h2 { 
-  /* Titolo fluido */
-  font-size: clamp(2rem, 4vw, 2.5rem); 
-  font-weight: 800; margin: 0; color: var(--c-dark); 
-}
-.csp-header-line { width: 80px; height: 6px; background: var(--c-accent); margin-top: 10px; border-radius: 3px; }
-
-.csp-section-header.csp-center { text-align: center; }
-.csp-section-header.csp-center .csp-header-line { margin: 10px auto; }
-
-.csp-values-grid {
-  display: grid;
-  /* Griglia fluida: minimo 300px per colonna */
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 2rem;
-}
-
-.csp-value-item {
-  padding: 2rem;
-  background: var(--c-surface);
-  border-radius: 20px;
-  transition: translate 0.3s, background-color 0.3s;
-}
-.csp-value-item:hover { translate: 0 -5px; background: #eef2ff; }
-
-.csp-val-icon { font-size: 2rem; color: var(--c-blue); margin-bottom: 1rem; }
-.csp-value-item h4 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
-.csp-value-item p { margin: 0; color: var(--c-text-muted); line-height: 1.5; }
-
-/* --- 3. ORGANIGRAMMA (Dark Section) --- */
-.csp-org-section-dark {
-  background: var(--c-dark);
-  /* Padding fluido */
-  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem); 
-  color: #fff;
-  position: relative;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
   overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
+.chs .sp-contatore { font-variant-numeric: tabular-nums; }
 
-.csp-org-section-dark::before {
-  content: '';
-  position: absolute;
-  top: -100px; right: -100px;
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(255,102,0,0.15) 0%, transparent 70%);
-  border-radius: 50%;
-}
+/* ---------- Elementi comuni ---------- */
 
-.csp-org-container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
-
-.csp-org-header { margin-bottom: 4rem; text-align: center; }
-.csp-org-header h2 { 
-  /* Titolo fluido */
-  font-size: clamp(2rem, 5vw, 3rem); 
-  font-weight: 800; margin-bottom: 0.5rem; 
-}
-.csp-org-header p { color: rgba(255,255,255,0.6); font-size: 1.1rem; }
-
-.csp-org-grid-modern {
-  display: grid;
-  /* Griglia fluida: min 260px, fino a 4 colonne */
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
-  gap: 2rem;
-}
-
-.csp-org-card-glass {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  border-radius: 24px;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.csp-org-card-glass:hover {
-  background: #fff;
-  translate: 0 -10px;
-}
-
-.csp-org-card-glass:hover h3 { color: var(--c-dark); }
-.csp-org-card-glass:hover p { color: var(--c-text-muted); }
-.csp-org-card-glass:hover .csp-divider-small { background: var(--c-accent); }
-
-.csp-org-icon-floating {
-  width: 50px; height: 50px;
-  background: var(--c-accent);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; color: #fff;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-}
-
-.csp-org-card-glass h3 { font-size: 1.2rem; margin: 0 0 1rem 0; font-weight: 700; color: #fff; }
-.csp-divider-small { width: 40px; height: 3px; background: rgba(255,255,255,0.2); margin-bottom: 1rem; }
-.csp-org-card-glass p { font-size: 0.9rem; line-height: 1.5; color: rgba(255,255,255,0.7); margin: 0; }
-
-/* --- 4. NEW STAFF SECTION (Twin Cards) --- */
-.csp-staff-section {
-  padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 5vw, 2rem);
-  background: #fff;
-  max-width: 1000px;
+.chs-sezione {
+  max-width: 1240px;
   margin: 0 auto;
+  padding: clamp(72px, 10vw, 128px) 16px 0;
+  scroll-margin-top: 80px;
 }
 
-.csp-staff-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+.chs-testa {
+  max-width: 760px;
+  margin-bottom: clamp(32px, 5vw, 56px);
 }
-
-.csp-staff-card {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-left: 5px solid var(--c-accent); /* Accent laterale */
-  border-radius: 12px;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  transition: translate 0.3s ease, box-shadow 0.3s ease;
-}
-
-.csp-staff-card:hover {
-  translate: 0 -5px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-}
-
-.csp-staff-icon {
-  font-size: 2.5rem;
-  color: var(--c-blue);
-  margin-bottom: 1rem;
-}
-
-.csp-staff-card h3 {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--c-dark);
-  margin: 0 0 0.5rem 0;
-}
-
-.csp-staff-card p {
-  font-size: 1rem;
-  color: var(--c-text-muted);
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* --- 5. MEMBERSHIP (Expanded Layout) --- */
-.csp-membership-section {
-  /* Padding fluido */
-  padding: clamp(3rem, 10vw, 6rem) clamp(1rem, 5vw, 2rem); 
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.csp-pricing-grid {
-  display: grid;
-  /* Griglia fluida: min 280px, fino a 3 colonne */
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-  align-items: center;
-}
-
-.csp-pricing-card {
-  background: #fff;
-  border: 1px solid var(--c-border);
-  border-radius: 24px;
-  padding: 3rem 2rem;
-  position: relative;
+.chs-testa--centro {
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
-  transition: translate 0.3s, scale 0.3s, box-shadow 0.3s;
+}
+.chs-testa--centro .chs-sezione-testo { margin-left: auto; margin-right: auto; }
+
+.chs-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ffb27a;
+}
+.chs-occhiello--scuro { color: var(--chs-arancio-testo); }
+.chs-occhiello--scuro::before {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
 }
 
-.csp-pricing-card:hover {
-  translate: 0 -5px; /* Ridotto l'effetto hover per mobile */
-  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+/* Il puntino che "respira", come negli altri titoli del sito */
+.chs-punto {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chs-arancio);
+}
+.chs-punto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--chs-arancio);
+  animation: chs-respiro 2.2s var(--chs-curva) infinite;
+}
+@keyframes chs-respiro {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3.2); opacity: 0; }
 }
 
-.csp-pricing-card.csp-popular {
-  border: 2px solid var(--c-accent);
-  background: #fffaf5;
-  scale: 1.05;
-  z-index: 2;
-  box-shadow: 0 25px 50px rgba(255, 102, 0, 0.15);
+.chs-sezione-titolo {
+  margin: 0 0 16px;
+  font-size: clamp(2.5rem, 7vw, 4.4rem);
+  font-weight: 900;
+  line-height: .98;
+  letter-spacing: -.045em;
+  color: var(--chs-inchiostro);
 }
-/* Manteniamo l'effetto hover su desktop, ma lo riduciamo su mobile */
-@media (min-width: 901px) {
-  .csp-pricing-card.csp-popular:hover { translate: 0 -10px; }
+.chs-sezione-titolo em {
+  font-style: normal;
+  color: var(--chs-arancio);
+}
+.chs-sezione-testo {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--chs-grigio);
 }
 
-.csp-pop-badge {
-  position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-  background: var(--c-accent); color: #fff; padding: 5px 15px;
-  border-radius: 20px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;
+.chs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-
-.csp-kit-name { font-size: 1.5rem; font-weight: 800; color: var(--c-dark); margin-bottom: 0.5rem; }
-.csp-kit-price { font-size: 3rem; font-weight: 900; color: var(--c-dark); margin-bottom: 2rem; }
-.csp-currency { font-size: 1.5rem; vertical-align: super; opacity: 0.7; }
-
-.csp-kit-features { list-style: none; padding: 0; margin: 0; text-align: left; }
-.csp-kit-features li { 
-  padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); 
-  color: var(--c-text-muted); font-size: 0.95rem; display: flex; align-items: center; gap: 10px;
+.chs-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
-.csp-check-icon { color: var(--c-accent); font-size: 0.9rem; }
+.chs-btn svg { transition: transform .35s var(--chs-curva); }
+.chs-btn--pieno {
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-arancio), #ff3d00);
+  box-shadow: 0 10px 30px -8px rgba(255, 102, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.chs-btn--pieno:hover {
+  color: #fff;
+  box-shadow: 0 16px 40px -8px rgba(255, 102, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.chs-btn--pieno:hover svg { transform: translateX(4px); }
+.chs-btn--vetro { color: #fff; }
+.chs-btn--vetro:hover { color: #fff; background: rgba(255, 255, 255, .2); }
+.chs-btn--vetro:hover svg { transform: translateY(3px); }
+.chs-btn--grande { min-height: 58px; padding: 0 34px; font-size: 1.1rem; }
+.chs-btn--testo {
+  padding: 0 8px;
+  color: rgba(255, 255, 255, .85);
+}
+.chs-btn--testo:hover { color: #fff; }
+.chs-btn--testo:hover svg { transform: translateX(4px); }
 
-/* Impact Bar */
-.csp-impact-bar {
-  margin-top: 5rem;
-  background: var(--c-surface);
-  border-radius: 20px;
-  padding: 2rem;
+.chs-azioni {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
   align-items: center;
-  gap: 2rem;
+  gap: 12px;
 }
 
-.csp-impact-stat { display: flex; align-items: center; gap: 15px; }
-.csp-i-icon { font-size: 2.5rem; color: var(--c-dark); opacity: 0.2; }
+/* Le schede che si inclinano (data-inclina). L'inclinazione possiede
+   transform e riscrive la transizione: qui si rimettono anche quelle del
+   sollevamento, che usa translate e quindi non la disturba. */
+.chs-valore,
+.chs-organo,
+.chs-persona,
+.chs-kit {
+  position: relative;
+  transition: translate .5s var(--chs-curva), box-shadow .5s var(--chs-curva), background-color .4s ease, border-color .4s ease;
+}
+.mv-attivo .chs [data-inclina] {
+  transition:
+    transform .5s var(--chs-curva),
+    translate .5s var(--chs-curva),
+    box-shadow .5s var(--chs-curva),
+    background-color .4s ease,
+    border-color .4s ease;
+}
+.mv-attivo .chs [data-inclina]:hover {
+  transition-duration: .12s, .5s, .5s, .4s, .4s;
+}
 
-.csp-impact-stat strong { display: block; font-size: 1.1rem; color: var(--c-dark); }
-.csp-impact-stat span { display: block; font-size: 0.9rem; color: var(--c-text-muted); }
+/* =====================================================
+   APERTURA
+   ===================================================== */
 
-.csp-impact-stat.csp-highlight {
+.chs-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
+    linear-gradient(180deg, var(--chs-blu) 0%, var(--chs-notte) 100%);
+  /* Sotto resta lo spazio per il nastro, che ci sale sopra ruotato */
+  padding: clamp(48px, 8vw, 104px) 0 clamp(64px, 8vw, 96px);
+}
+
+/* Una griglia sottile, come le linee di un campo, che sfuma ai bordi */
+.chs-eroe-griglia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 70% at 70% 30%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(80% 70% at 70% 30%, #000 20%, transparent 75%);
+}
+
+/* La parola gigante solo disegnata, che scorre più lenta della pagina */
+.chs-eroe-fantasma {
+  position: absolute;
+  z-index: 0;
+  left: -1vw;
+  bottom: 4%;
+  font-size: clamp(6rem, 22vw, 20rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.chs-eroe-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(40px, 6vw, 64px);
+  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.chs-eroe-testo { min-width: 0; }
+
+.chs-titolo {
+  margin: 0 0 clamp(20px, 3vw, 32px);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.055em;
+  color: #fff;
+}
+.chs-titolo-riga { display: block; }
+.chs-titolo-riga:first-child {
+  font-size: clamp(1.9rem, 6vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -.035em;
+  color: rgba(255, 255, 255, .78);
+  margin-bottom: .2em;
+}
+.chs-titolo-riga + .chs-titolo-riga {
+  font-size: clamp(3.3rem, 13.5vw, 7.6rem);
+}
+/* Il gradiente animato taglia le lettere col bordo del riquadro: un filo
+   di spazio sotto salva le gambe della "p" */
+.chs-titolo .mv-testo-vivo {
+  display: inline-block;
+  padding-bottom: .08em;
+  margin-left: -.02em;
+}
+
+.chs-sottotitolo {
+  margin: 0 0 clamp(28px, 4vw, 40px);
+  max-width: 540px;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .78);
+}
+.chs-sottotitolo strong {
+  color: #fff;
+  font-weight: 800;
+  background: linear-gradient(transparent 62%, rgba(255, 102, 0, .55) 62%, rgba(255, 102, 0, .55) 92%, transparent 92%);
+}
+
+/* L'oblò: un anello di testo che gira attorno alla foto delle mani, che
+   a sua volta gira piano al contrario. La foto è già "circolare" (mani
+   viste dal basso), nel tondo diventa una ruota. */
+.chs-oblo-cornice {
+  justify-self: center;
+  width: min(84vw, 360px);
+}
+.chs-oblo {
+  position: relative;
+  aspect-ratio: 1;
+}
+.chs-oblo::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 102, 0, .55), transparent 68%);
+  filter: blur(34px);
+  pointer-events: none;
+}
+.chs-oblo-anello {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: chs-gira 40s linear infinite;
+}
+.chs-oblo-anello text {
+  fill: rgba(255, 255, 255, .82);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.chs-oblo-foto {
+  position: absolute;
+  inset: 13%;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .25),
+    0 0 0 10px rgba(255, 255, 255, .05),
+    0 40px 80px -30px rgba(0, 0, 0, .8);
+  /* Safari altrimenti mostra gli angoli durante la rotazione */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+}
+.chs-oblo-foto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 1.25;
+  animation: chs-gira 90s linear infinite reverse;
+}
+/* Il bollino arancio con l'anno: il numero che dice da quanto ci siamo */
+.chs-oblo-bollo {
+  position: absolute;
+  left: 2%;
+  bottom: 6%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 30%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: clamp(1.3rem, 5vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -.04em;
+  line-height: 1;
+  color: #fff;
+  background: radial-gradient(circle at 30% 25%, #ffb36b, var(--chs-arancio) 45%, #c43d00);
+  box-shadow: 0 24px 50px -18px rgba(255, 102, 0, .8), 0 0 0 8px rgba(0, 26, 56, .35);
+}
+.chs-oblo-bollo small {
+  font-size: .42em;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .9;
+}
+@keyframes chs-gira { to { transform: rotate(360deg); } }
+
+/* I numeri in vetro sotto all'apertura */
+.chs-eroe-numeri {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 1240px;
+  margin: clamp(40px, 6vw, 72px) auto 0;
+  padding: 0 16px;
+}
+.chs-eroe-numeri > div {
+  display: flex;
+  flex-direction: column-reverse; /* il numero sopra, l'etichetta sotto */
+  gap: .3rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .13);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.chs-eroe-numeri dt {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .66);
+}
+.chs-eroe-numeri dd {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+/* ---------- Nastro dei valori ---------- */
+
+.chs-fascia {
+  position: relative;
+  z-index: 2;
+  margin: -26px -4% 0;          /* sborda: ruotata, non deve mostrare gli angoli */
+  padding: 14px 0;
+  transform: rotate(-2deg);
+  background: linear-gradient(90deg, var(--chs-arancio), #ff3d00);
+  box-shadow: 0 18px 40px -18px rgba(255, 61, 0, .7);
+}
+.chs-fascia .mv-nastro { mask-image: none; }
+.chs-fascia-giro {
+  display: flex;
+  flex: none;
+  gap: 28px;
+  padding-right: 28px;
+  font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+}
+.chs-stella { margin-left: 24px; color: var(--chs-blu); }
+
+/* =====================================================
+   LA STORIA
+   ===================================================== */
+
+/* La linea sta dietro alle tappe. Su telefono è verticale, a sinistra;
+   sugli schermi larghi diventa orizzontale e passa per i nodi. */
+.chs-linea-tempo { position: relative; }
+.chs-linea {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  border-radius: 2px;
+  background: rgba(0, 43, 92, .12);
+}
+.chs-linea-piena {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--chs-arancio), #ff3d00 60%, var(--chs-blu));
+  transform-origin: top;
+}
+/* Finché la sezione non è entrata nello schermo la linea è "vuota" e le
+   tappe spente; poi la linea si disegna e le tappe si accendono in fila.
+   Solo sotto .mv-attivo: senza movimento tutto è già al suo posto. */
+.mv-attivo .chs-linea-piena { transition: transform 1.8s var(--chs-curva) .2s; }
+.mv-attivo .chs-linea-tempo:not(.mv-visto) .chs-linea-piena { transform: scaleY(0); }
+.mv-attivo .chs-tappa {
+  transition: opacity .8s var(--chs-curva), transform .8s var(--chs-curva);
+  transition-delay: calc(.35s + var(--chs-i) * .3s);
+}
+.mv-attivo .chs-linea-tempo:not(.mv-visto) .chs-tappa {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+.chs-tappe {
+  display: grid;
+  gap: 36px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-tappa {
+  position: relative;
+  padding-left: 44px;
+  min-width: 0;
+}
+/* Su telefono la linea finisce sull'ultimo nodo: sotto, un tratto del
+   colore del fondo la copre (la linea è una sola, misurata sul contenitore) */
+.chs-tappa:last-child::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 26px;
+  bottom: -14px;
+  width: 8px;
+  background: var(--chs-carta);
+}
+.chs-tappa-nodo {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   background: #fff;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  border: 1px dashed var(--c-accent);
+  border: 3px solid var(--chs-arancio);
+  box-shadow: 0 0 0 6px rgba(255, 102, 0, .12);
 }
-.csp-fiscal-code {
-  font-family: monospace; font-size: 1.2rem; font-weight: 700; color: var(--c-dark);
-  display: block; margin-top: 5px;
+.chs-tappa:last-child .chs-tappa-nodo {
+  background: var(--chs-arancio);
+  border-color: #fff;
+  box-shadow: 0 0 0 6px rgba(255, 102, 0, .2), 0 10px 20px -6px rgba(255, 102, 0, .7);
+}
+.chs-tappa-quando {
+  margin: 0 0 6px;
+  font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.05em;
+  color: var(--chs-blu);
+  font-variant-numeric: tabular-nums;
+}
+.chs-tappa:last-child .chs-tappa-quando { color: var(--chs-arancio-testo); }
+.chs-tappa-titolo {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--chs-inchiostro);
+}
+.chs-tappa-numero { color: var(--chs-arancio-testo); }
+.chs-tappa-testo {
+  margin: 0;
+  max-width: 30ch;
+  font-size: .98rem;
+  line-height: 1.55;
+  color: var(--chs-grigio);
+}
+.chs-tappa-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--chs-blu);
+  text-decoration: none;
+}
+.chs-tappa-link svg { transition: transform .35s var(--chs-curva); }
+.chs-tappa-link:hover {
+  color: var(--chs-arancio-testo);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.chs-tappa-link:hover svg { transform: translateY(3px); }
+.chs-tappa-link:focus-visible { outline: 3px solid var(--chs-arancio); outline-offset: 3px; border-radius: 6px; }
+
+/* =====================================================
+   IL MANIFESTO
+   ===================================================== */
+
+.chs-bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-bento-cella { display: flex; min-width: 0; }
+
+.chs-valore {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 26px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid rgba(11, 21, 38, .07);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
+}
+.chs-valore:hover {
+  translate: 0 -6px;
+  box-shadow: 0 30px 60px -28px rgba(0, 43, 92, .45);
+}
+.chs-valore h3 {
+  margin: auto 0 8px;           /* il titolo scende in fondo alla tessera */
+  padding-top: 28px;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+}
+.chs-valore p {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--chs-grigio);
+}
+.chs-valore-icona {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  font-size: 1.35rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-blu), #0a4a93);
+  box-shadow: 0 10px 22px -10px rgba(0, 43, 92, .8);
+  transition: transform .5s var(--chs-curva);
+}
+.chs-valore:hover .chs-valore-icona { transform: rotate(-10deg) scale(1.08); }
+.chs-valore-numero {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.06em;
+  color: rgba(0, 43, 92, .08);
+  pointer-events: none;
+}
+/* La stessa icona, enorme e sbiadita, che esce dall'angolo */
+.chs-valore-filigrana {
+  position: absolute;
+  z-index: -1;
+  right: -24px;
+  bottom: -28px;
+  font-size: 9.5rem;
+  color: rgba(0, 43, 92, .045);
+  transform: rotate(-14deg);
+  transition: transform .8s var(--chs-curva);
+  pointer-events: none;
+}
+.chs-valore:hover .chs-valore-filigrana { transform: rotate(0deg) scale(1.08); }
+
+/* La prima tessera è scura, l'ultima arancio: il mosaico prende ritmo */
+.chs-bento-cella:first-child .chs-valore {
+  color: #fff;
+  border-color: transparent;
+  background:
+    radial-gradient(90% 90% at 100% 0%, rgba(255, 102, 0, .35), transparent 60%),
+    linear-gradient(160deg, var(--chs-blu), var(--chs-notte));
+}
+.chs-bento-cella:first-child .chs-valore p { color: rgba(255, 255, 255, .78); }
+.chs-bento-cella:first-child .chs-valore-icona {
+  background: linear-gradient(135deg, var(--chs-arancio), #ff3d00);
+  box-shadow: 0 10px 22px -10px rgba(255, 102, 0, .9);
+}
+.chs-bento-cella:first-child .chs-valore-numero,
+.chs-bento-cella:last-child .chs-valore-numero { color: rgba(255, 255, 255, .16); }
+.chs-bento-cella:first-child .chs-valore-filigrana,
+.chs-bento-cella:last-child .chs-valore-filigrana { color: rgba(255, 255, 255, .08); }
+
+.chs-bento-cella:last-child .chs-valore {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #ff7a1a, #e0400a);
+}
+.chs-bento-cella:last-child .chs-valore p { color: rgba(255, 255, 255, .92); }
+.chs-bento-cella:last-child .chs-valore-icona {
+  color: var(--chs-arancio-testo);
+  background: #fff;
+  box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .4);
 }
 
-/* --- FOOTER --- */
-.csp-page-footer {
-  text-align: center; padding: 3rem; background: var(--c-dark); color: rgba(255,255,255,0.5); font-size: 0.9rem;
+/* =====================================================
+   GLI ORGANI
+   ===================================================== */
+
+.chs-organi {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  margin: clamp(72px, 10vw, 128px) 8px 0;
+  border-radius: 32px;
+  color: #fff;
+  background:
+    radial-gradient(70% 60% at 0% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, var(--chs-blu) 0%, var(--chs-notte) 75%);
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .6);
+}
+.chs-organi-aurora { opacity: .6; }
+.chs-organi-dentro {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 104px) 16px;
+}
+.chs-testa--chiara .chs-sezione-titolo { color: #fff; }
+.chs-testa--chiara .chs-sezione-testo { color: rgba(255, 255, 255, .72); }
+
+.chs-organi-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-organi-cella { display: flex; min-width: 0; }
+
+.chs-organo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.chs-organo:hover {
+  translate: 0 -6px;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 150, 80, .55);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .8);
+}
+.chs-organo-testa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+/* L'icona enorme e sbiadita: solo nella scheda grande del Presidente,
+   dove riempie lo spazio sopra al titolo */
+.chs-organo-filigrana { display: none; }
+.chs-organo-icona {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 1.35rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-arancio), #ff3d00);
+  box-shadow: 0 12px 24px -10px rgba(255, 102, 0, .8);
+  transition: transform .5s var(--chs-curva);
+}
+.chs-organo:hover .chs-organo-icona { transform: rotate(-10deg) scale(1.08); }
+.chs-organo-numero {
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.06em;
+  color: rgba(255, 255, 255, .14);
+}
+.chs-organo h3 {
+  margin: 0 0 14px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: #fff;
+}
+/* La riga arancio si allunga al passaggio: scaleX, non width */
+.chs-organo-riga {
+  display: block;
+  width: 80px;
+  height: 3px;
+  margin-bottom: 14px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--chs-arancio), #ffb36b);
+  transform: scaleX(.5);
+  transform-origin: left;
+  transition: transform .6s var(--chs-curva);
+}
+.chs-organo:hover .chs-organo-riga { transform: scaleX(1); }
+.chs-organo p {
+  margin: 0;
+  font-size: .98rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .72);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  /* Titoli più piccoli su mobile/tablet */
-  .csp-hero-title { font-size: clamp(2.5rem, 8vw, 4rem); } 
-  /* Ritorno ad una colonna singola per organigramma */
-  .csp-org-grid-modern { 
-    grid-template-columns: 1fr; 
-    max-width: 450px; 
-    margin-inline: auto;
+/* Il Presidente: la prima scheda, più grande, con il titolo in fondo */
+.chs-organi-cella:first-child .chs-organo {
+  background:
+    radial-gradient(100% 80% at 100% 100%, rgba(255, 102, 0, .28), transparent 60%),
+    rgba(255, 255, 255, .08);
+}
+.chs-organi-cella:first-child .chs-organo h3 {
+  margin-top: auto;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: -.04em;
+}
+.chs-organi-cella:first-child .chs-organo p { font-size: 1.08rem; max-width: 30ch; }
+
+/* =====================================================
+   LO STAFF
+   ===================================================== */
+
+.chs-staff-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-staff-cella { display: flex; min-width: 0; }
+
+.chs-persona {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid rgba(11, 21, 38, .07);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
+}
+.chs-persona:hover {
+  translate: 0 -6px;
+  box-shadow: 0 30px 60px -28px rgba(0, 43, 92, .45);
+}
+.chs-persona-icona {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  font-size: 2rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-blu), #0a4a93);
+  box-shadow: 0 0 0 6px rgba(255, 102, 0, .14), 0 16px 30px -14px rgba(0, 43, 92, .8);
+  transition: transform .5s var(--chs-curva);
+}
+.chs-persona:hover .chs-persona-icona { transform: rotate(-8deg) scale(1.06); }
+.chs-persona h3 {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 2.6vw, 1.8rem);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+}
+.chs-persona p {
+  margin: 0;
+  max-width: 40ch;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--chs-grigio);
+}
+.chs-persona-filigrana {
+  position: absolute;
+  z-index: -1;
+  right: -20px;
+  top: -20px;
+  font-size: 10rem;
+  color: rgba(255, 102, 0, .06);
+  transform: rotate(12deg);
+  transition: transform .8s var(--chs-curva);
+  pointer-events: none;
+}
+.chs-persona:hover .chs-persona-filigrana { transform: rotate(0deg) scale(1.08); }
+
+/* =====================================================
+   MEMBERSHIP
+   ===================================================== */
+
+.chs-kit-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.chs-kit-cella { display: flex; min-width: 0; }
+
+.chs-kit {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 30px;
+  background: #fff;
+  border: 1px solid rgba(11, 21, 38, .07);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
+}
+.chs-kit:hover {
+  translate: 0 -8px;
+  box-shadow: 0 34px 64px -30px rgba(0, 43, 92, .5);
+}
+.chs-kit-dentro {
+  position: relative;
+  z-index: 1;
+  padding: 30px 28px;
+}
+.chs-kit-testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.chs-kit h3 {
+  margin: 0;
+  font-size: .85rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--chs-grigio);
+}
+.chs-kit-bollino {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-arancio), #ff3d00);
+  box-shadow: 0 8px 20px -8px rgba(255, 102, 0, .9);
+}
+.chs-kit-prezzo {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 14px 0 22px;
+  font-size: clamp(4rem, 9vw, 5.2rem);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.06em;
+  color: var(--chs-inchiostro);
+  font-variant-numeric: tabular-nums;
+}
+.chs-kit-valuta {
+  margin-top: .12em;
+  font-size: .38em;
+  letter-spacing: 0;
+  color: var(--chs-arancio-testo);
+}
+.chs-kit-voci {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 18px 0 0;
+  list-style: none;
+  border-top: 1px solid rgba(11, 21, 38, .08);
+}
+.chs-kit-voci li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--chs-inchiostro);
+}
+.chs-kit-voci svg {
+  flex: none;
+  box-sizing: content-box;
+  width: .7rem;
+  height: .7rem;
+  padding: 6px;
+  border-radius: 50%;
+  color: var(--chs-arancio-testo);
+  background: rgba(255, 102, 0, .12);
+}
+
+/* Il kit consigliato: scuro, con l'aurora, e sugli schermi larghi più
+   alto degli altri due */
+.chs-kit--scelto {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(160deg, var(--chs-blu), var(--chs-notte));
+  box-shadow: 0 40px 80px -36px rgba(0, 26, 56, .8);
+}
+.chs-kit--scelto:hover { box-shadow: 0 50px 90px -36px rgba(0, 26, 56, .9); }
+.chs-kit-aurora { opacity: .75; }
+.chs-kit--scelto h3 { color: rgba(255, 255, 255, .75); }
+.chs-kit--scelto .chs-kit-prezzo { color: #fff; }
+.chs-kit--scelto .chs-kit-valuta { color: #ffb27a; }
+.chs-kit--scelto .chs-kit-voci { border-top-color: rgba(255, 255, 255, .14); }
+.chs-kit--scelto .chs-kit-voci li { color: #fff; }
+.chs-kit--scelto .chs-kit-voci svg { color: #fff; background: var(--chs-arancio); }
+
+/* =====================================================
+   I NUMERI
+   ===================================================== */
+
+.chs-numeri-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.chs-cifre {
+  position: relative;
+  min-width: 0;
+  padding: 28px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid rgba(11, 21, 38, .07);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
+}
+.chs-cifre-titolo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-size: .8rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--chs-grigio);
+}
+.chs-cifre-titolo svg { font-size: 1.1rem; color: var(--chs-arancio-testo); }
+
+/* Le barre: il valore sta in una variabile, la barra si allunga con
+   scaleX. Si riempiono quando la scheda compare. */
+.chs-barre {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-barre li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  row-gap: 8px;
+}
+.chs-barra-nome { font-size: 1.05rem; font-weight: 800; }
+.chs-barra-valore {
+  font-size: clamp(1.9rem, 4vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: var(--chs-blu);
+}
+.chs-barra-binario {
+  grid-column: 1 / -1;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef1f6;
+}
+.chs-barra-piena {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--chs-blu), #0a4a93 50%, var(--chs-arancio));
+  transform: scaleX(var(--chs-livello, 1));
+  transform-origin: left;
+}
+.mv-attivo .chs-barra-piena { transition: transform 1.4s var(--chs-curva) .35s; }
+.mv-attivo .chs-cifre:not(.mv-visto) .chs-barra-piena { transform: scaleX(0); }
+
+/* Le sigle come tessere 2×2: riempiono la scheda come le barre accanto */
+.chs-sigle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chs-sigle li {
+  display: grid;
+  place-items: center;
+  min-height: 76px;
+  padding: 12px;
+  border-radius: 20px;
+  text-align: center;
+  font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--chs-blu), #0a4a93);
+  transition: translate .4s var(--chs-curva), background-color .3s ease;
+}
+.chs-sigle li:nth-child(even) {
+  color: var(--chs-blu);
+  background: #eef1f6;
+}
+.chs-sigle li:hover { translate: 0 -3px; }
+
+/* Il 5x1000: la scheda arancio, con il codice fiscale da copiare */
+.chs-cifre--5x1000 {
+  color: #fff;
+  border-color: transparent;
+  background:
+    radial-gradient(90% 90% at 100% 0%, rgba(255, 200, 140, .45), transparent 60%),
+    linear-gradient(135deg, #ff7a1a, #d93a06);
+  box-shadow: 0 30px 60px -30px rgba(255, 61, 0, .8);
+}
+.chs-cifre--5x1000 .chs-cifre-titolo {
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  letter-spacing: -.05em;
+  text-transform: none;
+  color: #fff;
+}
+.chs-cf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.chs-cf-codice {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(1.3rem, 3vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #fff;
+  background: none;
+}
+.chs-cf-copia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--chs-arancio-testo);
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .5);
+  transition: scale .3s var(--chs-curva), background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.chs-cf-copia:hover { scale: 1.05; }
+.chs-cf-copia:active { scale: .96; }
+.chs-cf-copia.is-fatto { color: #fff; background: var(--chs-blu); }
+.chs-cf-copia:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.chs-cifre-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.chs-cifre-link svg { transition: transform .35s var(--chs-curva); }
+.chs-cifre-link:hover { color: #fff; }
+.chs-cifre-link:hover svg { transform: translateX(4px); }
+.chs-cifre-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 6px; }
+
+/* =====================================================
+   INVITO FINALE
+   ===================================================== */
+
+.chs-invito-sezione { padding-bottom: clamp(72px, 10vw, 128px); }
+.chs-invito {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 32px;
+  color: #fff;
+  background: linear-gradient(160deg, var(--chs-blu), var(--chs-notte));
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .8);
+}
+.chs-invito-fantasma {
+  position: absolute;
+  z-index: 0;
+  right: -2%;
+  bottom: -12%;
+  font-size: clamp(8rem, 30vw, 22rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .09);
+  pointer-events: none;
+  user-select: none;
+}
+.chs-invito-dentro {
+  position: relative;
+  z-index: 1;
+  padding: clamp(36px, 7vw, 88px) clamp(24px, 6vw, 72px);
+}
+.chs-invito-titolo {
+  margin: 0 0 clamp(28px, 4vw, 40px);
+  font-size: clamp(2.3rem, 7vw, 5rem);
+  font-weight: 900;
+  line-height: .98;
+  letter-spacing: -.05em;
+}
+.chs-invito-titolo .mv-testo-vivo { padding-bottom: .06em; }
+
+/* =====================================================
+   SCHERMI PIÙ LARGHI
+   ===================================================== */
+
+@media (min-width: 640px) {
+  .chs-sezione,
+  .chs-eroe-dentro,
+  .chs-eroe-numeri,
+  .chs-organi-dentro { padding-left: 24px; padding-right: 24px; }
+  .chs-organi { margin-left: 12px; margin-right: 12px; }
+
+  .chs-eroe-numeri { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+
+  .chs-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .chs-bento-cella:first-child,
+  .chs-bento-cella:last-child { grid-column: span 2; }
+
+  .chs-organi-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .chs-organi-cella:first-child { grid-column: span 2; }
+
+  .chs-persona { flex-direction: row; align-items: flex-start; padding: 32px; }
+  .chs-invito-titolo { max-width: 14ch; }
+}
+
+@media (min-width: 900px) {
+  .chs-eroe-dentro { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .chs-oblo-cornice { width: min(100%, 460px); justify-self: end; }
+  .chs-oblo-anello text { font-size: 11px; }
+
+  /* La storia diventa orizzontale: la linea passa per i nodi, in alto */
+  .chs-linea {
+    left: 10px;
+    right: 10px;
+    top: 9px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
   }
-  .csp-staff-grid { grid-template-columns: 1fr; } /* Responsive per staff */
-  
-  .csp-impact-bar { 
-    /* Passa ad una colonna o wrap */
-    flex-direction: column; 
-    text-align: center; 
+  .chs-linea-piena {
+    background: linear-gradient(90deg, var(--chs-arancio), #ff3d00 60%, var(--chs-blu));
+    transform-origin: left;
+  }
+  .mv-attivo .chs-linea-tempo:not(.mv-visto) .chs-linea-piena { transform: scaleX(0); }
+  .chs-tappe {
+    grid-template-columns: repeat(var(--chs-tappe, 4), minmax(0, 1fr));
+    gap: 28px;
+  }
+  .chs-tappa { padding: 48px 0 0; }
+  .chs-tappa:last-child::before { content: none; }
+  .chs-tappa-nodo { top: 0; }
+
+  .chs-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+  .chs-valore { min-height: 280px; padding: 30px; }
+
+  .chs-organi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .chs-organi-cella:first-child { grid-column: auto; grid-row: span 2; }
+  .chs-organo { padding: 30px; overflow: hidden; isolation: isolate; }
+  .chs-organo-testa { margin-bottom: 26px; }
+  .chs-organi-cella:first-child .chs-organo-filigrana {
+    display: block;
+    position: absolute;
+    z-index: -1;
+    right: -30px;
+    top: 90px;
+    font-size: 15rem;
+    color: rgba(255, 255, 255, .05);
+    transform: rotate(-10deg);
+    transition: transform .8s var(--chs-curva);
+    pointer-events: none;
+  }
+  .chs-organi-cella:first-child .chs-organo:hover .chs-organo-filigrana { transform: rotate(0deg) scale(1.06); }
+
+  .chs-staff-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+
+  .chs-kit-griglia {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    max-width: none;
     align-items: center;
   }
-  /* Rimuove l'ingrandimento extra sulla card popolare su tablet */
-  .csp-pricing-card.csp-popular { scale: 1; }
-  .csp-pricing-card.csp-popular:hover { translate: 0 -5px; }
-  /* La griglia pricing torna ad 1 colonna se la minmax è superata */
-  .csp-pricing-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-  }
+  .chs-kit-cella.is-scelto .chs-kit-dentro { padding-top: 48px; padding-bottom: 48px; }
+
+  .chs-numeri-griglia { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
 }
 
-/* --- ANIMAZIONE FADE IN --- */
-.csp-fade-in {
-  animation: cspPageEntry 0.6s ease-out forwards;
-  opacity: 0;
+@media (min-width: 1200px) {
+  .chs-sezione,
+  .chs-eroe-dentro,
+  .chs-eroe-numeri,
+  .chs-organi-dentro { padding-left: 32px; padding-right: 32px; }
+  .chs-organi { margin-left: 20px; margin-right: 20px; }
 }
 
-@keyframes cspPageEntry {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* ---------- Chi ha chiesto meno movimento ---------- */
 
-/* --- MOVIMENTO (vedi src/utils/movimento.js) ---
-   Le schede compaiono in fila allo scorrimento, e la comparsa usa
-   transform. Per questo sollevamento e ingrandimento delle schede usano
-   translate e scale, che si sommano a transform invece di cancellarlo.
-
-   La comparsa riscrive anche la transizione con le sue tre proprietà e il
-   suo ritardo: qui si rimettono quelle del passaggio del mouse, senza
-   ritardo, altrimenti ogni scheda aspetterebbe il suo turno per muoversi. */
-.mv-attivo .csp-value-item[data-rivela],
-.mv-attivo .csp-org-card-glass[data-rivela],
-.mv-attivo .csp-staff-card[data-rivela],
-.mv-attivo .csp-pricing-card[data-rivela] {
-  transition:
-    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    translate .3s ease 0s,
-    scale .3s ease 0s,
-    box-shadow .3s ease 0s,
-    background-color .3s ease 0s;
+@media (prefers-reduced-motion: reduce) {
+  .chs-punto::after { animation: none; opacity: 0; }
+  .chs-oblo-anello,
+  .chs-oblo-foto img { animation: none; }
+  .chs *,
+  .chs *::before,
+  .chs *::after { transition-duration: .01ms !important; }
+  .chs-valore:hover,
+  .chs-organo:hover,
+  .chs-persona:hover,
+  .chs-kit:hover,
+  .chs-sigle li:hover { translate: none; }
+  .chs-cf-copia:hover,
+  .chs-cf-copia:active { scale: none; }
+  .chs-valore:hover .chs-valore-icona,
+  .chs-valore:hover .chs-valore-filigrana,
+  .chs-organo:hover .chs-organo-icona,
+  .chs-persona:hover .chs-persona-icona,
+  .chs-persona:hover .chs-persona-filigrana,
+  .chs-organo:hover .chs-organo-filigrana,
+  .chs-btn:hover svg,
+  .chs-cifre-link:hover svg,
+  .chs-tappa-link:hover svg { transform: none; }
 }

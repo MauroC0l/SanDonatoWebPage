@@ -4,6 +4,7 @@ import AboutSection from "./AboutSection";
 import EventDetailsModal from "../../components/EventDetailsModal";
 import ResultsModal from "../../components/ResultsModal";
 import NewsletterForm from "./NewsletterForm";
+import NastroHome from "./NastroHome";
 import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchHomeEvents } from "../../api/calendarApi";
 import {
@@ -168,213 +169,260 @@ export default function HomePage() {
   });
 
   /* La prima notizia fa da copertina, le altre le stanno sotto in fila.
-     Dare a tutte e cinque lo stesso peso vuol dire non dire quale conta. */
+     Dare a tutte e sette lo stesso peso vuol dire non dire quale conta. */
   const [inEvidenza, ...altreNotizie] = ultimeNotizie;
+
+  /* Per la prima schermata: la diretta in corso se c'è, altrimenti il
+     primo appuntamento che deve ancora cominciare. */
+  const direttaInOnda = dirette.find((d) => eInOnda(d.start));
+  const prossimo = direttaInOnda || eventiSettimana[0] || null;
 
   return (
     <div className="hp-root">
-      <AboutSection />
+      <AboutSection
+        prossimo={prossimo}
+        inOnda={Boolean(direttaInOnda)}
+        caricamento={caricamento}
+        onApriEvento={setEventoScelto}
+      />
 
-      <section className="hs-sezione">
+      <NastroHome />
+
+      {/* ---------- Notizie ---------- */}
+      <section className="hs-sezione hs-sezione-notizie" aria-labelledby="hs-t-notizie">
         <div className="hs-contenitore">
 
-          <header className="hs-intestazione" data-rivela>
-            <span className="hs-occhiello">In Polisportiva</span>
-            <h2 className="hs-titolo">Cosa succede in questi giorni</h2>
-            <p className="hs-sottotitolo">
-              Le ultime notizie, le partite in diretta e gli appuntamenti della settimana.
-            </p>
+          <header className="hs-intestazione">
+            <div data-rivela>
+              <span className="hs-occhiello">In Polisportiva</span>
+              <h2 id="hs-t-notizie" className="hs-titolo">
+                Cosa succede in <em>questi giorni</em>
+              </h2>
+            </div>
+            <div className="hs-intestazione-lato" data-rivela style={{ "--mv-ritardo": "120ms" }}>
+              <p className="hs-sottotitolo">
+                Risultati, eventi e novità dalle nostre squadre, appena succedono.
+              </p>
+              <button type="button" className="hs-vedi-tutte" onClick={() => navigate("/news")}>
+                Tutte le notizie <FaArrowRight aria-hidden="true" />
+              </button>
+            </div>
           </header>
 
-          <div className="hs-griglia">
+          {caricamento ? (
+            /* Rettangoli grigi della forma giusta invece di una rotella:
+               la pagina non salta quando i dati arrivano, perché lo
+               spazio è già quello definitivo. */
+            <div className="hs-notizie-griglia" aria-hidden="true">
+              <div className="hs-posto hs-posto-grande"><div className="hs-scheletro hs-scheletro-grande" /></div>
+              <div className="hs-notizie-fila">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="hs-posto"><div className="hs-scheletro" /></div>
+                ))}
+              </div>
+            </div>
+          ) : erroreNotizie ? (
+            <p className="hs-vuoto">{erroreNotizie}</p>
+          ) : ultimeNotizie.length === 0 ? (
+            <p className="hs-vuoto">Nessuna notizia pubblicata.</p>
+          ) : (
+            /* La chiave obbliga React a creare una griglia nuova invece di
+               riusare quella delle sagome grigie: riusandola cambierebbe
+               solo gli attributi, e il movimento — che si accorge degli
+               elementi aggiunti, non degli attributi cambiati — non
+               vedrebbe mai le schede, rimaste invisibili. */
+            <div className="hs-notizie-griglia" key="notizie">
+              {/* Le schede stanno dentro a un involucro che compare
+                  allo scorrimento: la scheda stessa si inclina sotto
+                  al puntatore, e due trasformazioni sullo stesso
+                  elemento si cancellerebbero a vicenda. */}
+              <div className="hs-posto hs-posto-grande" data-rivela="zoom">
+                <NotiziaGrande notizia={inEvidenza} />
+              </div>
 
-            {/* ---------- Notizie ---------- */}
-            <div className="hs-notizie">
-              <div className="hs-blocco-testa">
-                <h3 className="hs-blocco-titolo">
-                  <FaNewspaper aria-hidden="true" /> Ultime notizie
+              <div className="hs-notizie-fila" data-rivela-gruppo>
+                {altreNotizie.map((n) => (
+                  <div key={n.id} className="hs-posto">
+                    <NotiziaPiccola notizia={n} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ---------- In campo: dirette e settimana ---------- */}
+      <section className="hs-campo" aria-labelledby="hs-t-campo">
+        <div className="mv-aurora hs-campo-aurora" aria-hidden="true" />
+        <div className="hs-campo-reticolo" aria-hidden="true" />
+
+        <div className="hs-contenitore hs-campo-dentro">
+          <header className="hs-intestazione" data-rivela>
+            <div>
+              <span className="hs-occhiello hs-occhiello-chiaro">
+                <span className="hs-pulsante-live" aria-hidden="true" /> In campo
+              </span>
+              <h2 id="hs-t-campo" className="hs-titolo">
+                Dirette e <em>settimana</em>
+              </h2>
+            </div>
+          </header>
+
+          <div className="hs-campo-bento" data-rivela-gruppo>
+
+            <section className="hs-scheda hs-scheda-live" aria-labelledby="hs-t-live">
+              <div className="hs-scheda-testa">
+                <h3 id="hs-t-live" className="hs-blocco-titolo">
+                  <FaYoutube className="hs-youtube" aria-hidden="true" /> Live center
                 </h3>
-                <button type="button" className="hs-vedi-tutte" onClick={() => navigate("/news")}>
-                  Vedi tutte <FaArrowRight aria-hidden="true" />
-                </button>
               </div>
 
               {caricamento ? (
-                /* Rettangoli grigi della forma giusta invece di una rotella:
-                   la pagina non salta quando i dati arrivano, perché lo
-                   spazio è già quello definitivo. */
-                <div className="hs-notizie-griglia">
-                  <div className="hs-scheletro hs-scheletro-grande" />
-                  <div className="hs-scheletro" />
-                  <div className="hs-scheletro" />
-                </div>
-              ) : erroreNotizie ? (
-                <p className="hs-vuoto">{erroreNotizie}</p>
-              ) : ultimeNotizie.length === 0 ? (
-                <p className="hs-vuoto">Nessuna notizia pubblicata.</p>
+                <div className="hs-scheletro hs-scheletro-riga" />
+              ) : dirette.length === 0 ? (
+                <p className="hs-vuoto hs-vuoto-piccolo">
+                  Nessuna diretta in programma per oggi.
+                </p>
               ) : (
-                /* La chiave obbliga React a creare una griglia nuova invece di
-                   riusare quella delle sagome grigie: riusandola cambierebbe
-                   solo gli attributi, e il movimento — che si accorge degli
-                   elementi aggiunti, non degli attributi cambiati — non
-                   vedrebbe mai le schede, rimaste invisibili. */
-                <div className="hs-notizie-griglia" key="notizie">
-                  {/* Le schede stanno dentro a un involucro che compare
-                      allo scorrimento: la scheda stessa si inclina sotto
-                      al puntatore, e due trasformazioni sullo stesso
-                      elemento si cancellerebbero a vicenda. */}
-                  <div className="hs-posto" data-rivela="zoom">
-                    <NotiziaGrande notizia={inEvidenza} />
-                  </div>
+                <ul className="hs-dirette">
+                  {dirette.map((diretta, posizione) => {
+                    const inOnda = eInOnda(diretta.start);
+                    // La prossima resta chiusa finché non comincia: un
+                    // collegamento che porta a una diretta non ancora
+                    // aperta è solo un vicolo cieco.
+                    const chiusa = posizione === 0 && !inOnda;
+                    const dove = diretta.diretta || "https://youtube.com/@PolisportivaSanDonato";
 
-                  <div className="hs-notizie-fila" data-rivela-gruppo>
-                    {altreNotizie.map((n) => (
-                      <div key={n.id} className="hs-posto">
-                        <NotiziaPiccola notizia={n} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                    return (
+                      <li key={diretta.id} className={`hs-diretta ${inOnda ? "is-onda" : ""}`}>
+                        <div className="hs-diretta-alto">
+                          {inOnda
+                            ? <span className="hs-targhetta hs-targhetta-onda">In onda</span>
+                            : <span className="hs-targhetta">Oggi {oraDi(diretta.start)}</span>}
+                          <span className="hs-targhetta hs-targhetta-categoria">{diretta.category}</span>
+                        </div>
 
-            {/* ---------- Colonna di fianco ---------- */}
-            <aside className="hs-lato" data-rivela-gruppo>
+                        <p className="hs-diretta-titolo">{diretta.title}</p>
 
-              <section className="hs-scheda">
-                <div className="hs-scheda-testa">
-                  <h3 className="hs-blocco-titolo">
-                    <span className="hs-pulsante-live" aria-hidden="true" /> Live center
-                  </h3>
-                  <FaYoutube className="hs-youtube" aria-hidden="true" />
-                </div>
+                        <p className="hs-diretta-dove">
+                          <FaMapMarkerAlt aria-hidden="true" />
+                          {diretta.location || "Sede da definire"}
+                        </p>
 
-                {caricamento ? (
-                  <div className="hs-scheletro hs-scheletro-riga" />
-                ) : dirette.length === 0 ? (
-                  <p className="hs-vuoto hs-vuoto-piccolo">
-                    Nessuna diretta in programma per oggi.
-                  </p>
-                ) : (
-                  <ul className="hs-dirette">
-                    {dirette.map((diretta, posizione) => {
-                      const inOnda = eInOnda(diretta.start);
-                      // La prossima resta chiusa finché non comincia: un
-                      // collegamento che porta a una diretta non ancora
-                      // aperta è solo un vicolo cieco.
-                      const chiusa = posizione === 0 && !inOnda;
-                      const dove = diretta.diretta || "https://youtube.com/@PolisportivaSanDonato";
+                        {chiusa && (
+                          <ContoAllaRovescia quando={diretta.start} alTermine={finitoIlConto} />
+                        )}
 
-                      return (
-                        <li key={diretta.id} className={`hs-diretta ${inOnda ? "is-onda" : ""}`}>
-                          <div className="hs-diretta-alto">
-                            {inOnda
-                              ? <span className="hs-targhetta hs-targhetta-onda">In onda</span>
-                              : <span className="hs-targhetta">Oggi {oraDi(diretta.start)}</span>}
-                            <span className="hs-targhetta hs-targhetta-categoria">{diretta.category}</span>
-                          </div>
-
-                          <p className="hs-diretta-titolo">{diretta.title}</p>
-
-                          <p className="hs-diretta-dove">
-                            <FaMapMarkerAlt aria-hidden="true" />
-                            {diretta.location || "Sede da definire"}
-                          </p>
-
-                          {chiusa && (
-                            <ContoAllaRovescia quando={diretta.start} alTermine={finitoIlConto} />
-                          )}
-
-                          {chiusa ? (
-                            <span className="hs-bottone hs-bottone-chiuso">
-                              <FaLock aria-hidden="true" /> In attesa dell&apos;inizio
-                            </span>
-                          ) : (
-                            <a
-                              href={dove}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={`hs-bottone ${inOnda ? "hs-bottone-onda" : "hs-bottone-vuoto"}`}
-                            >
-                              <FaPlay aria-hidden="true" />
-                              {inOnda ? "Guarda ora" : "Vai al canale"}
-                            </a>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </section>
-
-              <section className="hs-scheda">
-                <div className="hs-scheda-testa">
-                  <h3 className="hs-blocco-titolo">
-                    <FaCalendarAlt aria-hidden="true" /> Questa settimana
-                  </h3>
-                  {!caricamento && (
-                    <button
-                      type="button"
-                      className="hs-risultati"
-                      onClick={() => setMostraRisultati(true)}
-                    >
-                      <FaTrophy aria-hidden="true" /> Risultati
-                    </button>
-                  )}
-                </div>
-
-                {caricamento ? (
-                  <div className="hs-scheletro hs-scheletro-riga" />
-                ) : eventiSettimana.length === 0 ? (
-                  <p className="hs-vuoto hs-vuoto-piccolo">Nessun appuntamento in programma.</p>
-                ) : (
-                  <ul className="hs-agenda">
-                    {eventiSettimana.map((evento) => (
-                      <li key={evento.id}>
-                        <button
-                          type="button"
-                          className="hs-appuntamento"
-                          onClick={() => setEventoScelto(evento)}
-                        >
-                          <span className="hs-quando" style={{ backgroundColor: evento.color }}>
-                            <span className="hs-quando-giorno">{nomeGiorno(evento.start)}</span>
-                            <span className="hs-quando-data">{giornoMese(evento.start)}</span>
+                        {chiusa ? (
+                          <span className="hs-bottone hs-bottone-chiuso">
+                            <FaLock aria-hidden="true" /> In attesa dell&apos;inizio
                           </span>
-
-                          <span className="hs-appuntamento-testi">
-                            <span className="hs-appuntamento-titolo">{evento.title}</span>
-                            <span className="hs-appuntamento-meta">
-                              <span>
-                                <FaClock aria-hidden="true" />
-                                {evento.hasTime ? oraDi(evento.start) : "tutto il giorno"}
-                              </span>
-                              <span className="hs-appuntamento-luogo">
-                                <FaMapMarkerAlt aria-hidden="true" />
-                                {evento.location || "da definire"}
-                              </span>
-                            </span>
-                          </span>
-                        </button>
+                        ) : (
+                          <a
+                            href={dove}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`hs-bottone ${inOnda ? "hs-bottone-onda" : "hs-bottone-vuoto"}`}
+                          >
+                            <FaPlay aria-hidden="true" />
+                            {inOnda ? "Guarda ora" : "Vai al canale"}
+                          </a>
+                        )}
                       </li>
-                    ))}
-                  </ul>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+
+            <section className="hs-scheda hs-scheda-agenda" aria-labelledby="hs-t-agenda">
+              <div className="hs-scheda-testa">
+                <h3 id="hs-t-agenda" className="hs-blocco-titolo">
+                  <FaCalendarAlt aria-hidden="true" /> Questa settimana
+                </h3>
+                {!caricamento && (
+                  <button
+                    type="button"
+                    className="hs-risultati"
+                    onClick={() => setMostraRisultati(true)}
+                  >
+                    <FaTrophy aria-hidden="true" /> Risultati
+                  </button>
                 )}
-              </section>
+              </div>
 
-              <button
-                type="button"
-                className="hs-newsletter"
-                onClick={() => setMostraNewsletter(true)}
-              >
-                <FaEnvelopeOpenText className="hs-newsletter-icona" aria-hidden="true" />
-                <span className="hs-newsletter-testi">
-                  <strong>Resta aggiornato</strong>
-                  <span>Risultati e notizie nella tua posta.</span>
-                </span>
-                <FaArrowRight className="hs-newsletter-freccia" aria-hidden="true" />
-              </button>
+              {caricamento ? (
+                <div className="hs-scheletro hs-scheletro-riga" />
+              ) : eventiSettimana.length === 0 ? (
+                <p className="hs-vuoto hs-vuoto-piccolo">Nessun appuntamento in programma.</p>
+              ) : (
+                <ul className="hs-agenda">
+                  {eventiSettimana.map((evento) => (
+                    <li key={evento.id}>
+                      <button
+                        type="button"
+                        className="hs-appuntamento"
+                        style={{ "--hs-colore": evento.color }}
+                        onClick={() => setEventoScelto(evento)}
+                      >
+                        <span className="hs-quando">
+                          <span className="hs-quando-giorno">{nomeGiorno(evento.start)}</span>
+                          <span className="hs-quando-data">{giornoMese(evento.start)}</span>
+                        </span>
 
-            </aside>
+                        <span className="hs-appuntamento-testi">
+                          <span className="hs-appuntamento-titolo">{evento.title}</span>
+                          <span className="hs-appuntamento-meta">
+                            <span>
+                              <FaClock aria-hidden="true" />
+                              {evento.hasTime ? oraDi(evento.start) : "tutto il giorno"}
+                            </span>
+                            <span className="hs-appuntamento-luogo">
+                              <FaMapMarkerAlt aria-hidden="true" />
+                              {evento.location || "da definire"}
+                            </span>
+                          </span>
+                        </span>
+
+                        <FaArrowRight className="hs-appuntamento-freccia" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <Link to="/calendario" className="hs-calendario">
+                Apri il calendario completo <FaArrowRight aria-hidden="true" />
+              </Link>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Newsletter ---------- */}
+      <section className="hs-sezione hs-sezione-newsletter" aria-label="Newsletter">
+        <div className="hs-contenitore">
+          {/* L'involucro compare, il pulsante dentro si inclina: come per
+              le notizie, due trasformazioni sullo stesso elemento si
+              cancellerebbero a vicenda. */}
+          <div className="hs-posto" data-rivela="zoom">
+            <button
+              type="button"
+              className="hs-newsletter"
+              onClick={() => setMostraNewsletter(true)}
+              data-inclina="3"
+            >
+              <FaEnvelopeOpenText className="hs-newsletter-filigrana" aria-hidden="true" />
+              <span className="hs-newsletter-testi">
+                <span className="hs-newsletter-occhiello">Newsletter</span>
+                <strong>Resta aggiornato</strong>
+                <span>Risultati e notizie nella tua posta, senza doverli cercare.</span>
+              </span>
+              <span className="hs-newsletter-azione">
+                Iscriviti <FaArrowRight aria-hidden="true" />
+              </span>
+            </button>
           </div>
         </div>
       </section>
@@ -424,6 +472,7 @@ function NotiziaGrande({ notizia }) {
     >
       <span className="hs-foto" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
       <span className="hs-velo" aria-hidden="true" />
+      <span className="hs-evidenza">In evidenza</span>
 
       <span className="hs-notizia-testi">
         <span className="hs-notizia-etichette">
@@ -433,6 +482,7 @@ function NotiziaGrande({ notizia }) {
         </span>
 
         <span className="hs-notizia-titolo">{notizia.title}</span>
+        <span className="hs-leggi">Leggi la notizia <FaArrowRight aria-hidden="true" /></span>
       </span>
     </Link>
   );

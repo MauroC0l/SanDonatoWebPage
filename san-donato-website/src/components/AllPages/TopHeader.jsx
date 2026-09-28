@@ -3,27 +3,26 @@ import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
 import { FiMapPin, FiMail, FiLogIn, FiUserPlus } from "react-icons/fi";
 import { attesaAreaRiservata } from "../../precarica";
+import { MARCHIO } from "./marchio";
 import "../../css/TopHeader.css";
 
 import headerData from "../../data/TopHeader.json";
 
 /**
- * La barra sopra a tutto, divisa in tre.
+ * La barra sottile sopra al menu, divisa in tre.
  *
- * A sinistra dove ci si trova sui social, al centro dove ci si trova nella
- * città, a destra come si entra. Tre zone e non due: prima i contatti erano
- * spinti a destra e l'accesso finiva schiacciato in mezzo ai social, con il
- * risultato che sembrava l'ennesimo profilo della società.
+ * È la sola parte dell'intestazione che se ne va scorrendo: il marchio e il
+ * menu restano attaccati in alto, questa no (vedi il "top" negativo in
+ * MyNavbar.css). Sul telefono non c'è proprio: social, recapiti e accesso
+ * stanno nel menu a tutto schermo, e la prima riga resta al marchio.
  *
- * Le tre zone stanno su una griglia 1fr auto 1fr e non su un flex con
- * space-between: così il centro è centrato rispetto alla PAGINA e non
- * rispetto a quanto spazio avanza fra le altre due, che cambia a ogni
- * larghezza e faceva ballare l'indirizzo.
+ * A sinistra i social con lo slogan, poi dove ci si trova nella città, in
+ * fondo come si entra, separato da una lineetta: l'accesso non deve
+ * sembrare l'ennesimo profilo della società.
  *
- * L'accesso resta scritto e non disegnato come un pulsante: sopra al logo e
- * al menu, un pulsante pieno si prenderebbe il primo sguardo, che qui
- * appartiene alla società. Il contorno compare al passaggio del mouse, che
- * è il momento in cui serve — quando uno sta per cliccare.
+ * Tutto piccolo e tenue: sotto c'è la riga del marchio e del menu, ed è
+ * quella che deve prendersi il primo sguardo. Solo "Accedi" ha un contorno
+ * arancione, perché è la voce che chi torna cerca a colpo d'occhio.
  */
 export default function TopHeader() {
   const { contactInfo, socialLinks } = headerData;
@@ -53,6 +52,9 @@ export default function TopHeader() {
               <Icona />
             </a>
           ))}
+          {/* Lo slogan che prima stava sotto al nome, nella fascia bianca:
+              qui accanto ai social, dove racconta di chi sono i profili. */}
+          <span className="th-slogan">{MARCHIO.slogan}</span>
         </div>
 
         <div className="th-contatti">
@@ -78,9 +80,6 @@ export default function TopHeader() {
         </div>
 
         <div className="th-accesso">
-          {/* Il nome dell'azione sta anche nell'etichetta: sotto i 420
-              pixel la scritta sparisce e resta la sola icona, che senza
-              questa sarebbe un collegamento senza nome. */}
           {/* Il pacchetto dell'area riservata comincia a scaricarsi quando
               il puntatore sfiora il collegamento, non quando lo si clicca:
               fra le due cose passano due o trecento millisecondi, che
