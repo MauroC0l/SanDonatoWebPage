@@ -200,7 +200,7 @@ export default function SchermataPagamento({ quota, versato, conto = null, onChi
                 {restoPrimaMeta > 0 && restoPrimaMeta < residuo && (
                   <p className="adm-hint">
                     Puoi versarla tutta subito oppure in due metà: la prima
-                    entro il 31 ottobre, la seconda
+                    il prima possibile, la seconda
                     ({euro(conto.secondaMeta)}) da gennaio.
                   </p>
                 )}

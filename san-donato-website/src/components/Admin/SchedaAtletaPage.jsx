@@ -990,7 +990,7 @@ export default function SchedaAtletaPage() {
                     <span>Abbandonato dal {dataLeggibile(atleta.abbandonatoIl)}</span>
                     <span className="adm-hint">
                       {atleta.abbandonoAutomatico
-                        ? "L'ha segnato il sito: non ha rinnovato, o non ha versato la prima metà in tempo. Se la versa, torna attivo da solo."
+                        ? "L'ha segnato il sito: non ha rinnovato, o non ha versato la prima metà. Se la versa, torna attivo da solo."
                         : "L'ha segnato la segreteria."}
                     </span>
                   </p>

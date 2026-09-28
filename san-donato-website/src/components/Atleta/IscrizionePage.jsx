@@ -292,7 +292,7 @@ export default function IscrizionePage() {
   /* Senza certificato e senza squadre la colonna di destra resterebbe
      vuota: in quel caso il modulo si prende tutta la larghezza invece di
      lasciare mezza pagina bianca. */
-  const conLato = certificatoRichiesto || (iscrizione?.appartenenze ?? []).length > 0;
+  const conLato = certificatoRichiesto || Boolean(iscrizione?.gioca);
 
   /* Il permesso lo decide il server ed è lì che conta: qui serve solo a
      non far compilare campi che verrebbero poi rifiutati. */
@@ -337,6 +337,21 @@ export default function IscrizionePage() {
           </div>
         )}
       </div>
+
+      {/* Dove si gioca, in cima: è la prima cosa che dice "sei dei nostri",
+          e prima stava in fondo alla colonna di lato, dove nessuno guardava. */}
+      {(iscrizione?.appartenenze ?? []).length > 0 && (
+        <div className="isc-squadre" aria-label="Le tue squadre">
+          <span className="isc-squadre-etichetta">Sei iscritto a</span>
+          {iscrizione.appartenenze.map((a) => (
+            <span className="isc-squadra" key={a.squadraId}>
+              <span className="isc-squadra-punto" style={{ background: a.colore || undefined }} aria-hidden="true" />
+              <strong>{a.squadra}</strong>
+              {a.sport && <span className="isc-squadra-sport">{a.sport}</span>}
+            </span>
+          ))}
+        </div>
+      )}
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">
@@ -598,45 +613,24 @@ export default function IscrizionePage() {
             </section>
             )}
 
-            {(iscrizione?.appartenenze ?? []).length > 0 && (
-              <section className="adm-panel">
-                <h2 className="adm-panel-title">Sei iscritto a</h2>
-
-                {/* Una riga per squadra, con lo sport: chi ne ha due deve
-                    vederle entrambe, e "Under 14" da solo non dice se è il
-                    volley o il calcio. */}
-                {iscrizione.appartenenze.map((a) => (
-                  <p className="adm-esito-riga adm-esito-ok" key={a.squadraId}>
-                    <FaCheckCircle aria-hidden="true" />
-                    <span>
-                      <strong>{a.squadra}</strong>
-                      {a.sport && ` — ${a.sport}`}
-                    </span>
-                  </p>
-                ))}
-              </section>
+            {/* Il codice fiscale del fratello o della sorella, sotto al
+                certificato: è una richiesta sulla quota, non un dato del
+                modulo, e sta di lato come il certificato. Solo a chi gioca:
+                un allenatore ha la sua quota. */}
+            {iscrizione?.gioca && (
+              <RiquadroFratelli
+                fratelli={iscrizione?.fratelli ?? []}
+                onAggiornati={(elenco) => setIscrizione({ ...iscrizione, fratelli: elenco })}
+                onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
+              />
             )}
+
 
           </aside>
           )}
         </div>
       </form>
 
-      {/* Fuori dal modulo, e sotto: una parentela si dichiara subito e per
-          conto suo, mentre i propri dati si salvano col pulsante in cima.
-          Dentro allo stesso <form> sarebbero due salvataggi dietro a un
-          invio solo — e un <form> dentro a un altro non è nemmeno HTML
-          valido.
-
-          Solo a chi gioca: la quota per la famiglia è quella degli
-          iscritti dal secondo figlio in poi, e un allenatore ha la sua. */}
-      {iscrizione?.gioca && (
-        <RiquadroFratelli
-          fratelli={iscrizione?.fratelli ?? []}
-          onAggiornati={(elenco) => setIscrizione({ ...iscrizione, fratelli: elenco })}
-          onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
-        />
-      )}
     </div>
   );
 }

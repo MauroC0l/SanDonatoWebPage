@@ -549,8 +549,8 @@ export default function ProfiloPage() {
                   La stagione va dal <strong>1° luglio</strong> al <strong>30 giugno</strong> dell&apos;anno dopo.
                 </li>
                 <li>
-                  La quota è divisa in <strong>due metà</strong>: la prima si versa entro il
-                  31 ottobre, la seconda è dovuta da gennaio.
+                  La quota è divisa in <strong>due metà</strong>: la prima va versata il
+                  prima possibile, la seconda è dovuta da gennaio.
                 </li>
                 <li>
                   Puoi versarla <strong>tutta subito</strong>, in una volta sola,
@@ -559,10 +559,6 @@ export default function ProfiloPage() {
                 <li>
                   Se smetti prima del 1° gennaio, la seconda metà non la devi: nella
                   pagina della quota la vedrai barrata.
-                </li>
-                <li>
-                  Se la quota non si divide in due parti uguali, il centesimo in più
-                  va nella prima metà.
                 </li>
               </ul>
             </section>

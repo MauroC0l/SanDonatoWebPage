@@ -105,12 +105,17 @@ Resta aperto:
   richiesta. Chi si era ritirato o aveva abbandonato arriva come
   "abbandonato" (server/manutenzione-stagioni.js, cron /api/cron/stagioni);
 - **abbandono automatico — SPENTO finché non ci sono i pagamenti.** Chi non
-  versa la prima metà entro il **31 ottobre** (scadenza da confermare con la
-  società) passa ad "abbandonato"; se poi la versa, torna attivo da solo.
+  versa la prima metà passa ad "abbandonato"; se poi la versa, torna attivo
+  da solo. La società non vuole indicare una scadenza agli atleti ("va
+  saldata il prima possibile", 28/09/2026), ma per l'abbandono automatico
+  una data serve: oggi nel codice è il 31 ottobre (`scadenzaPrimaMeta` in
+  server/stagioni.js), non mostrata da nessuna parte. **Da decidere prima
+  di accenderlo.**
   Si accende con `ABBANDONI_AUTOMATICI=1` su Vercel: oggi i versamenti non si
   registrano, e acceso segnerebbe come abbandonati tutti;
 - **chi è "abbandonato" non deve la quota** e l'account resta aperto (può
-  entrare e tornare). Scelte fatte nel codice, da confermare con la società;
+  entrare e tornare): l'account aperto è confermato dalla società il
+  28/09/2026, il "non deve la quota" è ancora da confermare;
 - **"prima di gennaio" è la data del ritiro**, non quella dei versamenti:
   scelta fatta nel codice, da confermare con la società;
 - **il pagamento online in due rate**: quando arriverà, deve scrivere

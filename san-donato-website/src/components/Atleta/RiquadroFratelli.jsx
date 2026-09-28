@@ -90,7 +90,7 @@ export default function RiquadroFratelli({ fratelli = [], onAggiornati, onErrore
         Polisportiva, puoi chiedere la <strong>quota per la famiglia</strong>.
         Scrivi qui il suo codice fiscale: la segreteria controlla e, se
         risulta, la tua quota diventa quella per la famiglia. Finché non
-        l&apos;ha guardata resta quella che vedi in alto. Vale per questa
+        l&apos;ha guardata resta quella di adesso. Vale per questa
         stagione: la prossima si richiede di nuovo.
       </p>
 
@@ -143,15 +143,22 @@ export default function RiquadroFratelli({ fratelli = [], onAggiornati, onErrore
             className="adm-input"
             value={codice}
             onChange={(e) => setCodice(e.target.value.toUpperCase())}
+            /* Il riquadro sta dentro al modulo dell'iscrizione: senza
+               questo, Invio qui salverebbe il modulo invece di dichiarare. */
+            onKeyDown={(e) => {
+              if (e.key !== "Enter") return;
+              e.preventDefault();
+              if (!occupato && codice.trim().length >= 16) dichiara();
+            }}
             placeholder="Sedici caratteri"
             maxLength={16}
             disabled={occupato}
           />
         </label>
 
-        {/* type="button": questo pannello sta fuori dal modulo
-            dell'iscrizione apposta — sono due salvataggi diversi, e un
-            invio solo li confonderebbe. */}
+        {/* type="button": il pannello sta dentro al modulo
+            dell'iscrizione, ma sono due salvataggi diversi e un invio solo
+            li confonderebbe. */}
         <button
           type="button"
           className="adm-btn adm-btn-secondary"

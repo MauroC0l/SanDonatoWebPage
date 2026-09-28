@@ -231,3 +231,23 @@
 }
 
 .fra-errore { color: var(--adm-danger); }
+
+/* Le squadre in cima alla pagina: una riga di etichette, una per squadra */
+.isc-squadre {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
+  margin: 0 0 1rem; padding: .7rem .9rem;
+  background: var(--adm-surface, #fff); border: 1px solid var(--adm-line, #e5e7eb); border-radius: 12px;
+}
+.isc-squadre-etichetta { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--adm-muted, #6b7280); margin-right: .2rem; }
+.isc-squadra {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .3rem .75rem; border-radius: 999px; background: var(--adm-blue-soft, #eef4ff);
+  color: var(--adm-ink, #111827); font-size: .92rem;
+}
+.isc-squadra-punto { width: .6rem; height: .6rem; border-radius: 50%; background: var(--adm-blue, #2563eb); flex: none; }
+.isc-squadra-sport { color: var(--adm-muted, #6b7280); font-size: .82rem; }
+
+/* Il riquadro dei fratelli, di lato sotto al certificato: più stretto,
+   il campo e il pulsante vanno uno sotto l'altro */
+.isc-lato .fra-aggiungi { flex-direction: column; align-items: stretch; }
+.isc-lato .fra-aggiungi .adm-field { min-width: 0; }
