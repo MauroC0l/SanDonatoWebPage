@@ -140,9 +140,9 @@
   padding: 2rem;
   background: var(--c-surface);
   border-radius: 20px;
-  transition: transform 0.3s;
+  transition: translate 0.3s, background-color 0.3s;
 }
-.csp-value-item:hover { transform: translateY(-5px); background: #eef2ff; }
+.csp-value-item:hover { translate: 0 -5px; background: #eef2ff; }
 
 .csp-val-icon { font-size: 2rem; color: var(--c-blue); margin-bottom: 1rem; }
 .csp-value-item h4 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
@@ -195,7 +195,7 @@
 
 .csp-org-card-glass:hover {
   background: #fff;
-  transform: translateY(-10px);
+  translate: 0 -10px;
 }
 
 .csp-org-card-glass:hover h3 { color: var(--c-dark); }
@@ -240,11 +240,11 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: translate 0.3s ease, box-shadow 0.3s ease;
 }
 
 .csp-staff-card:hover {
-  transform: translateY(-5px);
+  translate: 0 -5px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
@@ -292,24 +292,24 @@
   padding: 3rem 2rem;
   position: relative;
   text-align: center;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: translate 0.3s, scale 0.3s, box-shadow 0.3s;
 }
 
 .csp-pricing-card:hover {
-  transform: translateY(-5px); /* Ridotto l'effetto hover per mobile */
+  translate: 0 -5px; /* Ridotto l'effetto hover per mobile */
   box-shadow: 0 20px 40px rgba(0,0,0,0.08);
 }
 
 .csp-pricing-card.csp-popular {
   border: 2px solid var(--c-accent);
   background: #fffaf5;
-  transform: scale(1.05);
+  scale: 1.05;
   z-index: 2;
   box-shadow: 0 25px 50px rgba(255, 102, 0, 0.15);
 }
 /* Manteniamo l'effetto hover su desktop, ma lo riduciamo su mobile */
 @media (min-width: 901px) {
-  .csp-pricing-card.csp-popular:hover { transform: scale(1.05) translateY(-10px); }
+  .csp-pricing-card.csp-popular:hover { translate: 0 -10px; }
 }
 
 .csp-pop-badge {
@@ -383,8 +383,8 @@
     align-items: center;
   }
   /* Rimuove l'ingrandimento extra sulla card popolare su tablet */
-  .csp-pricing-card.csp-popular { transform: scale(1); } 
-  .csp-pricing-card.csp-popular:hover { transform: scale(1) translateY(-5px); }
+  .csp-pricing-card.csp-popular { scale: 1; }
+  .csp-pricing-card.csp-popular:hover { translate: 0 -5px; }
   /* La griglia pricing torna ad 1 colonna se la minmax è superata */
   .csp-pricing-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
@@ -400,4 +400,26 @@
 @keyframes cspPageEntry {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MOVIMENTO (vedi src/utils/movimento.js) ---
+   Le schede compaiono in fila allo scorrimento, e la comparsa usa
+   transform. Per questo sollevamento e ingrandimento delle schede usano
+   translate e scale, che si sommano a transform invece di cancellarlo.
+
+   La comparsa riscrive anche la transizione con le sue tre proprietà e il
+   suo ritardo: qui si rimettono quelle del passaggio del mouse, senza
+   ritardo, altrimenti ogni scheda aspetterebbe il suo turno per muoversi. */
+.mv-attivo .csp-value-item[data-rivela],
+.mv-attivo .csp-org-card-glass[data-rivela],
+.mv-attivo .csp-staff-card[data-rivela],
+.mv-attivo .csp-pricing-card[data-rivela] {
+  transition:
+    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    translate .3s ease 0s,
+    scale .3s ease 0s,
+    box-shadow .3s ease 0s,
+    background-color .3s ease 0s;
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   schemaNotiziaNuova, schemaNotiziaModifica, schemaElencoNotizie,
-  schemaAccesso, valida, SPORT, CATEGORIE, STATI, STATI_FILTRO
+  schemaAccesso, valida, SPORT, STATI, STATI_FILTRO
 } from "../server/validazione.js";
 import { cosaManca } from "../server/atleti.js";
 
@@ -128,11 +128,10 @@ describe("accesso", () => {
 });
 
 describe("gli elenchi condivisi con il front-end", () => {
-  it("sport e categorie sono quelli che si aspetta il database", () => {
+  it("gli sport sono quelli che si aspetta il database", () => {
     // Se qui e nell'enum di Postgres gli elenchi divergono, l'errore arriva
     // dal driver come un messaggio incomprensibile in fase di scrittura.
     expect(SPORT).toEqual(["Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"]);
-    expect(CATEGORIE).toEqual(["societa", "eventi", "sport", "solidarieta", "altro"]);
   });
 });
 

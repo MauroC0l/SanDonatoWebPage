@@ -49,10 +49,11 @@ export function stagioneDi(dataIso) {
     fine: `${a + 1}-06-30`,
     // Da questo giorno è dovuta la seconda metà della quota
     inizioSecondaMeta: `${a + 1}-01-01`,
-    /* Entro questo giorno va versata la prima metà: dopo, chi non l'ha
-       versata passa da solo ad "abbandonato" (scelta da confermare con la
-       società: vedi DA-FARE.md). */
-    scadenzaPrimaMeta: `${a}-10-31`
+    /* Chi a fine gennaio non ha ancora rinnovato, cioè non ha versato la
+       prima metà, passa da solo ad "abbandonato" (deciso dalla società il
+       28 settembre 2026). Non si mostra agli atleti: per loro la prima
+       metà va versata "il prima possibile". */
+    scadenzaPrimaMeta: `${a + 1}-01-31`
   };
 }
 
@@ -60,8 +61,8 @@ export function stagioneDi(dataIso) {
  * Il conto di una stagione: quanto si deve, in due metà, e quanto manca.
  *
  * La prima metà è dovuta sempre; la seconda solo se la persona è ancora
- * iscritta a gennaio, cioè se non si è ritirata o si è ritirata dal 1°
- * gennaio in poi. È la DATA DEL RITIRO a decidere, non quella dei
+ * iscritta a gennaio, cioè se non si è ritirata (o non ha abbandonato) o
+ * l'ha fatto dal 1° gennaio in poi. È la DATA DEL RITIRO a decidere, non quella dei
  * versamenti (scelta da confermare con la società).
  *
  * Il centesimo dispari va alla prima metà: 125,01 € fanno 62,51 + 62,50.
@@ -79,18 +80,13 @@ export function contoStagione(iscrizione, versato, stagione) {
   const primaMeta = Math.ceil(quota / 2);
   const secondaMeta = quota - primaMeta;
 
-  /* Chi ha abbandonato — non ha rinnovato, o non ha mai versato la prima
-     metà — per la stagione non c'è, e non deve niente. Quello che ha
-     versato resta, come credito (scelta da confermare con la società). */
-  if (iscrizione.stato === "abbandonata") {
-    return {
-      quota, primaMeta, secondaMeta, secondaDovuta: false, abbandonata: true,
-      dovuto: 0, versato, residuo: -versato
-    };
-  }
-
-  const ritirata = iscrizione.stato === "ritirata" && iscrizione.ritiratoIl;
-  const secondaDovuta = !ritirata || String(iscrizione.ritiratoIl) >= stagione.inizioSecondaMeta;
+  /* Chi si è ritirato e chi ha abbandonato seguono la stessa regola,
+     decisa dalla società il 28 settembre 2026: prima di gennaio la seconda
+     metà non è dovuta, la prima sì. */
+  const uscitaIl = iscrizione.stato === "ritirata" ? iscrizione.ritiratoIl
+    : iscrizione.stato === "abbandonata" ? iscrizione.abbandonataIl
+    : null;
+  const secondaDovuta = !uscitaIl || String(uscitaIl) >= stagione.inizioSecondaMeta;
 
   const dovuto = primaMeta + (secondaDovuta ? secondaMeta : 0);
 

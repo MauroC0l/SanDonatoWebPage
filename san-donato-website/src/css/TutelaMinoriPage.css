@@ -128,9 +128,27 @@
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: translate .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
-/* Hover mantenuto */
+
+/* La scheda si solleva e si accende d'arancio: dice che contiene qualcosa
+   da scaricare. translate e non transform, perché la comparsa in fila allo
+   scorrimento usa già transform. */
+.tml-doc-card:hover {
+  translate: 0 -4px;
+  border-color: var(--tml-accent);
+  box-shadow: var(--tml-shadow-hover);
+}
+
+.mv-attivo .tml-doc-card[data-rivela] {
+  transition:
+    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    translate .3s ease 0s,
+    box-shadow .3s ease 0s,
+    border-color .3s ease 0s;
+}
 
 .tml-doc-icon {
   font-size: 2rem;
@@ -167,7 +185,16 @@
   width: fit-content;
   flex-shrink: 0;
 }
-/* Hover mantenuto */
+
+.tml-download-btn:hover {
+  background: var(--tml-accent);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tml-doc-card,
+  .tml-download-btn { transition: none; }
+}
 
 /* SAFEGUARDING BLOCK (Fluidità e Anti-Overflow) */
 .tml-safeguarding-block {

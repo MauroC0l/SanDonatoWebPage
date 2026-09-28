@@ -33,7 +33,9 @@ export default function AboutSection() {
       {/* Le immagini sono livelli sovrapposti che si dissolvono l'uno
           nell'altro. Cambiando background-image su un solo elemento il
           passaggio era uno stacco netto: background-image non è animabile. */}
-      <div className="about-layers" aria-hidden="true">
+      {/* Le foto scorrono un po' più lente della pagina: la prima
+          schermata prende profondità senza che si aggiunga niente. */}
+      <div className="about-layers" aria-hidden="true" data-parallasse="0.18">
         {carouselImages.map((image, index) => (
           <div
             key={image}
@@ -46,10 +48,10 @@ export default function AboutSection() {
       <div className="about-overlay" aria-hidden="true"></div>
 
       <div className="about-content">
-        <h2 className="about-subtitle">
+        <h2 className="about-subtitle" data-rivela="zoom">
           {content.subtitle}
         </h2>
-        <p className="about-text">
+        <p className="about-text" data-rivela style={{ "--mv-ritardo": "180ms" }}>
           {content.description}
         </p>
       </div>

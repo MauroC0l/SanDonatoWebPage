@@ -19,7 +19,11 @@ const GalleriaPage = () => {
 
   return (
     <div className="galleria-page-container">
-      <div className="galleria-card">
+      {/* Macchie di colore che si muovono piano dietro alla scheda: la
+          pagina è un "arriva presto", e un fondo vivo lo dice meglio di
+          un grigio fermo. */}
+      <div className="mv-aurora" aria-hidden="true" />
+      <div className="galleria-card" data-inclina="5">
         <div className="icon-wrapper">
           <FaGift className="surprise-icon" />
         </div>

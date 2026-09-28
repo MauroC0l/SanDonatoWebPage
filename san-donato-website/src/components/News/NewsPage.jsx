@@ -221,7 +221,7 @@ export default function NewsPage() {
 
   return (
     <div className="nws">
-      <header className="nws-intestazione">
+      <header className="nws-intestazione" data-rivela>
         <span className="nws-occhiello">Archivio</span>
         <h1 className="nws-titolo-pagina">Le notizie della Polisportiva</h1>
         <p className="nws-sottotitolo">
@@ -336,7 +336,15 @@ export default function NewsPage() {
               {conFiltri && " con questi filtri"}
             </p>
 
-            <div className="nws-griglia">
+            {/* La chiave cambia con pagina e filtri: la griglia rinasce e
+                le schede ricompaiono in fila, invece di cambiare sotto gli
+                occhi senza segno. Serve anche a non riusare schede già
+                comparse, a cui React riscriverebbe le classi del movimento. */}
+            <div
+              className="nws-griglia"
+              data-rivela-gruppo
+              key={[paginaValida, ordine, sport, etichetta, da, a, cerca].join("|")}
+            >
               {conEvidenza
                 ? <>
                   <Scheda post={primo} grande />

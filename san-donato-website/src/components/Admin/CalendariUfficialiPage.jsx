@@ -466,6 +466,16 @@ export default function CalendariUfficialiPage() {
   const apertoDiSolito = () => false;
   const apriChiudi = (id, aperto) => setAperture((prima) => ({ ...prima, [id]: !aperto }));
 
+  /* Dall'avviso in cima al torneo: si apre, si toglie un eventuale filtro
+     per sport che lo nasconderebbe, e la pagina scorre fin lì. */
+  const vaiAlTorneo = (id) => {
+    setAperture((prima) => ({ ...prima, [id]: true }));
+    setSportScelto("");
+    requestAnimationFrame(() => {
+      document.getElementById(`cal-torneo-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   return (
     <div className="adm-page">
       <div className="adm-page-head">
@@ -508,15 +518,39 @@ export default function CalendariUfficialiPage() {
         </div>
       )}
 
+      {/* Quali gironi aspettano una squadra, torneo per torneo: una frase
+          generica costringeva ad aprire ogni torneo per trovarli. Ogni voce
+          apre il suo torneo e ci porta sopra. */}
       {senzaSquadra.length > 0 && (
-        <p className="adm-cal-didascalia adm-cal-avviso">
-          {senzaSquadra.length === 1
-            ? "C'è un girone in cui risulta iscritta una squadra della Polisportiva, ma che non è ancora collegato a nessuna squadra del sito."
-            : `Ci sono ${senzaSquadra.length} gironi in cui risulta iscritta una squadra della Polisportiva, ma che non sono ancora collegati a nessuna squadra del sito.`}
-          {" "}Assegna a ciascuno la propria squadra da <Link to={`${area}/squadre`}>Squadre</Link>,
-          nella riga &quot;Calendario ufficiale&quot;: da lì in poi le partite si aggiornano da sole
-          (seguendo i calendari ufficiali). Se un girone non ci riguarda, premi &quot;Non ci riguarda&quot;.
-        </p>
+        <div className="adm-cal-didascalia adm-cal-avviso adm-cal-da-assegnare">
+          <p className="adm-cal-da-assegnare-titolo">
+            <strong>
+              {senzaSquadra.length === 1
+                ? "1 girone da assegnare a una squadra"
+                : `${senzaSquadra.length} gironi da assegnare a una squadra`}
+            </strong>
+          </p>
+          <ul className="adm-cal-da-assegnare-elenco">
+            {dati.fonti
+              .map((fonte) => ({ fonte, gironi: senzaSquadra.filter((g) => g.fonteId === fonte.id) }))
+              .filter(({ gironi }) => gironi.length > 0)
+              .map(({ fonte, gironi }) => (
+                <li key={fonte.id}>
+                  <button type="button" className="adm-cal-vai" onClick={() => vaiAlTorneo(fonte.id)}>
+                    {fonte.nome}
+                  </button>
+                  <span className="adm-cal-da-assegnare-gironi">
+                    {gironi.map((g) => g.nome).join(" · ")}
+                  </span>
+                </li>
+              ))}
+          </ul>
+          <p className="adm-cal-da-assegnare-come">
+            Si assegnano da <Link to={`${area}/squadre`}>Squadre</Link>, nella riga
+            &quot;Calendario ufficiale&quot; della squadra: da lì in poi le partite si aggiornano
+            da sole. Se un girone non ci riguarda, apri il torneo e premi &quot;Non ci riguarda&quot;.
+          </p>
+        </div>
       )}
 
       {nuova && (
@@ -582,7 +616,7 @@ export default function CalendariUfficialiPage() {
         const idGironi = `cal-gironi-${fonte.id}`;
 
         return (
-          <section key={fonte.id} className={`adm-panel adm-cal-torneo ${fonte.attiva || inModifica ? "" : "is-disattivato"}`}>
+          <section key={fonte.id} id={`cal-torneo-${fonte.id}`} className={`adm-panel adm-cal-torneo ${fonte.attiva || inModifica ? "" : "is-disattivato"}`}>
             {/* L'intestazione e, alla sua destra, il pulsante che apre i
                 gironi. Centrato sull'intestazione e non sulla scheda
                 intera: la scheda si allunga quando si apre, l'intestazione

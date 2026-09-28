@@ -23,7 +23,7 @@ export default function TutelaMinoriPage() {
       <div className="tml-container">
         
         {/* SEZIONE INTRODUTTIVA */}
-        <section className="tml-intro-card">
+        <section className="tml-intro-card" data-rivela>
           <h2>{intro.title}</h2>
           <p>{intro.text}</p>
         </section>
@@ -31,8 +31,8 @@ export default function TutelaMinoriPage() {
         {/* GRIGLIA DOCUMENTI SAFEGUARDING (Aggiunta sotto) */}
         {safeguarding.documents && safeguarding.documents.length > 0 && (
           <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
-            <h3 className="tml-section-title">Documentazione Safeguarding</h3>
-            <div className="tml-docs-grid">
+            <h3 className="tml-section-title" data-rivela="sinistra">Documentazione Safeguarding</h3>
+            <div className="tml-docs-grid" data-rivela-gruppo>
               {safeguarding.documents.map((doc) => (
                 <div key={doc.id} className="tml-doc-card">
                   <div className="tml-doc-icon">
@@ -57,7 +57,7 @@ export default function TutelaMinoriPage() {
         )}
         
         {/* SAFEGUARDING OFFICER */}
-        <section className="tml-safeguarding-block">
+        <section className="tml-safeguarding-block" data-rivela="zoom">
           <div className="tml-sg-icon">
             <FaUserShield />
           </div>
@@ -76,8 +76,8 @@ export default function TutelaMinoriPage() {
 
         {/* GRIGLIA DOCUMENTI UFFICIALI */}
         <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
-          <h3 className="tml-section-title">Documenti Ufficiali</h3>
-          <div className="tml-docs-grid">
+          <h3 className="tml-section-title" data-rivela="sinistra">Documenti Ufficiali</h3>
+          <div className="tml-docs-grid" data-rivela-gruppo>
             {documents.map((doc) => (
               <div key={doc.id} className="tml-doc-card">
                 <div className="tml-doc-icon">

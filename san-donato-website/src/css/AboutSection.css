@@ -36,9 +36,12 @@
 
 /* --- Livelli del carosello --- */
 
+/* Più alti della sezione di un po' sopra e sotto: con la parallasse le
+   foto si spostano in verticale, e senza questo margine si vedrebbe il
+   fondo scuro scoprirsi da un bordo. La sezione taglia l'eccedenza. */
 .about-layers {
   position: absolute;
-  inset: 0;
+  inset: -14% 0;
   z-index: 0;
 }
 

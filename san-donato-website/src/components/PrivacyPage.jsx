@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <h2>{content.introTitle}</h2>
           <p>{content.introText}</p>
 
-          <div className="prv-documents-list">
+          <div className="prv-documents-list" data-rivela-gruppo>
             {documents.map((doc) => (
               <a 
                 key={doc.id} 

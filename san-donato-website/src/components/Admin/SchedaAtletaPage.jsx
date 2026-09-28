@@ -397,12 +397,13 @@ export default function SchedaAtletaPage() {
   /**
    * "Abbandonato": per la stagione in corso non c'è — non ha rinnovato, o
    * non ha mai versato. Non chiude l'account e non cancella niente; il
-   * conto non gli chiede più la quota. Si riattiva con un clic.
+   * conto segue la regola del ritiro: prima di gennaio la seconda metà non
+   * è dovuta. Si riattiva con un clic.
    */
   const abbandona = async () => {
     const ok = await conferma({
       titolo: `Segnare ${atleta.nomeCompleto} come abbandonato?`,
-      testo: "Per questa stagione non risulterà iscritto e la quota non gli sarà più chiesta. L'account resta: può ancora entrare, e lo si riattiva quando vuoi.",
+      testo: "Per questa stagione non risulterà iscritto. Se è prima di gennaio non deve la seconda metà della quota; la prima sì. L'account resta: può ancora entrare, e lo si riattiva quando vuoi.",
       conferma: "Segna come abbandonato"
     });
     if (!ok) return;
@@ -1045,7 +1046,7 @@ export default function SchedaAtletaPage() {
 
                   <p className="adm-hint adm-abbandono-spiega">
                     Se invece non ha rinnovato, o non ha mai cominciato:
-                    per la stagione non c&apos;è e non deve la quota.
+                    per la stagione non c&apos;è; prima di gennaio non deve la seconda metà.
                   </p>
                   <button
                     type="button"

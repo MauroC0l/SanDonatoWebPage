@@ -1,334 +1,953 @@
-/* =========================================
-   SPORT PAGE SYSTEM (Scoped: sp-)
-   ========================================= */
+/* =====================================================
+   Pagina Sport (prefisso sp-)
 
-:root {
-  --sp-bg: #f8f9fa;
-  --sp-card-bg: #ffffff;
-  --sp-text-main: #1f2937;
-  --sp-text-muted: #6b7280;
-  --sp-orange: #ff6600;
-  --sp-blue: #0056d6;
-  --shadow-soft: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
-  --radius-lg: 20px;
+   Tre parti: la testata scura con i numeri della stagione, il selettore
+   dello sport che resta attaccato in alto scorrendo, e il pannello dello
+   sport scelto (mosaico di riquadri + schede delle squadre).
+
+   Il colore dello sport scelto sta in --sp-c, messo dal JSX su
+   .sp-pagina: tutto quello che è "colorato" lo legge da lì, così
+   cambiare sport ritinge la pagina intera senza classi per ogni sport.
+   I movimenti comuni (comparse, inclinazione, aurora, nastro) arrivano
+   da Movimento.css; qui solo quelli propri della pagina.
+   ===================================================== */
+
+/* Registrata come colore, --sp-c si può animare: passando da calcio a
+   volley il cursore e gli accenti sfumano invece di scattare. Dove
+   @property non c'è, cambia di colpo e basta. */
+@property --sp-c {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0056d6;
 }
 
-.sp-page-wrapper {
+.sp-pagina {
+  --sp-inchiostro: #0b1b33;
+  --sp-grigio: #5b6778;
+  --sp-bordo: rgba(0, 43, 92, 0.09);
+  --sp-fondo: #f4f6fa;
+  --sp-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  /* Il colore dello sport, scurito per il testo su bianco: l'arancio puro
+     su bianco non arriva al contrasto minimo per le scritte piccole. */
+  --sp-c-testo: color-mix(in srgb, var(--sp-c) 78%, #000);
+  --sp-c-velo: color-mix(in srgb, var(--sp-c) 10%, transparent);
+
   font-family: 'Inter', system-ui, sans-serif;
-  background: var(--sp-bg);
-  min-height: 100vh;
-
+  color: var(--sp-inchiostro);
+  background:
+    radial-gradient(60rem 30rem at 100% 40rem, color-mix(in srgb, var(--sp-c) 7%, transparent), transparent 70%),
+    var(--sp-fondo);
   min-height: 100svh;
-  padding: 2rem 1rem 4rem;
-  color: var(--sp-text-main);
+  padding: 12px 12px 4rem;
+  transition: --sp-c .6s ease;
 }
 
-/* --- Animazioni ---
-   I nomi erano .fade-in / .fade-in-up mentre il JSX usa sp-fade-in:
-   le classi non combaciavano e l'animazione non partiva mai. */
-.sp-fade-in { animation: sp-fadeIn 0.5s ease-out; }
-.sp-fade-in-up { animation: sp-fadeInUp 0.4s ease-out forwards; opacity: 0; transform: translateY(15px); }
-
-@keyframes sp-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes sp-fadeInUp { to { opacity: 1; transform: translateY(0); } }
-
-/* --- Header --- */
-.sp-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
+.sp-solo-lettori {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.sp-main-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 900;
-  color: #111;
-  margin-bottom: 0.5rem;
-  letter-spacing: -1px;
+.sp-punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--psd-arancio, #ff6600);
+  box-shadow: 0 0 0 0 rgba(255, 102, 0, .6);
+  animation: sp-pulsa 2.4s ease-out infinite;
 }
+.sp-punto-chiaro { background: #fff; box-shadow: 0 0 0 0 rgba(255, 255, 255, .6); animation-name: sp-pulsa-chiaro; }
 
-.sp-highlight {
-  background: linear-gradient(120deg, var(--sp-blue), var(--sp-orange));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+/* =====================================================
+   TESTATA
+   ===================================================== */
 
-.sp-subtitle {
-  color: var(--sp-text-muted);
-  font-size: 1.1rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* --- Tabs Navigation --- */
-.sp-tabs-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 3rem;
-  position: sticky;
-  top: 1rem;
-  z-index: 100; /* Sta sopra al contenuto nello scroll */
-}
-
-.sp-tabs-wrapper {
-  background: #fff;
-  padding: 0.5rem;
-  border-radius: 50px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  display: flex;
-  gap: 0.5rem;
-}
-
-.sp-tab-button {
-  border: none;
-  background: transparent;
-  padding: 0.8rem 1.5rem;
-  border-radius: 40px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--sp-text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.sp-tab-button:hover {
-  background: rgba(0,0,0,0.03);
-  color: #333;
-}
-
-.sp-tab-button.active {
-  background: var(--tab-color); /* Colore dinamico in base allo sport */
+.sp-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 32px;
   color: #fff;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  transform: scale(1.05);
+  background:
+    radial-gradient(80% 90% at 0% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, #002b5c 0%, #001a38 70%, #00122a 100%);
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .55);
+  /* Spazio sotto al nastro per il selettore, che sale sul bordo */
+  padding-bottom: 44px;
 }
 
-.sp-tab-icon { font-size: 1.1rem; display: flex; }
+/* Reticolo sottile che svanisce verso i bordi: dà profondità senza
+   immagini da scaricare */
+.sp-eroe-griglia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 70% at 70% 40%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 70% 40%, #000 20%, transparent 75%);
+}
 
-/* --- Content Area --- */
-.sp-content-area {
-  max-width: 1200px;
+/* La scritta gigante vuota sullo sfondo, che scorre più lenta */
+.sp-eroe-fantasma {
+  position: absolute;
+  right: -2vw;
+  bottom: 5.5rem;
+  z-index: 0;
+  font-size: clamp(6rem, 24vw, 22rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .09);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* L'orbita degli sport. L'anello gira, e ogni icona gira al contrario
+   della stessa quantità: così resta dritta mentre fa il giro. Solo sugli
+   schermi larghi, dove accanto al titolo c'è posto. */
+.sp-orbita {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  top: 14%;
+  right: 4%;
+  width: 260px;
+  height: 260px;
+  pointer-events: none;
+}
+.sp-orbita-alone {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 102, 0, .45), transparent 65%);
+  filter: blur(30px);
+}
+.sp-orbita-anello {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, .2);
+  animation: sp-gira 36s linear infinite;
+}
+.sp-orbita-palla {
+  --sp-angolo: calc(var(--sp-i) / var(--sp-n) * 360deg);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 68px;
+  height: 68px;
+  margin: -34px 0 0 -34px;
+  transform: rotate(var(--sp-angolo)) translateY(-130px) rotate(calc(-1 * var(--sp-angolo)));
+}
+.sp-orbita-dritta {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-size: 1.7rem;
+  color: #fff;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .6);
+  animation: sp-gira 36s linear infinite reverse;
+}
+.sp-orbita-centro {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 136px;
+  height: 136px;
+  margin: -68px 0 0 -68px;
+  border-radius: 50%;
+  font-size: 3.4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: #fff;
+  background: radial-gradient(circle at 30% 25%, #ffb36b, var(--psd-arancio, #ff6600) 45%, #c43d00);
+  box-shadow: 0 30px 60px -20px rgba(255, 102, 0, .7), 0 0 0 10px rgba(255, 255, 255, .04);
+}
+.sp-orbita-centro small {
+  margin-top: .3rem;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .9;
+}
+@media (min-width: 1100px) {
+  .sp-orbita { display: block; }
+}
+
+.sp-eroe-contenuto {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
   margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6.5rem) clamp(1.25rem, 5vw, 3.5rem) clamp(4.5rem, 8vw, 6rem);
 }
 
-.sp-sport-intro {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.sp-sport-intro h2 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-
-/* Banner speciale per Volley */
-.sp-alert-banner {
-  background: #fff5eb;
-  border: 1px solid #ffd6b3;
-  color: #c2410c;
-  padding: 1rem;
-  border-radius: 12px;
+.sp-sopratitolo {
   display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  text-align: left;
-  max-width: 500px;
+  gap: .6rem;
+  margin: 0 0 1.4rem;
+  padding: .45rem .9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .14);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .85);
 }
 
-/* --- Schedule Grid ---
-   min(300px, 100%) evita che la colonna resti larga 300px su schermi
-   più stretti, cosa che faceva sbordare le card sui telefoni piccoli. */
-.sp-schedule-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
-  gap: 1.5rem;
-}
-
-/* --- Card Styles --- */
-.sp-card {
-  background: var(--sp-card-bg);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-soft);
-  border-top: 5px solid #ccc; /* Sovrascritto inline */
+.sp-titolo {
+  margin: 0;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease;
+  font-weight: 900;
+  line-height: .92;
+  letter-spacing: -.045em;
 }
-
-.sp-card:hover {
-  transform: translateY(-5px);
-}
-
-.sp-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-/* Titolo + annate restano insieme, la pillola sta sempre in alto a destra */
-.sp-card-heading { min-width: 0; }
-
-.sp-group-name {
-  font-size: 1.25rem;
+.sp-titolo-riga {
+  font-size: clamp(1.7rem, 4.5vw, 3rem);
   font-weight: 700;
-  margin: 0;
-  color: #111;
-  line-height: 1.2;
+  letter-spacing: -.02em;
+  color: rgba(255, 255, 255, .78);
+  margin-bottom: .35rem;
+}
+.sp-titolo-anno {
+  font-size: clamp(3.3rem, 13.5vw, 9.5rem);
+  padding-bottom: .08em; /* le discendenti non vengono tagliate dal clip */
+  font-variant-numeric: tabular-nums;
 }
 
-.sp-group-years {
-  margin: 0.3rem 0 0;
-  font-size: 0.8rem;
-  color: var(--sp-text-muted);
+.sp-sottotitolo {
+  max-width: 34rem;
+  margin: 1.4rem 0 0;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, .78);
+}
+
+.sp-numeri {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: clamp(2rem, 5vw, 3.2rem) 0 0;
+  max-width: 820px;
+}
+.sp-numero {
+  display: flex;
+  flex-direction: column-reverse; /* il numero sopra, l'etichetta sotto */
+  gap: .25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .13);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.sp-numero dt {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .66);
   line-height: 1.3;
 }
+.sp-numero dd {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.sp-contatore { font-variant-numeric: tabular-nums; }
 
-.sp-group-badge {
-  font-size: 0.75rem;
-  background: #f3f4f6;
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-  font-weight: 600;
-  color: #555;
-  white-space: nowrap;
+.sp-nastro {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+  padding: 1rem 0;
+  background: rgba(0, 0, 0, .12);
+}
+.sp-nastro-giro {
+  display: flex;
   flex-shrink: 0;
 }
-
-.sp-location-block {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-}
-
-.sp-icon-small { color: var(--sp-text-muted); margin-top: 3px; }
-.sp-icon-tiny { font-size: 0.8rem; opacity: 0.7; }
-
-.sp-map-link {
-  color: var(--sp-blue);
-  text-decoration: none;
-  font-weight: 500;
-  display: flex;
-  flex-direction: column;
-}
-.sp-map-link:hover { text-decoration: underline; }
-.sp-map-link small { color: var(--sp-text-muted); font-weight: 400; font-size: 0.85rem; }
-
-.sp-times-list {
-  margin-top: auto; /* Spinge in basso se la card è alta */
-  background: #f9fafb;
-  border-radius: 12px;
-  padding: 1rem;
-}
-
-.sp-time-entry { margin-bottom: 0.5rem; }
-.sp-time-entry:last-child { margin-bottom: 0; }
-
-.sp-time-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  font-size: 0.95rem;
-}
-
-.sp-time-place {
-  display: flex;
+.sp-nastro-voce {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-  font-size: 0.8rem;
-  color: var(--sp-text-muted);
+  gap: .55rem;
+  padding: 0 1.6rem;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, .72);
 }
+.sp-nastro-voce svg { color: var(--psd-arancio, #ff6600); }
 
-.sp-day { font-weight: 600; color: #444; display: flex; align-items: center; gap: 6px; }
-.sp-hour { font-family: monospace, sans-serif; color: #666; display: flex; align-items: center; gap: 6px; }
+/* =====================================================
+   SELETTORE DELLO SPORT
+   ===================================================== */
 
-/* --- Footer Note --- */
-.sp-footer-note {
-  margin-top: 4rem;
-  text-align: center;
-  color: var(--sp-text-muted);
-  font-size: 0.9rem;
+/* La fascia sale sul bordo della testata (margine negativo): il
+   selettore "galleggia" fra le due parti, e scorrendo resta in alto. */
+.sp-selettore-fascia {
+  position: sticky;
+  top: .75rem;
+  z-index: 50;
   display: flex;
   justify-content: center;
+  margin: -34px 0 clamp(1.8rem, 4vw, 3rem);
+  padding: 0 4px;
+}
+
+.sp-selettore {
+  --sp-bordo-int: 6px;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--sp-quanti), minmax(0, 1fr));
+  width: min(100%, 600px);
+  padding: var(--sp-bordo-int);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid rgba(255, 255, 255, .9);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .8) inset,
+    0 20px 45px -18px rgba(0, 26, 56, .45),
+    0 0 0 1px var(--sp-bordo);
+}
+
+.sp-selettore-cursore {
+  position: absolute;
+  top: var(--sp-bordo-int);
+  bottom: var(--sp-bordo-int);
+  left: var(--sp-bordo-int);
+  width: calc((100% - 2 * var(--sp-bordo-int)) / var(--sp-quanti));
+  border-radius: 999px;
+  background:
+    radial-gradient(120% 140% at 30% 0%, rgba(255, 255, 255, .35), transparent 55%),
+    var(--sp-c);
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--sp-c) 70%, transparent);
+  transform: translateX(calc(var(--sp-indice) * 100%));
+  transition: transform .6s var(--sp-curva);
+}
+
+.sp-scheda {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  opacity: 0.8;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 52px;
+  padding: .6rem .9rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sp-grigio);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color .35s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.sp-scheda:hover { color: var(--sp-inchiostro); }
+.sp-scheda.attiva { color: #fff; }
+.sp-scheda:focus-visible { outline: 3px solid var(--psd-arancio, #ff6600); outline-offset: 3px; }
+
+.sp-scheda-icona {
+  font-size: 1.15rem;
+  transition: transform .5s var(--sp-curva);
+}
+.sp-scheda.attiva .sp-scheda-icona { transform: rotate(-20deg) scale(1.12); }
+
+.sp-scheda-conto {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 .35rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  background: rgba(0, 43, 92, .07);
+  transition: background .35s ease;
+}
+.sp-scheda.attiva .sp-scheda-conto { background: rgba(255, 255, 255, .22); }
+
+/* =====================================================
+   PANNELLO DELLO SPORT
+   ===================================================== */
+
+.sp-pannello {
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
-/* =========================================
-   RESPONSIVE
-   ========================================= */
+/* Entra dal lato verso cui ci si è spostati nel selettore */
+.mv-attivo .sp-entra-destra { animation: sp-da-destra .65s var(--sp-curva) both; }
+.mv-attivo .sp-entra-sinistra { animation: sp-da-sinistra .65s var(--sp-curva) both; }
 
-@media (max-width: 600px) {
-  .sp-page-wrapper { padding: 1.25rem 0.85rem 3rem; }
+/* ---------- Mosaico ---------- */
 
-  .sp-header { margin-bottom: 1.75rem; }
-  .sp-subtitle { font-size: 1rem; }
-  .sp-tabs-container { margin-bottom: 2rem; }
+.sp-bento {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+}
+.sp-bento > * { min-width: 0; }
 
-  .sp-tabs-wrapper {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .sp-tab-button {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    flex: 1;
-    justify-content: center;
-  }
-
-  /* La scala ingrandiva la pillola attiva facendola uscire dal contenitore */
-  .sp-tab-button.active { transform: none; }
-
-  .sp-sport-intro h2 { font-size: 1.6rem; }
-
-  .sp-alert-banner { width: 100%; }
-
-  .sp-schedule-grid { gap: 1rem; }
-  .sp-card { padding: 1.25rem; }
-
-  /* Su touch l'effetto hover resta "incollato" dopo il tap */
-  .sp-card:hover { transform: none; }
-
-  .sp-footer-note {
-    margin-top: 2.5rem;
-    align-items: flex-start;
-    text-align: left;
-  }
+.sp-tessera {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  background: #fff;
+  border: 1px solid var(--sp-bordo);
+  box-shadow: 0 18px 40px -28px rgba(0, 26, 56, .35);
 }
 
-/* Sotto i 400px l'etichetta non ci sta: restano le sole icone */
-@media (max-width: 399px) {
-  .sp-tab-label { display: none; }
+.sp-tessera-intro { grid-column: span 7; }
+.sp-tessera-cerca { grid-column: span 5; }
+.sp-tessera-settimana { grid-column: span 5; }
+.sp-tessera-sedi { grid-column: span 7; }
+/* Senza il riquadro "Info utili" l'introduzione prende tutta la riga */
+.sp-tessera-intro:last-child,
+.sp-tessera-intro:not(:has(+ .sp-tessera-cerca)) { grid-column: 1 / -1; }
 
-  .sp-group-badge {
-    white-space: normal;
-    text-align: right;
-  }
+.sp-tessera-titolo {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+.sp-tessera-nota {
+  margin: .25rem 0 0;
+  font-size: .85rem;
+  color: var(--sp-grigio);
 }
 
-@media (hover: none) {
-  .sp-card:hover { transform: none; }
+/* Introduzione: scura, con l'icona dello sport enorme in filigrana */
+.sp-tessera-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 300px;
+  color: #fff;
+  border: 0;
+  background:
+    radial-gradient(90% 120% at 100% 100%, color-mix(in srgb, var(--sp-c) 55%, transparent), transparent 60%),
+    linear-gradient(150deg, #0b2447 0%, #061429 100%);
+}
+.sp-intro-filigrana {
+  position: absolute;
+  right: -3.5rem;
+  top: -3.5rem;
+  width: 17rem;
+  height: 17rem;
+  color: #fff;
+  opacity: .08;
+  animation: sp-gira 60s linear infinite;
+  pointer-events: none;
+}
+.sp-intro-icona {
+  display: inline-grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-bottom: auto;
+  border-radius: 16px;
+  font-size: 1.45rem;
+  background: var(--sp-c);
+  box-shadow: 0 12px 26px -10px var(--sp-c);
+}
+.sp-intro-titolo {
+  position: relative;
+  margin: 2.5rem 0 .6rem;
+  font-size: clamp(3rem, 9vw, 5.8rem);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.05em;
+}
+.sp-intro-testo {
+  position: relative;
+  max-width: 32rem;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .8);
+}
+.sp-intro-conto {
+  position: relative;
+  margin: 1.2rem 0 0;
+  font-size: .9rem;
+  color: rgba(255, 255, 255, .7);
+}
+.sp-intro-conto strong { color: #fff; font-size: 1.05rem; }
+
+/* Cercasi atleti: il colore pieno dello sport, per farsi notare */
+.sp-tessera-cerca {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  color: #fff;
+  border: 0;
+  background:
+    radial-gradient(80% 80% at 100% 0%, rgba(255, 255, 255, .28), transparent 60%),
+    linear-gradient(145deg, var(--sp-c), color-mix(in srgb, var(--sp-c) 65%, #000));
+}
+.sp-tessera-etichetta {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  align-self: flex-start;
+  padding: .35rem .8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.sp-cerca-testo {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.sp-chiama {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .3rem .7rem;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: .85rem 1.3rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--sp-inchiostro);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .45);
+}
+.sp-chiama svg { color: var(--sp-c-testo); }
+.sp-chiama-numero {
+  font-weight: 600;
+  color: var(--sp-grigio);
+  font-variant-numeric: tabular-nums;
+}
+.sp-chiama:hover { color: var(--sp-inchiostro); box-shadow: 0 18px 36px -12px rgba(0, 0, 0, .55); }
+.sp-chiama:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+/* La settimana: una colonna per giorno, alta quanto gli allenamenti */
+.sp-settimana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sp-giorno {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+}
+.sp-giorno-conto {
+  min-height: 1.2em;
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--sp-c-testo);
+  font-variant-numeric: tabular-nums;
+}
+.sp-giorno-binario {
+  position: relative;
+  width: 100%;
+  max-width: 42px;
+  height: 120px;
+  border-radius: 12px;
+  background: var(--sp-c-velo);
+  overflow: hidden;
+}
+.sp-giorno-barra {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(to top, var(--sp-c), color-mix(in srgb, var(--sp-c) 55%, #fff));
+  transform-origin: bottom;
+  transform: scaleY(var(--sp-livello));
+  transition: transform 1.1s var(--sp-curva);
+}
+.sp-giorno-nome {
+  font-size: .78rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--sp-grigio);
+}
+.sp-giorno.vuoto .sp-giorno-nome { opacity: .5; }
+
+/* Le barre crescono quando il riquadro compare; il ritardo le fa salire
+   una dopo l'altra, da lunedì a domenica */
+.mv-attivo .sp-tessera-settimana:not(.mv-visto) .sp-giorno-barra { transform: scaleY(0); }
+.sp-giorno:nth-child(2) .sp-giorno-barra { transition-delay: .06s; }
+.sp-giorno:nth-child(3) .sp-giorno-barra { transition-delay: .12s; }
+.sp-giorno:nth-child(4) .sp-giorno-barra { transition-delay: .18s; }
+.sp-giorno:nth-child(5) .sp-giorno-barra { transition-delay: .24s; }
+.sp-giorno:nth-child(6) .sp-giorno-barra { transition-delay: .3s; }
+.sp-giorno:nth-child(7) .sp-giorno-barra { transition-delay: .36s; }
+
+/* Le sedi */
+.sp-sedi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 8px;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sp-sede {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  height: 100%;
+  padding: .75rem .85rem;
+  border-radius: 16px;
+  background: var(--sp-fondo);
+  color: inherit;
+  text-decoration: none;
+  transition: background .3s ease, box-shadow .3s ease;
+}
+.sp-sede:hover { background: var(--sp-c-velo); color: inherit; box-shadow: 0 0 0 1px color-mix(in srgb, var(--sp-c) 30%, transparent) inset; }
+.sp-sede:focus-visible { outline: 3px solid var(--psd-arancio, #ff6600); outline-offset: 2px; }
+.sp-sede-icona {
+  flex-shrink: 0;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: .6rem;
+  border-radius: 12px;
+  color: var(--sp-c-testo);
+  background: #fff;
+  box-shadow: 0 4px 12px -6px rgba(0, 26, 56, .3);
+}
+.sp-sede-testo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  line-height: 1.3;
+}
+.sp-sede-testo strong { font-size: .95rem; font-weight: 700; }
+.sp-sede-testo small { font-size: .8rem; color: var(--sp-grigio); }
+.sp-sede-conto {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--sp-c-testo);
+}
+.sp-freccia {
+  flex-shrink: 0;
+  font-size: .8rem;
+  color: var(--sp-c-testo);
+  opacity: .45;
+  transition: transform .4s var(--sp-curva), opacity .3s ease;
+}
+.sp-sede:hover .sp-freccia,
+.sp-squadra-sede:hover .sp-freccia { opacity: 1; transform: translateX(4px) rotate(-45deg); }
+
+/* ---------- Le squadre ---------- */
+
+.sp-squadre-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .5rem 2rem;
+  margin: clamp(3rem, 7vw, 5rem) 0 1.5rem;
+}
+.sp-squadre-titolo {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+.sp-squadre-conto {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  padding: 0 .5rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  letter-spacing: 0;
+  color: #fff;
+  background: var(--sp-c);
+}
+.sp-squadre-testa p { margin: 0; color: var(--sp-grigio); }
+
+.sp-squadre {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
+}
+.sp-squadra-cornice { display: flex; }
+
+.sp-squadra {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 1.4rem 1.4rem 1.1rem;
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 55% at 100% 0%, var(--sp-c-velo), transparent 70%),
+    #fff;
+  border: 1px solid var(--sp-bordo);
+  box-shadow: 0 16px 36px -26px rgba(0, 26, 56, .4);
+  transition: box-shadow .4s ease, border-color .4s ease;
+}
+.sp-squadra:hover {
+  border-color: color-mix(in srgb, var(--sp-c) 35%, transparent);
+  box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--sp-c) 60%, rgba(0, 26, 56, .5));
 }
 
+.sp-squadra-testa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.sp-chip {
+  display: inline-block;
+  padding: .3rem .7rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--sp-c-testo);
+  background: var(--sp-c-velo);
+}
+/* Il numero d'ordine, vuoto: si riempie di colore al passaggio */
+.sp-squadra-numero {
+  font-size: 2.6rem;
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--sp-c) 45%, transparent);
+  transition: color .4s ease;
+  font-variant-numeric: tabular-nums;
+}
+.sp-squadra:hover .sp-squadra-numero { color: color-mix(in srgb, var(--sp-c) 22%, transparent); }
+
+.sp-squadra-nome {
+  margin: 1.1rem 0 .2rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+.sp-squadra-annate {
+  margin: 0;
+  font-size: .9rem;
+  color: var(--sp-grigio);
+}
+
+.sp-orari {
+  display: grid;
+  gap: 6px;
+  margin: 1.1rem 0 1.1rem;
+  padding: 0;
+  list-style: none;
+}
+.sp-orario {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .25rem .75rem;
+  padding: .6rem .75rem;
+  border-radius: 14px;
+  background: var(--sp-fondo);
+}
+.sp-orario-giorno { font-weight: 700; font-size: .95rem; }
+.sp-orario-ore {
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  font-size: .88rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--sp-c-testo);
+  background: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sp-c) 22%, transparent) inset;
+  white-space: nowrap;
+}
+.sp-orario-sede {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--sp-c-testo);
+}
+
+.sp-squadra-sede {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--sp-bordo);
+  color: inherit;
+  text-decoration: none;
+}
+.sp-squadra-sede:hover { color: inherit; }
+.sp-squadra-sede:focus-visible { outline: 3px solid var(--psd-arancio, #ff6600); outline-offset: 4px; border-radius: 10px; }
+.sp-squadra-sede-icona {
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: .55rem;
+  border-radius: 12px;
+  color: #fff;
+  background: var(--sp-c-testo);
+}
+.sp-squadra-sede-testo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+.sp-squadra-sede-testo strong { font-size: .92rem; }
+.sp-squadra-sede-testo small { font-size: .8rem; color: var(--sp-grigio); }
+
+/* ---------- Nota in fondo ---------- */
+
+.sp-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: .7rem;
+  max-width: 720px;
+  margin: clamp(2.5rem, 6vw, 4rem) auto 0;
+  padding: 1rem 1.3rem;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--sp-bordo);
+  color: var(--sp-grigio);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+.sp-nota svg { flex-shrink: 0; margin-top: .2rem; color: var(--sp-c-testo); }
+.sp-nota p { margin: 0; }
+
+/* =====================================================
+   SCHERMI
+   ===================================================== */
+
+@media (max-width: 960px) {
+  /* Introduzione e "Info utili" a tutta riga, settimana e sedi affiancate */
+  .sp-tessera-intro,
+  .sp-tessera-cerca { grid-column: 1 / -1; }
+  .sp-tessera-settimana,
+  .sp-tessera-sedi { grid-column: span 6; }
+}
+
+@media (max-width: 640px) {
+  .sp-pagina { padding: 8px 8px 3rem; }
+  .sp-eroe { border-radius: 26px; }
+  .sp-numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .sp-numero { padding: .85rem .95rem; border-radius: 16px; }
+  .sp-selettore { width: 100%; }
+  .sp-scheda { gap: .4rem; padding: .55rem .4rem; font-size: .95rem; }
+  .sp-scheda-conto { display: none; }
+  .sp-bento { gap: 12px; }
+  .sp-tessera-settimana,
+  .sp-tessera-sedi { grid-column: 1 / -1; }
+  .sp-tessera { border-radius: 24px; }
+  .sp-tessera-intro { min-height: 260px; }
+  .sp-intro-filigrana { width: 12rem; height: 12rem; right: -2.5rem; top: -2.5rem; }
+  .sp-giorno-binario { height: 96px; }
+  .sp-squadre { gap: 14px; }
+  .sp-squadra { padding: 1.2rem 1.15rem 1rem; }
+}
+
+/* =====================================================
+   ANIMAZIONI
+   ===================================================== */
+
+@keyframes sp-da-destra {
+  from { opacity: 0; transform: translate3d(48px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sp-da-sinistra {
+  from { opacity: 0; transform: translate3d(-48px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sp-gira { to { transform: rotate(360deg); } }
+@keyframes sp-pulsa {
+  0% { box-shadow: 0 0 0 0 rgba(255, 102, 0, .6); }
+  80%, 100% { box-shadow: 0 0 0 10px rgba(255, 102, 0, 0); }
+}
+@keyframes sp-pulsa-chiaro {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .6); }
+  80%, 100% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+}
+
+/* Chi ha chiesto meno movimento: niente rotazioni, pulsazioni o
+   scivolamenti; il cursore del selettore si sposta di colpo. */
 @media (prefers-reduced-motion: reduce) {
-  .sp-fade-in,
-  .sp-fade-in-up {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-  .sp-card,
-  .sp-tab-button { transition: none; }
+  .sp-pagina { transition: none; }
+  .sp-punto,
+  .sp-intro-filigrana,
+  .sp-orbita-anello,
+  .sp-orbita-dritta { animation: none; }
+  .sp-selettore-cursore,
+  .sp-scheda-icona,
+  .sp-giorno-barra,
+  .sp-freccia { transition: none; }
+  .sp-scheda.attiva .sp-scheda-icona { transform: none; }
 }

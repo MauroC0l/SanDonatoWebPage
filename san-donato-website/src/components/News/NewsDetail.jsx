@@ -85,7 +85,7 @@ export default function NewsDetail() {
             Questo rimane a larghezza intera sopra tutto 
         */}
         <header className="nd-header">
-          <div className="nd-tags-wrapper">
+          <div className="nd-tags-wrapper" data-rivela-gruppo>
             {tags.map((tag, index) => (
               <span key={index} className="nd-tag">
                 <FaTag size={10} /> {tag}
@@ -115,8 +115,12 @@ export default function NewsDetail() {
               Deve essere posizionata PRIMA del testo nel codice HTML
               per far sì che il float funzioni correttamente.
           */}
-          <div className="nd-float-visual">
-            <div className="nd-image-wrapper" onClick={() => setIsLightboxOpen(true)}>
+          {/* Compare l'involucro, si inclina la foto: due elementi, perché
+              comparsa e inclinazione usano entrambe transform. Il corpo
+              del testo invece resta fermo: è lungo, e un elemento molto
+              alto non raggiunge mai la soglia che lo farebbe comparire. */}
+          <div className="nd-float-visual" data-rivela="zoom">
+            <div className="nd-image-wrapper" data-inclina="5" onClick={() => setIsLightboxOpen(true)}>
               <img 
                 src={displayImage} 
                 alt={post.title} 
@@ -140,7 +144,7 @@ export default function NewsDetail() {
         </div>
 
         {/* --- FOOTER --- */}
-        <footer className="nd-footer-action">
+        <footer className="nd-footer-action" data-rivela>
           <button
             className="nd-btn-back"
             onClick={() => navigate("/news")}

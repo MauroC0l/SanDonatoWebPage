@@ -307,12 +307,25 @@
   border-radius: 16px;
   border: 1px solid var(--c-border);
   position: relative;
-  transition: transform 0.3s;
+  transition: translate 0.3s, border-color 0.3s;
 }
 
+/* translate e non transform: le schede compaiono in fila allo
+   scorrimento, e quella comparsa usa transform. */
 .c5xm-deadline-card:hover {
-  transform: translateY(-5px);
+  translate: 0 -5px;
   border-color: var(--c-accent);
+}
+
+/* La comparsa riscrive la transizione con il suo ritardo in fila: il
+   passaggio del mouse deve rispondere subito. */
+.mv-attivo .c5xm-deadline-card[data-rivela] {
+  transition:
+    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    translate .3s ease 0s,
+    border-color .3s ease 0s;
 }
 
 .c5xm-date {

@@ -32,10 +32,10 @@ Resta aperto:
   atleta e allenatore. Se anche dirigenti e segreteria versano qualcosa, è
   una riga in `server/autorizzazioni.js` — e un test che va aggiornato
   apposta, perché oggi dice il contrario;
-- **un allenatore che gioca anche in prima squadra** oggi prende la quota da
-  atleta se la segreteria gliel'ha messa, e quella degli allenatori solo se
-  non ne ha nessuna. Non paga due volte. Se invece deve, serve una regola
-  nuova: una quota per persona non basta più;
+- **un allenatore che gioca anche** — per ora non è previsto (la società,
+  28/09/2026): oggi prende la quota da atleta se la segreteria gliel'ha
+  messa, e quella degli allenatori solo se non ne ha nessuna. Se un giorno
+  dovesse pagarle tutte e due, serve una regola nuova;
 ### Tariffa per fratelli: cosa succede quando il primo si ritira
 
 Fatto: il giro completo — l'atleta dichiara il codice fiscale del fratello
@@ -50,12 +50,9 @@ Resta aperto:
   la segreteria legge "nella stagione X non risulta iscritto" quando il
   fratello trovato non ha un'iscrizione attiva a quella stagione. Nessun
   rifiuto automatico: decide lei;
-- **il proprio codice fiscale è ancora controllato solo nella lunghezza**
-  (`server/rotte/iscrizione.js`). Quello del fratello no: lì il carattere di
-  controllo si verifica. La differenza è voluta — stringere anche l'altro
-  significherebbe rifiutare il salvataggio a chi ha già scritto un codice
-  fiscale storto mesi fa — ma finché resta, la ricerca del fratello può non
-  trovare una persona che c'è;
+- **il proprio codice fiscale — FATTO (28/09/2026).** Si verifica anche il
+  carattere di controllo, ma solo quando cambia: chi ne ha salvato uno
+  storto mesi fa non resta bloccato mentre corregge altro;
 - **nessuno avvisa chi ha dichiarato.** Conferma e rifiuto si vedono solo
   entrando nel sito, come tutto il resto: è la stessa mancanza delle email,
   più in basso in questa pagina;
@@ -97,34 +94,32 @@ Fatto il 28 settembre 2026 (migrazione 0025):
 
 Resta aperto:
 
-- **per quanti anni si tengono i dati di chi non torna**: lo deve dire chi
-  segue la privacy della società. Non è ancora stato chiesto;
+- **i dati di chi non torna** restano nella stagione in cui c'era, e la
+  stagione nuova non li ha (la società, 28/09/2026). Resta da stabilire con
+  chi segue la privacy DOPO QUANTI ANNI le stagioni vecchie si cancellano:
+  il GDPR vuole un periodo scritto. Nota: anagrafica e account sono della
+  persona, non della stagione, e oggi restano finché qualcuno non li toglie;
 - **il rinnovo del 1° luglio — FATTO (deciso il 28 settembre 2026).** Tutti
   gli iscritti passano da soli alla stagione nuova con la quota Rinnovo, da
   saldare; chi aveva la quota famiglia o un'altra passa a Rinnovo e rifà la
   richiesta. Chi si era ritirato o aveva abbandonato arriva come
   "abbandonato" (server/manutenzione-stagioni.js, cron /api/cron/stagioni);
-- **abbandono automatico — SPENTO finché non ci sono i pagamenti.** Chi non
-  versa la prima metà passa ad "abbandonato"; se poi la versa, torna attivo
-  da solo. La società non vuole indicare una scadenza agli atleti ("va
-  saldata il prima possibile", 28/09/2026), ma per l'abbandono automatico
-  una data serve: oggi nel codice è il 31 ottobre (`scadenzaPrimaMeta` in
-  server/stagioni.js), non mostrata da nessuna parte. **Da decidere prima
-  di accenderlo.**
+- **abbandono automatico — SPENTO finché non ci sono i pagamenti.** Chi a
+  fine gennaio non ha rinnovato (non ha versato la prima metà) passa ad
+  "abbandonato"; se poi la versa, torna attivo da solo. Deciso dalla
+  società il 28/09/2026 (`scadenzaPrimaMeta` in server/stagioni.js, il
+  31 gennaio). Agli atleti non si mostra: per loro "il prima possibile".
   Si accende con `ABBANDONI_AUTOMATICI=1` su Vercel: oggi i versamenti non si
   registrano, e acceso segnerebbe come abbandonati tutti;
-- **chi è "abbandonato" non deve la quota** e l'account resta aperto (può
-  entrare e tornare): l'account aperto è confermato dalla società il
-  28/09/2026, il "non deve la quota" è ancora da confermare;
-- **"prima di gennaio" è la data del ritiro**, non quella dei versamenti:
-  scelta fatta nel codice, da confermare con la società;
+- **ritirati e abbandonati seguono la stessa regola** (la società,
+  28/09/2026): prima di gennaio non devono la seconda metà, la prima sì;
+  conta la data in cui si esce. L'account resta aperto;
 - **il pagamento online in due rate**: quando arriverà, deve scrivere
   `pagamenti.stagione_id` e sapere quale metà sta pagando;
 - **certificato e taglia sono della persona**, non della stagione: una
   scheda sola, come prima. Se servono per stagione, va spostato;
-- **le colonne della quota su `schede_atleta`** non si usano più: vanno
-  tolte con una migrazione, dopo aver controllato che la 0024 abbia copiato
-  tutto anche sul database vero.
+- **le colonne della quota su `schede_atleta` — TOLTE** (migrazione 0028,
+  che su un database nuovo gira dopo la copia della 0024).
 
 ---
 
@@ -150,9 +145,8 @@ da dove si ripristinano o si cancellano per sempre ("Svuota il cestino").
 
 Resta da fare:
 
-- la colonna `notizie.categoria` non si usa più: va tolta con una
-  migrazione, insieme a `scripts/classifica-notizie.mjs`, che la scrive
-  ancora;
+- FATTO: tolte la colonna `notizie.categoria` (migrazione 0028) e
+  `scripts/classifica-notizie.mjs`;
 - FATTO: il cestino si svuota da solo dopo 30 giorni (cron notturno
   /api/cron/stagioni, e ogni volta che si apre il cestino).
 
@@ -171,12 +165,10 @@ locale funziona con `ARCHIVIO_LOCALE=1`. Da verificare, una volta collegato
 R2, anche il percorso completo del certificato: caricamento, anteprima,
 controllo della segreteria.
 
-### Telefono: il limite di 10 cifre è solo nel browser
+### Telefono: FATTO (28 settembre 2026)
 
-I campi del telefono accettano solo cifre, al massimo 10. Il server però
-controlla solo la lunghezza (40 caratteri): chi scrive a mano una richiesta
-passa lo stesso. Da stringere anche lì, normalizzando i numeri già salvati
-con gli spazi.
+Solo cifre, al massimo 10, controllato anche dal server: spazi, trattini e
+il prefisso +39 si tolgono prima di salvare.
 
 ---
 
@@ -186,6 +178,15 @@ Non sono lavori di programmazione: senza una decisione o una credenziale non
 si può cominciare.
 
 ### Archivio dei file su Cloudflare R2
+
+**Prima di andare in produzione: i certificati medici non devono essere
+pubblici.** Oggi ogni file ha un indirizzo pubblico permanente
+(`URL_PUBBLICO_FILE` + chiave casuale): chi ha il link di un certificato
+lo apre per sempre, senza entrare nel sito. Per i certificati (dati sulla
+salute) serve un bucket privato, con link firmati che scadono dopo pochi
+minuti e si danno solo a chi ha il permesso di vederli. Il bucket va creato
+con giurisdizione UE.
+
 
 Servono `R2_ACCOUNT_ID`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`,
 `R2_SECRET_ACCESS_KEY` e il dominio pubblico da cui i file si leggono.
@@ -252,9 +253,10 @@ cartelle Drive della federazione e il calendario del sito le segue (vedi
 - **i venti calendari Google di squadra sono vuoti** (verificato con la
   società il 27 settembre 2026) e **non servono più**: al loro posto ogni
   squadra ha un calendario da abbonare, `/api/calendario/:id.ics`, che
-  Google e Apple rileggono da soli (deciso lo stesso giorno). Da togliere,
-  con calma: `scripts/importa-eventi-google.mjs`, la colonna
-  `squadre.calendario_google_id` e le variabili `VITE_*_CALENDAR_ID`;
+  Google e Apple rileggono da soli (deciso lo stesso giorno). Tolti il
+  28/09/2026 lo script di importazione e la colonna
+  `squadre.calendario_google_id` (migrazione 0028); le variabili
+  `VITE_*_CALENDAR_ID` si possono togliere da .env e da Vercel;
 - **Google Calendar rilegge quando vuole**: di solito ogni 8-24 ore, e non
   si può forzare. Una partita spostata il giorno stesso sul sito si vede
   subito, sul telefono di chi usa Google no. Apple rispetta le sei ore

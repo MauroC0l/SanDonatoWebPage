@@ -11,7 +11,7 @@ describe("la stagione di una data", () => {
     const s = stagioneDi("2027-01-15");
     expect(s).toEqual({
       nome: "2026/27", inizio: "2026-07-01", fine: "2027-06-30", inizioSecondaMeta: "2027-01-01",
-      scadenzaPrimaMeta: "2026-10-31"
+      scadenzaPrimaMeta: "2027-01-31"
     });
   });
 
@@ -54,11 +54,15 @@ describe("il conto di una stagione", () => {
     expect(c.residuo).toBe(-10000);
   });
 
-  it("chi ha abbandonato non deve niente, e quello che ha versato è credito", () => {
-    const c = contoStagione({ quotaCentesimi: 25000, stato: "abbandonata" }, 3000, stagione);
-    expect(c.dovuto).toBe(0);
-    expect(c.residuo).toBe(-3000);
+  it("chi abbandona prima di gennaio deve solo la prima metà", () => {
+    const c = contoStagione({ quotaCentesimi: 25000, stato: "abbandonata", abbandonataIl: "2026-11-20" }, 3000, stagione);
     expect(c.secondaDovuta).toBe(false);
+    expect(c.dovuto).toBe(12500);
+  });
+
+  it("chi abbandona da gennaio in poi deve tutta la quota", () => {
+    const c = contoStagione({ quotaCentesimi: 25000, stato: "abbandonata", abbandonataIl: "2027-02-01" }, 0, stagione);
+    expect(c.dovuto).toBe(25000);
   });
 
   it("senza quota non c'è niente da dovere, ma il versato si vede", () => {

@@ -258,7 +258,7 @@ Vedi `.env.esempio` per l'elenco completo e commentato.
 | `DATABASE_URL` | Postgres |
 | `R2_*`, `URL_PUBBLICO_FILE` | archivio dei file su Cloudflare R2 |
 | `ARCHIVIO_LOCALE` | **solo in locale**: scrive i file in `public/caricamenti` |
-| `VITE_GOOGLE_API_KEY`, `VITE_*_CALENDAR_ID` | calendari Google, in via di dismissione |
+| `VITE_GOOGLE_API_KEY` | calendari Google, in via di dismissione (i `VITE_*_CALENDAR_ID` non si usano più: si possono togliere da .env) |
 | `CRON_SECRET` | la lettura notturna dei calendari ufficiali: senza, è spenta |
 | `GOOGLE_DRIVE_API_KEY` | facoltativa: legge le cartelle Drive con l'API ufficiale invece che dalla pagina pubblica |
 | `MAILERLITE_API_KEY` | newsletter — **solo lato server**, mai con prefisso `VITE_` |

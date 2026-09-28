@@ -82,7 +82,7 @@ const CinquePerMillePage = () => {
 
         {/* HOW TO SECTION (Fac-simile Visuale) */}
         <section className="c5xm-facsimile-wrapper">
-          <div className="c5xm-hero-content">
+          <div className="c5xm-hero-content" data-rivela="zoom">
             <h2 className="c5xm-facsimile-title">{facsimile.sectionTitle}</h2>
             <p className="c5xm-subtitle" style={{color: 'var(--c-text-muted)', marginBottom: '2rem'}}>
               {facsimile.subtitle}
@@ -113,8 +113,8 @@ const CinquePerMillePage = () => {
 
         {/* SECTION 5: DEADLINES */}
         <section className="c5xm-deadlines-section">
-          <h2 className="c5xm-section-title">{deadlines.title}</h2>
-          <div className="c5xm-grid">
+          <h2 className="c5xm-section-title" data-rivela="sinistra">{deadlines.title}</h2>
+          <div className="c5xm-grid" data-rivela-gruppo>
             {deadlines.items.map((item) => (
               <div key={item.id} className="c5xm-deadline-card">
                 <div className="c5xm-deadline-header">
@@ -130,10 +130,10 @@ const CinquePerMillePage = () => {
         {/* SECTION 6: RENDICONTI TABLE */}
         {reportsSection && (
           <section className="c5xm-reports-section">
-            <h2 className="c5xm-section-title">{reportsSection.title}</h2>
-            <p className="c5xm-reports-desc">{reportsSection.description}</p>
+            <h2 className="c5xm-section-title" data-rivela="sinistra">{reportsSection.title}</h2>
+            <p className="c5xm-reports-desc" data-rivela>{reportsSection.description}</p>
             
-            <div className="c5xm-table-responsive">
+            <div className="c5xm-table-responsive" data-rivela>
               <table className="c5xm-reports-table">
                 <thead>
                   <tr>

@@ -674,6 +674,17 @@ body.cp-modal-open { overflow: hidden; }
 
   .cp-sidebar.cp-mobile-open { transform: translateY(0); }
 
+  /* Sul telefono la spalla è un cassetto fuori schermo: le sue schede non
+     entrerebbero mai in vista da sole, e aprendolo comparirebbero in
+     ritardo mentre il cassetto sale. Qui sono subito al loro posto. */
+  .mv-attivo .cp-sidebar > [data-rivela] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    will-change: auto;
+  }
+
   .cp-mobile-drag-handle {
     width: 44px;
     height: 4px;

@@ -66,7 +66,8 @@ const ContributiPage = () => {
           </div>
           <a 
             href={singleDocument.link} 
-            className="cpub-dl-btn" 
+            className="cpub-dl-btn"
+            data-magnete 
             target="_blank" 
             rel="noopener noreferrer" 
             download
@@ -79,7 +80,7 @@ const ContributiPage = () => {
 
       {/* FOOTER NOTE */}
       <footer className="cpub-info-section">
-        <div className="cpub-info-container">
+        <div className="cpub-info-container" data-rivela>
           <h4 className="cpub-info-title">{footer.title}</h4>
           <p className="cpub-info-text">{footer.text}</p>
         </div>

@@ -57,27 +57,6 @@ export const sportNotizia = pgEnum("sport_notizia", [
   "Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"
 ]);
 
-/*
- * Di cosa parla una notizia, che è un'altra domanda rispetto a quale
- * sport riguarda.
- *
- * Su 98 articoli portati da WordPress, 79 avevano sport "Altro": non
- * erano mal catalogati, semplicemente non parlavano di uno sport.
- * Assemblee, feste di Natale, tariffe della stagione, 5x1000: la vita di
- * una polisportiva è fatta soprattutto di questo, e infilarla tutta in
- * "Altro" vuol dire non avere nessuna categoria.
- *
- * Una colonna a parte e non altri valori dentro allo sport: una partita
- * di calcio con la raccolta fondi è entrambe le cose, e un elenco solo
- * costringerebbe a scegliere quale delle due buttare via.
- */
-export const categoriaNotizia = pgEnum("categoria_notizia", [
-  "societa",      // assemblee, consiglio, documenti, tariffe, iscrizioni
-  "eventi",       // feste, tornei, lotterie, ricorrenze
-  "sport",        // partite, campionati, risultati, squadre
-  "solidarieta",  // 5x1000, iniziative sul territorio, parrocchia
-  "altro"
-]);
 
 /* =====================================================
    Utenti e sessioni
@@ -302,11 +281,6 @@ export const notizie = pgTable("notizie", {
   copertinaId: integer("copertina_id").references(() => media.id, { onDelete: "set null" }),
 
   sport: sportNotizia("sport").notNull().default("Altro"),
-  /* NON PIÙ USATA dal 28 settembre 2026: al posto delle quattro categorie
-     fisse ci sono le etichette (tabella etichette), che la redazione crea e
-     rinomina da sola. La migrazione 0027 le ha copiate; la colonna va tolta
-     con una migrazione quando nessuno script la legge più. */
-  categoria: categoriaNotizia("categoria").notNull().default("altro"),
   stato: statoNotizia("stato").notNull().default("bozza"),
 
   // Quando è finita nel cestino: il cestino si mostra dal più recente
@@ -325,8 +299,7 @@ export const notizie = pgTable("notizie", {
 }, (t) => [
   // L'elenco pubblico chiede sempre "le pubblicate, dalla più recente"
   index("idx_notizie_elenco").on(t.stato, t.pubblicataIl),
-  index("idx_notizie_sport").on(t.sport),
-  index("idx_notizie_categoria").on(t.categoria)
+  index("idx_notizie_sport").on(t.sport)
 ]);
 
 /**
@@ -398,9 +371,9 @@ export const tipoEvento = pgEnum("tipo_evento", [
  * Le squadre, più i due calendari di società ("Eventi PSD", "Segreteria PSD")
  * che squadre non sono: hanno sport "Societa".
  *
- * calendarioGoogleId conserva l'origine, come wp_id per le notizie: serve
- * all'importazione dello storico e a non reimportare due volte lo stesso
- * evento. Dopo il passaggio non viene più letto.
+ * I calendari Google di una volta non ci sono più (tolti il 28 settembre
+ * 2026, insieme all'importazione dello storico): ogni squadra ha il suo
+ * calendario da abbonare, /api/calendario/:id.ics.
  */
 export const squadre = pgTable("squadre", {
   id: serial("id").primaryKey(),
@@ -419,8 +392,6 @@ export const squadre = pgTable("squadre", {
   // Una squadra che non esiste più si disattiva: i suoi eventi passati
   // devono restare consultabili.
   attiva: boolean("attiva").notNull().default(true),
-
-  calendarioGoogleId: text("calendario_google_id"),
 
   creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
 }, (t) => [
@@ -975,34 +946,6 @@ export const schedeAtleta = pgTable("schede_atleta", {
     .references(() => utenti.id, { onDelete: "set null" }),
   certificatoValidatoIl: timestamp("certificato_validato_il", { withTimezone: true }),
   certificatoMotivo: text("certificato_motivo"),
-
-  /* ---------- Quota della stagione: NON PIÙ USATE ----------
-
-     Dal 27 settembre 2026 la quota sta in iscrizioni_stagione, una riga
-     per stagione. Queste due colonne sono state copiate nella stagione
-     2026/27 dalla migrazione 0024 e da allora nessuno le legge né le
-     scrive. Restano per una stagione di prova, così un errore nella copia
-     si può ancora rimediare; poi vanno tolte con una migrazione. */
-
-  /**
-   * Quanto deve per la stagione in corso, in CENTESIMI.
-   *
-   * Interi e non decimali: 0.1 + 0.2 in virgola mobile non fa 0.3, e su una
-   * somma di quote l'errore si vede. Il resto del codice divide per cento
-   * solo al momento di scriverlo a schermo.
-   */
-  quotaStagionaleCentesimi: integer("quota_stagionale_centesimi"),
-
-  /**
-   * Quale tariffa le è stata applicata.
-   *
-   * L'importo resta scritto anche qui e non si ricava dalla tariffa: una
-   * tariffa cambiata a stagione in corso non deve riscrivere gli accordi
-   * già presi con le famiglie. Questo campo dice PERCHÉ quella cifra —
-   * "sconto fratello" — che su un conto è la metà della risposta.
-   */
-  tipoQuotaId: integer("tipo_quota_id")
-    .references(() => tipiQuota.id, { onDelete: "set null" }),
 
   note: text("note"),
 

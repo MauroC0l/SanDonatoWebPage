@@ -277,7 +277,7 @@ export default function CalendarPage() {
       {/* Stessa apertura della home: occhiello, titolo, una riga che dice
           cosa si sta guardando. Prima la pagina cominciava direttamente con
           la griglia, senza dire di che calendario fosse. */}
-      <header className="cp-intestazione">
+      <header className="cp-intestazione" data-rivela>
         <span className="cp-occhiello">Polisportiva San Donato</span>
         <h1 className="cp-titolo-pagina">Il calendario</h1>
         <p className="cp-sottotitolo">
@@ -291,7 +291,9 @@ export default function CalendarPage() {
         {/* SIDEBAR */}
         <>
           {isMobileSidebarOpen && <div className="cp-backdrop" onClick={() => setIsMobileSidebarOpen(false)} />}
-          <aside className={`cp-sidebar ${isMobileSidebarOpen ? 'cp-mobile-open' : ''}`}>
+          {/* Le schede della spalla compaiono una dopo l'altra; la griglia
+              del mese no: è lo strumento, deve essere lì subito. */}
+          <aside className={`cp-sidebar ${isMobileSidebarOpen ? 'cp-mobile-open' : ''}`} data-rivela-gruppo>
             <div className="cp-mobile-drag-handle"></div>
             <div className="cp-card">
               <div className="cp-card-head">

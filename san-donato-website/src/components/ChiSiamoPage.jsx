@@ -42,7 +42,7 @@ export default function ChiSiamoPage() {
       
       {/* 1. HERO SECTION */}
       <section className="csp-hero-block">
-        <div className="csp-hero-content">
+        <div className="csp-hero-content" data-rivela-gruppo>
           
           <div className="csp-history-badge-container">
             <div className="csp-history-badge-ring">
@@ -60,11 +60,11 @@ export default function ChiSiamoPage() {
 
       {/* 2. MANIFESTO */}
       <section className="csp-manifesto-section">
-        <div className="csp-section-header">
+        <div className="csp-section-header" data-rivela="sinistra">
           <h2>Il Manifesto</h2>
           <div className="csp-header-line"></div>
         </div>
-        <div className="csp-values-grid">
+        <div className="csp-values-grid" data-rivela-gruppo>
           {manifesto.map((val, idx) => (
             <div className="csp-value-item" key={idx}>
               <div className="csp-val-icon">{ICON_MAP[val.iconKey]}</div>
@@ -78,12 +78,12 @@ export default function ChiSiamoPage() {
       {/* 3. ORGANIGRAMMA */}
       <section className="csp-org-section-dark">
         <div className="csp-org-container">
-          <div className="csp-org-header">
+          <div className="csp-org-header" data-rivela>
             <h2>Gli Organi della PSD</h2>
             <p>La professionalità dei volontari al servizio della comunità.</p>
           </div>
           
-          <div className="csp-org-grid-modern">
+          <div className="csp-org-grid-modern" data-rivela-gruppo>
             {organigramma.map((item, idx) => (
               <div className="csp-org-card-glass" key={idx}>
                 <div className="csp-org-icon-floating">{ICON_MAP[item.iconKey]}</div>
@@ -98,7 +98,7 @@ export default function ChiSiamoPage() {
 
       {/* --- NUOVA SEZIONE: STAFF TECNICO & EDUCATIVO --- */}
       <section className="csp-staff-section">
-        <div className="csp-section-header csp-center">
+        <div className="csp-section-header csp-center" data-rivela>
           <h2>Staff Tecnico & Educativo</h2>
           <div className="csp-header-line"></div>
           <p style={{color: 'var(--c-text-muted)', marginTop: '1rem'}}>
@@ -106,7 +106,7 @@ export default function ChiSiamoPage() {
           </p>
         </div>
 
-        <div className="csp-staff-grid">
+        <div className="csp-staff-grid" data-rivela-gruppo>
           {staff && staff.map((member, idx) => (
             <div className="csp-staff-card" key={idx}>
               <div className="csp-staff-icon">
@@ -121,13 +121,13 @@ export default function ChiSiamoPage() {
 
       {/* 4. MEMBERSHIP & IMPACT */}
       <section className="csp-membership-section">
-        <div className="csp-section-header csp-center">
+        <div className="csp-section-header csp-center" data-rivela>
           <h2>Membership {dynamicData.anno}</h2>
           <p>Partecipa al progetto e al nuovo Murales.</p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="csp-pricing-grid">
+        <div className="csp-pricing-grid" data-rivela-gruppo>
           {kits.map((kit, i) => (
             <div className={`csp-pricing-card ${kit.isPopular ? 'csp-popular' : ''}`} key={i}>
               {kit.isPopular && <div className="csp-pop-badge">Consigliato</div>}
@@ -145,7 +145,7 @@ export default function ChiSiamoPage() {
         </div>
 
         {/* Impact Bar */}
-        <div className="csp-impact-bar">
+        <div className="csp-impact-bar" data-rivela="zoom">
           <div className="csp-impact-stat">
             <IoRibbon className="csp-i-icon"/>
             <div>

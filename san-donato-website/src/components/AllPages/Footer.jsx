@@ -64,7 +64,9 @@ export default function Footer() {
     <footer className="ft">
       <div className="ft-contenitore">
 
-        <div className="ft-alto">
+        {/* Le colonne salgono una dopo l'altra quando il fondo entra in
+            vista: un segnale leggero che la pagina è finita qui. */}
+        <div className="ft-alto" data-rivela-gruppo>
 
           <div className="ft-chi">
             <span className="ft-marchio">A.S.D. Polisportiva San Donato</span>

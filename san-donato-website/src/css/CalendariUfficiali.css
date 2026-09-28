@@ -162,3 +162,18 @@
   .adm-cal-apri:active { transform: none; }
   .adm-cal-cassetto-contenuto { transform: none; }
 }
+
+/* ---------- In cima: quali gironi aspettano una squadra ---------- */
+.adm-cal-da-assegnare { display: flex; flex-direction: column; gap: .5rem; }
+.adm-cal-da-assegnare p { margin: 0; }
+.adm-cal-da-assegnare-elenco { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.adm-cal-da-assegnare-elenco li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .2rem .6rem; }
+.adm-cal-vai {
+  background: none; border: 0; padding: 0; font: inherit; font-weight: 700;
+  color: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.adm-cal-vai::after { content: " →"; text-decoration: none; }
+.adm-cal-da-assegnare-gironi { font-size: .9em; opacity: .9; }
+.adm-cal-da-assegnare-come { font-size: .88em; }
+/* Arrivando dall'avviso, il torneo non finisce sotto la barra in alto */
+.adm-cal-torneo { scroll-margin-top: 1rem; }

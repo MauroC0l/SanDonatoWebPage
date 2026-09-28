@@ -38,10 +38,33 @@ import { annota } from "../registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../risposte.js";
 import { leggiCorpo } from "../richiesta.js";
 import { valida } from "../validazione.js";
+import { codiceFiscaleValido, normalizzaCodiceFiscale } from "../codice-fiscale.js";
 
 const vuotoENull = (max) => z.preprocess(
   (v) => (typeof v === "string" && v.trim() === "" ? null : v),
   z.string().trim().max(max).nullable()
+);
+
+/**
+ * Un numero di telefono: solo cifre, al massimo dieci.
+ *
+ * Lo stesso limite del modulo, che però è solo una cortesia: qui è la
+ * regola. Prima di contare si tolgono spazi, trattini, punti, parentesi e
+ * il prefisso internazionale italiano (+39 o 0039): "345 123 4567" e
+ * "+39 3451234567" sono lo stesso numero, e salvati tutti allo stesso modo
+ * si confrontano e si cercano senza sorprese.
+ */
+const telefonoONull = z.preprocess(
+  (v) => {
+    if (typeof v !== "string") return v;
+    const cifre = v.replace(/[\s\-.()/]/g, "").replace(/^(\+39|0039)/, "");
+    return cifre === "" ? null : cifre;
+  },
+  z.string()
+    .regex(/^\d+$/, "Il numero di telefono si scrive solo con le cifre.")
+    .min(6, "Il numero di telefono è troppo corto.")
+    .max(10, "Il numero di telefono ha al massimo 10 cifre.")
+    .nullable()
 );
 
 const dataONull = z.preprocess(
@@ -55,13 +78,15 @@ const schemaMiei = z.object({
   dataNascita: dataONull.optional(),
   luogoNascita: vuotoENull(120).optional(),
   provinciaNascita: vuotoENull(60).optional(),
+  // Il carattere di controllo si verifica più sotto, in salva(): serve
+  // sapere qual è quello già salvato (vedi la nota lì)
   codiceFiscale: z.preprocess(
-    (v) => (typeof v === "string" ? v.trim().toUpperCase() || null : v),
+    (v) => (typeof v === "string" ? normalizzaCodiceFiscale(v) : v),
     z.string().length(16, "Il codice fiscale ha 16 caratteri.").nullable()
   ).optional(),
   tagliaMaglietta: vuotoENull(20).optional(),
 
-  telefono: vuotoENull(40).optional(),
+  telefono: telefonoONull.optional(),
 
   indirizzo: vuotoENull(200).optional(),
   civico: vuotoENull(20).optional(),
@@ -74,12 +99,12 @@ const schemaMiei = z.object({
   ).optional(),
   tutoreNome: vuotoENull(120).optional(),
   tutoreParentela: vuotoENull(40).optional(),
-  tutoreTelefono: vuotoENull(40).optional(),
+  tutoreTelefono: telefonoONull.optional(),
   tutoreEmail: vuotoENull(255).optional(),
 
   tutore2Nome: vuotoENull(120).optional(),
   tutore2Parentela: vuotoENull(40).optional(),
-  tutore2Telefono: vuotoENull(40).optional(),
+  tutore2Telefono: telefonoONull.optional(),
   tutore2Email: vuotoENull(255).optional(),
   tipoCertificato: z.preprocess(
     (v) => (typeof v === "string" && v.trim() === "" ? null : v),
@@ -312,6 +337,31 @@ async function scrivi(req, res) {
   const dati = valida(schemaMiei, await leggiCorpo(req));
   if (Object.keys(dati).length === 0) {
     throw new ErroreHttp(400, "Non c'è niente da salvare.");
+  }
+
+  /*
+   * Il codice fiscale si controlla davvero, carattere di controllo compreso:
+   * uno sbagliato non si trova quando un fratello lo dichiara.
+   *
+   * Ma solo se CAMBIA. Il modulo manda tutti i campi a ogni salvataggio, e
+   * chi mesi fa ha scritto un codice fiscale storto — prima si guardava
+   * solo la lunghezza — non deve trovarsi bloccato mentre corregge il
+   * telefono. Il suo codice resta com'è finché non lo tocca; toccandolo,
+   * deve essere giusto.
+   */
+  if (dati.codiceFiscale && !codiceFiscaleValido(dati.codiceFiscale)) {
+    const [attuale] = await getDb()
+      .select({ codiceFiscale: schedeAtleta.codiceFiscale })
+      .from(schedeAtleta)
+      .where(eq(schedeAtleta.utenteId, req.utente.id))
+      .limit(1);
+
+    if (normalizzaCodiceFiscale(attuale?.codiceFiscale ?? "") !== dati.codiceFiscale) {
+      throw new ErroreHttp(
+        400,
+        "Questo codice fiscale non torna: ricontrollalo, basta una lettera diversa."
+      );
+    }
   }
 
   /*

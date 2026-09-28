@@ -24,7 +24,7 @@ export default function NotFoundPage() {
           Ci scusiamo per l'inconveniente. La risorsa che stai cercando potrebbe essere stata rimossa, rinominata o non è momentaneamente disponibile.
         </p>
 
-        <Link to="/" className="nfp-home-btn">
+        <Link to="/" className="nfp-home-btn" data-magnete>
           <FaHouse /> Torna alla Home
         </Link>
       </div>

@@ -120,8 +120,23 @@
 .prv-doc-item:hover {
   border-color: var(--prv-accent);
   background: #eff6ff;
-  transform: translateY(-2px);
+  /* translate e non transform: i documenti compaiono in fila allo
+     scorrimento, e quella comparsa usa transform */
+  translate: 0 -2px;
   box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
+}
+
+/* La comparsa riscrive la transizione ("all") con le sue proprietà e il
+   suo ritardo: si rimettono quelle del passaggio del mouse, subito. */
+.mv-attivo .prv-doc-item[data-rivela] {
+  transition:
+    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    translate .3s ease 0s,
+    box-shadow .3s ease 0s,
+    border-color .3s ease 0s,
+    background-color .3s ease 0s;
 }
 
 .prv-doc-icon {

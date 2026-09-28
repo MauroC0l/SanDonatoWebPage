@@ -1,0 +1,148 @@
+/* =====================================================
+   Movimenti del sito pubblico (vedi src/utils/movimento.js)
+
+   Lo stato "nascosto" esiste solo sotto html.mv-attivo: senza JavaScript,
+   o con prefers-reduced-motion, tutto è visibile e fermo.
+   ===================================================== */
+
+:root {
+  --mv-curva: cubic-bezier(.16, 1, .3, 1);   /* parte veloce, si posa piano */
+  --mv-durata: .9s;
+  --psd-blu: #002b5c;
+  --psd-arancio: #ff6600;
+}
+
+/* ---------- Comparsa allo scorrimento ---------- */
+
+.mv-attivo [data-rivela] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  filter: blur(6px);
+  transition:
+    opacity var(--mv-durata) var(--mv-curva),
+    transform var(--mv-durata) var(--mv-curva),
+    filter var(--mv-durata) var(--mv-curva);
+  transition-delay: var(--mv-ritardo, 0ms);
+  will-change: opacity, transform;
+}
+.mv-attivo [data-rivela="sinistra"] { transform: translate3d(-40px, 0, 0); }
+.mv-attivo [data-rivela="destra"] { transform: translate3d(40px, 0, 0); }
+.mv-attivo [data-rivela="zoom"] { transform: scale(.94); }
+.mv-attivo [data-rivela="sfuma"] { transform: none; }
+
+.mv-attivo [data-rivela].mv-visto {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ---------- Parallasse ---------- */
+
+.mv-attivo [data-parallasse] {
+  transform: translate3d(0, var(--mv-parallasse, 0px), 0);
+  will-change: transform;
+}
+
+/* ---------- Inclinazione 3D ---------- */
+
+.mv-attivo [data-inclina] {
+  transform: perspective(900px) rotateX(var(--mv-rx, 0deg)) rotateY(var(--mv-ry, 0deg));
+  transition: transform .5s var(--mv-curva);
+  transform-style: preserve-3d;
+}
+.mv-attivo [data-inclina]:hover { transition-duration: .12s; }
+
+/* La lucentezza che segue il puntatore: sta sopra alla scheda e non
+   intercetta i clic */
+.mv-attivo [data-inclina]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mv-luce-x, 50%) var(--mv-luce-y, 50%),
+    rgba(255, 255, 255, .28), transparent 55%
+  );
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.mv-attivo [data-inclina]:hover::after { opacity: 1; }
+
+/* ---------- Pulsanti magnetici ---------- */
+
+.mv-attivo [data-magnete] {
+  transform: translate3d(var(--mv-mx, 0px), var(--mv-my, 0px), 0);
+  transition: transform .4s var(--mv-curva);
+}
+
+/* ---------- Classi pronte per le pagine ---------- */
+
+/* Testo con una sfumatura che scorre lentamente */
+.mv-testo-vivo {
+  background: linear-gradient(100deg, var(--psd-arancio), #ffb36b 30%, var(--psd-arancio) 60%, #ff3d00);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mv-scorri-sfondo 7s linear infinite;
+}
+
+/* Un nastro che scorre senza fine (loghi, parole). Il contenuto va
+   ripetuto due volte dentro .mv-nastro-traccia: la seconda metà prende il
+   posto della prima e il giro non si vede. */
+.mv-nastro { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.mv-nastro-traccia {
+  display: flex;
+  width: max-content;
+  animation: mv-nastro var(--mv-nastro-durata, 40s) linear infinite;
+}
+.mv-nastro:hover .mv-nastro-traccia { animation-play-state: paused; }
+
+/* Macchie di colore che si muovono piano, da mettere dietro a un titolo */
+.mv-aurora {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 50% at 20% 30%, rgba(255, 102, 0, .35), transparent 70%),
+    radial-gradient(45% 55% at 80% 20%, rgba(0, 90, 200, .35), transparent 70%),
+    radial-gradient(35% 45% at 60% 80%, rgba(255, 170, 60, .25), transparent 70%);
+  filter: blur(40px);
+  animation: mv-aurora 18s ease-in-out infinite alternate;
+}
+
+/* Vetro smerigliato per schede sopra a immagini o colori */
+.mv-vetro {
+  background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+@keyframes mv-scorri-sfondo { to { background-position: -250% 0; } }
+@keyframes mv-nastro { to { transform: translateX(-50%); } }
+@keyframes mv-aurora {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) rotate(8deg) scale(1.08); }
+  100% { transform: translate3d(-4%, 3%, 0) rotate(-6deg) scale(1); }
+}
+
+/* ---------- Passaggio fra le pagine ---------- */
+
+/* "backwards" e non "both": finita l'animazione la pagina non deve tenersi
+   addosso una trasformazione, perché ogni elemento "position: fixed" al suo
+   interno (le finestre a comparsa, il cassetto dei filtri) si posizionerebbe
+   rispetto alla pagina invece che allo schermo, e finirebbe fuori vista. */
+.mv-attivo .mv-pagina { animation: mv-entra-pagina .6s var(--mv-curva) backwards; }
+@keyframes mv-entra-pagina {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Chi ha chiesto meno movimento ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mv-testo-vivo, .mv-nastro-traccia, .mv-aurora { animation: none; }
+}

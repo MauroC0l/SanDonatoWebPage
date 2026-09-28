@@ -131,7 +131,8 @@ export default function HomePage() {
         // "Nuova" si decide una volta sola, qui: la finestra è di giorni, e
         // ricalcolarla a ogni ridisegno non cambierebbe mai niente.
         const adesso = Date.now();
-        const ultime = tutte.slice(0, 5).map((post) => ({ ...post, recente: eRecente(post, adesso) }));
+        // Una in grande e sei sotto: due file da tre riempiono la colonna
+        const ultime = tutte.slice(0, 7).map((post) => ({ ...post, recente: eRecente(post, adesso) }));
         setUltimeNotizie(ultime);
         ricordo = { ...ricordo, ultimeNotizie: ultime };
       } else {
@@ -177,7 +178,7 @@ export default function HomePage() {
       <section className="hs-sezione">
         <div className="hs-contenitore">
 
-          <header className="hs-intestazione">
+          <header className="hs-intestazione" data-rivela>
             <span className="hs-occhiello">In Polisportiva</span>
             <h2 className="hs-titolo">Cosa succede in questi giorni</h2>
             <p className="hs-sottotitolo">
@@ -212,12 +213,25 @@ export default function HomePage() {
               ) : ultimeNotizie.length === 0 ? (
                 <p className="hs-vuoto">Nessuna notizia pubblicata.</p>
               ) : (
-                <div className="hs-notizie-griglia">
-                  <NotiziaGrande notizia={inEvidenza} />
+                /* La chiave obbliga React a creare una griglia nuova invece di
+                   riusare quella delle sagome grigie: riusandola cambierebbe
+                   solo gli attributi, e il movimento — che si accorge degli
+                   elementi aggiunti, non degli attributi cambiati — non
+                   vedrebbe mai le schede, rimaste invisibili. */
+                <div className="hs-notizie-griglia" key="notizie">
+                  {/* Le schede stanno dentro a un involucro che compare
+                      allo scorrimento: la scheda stessa si inclina sotto
+                      al puntatore, e due trasformazioni sullo stesso
+                      elemento si cancellerebbero a vicenda. */}
+                  <div className="hs-posto" data-rivela="zoom">
+                    <NotiziaGrande notizia={inEvidenza} />
+                  </div>
 
-                  <div className="hs-notizie-fila">
+                  <div className="hs-notizie-fila" data-rivela-gruppo>
                     {altreNotizie.map((n) => (
-                      <NotiziaPiccola key={n.id} notizia={n} />
+                      <div key={n.id} className="hs-posto">
+                        <NotiziaPiccola notizia={n} />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -225,7 +239,7 @@ export default function HomePage() {
             </div>
 
             {/* ---------- Colonna di fianco ---------- */}
-            <aside className="hs-lato">
+            <aside className="hs-lato" data-rivela-gruppo>
 
               <section className="hs-scheda">
                 <div className="hs-scheda-testa">
@@ -406,6 +420,7 @@ function NotiziaGrande({ notizia }) {
       to={`/news/${notizia.id}`}
       state={{ post: notizia }}
       className="hs-notizia hs-notizia-grande"
+      data-inclina="4"
     >
       <span className="hs-foto" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
       <span className="hs-velo" aria-hidden="true" />
@@ -431,6 +446,7 @@ function NotiziaPiccola({ notizia }) {
       to={`/news/${notizia.id}`}
       state={{ post: notizia }}
       className="hs-notizia hs-notizia-piccola"
+      data-inclina="6"
     >
       <span className="hs-miniatura" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
 

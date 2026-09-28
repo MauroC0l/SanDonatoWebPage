@@ -9,6 +9,8 @@ import { usePublishedHeight } from "./hooks/usePublishedHeight";
 import FasciaDimostrativa from "./components/AllPages/FasciaDimostrativa";
 import SagomaAccesso from "./components/AllPages/SagomaAccesso";
 import { precaricaQuandoLibero } from "./utils/precarica";
+import { avviaMovimento } from "./utils/movimento";
+import "./css/Movimento.css";
 
 // La home resta nel bundle principale: è la pagina d'ingresso.
 // Tutte le altre vengono scaricate solo quando servono davvero.
@@ -72,6 +74,7 @@ function PublicLayout() {
   // L'altezza reale dell'intestazione viene pubblicata come variabile CSS:
   // la prima sezione della home la usa per arrivare esattamente a fondo schermo.
   const headerRef = usePublishedHeight("--site-header-h");
+  const { pathname } = useLocation();
 
   return (
     <div className="page-wrapper">
@@ -82,7 +85,11 @@ function PublicLayout() {
       </div>
 
       <main className="flex-grow w-full px-0">
-        <Outlet />
+        {/* La chiave cambia con la pagina: ogni pagina nuova entra con la
+            sua piccola animazione, invece di comparire di colpo */}
+        <div className="mv-pagina" key={pathname}>
+          <Outlet />
+        </div>
       </main>
 
       <Footer />
@@ -112,6 +119,8 @@ const PAGINE_PUBBLICHE = [
 
 export default function App() {
   useEffect(() => { precaricaQuandoLibero(PAGINE_PUBBLICHE); }, []);
+  // Comparse, parallasse e inclinazioni del sito pubblico (utils/movimento.js)
+  useEffect(() => { avviaMovimento(); }, []);
 
   return (
     <>

@@ -10,10 +10,6 @@ import { ErroreHttp } from "./risposte.js";
 
 export const SPORT = ["Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"];
 
-/* Di cosa parla la notizia, che non è lo sport: la maggior parte
-   dell'archivio racconta la vita della società, non una partita.
-   Vedi la nota sull'enum in db/schema.js. */
-export const CATEGORIE = ["societa", "eventi", "sport", "solidarieta", "altro"];
 export const STATI = ["bozza", "in_revisione", "pubblicata", "cestino"];
 
 /**

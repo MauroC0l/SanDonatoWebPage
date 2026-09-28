@@ -1,530 +1,955 @@
-/* ============================= */
-/* Contatti.css - Refined        */
-/* ============================= */
+/* =====================================================
+   Contatti — /contatti
 
-/* RESET (Scoped) */
-.contacts-page *, .contacts-page *::before, .contacts-page *::after {
-  box-sizing: border-box;
-}
+   Un'apertura blu scura con il titolo grande, un nastro che scorre, poi
+   le schede a "bento" (sede, segreteria, recapiti) e i pagamenti.
 
-:root {
-  --cnt-primary: #002b5c;
-  --cnt-primary-light: #00408a; /* Variante più chiara per hover */
-  --cnt-accent: #ff6600;
-  --cnt-bg: #f4f7f9;
-  --cnt-card-bg: #ffffff;
-  --cnt-text-main: #333333;
-  --cnt-text-light: #666666;
-  --cnt-border: #e2e8f0;
-  --cnt-success: #10b981; /* Verde per il feedback copia */
-  
-  --radius-card: 20px;
-  --shadow-card: 0 10px 30px -5px rgba(0, 43, 92, 0.08);
-  --shadow-hover: 0 20px 40px -5px rgba(0, 43, 92, 0.12);
-}
+   Tutte le classi cominciano con cnt-: il CSS delle pagine resta caricato
+   quando si cambia pagina, e un ".subtitle" qui finirebbe addosso a
+   un'altra pagina.
 
-/* Animation */
-@keyframes cntFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+   Le animazioni proprie di questa pagina muovono solo transform e
+   opacity, e si fermano con prefers-reduced-motion (in fondo al file).
+   I movimenti condivisi (data-rivela, data-magnete…) vengono da
+   Movimento.css: sugli elementi che li usano qui non si tocca transform
+   all'hover, altrimenti le due regole si contenderebbero la proprietà.
+   ===================================================== */
 
-.contacts-page {
+.cnt-pagina {
+  --cnt-blu: var(--psd-blu, #002b5c);
+  --cnt-blu-notte: #001a38;
+  --cnt-arancio: var(--psd-arancio, #ff6600);
+  --cnt-fondo: #f3f5f9;
+  --cnt-scheda: #ffffff;
+  --cnt-testo: #14213d;
+  --cnt-tenue: #5b6780;
+  --cnt-linea: rgba(0, 43, 92, 0.09);
+  --cnt-verde: #16c47f;
+  --cnt-satispay: #ff4e50;
+  --cnt-raggio: 28px;
+  --cnt-curva: cubic-bezier(.16, 1, .3, 1);
+
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--cnt-bg);
-  min-height: 100vh;
-
-  min-height: 100svh;
+  background: var(--cnt-fondo);
+  color: var(--cnt-testo);
   width: 100%;
-  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem) 4rem;
-  color: var(--cnt-text-main);
-  animation: cntFadeIn 0.6s ease-out forwards;
+  overflow-x: clip;
 }
 
-/* --- HEADER --- */
-.contacts-header {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 0 1rem;
-}
+.cnt-pagina *,
+.cnt-pagina *::before,
+.cnt-pagina *::after { box-sizing: border-box; }
 
-.contacts-header h1 {
-  font-size: clamp(2rem, 5vw, 2.8rem);
-  color: var(--cnt-primary);
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
+/* =============== Apertura =============== */
 
-.highlight-text {
-  color: var(--cnt-accent);
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  color: var(--cnt-text-light);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.header-decoration {
-  width: 60px;
-  height: 4px;
-  background: var(--cnt-accent);
-  margin: 1.5rem auto 0;
-  border-radius: 10px;
-}
-
-/* --- GRID LAYOUT --- */
-.contacts-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-@media (min-width: 900px) {
-  .contacts-container {
-    grid-template-columns: 1.2fr 1fr;
-    gap: 2.5rem;
-    align-items: start;
-  }
-}
-
-.contacts-column {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* --- CARD STYLE --- */
-.contact-card {
-  background: var(--cnt-card-bg);
-  border-radius: var(--radius-card);
-  padding: 2rem;
-  box-shadow: var(--shadow-card);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid white;
-}
-
-.contact-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
-}
-
-/* Header Card (Icon + Title) */
-.card-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.card-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  background: #f0f4f8;
-  border-radius: 14px;
-  color: var(--cnt-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  flex-shrink: 0;
-}
-
-.card-icon-wrapper.bank { background: #fff7ed; color: var(--cnt-accent); }
-
-.card-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--cnt-primary);
-  margin: 0;
-}
-
-.card-body {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* --- SEDE & MAPPA --- */
-.address-text {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--cnt-text-light);
-  margin-bottom: 1rem;
-}
-
-.map-link-container {
-  display: block;
-  width: 100%;
-  border-radius: 16px;
-  overflow: hidden;
+.cnt-eroe {
   position: relative;
-  aspect-ratio: 16/9;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 100% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, var(--cnt-blu) 0%, var(--cnt-blu-notte) 100%);
+  color: #fff;
+  padding: clamp(3.5rem, 9vw, 7rem) clamp(1rem, 5vw, 4rem) clamp(3.5rem, 8vw, 6rem);
 }
 
-.map-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.map-overlay {
+/* Una trama di punti che sfuma verso il basso: dà profondità senza
+   un'immagine da scaricare */
+.cnt-eroe-trama {
   position: absolute;
   inset: 0;
-  background: rgba(0, 43, 92, 0.4);
-  display: flex;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
+}
+
+.cnt-eroe-dentro {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.cnt-occhiello {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.map-overlay span {
-  background: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--cnt-primary);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.map-link-container:hover .map-overlay { opacity: 1; }
-.map-link-container:hover .map-image { transform: scale(1.05); }
-
-/* --- SEGRETERIA --- */
-.info-group {
-  margin-bottom: 1.5rem;
-  width: 100%;
-  background: #f8fafc;
-  padding: 1rem;
-  border-radius: 12px;
-}
-
-.info-label {
-  display: block;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #888;
-  margin-bottom: 0.3rem;
-  font-weight: 600;
-}
-
-.info-value.highlight {
-  font-size: 1.2rem;
-  color: var(--cnt-primary);
+  gap: 0.6rem;
+  margin: 0 0 1.4rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.divider {
-  width: 100%;
-  height: 1px;
-  background: var(--cnt-border);
-  margin: 1.5rem 0;
-  border: none;
+.cnt-punto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cnt-arancio);
+  box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.25);
 }
 
-.mobile-contact-section {
-  width: 100%;
+.cnt-titolo {
+  margin: 0;
+  font-size: clamp(3.2rem, 16.5vw, 9.5rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+  color: #fff;
+}
+
+/* Le due righe compaiono separate: inline-block perché la trasformazione
+   di data-rivela abbia effetto */
+.cnt-riga { display: inline-block; }
+.cnt-riga-2 { --mv-ritardo: 120ms; padding-right: 0.06em; }
+
+.cnt-indirizzo-eroe {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 0.55rem;
+  margin: clamp(1.4rem, 3vw, 2rem) 0 0;
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  --mv-ritardo: 200ms;
+}
+.cnt-indirizzo-eroe svg { color: var(--cnt-arancio); flex-shrink: 0; }
+
+/* Indicatore aperto / chiuso */
+.cnt-stato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.1rem 0 0;
+  padding: 0.5rem 1rem 0.5rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  --mv-ritardo: 260ms;
 }
 
-.sub-title {
+.cnt-stato-luce {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #94a3b8;
+  flex-shrink: 0;
+}
+.cnt-stato.is-aperto .cnt-stato-luce { background: var(--cnt-verde); }
+.cnt-stato.is-chiuso .cnt-stato-luce { background: #ff8a3d; }
+
+/* L'alone che pulsa esiste solo quando è aperto: il movimento dice "adesso" */
+.cnt-stato.is-aperto .cnt-stato-luce::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--cnt-verde);
+  animation: cnt-pulsa 1.8s var(--cnt-curva) infinite;
+}
+
+.cnt-azioni {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.cnt-bottone {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  font-size: 1.1rem;
-  color: var(--cnt-primary);
+  min-height: 52px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
-}
-
-.info-note {
-  font-size: 0.95rem;
-  color: var(--cnt-text-light);
-  margin-bottom: 1.2rem;
-}
-
-.phone-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  background: var(--cnt-primary);
-  color: white;
-  text-decoration: none;
-  padding: 0.9rem 2rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1.05rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(0, 43, 92, 0.2);
-}
-
-.phone-btn:hover {
-  background: var(--cnt-primary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 43, 92, 0.3);
-}
-
-.name-tag {
-  opacity: 0.8;
-  font-weight: 400;
-  font-size: 0.9em;
-  border-left: 1px solid rgba(255,255,255,0.3);
-  padding-left: 0.8rem;
-}
-
-/* --- RECAPITI / EMAIL --- */
-.email-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  width: 100%;
-  margin-bottom: 1.5rem;
-}
-
-.email-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.8rem;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.email-link.primary {
-  background: #f0f9ff;
-  color: #0077cc;
-}
-.email-link.primary:hover { background: #e0f2fe; }
-
-.email-link.pec {
-  background: #fdf2f8;
-  color: #db2777;
-  font-size: 0.9rem;
-}
-
-.fiscal-data-box {
-  width: 100%;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 1rem;
-}
-
-.fiscal-row {
-  display: flex;
-  justify-content: space-between;
-  font-family: monospace;
   font-size: 1rem;
-  color: var(--cnt-text-main);
-  padding: 0.3rem 0;
+  text-decoration: none;
+  color: #fff;
+  transition: background-color .25s ease, box-shadow .3s ease, border-color .25s ease;
+}
+.cnt-bottone svg { transition: transform .35s var(--cnt-curva); }
+.cnt-bottone:hover svg { transform: scale(1.18) rotate(-8deg); }
+
+.cnt-bottone-pieno {
+  background: var(--cnt-arancio);
+  box-shadow: 0 10px 30px -8px rgba(255, 102, 0, 0.7);
+}
+.cnt-bottone-pieno:hover {
+  background: #ff7a1f;
+  box-shadow: 0 16px 40px -8px rgba(255, 102, 0, 0.85);
+}
+.cnt-bottone-vetro:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); }
+
+.cnt-bottone:focus-visible,
+.cnt-copia:focus-visible,
+.cnt-copia-iban:focus-visible,
+.cnt-mappa:focus-visible,
+.cnt-voce-link:focus-visible,
+.cnt-telefono:focus-visible,
+.cnt-satispay-bottone:focus-visible {
+  outline: 3px solid var(--cnt-arancio);
+  outline-offset: 3px;
 }
 
-.fiscal-row span {
-  font-weight: 700;
-  color: var(--cnt-text-light);
-}
-
-/* --- BANCA & IBAN --- */
-.payment-intro {
-  margin-bottom: 1rem;
-  color: var(--cnt-text-light);
-}
-
-.iban-wrapper {
-  background: #f8fafc;
-  border: 1px solid var(--cnt-border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.iban-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
-}
-
-.iban-code {
-  font-family: 'Roboto Mono', monospace;
-  font-size: clamp(1rem, 4vw, 1.25rem);
-  color: var(--cnt-primary);
-  font-weight: 700;
-  word-break: break-all;
-  line-height: 1.4;
-  margin-bottom: 1rem;
-}
-
-.copy-btn {
-  background: white;
-  border: 1px solid var(--cnt-border);
-  color: var(--cnt-text-main);
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.copy-btn:hover {
-  border-color: var(--cnt-primary);
-  color: var(--cnt-primary);
-  transform: translateY(-1px);
-}
-
-.copy-btn:active {
-  transform: translateY(0);
-}
-
-.copy-btn.copied {
-  background: var(--cnt-success);
-  border-color: var(--cnt-success);
-  color: white;
+/* La scritta circolare che gira */
+.cnt-sigillo {
+  position: absolute;
+  z-index: 1;
+  /* In basso a destra, accanto ai pulsanti: lì lo spazio è libero e non
+     finisce sopra al titolo */
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  right: clamp(1rem, 5vw, 4rem);
+  width: clamp(150px, 18vw, 230px);
+  height: auto;
+  opacity: 0.55;
+  fill: rgba(255, 255, 255, 0.85);
+  font-size: 15.2px;
+  font-weight: 800;
+  letter-spacing: 0.23em;
+  animation: cnt-ruota 28s linear infinite;
   pointer-events: none;
 }
 
-.bank-logo-wrapper {
-  margin-top: 1.5rem;
-  height: 40px;
-}
-.bank-img {
-  height: 100%;
-  width: auto;
-  opacity: 0.8;
+/* =============== Nastro =============== */
+
+.cnt-nastro {
+  --mv-nastro-durata: 38s;
+  background: var(--cnt-arancio);
+  color: #fff;
+  padding: 0.95rem 0;
+  transform: rotate(-1.2deg) scale(1.03);
+  margin-top: -1.2rem;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 20px 40px -20px rgba(255, 102, 0, 0.6);
 }
 
-/* --- SATISPAY & QR CODE --- */
-.satispay-card {
-  border-top: 5px solid #ff4e50; /* Satispay Brand Color */
-}
-
-.satispay-content {
-  text-align: center;
-  width: 100%;
-}
-
-.satispay-title {
-  color: #ff4e50;
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 0.2rem;
-}
-
-.shop-name {
-  color: var(--cnt-text-light);
-  margin-bottom: 1rem;
-}
-
-/* Container specifico per il QR Code per evitare stretching */
-.satispay-qr-wrapper {
-  width: 180px;         /* Larghezza fissa contenuta */
-  height: 180px;        /* Altezza fissa quadrata */
-  margin: 0 auto 1.5rem auto; /* Centrato e distanziato dal bottone */
-  padding: 8px;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #eee;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  display: flex;
+.cnt-nastro-voce {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 1.6rem;
+  padding-right: 1.6rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cnt-nastro-stella { font-size: 0.8em; opacity: 0.7; }
+
+/* =============== Corpo =============== */
+
+.cnt-corpo {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1rem, 4vw, 2rem) clamp(3.5rem, 8vw, 6rem);
 }
 
-.satispay-qr-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* CRUCIALE: Mantiene l'aspect ratio, niente stretching */
-  display: block;
+.cnt-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
-.satispay-action-wrapper {
+@media (min-width: 900px) {
+  .cnt-bento {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+  .cnt-scheda-sede { grid-column: span 7; grid-row: span 2; }
+  .cnt-scheda-segreteria,
+  .cnt-scheda-recapiti { grid-column: span 5; }
+}
+
+.cnt-scheda {
+  position: relative;
+  background: var(--cnt-scheda);
+  border-radius: var(--cnt-raggio);
+  padding: clamp(1.3rem, 3vw, 2rem);
+  border: 1px solid var(--cnt-linea);
+  box-shadow: 0 1px 2px rgba(0, 43, 92, 0.04), 0 20px 50px -30px rgba(0, 43, 92, 0.25);
+  transition: box-shadow .4s ease, border-color .4s ease;
+  min-width: 0;
+}
+.cnt-scheda:hover {
+  border-color: rgba(255, 102, 0, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 43, 92, 0.04), 0 30px 70px -30px rgba(0, 43, 92, 0.38);
+}
+
+.cnt-etichetta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cnt-blu);
+}
+.cnt-etichetta svg { color: var(--cnt-arancio); }
+
+/* ---------- Pulsante copia piccolo ---------- */
+
+.cnt-copia {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--cnt-linea);
+  background: #f5f7fb;
+  color: var(--cnt-blu);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .3s var(--cnt-curva);
+}
+.cnt-copia:hover { background: var(--cnt-blu); color: #fff; border-color: var(--cnt-blu); }
+.cnt-copia:active { transform: scale(0.9); }
+.cnt-copia.is-fatto {
+  background: var(--cnt-verde);
+  border-color: var(--cnt-verde);
+  color: #fff;
+  animation: cnt-scatto .45s var(--cnt-curva);
+}
+
+/* ---------- Sede ---------- */
+
+.cnt-scheda-sede {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
+  padding: 0.6rem;
+  overflow: hidden;
 }
 
-.satispay-btn-link {
+.cnt-mappa {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-height: 0;
+  border-radius: calc(var(--cnt-raggio) - 8px);
+  overflow: hidden;
+  background: #e8edf3;
+  text-decoration: none;
+}
+
+/* La cornice ha le proporzioni esatte dell'immagine, così l'onda cade sul
+   segnaposto; su desktop la scheda è più alta e la cornice si centra */
+.cnt-mappa-cornice {
+  position: relative;
+  display: block;
+  aspect-ratio: 1057 / 553;
+  width: 100%;
+  transition: transform 1.2s var(--cnt-curva);
+}
+.cnt-mappa:hover .cnt-mappa-cornice { transform: scale(1.06); }
+
+.cnt-mappa-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .cnt-mappa { display: flex; align-items: center; }
+  /* Sulla scheda alta la mappa si allarga per riempirla: la cornice resta
+     in proporzione e il troppo si taglia ai lati */
+  .cnt-mappa-cornice { width: auto; height: 100%; min-width: 100%; flex-shrink: 0; margin-left: 50%; translate: -50% 0; }
+}
+
+.cnt-mappa-onda {
+  position: absolute;
+  left: 33.8%;
+  top: 31%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 2px solid var(--cnt-arancio);
+  animation: cnt-onda 2.4s var(--cnt-curva) infinite;
+  pointer-events: none;
+}
+
+.cnt-mappa-apri {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: var(--cnt-blu);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  box-shadow: 0 10px 30px -10px rgba(0, 26, 56, 0.7);
+}
+.cnt-mappa-apri svg { transition: transform .4s var(--cnt-curva); }
+.cnt-mappa:hover .cnt-mappa-apri svg { transform: translateX(4px) rotate(-45deg); }
+
+.cnt-sede-testo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.4rem 1rem;
+  padding: 1.2rem 1rem 0.9rem;
+}
+.cnt-sede-testo .cnt-etichetta { grid-column: 1 / -1; }
+
+.cnt-sede-indirizzo {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--cnt-blu);
+}
+.cnt-sede-indirizzo strong {
+  font-weight: 600;
+  font-size: 0.55em;
+  letter-spacing: 0.08em;
+  color: var(--cnt-tenue);
+}
+
+/* ---------- Segreteria ---------- */
+
+.cnt-scheda-segreteria {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.cnt-orario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f5f8fc, #eef2f8);
+  position: relative;
+}
+.cnt-orario-etichetta {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cnt-tenue);
+}
+.cnt-orario-valore {
+  font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--cnt-blu);
+}
+
+.cnt-stato-piccolo {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  margin: 0;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  font-size: 0.74rem;
+  color: var(--cnt-blu);
+  background: #fff;
+  border-color: var(--cnt-linea);
+}
+.cnt-stato-piccolo .cnt-stato-luce { width: 8px; height: 8px; }
+
+.cnt-sottotitolo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cnt-blu);
+}
+.cnt-nota { margin: 0.2rem 0 0.9rem; font-size: 0.93rem; color: var(--cnt-tenue); }
+
+.cnt-riga-azione {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cnt-telefono {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.55rem 1.2rem 0.55rem 0.55rem;
+  border-radius: 999px;
+  background: var(--cnt-blu);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -14px rgba(0, 43, 92, 0.8);
+  transition: background-color .25s ease, box-shadow .3s ease;
+}
+.cnt-telefono:hover { background: #00408a; box-shadow: 0 18px 36px -14px rgba(0, 43, 92, 0.9); }
+
+.cnt-telefono-icona {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--cnt-arancio);
+  flex-shrink: 0;
+  transition: transform .4s var(--cnt-curva);
+}
+.cnt-telefono:hover .cnt-telefono-icona { transform: rotate(-15deg) scale(1.08); }
+
+.cnt-telefono-testo { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 0.6rem; min-width: 0; }
+.cnt-telefono-testo strong { font-size: 1.12rem; font-weight: 800; letter-spacing: 0.01em; }
+.cnt-nome { font-size: 0.9rem; opacity: 0.75; }
+
+/* ---------- Recapiti ---------- */
+
+.cnt-scheda-recapiti { display: flex; flex-direction: column; gap: 1rem; }
+
+.cnt-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+
+.cnt-voce { display: flex; align-items: center; gap: 0.6rem; }
+
+.cnt-voce-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 1rem;
+  border-radius: 16px;
+  background: #f5f7fb;
+  text-decoration: none;
+  color: var(--cnt-blu);
+  transition: background-color .25s ease;
+  position: relative;
+}
+.cnt-voce-link::after {
+  content: "→";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  translate: 0 -50%;
+  opacity: 0;
+  transition: opacity .25s ease, transform .35s var(--cnt-curva);
+  transform: translateX(-6px);
+  color: var(--cnt-arancio);
+  font-weight: 800;
+}
+.cnt-voce-link:hover { background: #fff3ea; }
+.cnt-voce-link:hover::after { opacity: 1; transform: none; }
+
+.cnt-voce-tipo {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cnt-arancio);
+}
+.cnt-voce-valore {
+  font-weight: 600;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  padding-right: 1.2rem;
+}
+
+.cnt-fiscali {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+.cnt-fiscale {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 0.4rem;
+  padding: 0.7rem 0.6rem 0.7rem 1rem;
+  border-radius: 16px;
+  border: 1px dashed rgba(0, 43, 92, 0.2);
+  min-width: 0;
+}
+.cnt-fiscale dt {
+  grid-column: 1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--cnt-tenue);
+}
+.cnt-fiscale dd {
+  grid-column: 1;
+  margin: 0;
+  font-family: ui-monospace, 'Roboto Mono', monospace;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--cnt-testo);
+  overflow-wrap: anywhere;
+}
+.cnt-fiscale .cnt-copia { grid-column: 2; grid-row: 1 / span 2; width: 36px; height: 36px; border-radius: 12px; }
+
+/* =============== Pagamenti =============== */
+
+.cnt-pagamenti { margin-top: clamp(3.5rem, 8vw, 6rem); }
+
+.cnt-sezione-testa {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: clamp(1.4rem, 3vw, 2rem);
+}
+.cnt-sezione-numero {
+  display: grid;
+  place-items: center;
+  width: clamp(48px, 7vw, 64px);
+  aspect-ratio: 1;
+  border-radius: 18px;
+  background: var(--cnt-arancio);
+  color: #fff;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 900;
+  rotate: -6deg;
+  box-shadow: 0 14px 30px -12px rgba(255, 102, 0, 0.7);
+}
+.cnt-sezione-titolo {
+  margin: 0;
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  color: var(--cnt-blu);
+}
+
+.cnt-pagamenti-griglia {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 900px) {
+  .cnt-pagamenti-griglia { grid-template-columns: 1.15fr 1fr; gap: 1.25rem; align-items: stretch; }
+}
+
+/* ---------- La carta del bonifico ---------- */
+
+.cnt-carta-posto { display: flex; min-width: 0; }
+
+.cnt-carta {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--cnt-raggio);
+  padding: clamp(1.4rem, 3.5vw, 2.2rem);
+  color: #fff;
+  background:
+    radial-gradient(90% 120% at 110% -10%, rgba(255, 102, 0, 0.55), transparent 55%),
+    radial-gradient(70% 90% at -10% 110%, rgba(40, 120, 255, 0.35), transparent 60%),
+    linear-gradient(145deg, #003a7a 0%, var(--cnt-blu) 45%, var(--cnt-blu-notte) 100%);
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Le linee curve della "filigrana" di una carta; ::after è già usato
+   dalla lucentezza di data-inclina */
+.cnt-carta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-radial-gradient(circle at 120% 130%, transparent 0 22px, rgba(255, 255, 255, 0.045) 22px 23px);
+  pointer-events: none;
+}
+
+.cnt-carta-testa { display: flex; align-items: center; gap: 0.8rem; }
+.cnt-carta-icona {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffb070;
+  flex-shrink: 0;
+}
+.cnt-carta-titolo { margin: 0; font-size: clamp(1.15rem, 2.4vw, 1.4rem); font-weight: 800; letter-spacing: -0.02em; }
+
+/* Il chip dorato: fa capire al primo sguardo "questa è una banca" */
+.cnt-carta-chip {
+  margin-left: auto;
+  width: 46px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background:
+    linear-gradient(90deg, transparent 32%, rgba(0, 0, 0, 0.18) 32% 34%, transparent 34% 66%, rgba(0, 0, 0, 0.18) 66% 68%, transparent 68%),
+    linear-gradient(0deg, transparent 45%, rgba(0, 0, 0, 0.18) 45% 55%, transparent 55%),
+    linear-gradient(135deg, #f7d58b, #c99a3b 60%, #f1cf7e);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.cnt-carta-intro { margin: 0; color: rgba(255, 255, 255, 0.75); font-size: 0.95rem; }
+
+.cnt-iban { display: flex; flex-direction: column; gap: 0.35rem; }
+.cnt-iban-etichetta { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.2em; color: rgba(255, 255, 255, 0.6); }
+.cnt-iban-codice {
+  font-family: ui-monospace, 'Roboto Mono', monospace;
+  font-size: clamp(1.02rem, 3.2vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: #fff;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cnt-carta-piede {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem 1rem;
+  margin-top: auto;
+}
+.cnt-intestato { margin: 0; font-size: 0.9rem; color: rgba(255, 255, 255, 0.8); }
+.cnt-intestato strong { color: #fff; }
+
+.cnt-copia-iban {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 46px;
+  padding: 0 1.3rem;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--cnt-blu);
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
+  transition: background-color .25s ease, color .25s ease;
+}
+.cnt-copia-iban:hover { background: #ffe3cf; }
+.cnt-copia-iban.is-fatto { background: var(--cnt-verde); color: #fff; }
+
+/* Il logo della banca è scuro: su una carta blu sparirebbe, quindi sta
+   su una targhetta chiara */
+.cnt-banca-logo {
+  align-self: flex-start;
+  padding: 0.55rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  line-height: 0;
+}
+.cnt-banca-logo img { height: 26px; width: auto; }
+
+/* ---------- Satispay ---------- */
+
+.cnt-satispay {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.4rem;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Una macchia rossa Satispay in un angolo, per riconoscerla al volo */
+.cnt-satispay::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 320px;
+  height: 320px;
+  right: -140px;
+  top: -140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 78, 80, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+@media (min-width: 560px) {
+  .cnt-satispay { grid-template-columns: 1fr auto; }
+}
+@media (min-width: 900px) {
+  .cnt-satispay { grid-template-columns: 1fr; justify-items: start; }
+}
+@media (min-width: 1100px) {
+  .cnt-satispay { grid-template-columns: 1fr auto; }
+}
+
+.cnt-satispay-titolo {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--cnt-satispay);
+}
+.cnt-satispay-negozio {
+  margin: 0.5rem 0 1.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cnt-tenue);
+}
+
+.cnt-satispay-bottone {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
-  background: #ff4e50;
-  color: white;
+  gap: 0.7rem;
+  min-height: 52px;
+  padding: 0 1.7rem;
+  border-radius: 999px;
+  background: var(--cnt-satispay);
+  color: #fff;
+  font-weight: 800;
   text-decoration: none;
-  padding: 1rem 2.5rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(255, 78, 80, 0.3);
+  box-shadow: 0 14px 30px -12px rgba(255, 78, 80, 0.75);
+  transition: background-color .25s ease, box-shadow .3s ease;
+}
+.cnt-satispay-bottone:hover { background: #e63b3d; box-shadow: 0 18px 38px -12px rgba(255, 78, 80, 0.9); }
+.cnt-satispay-aiuto { margin: 0.7rem 0 0; font-size: 0.82rem; color: #8a93a6; }
+
+.cnt-qr {
+  position: relative;
+  width: 172px;
+  height: 172px;
+  padding: 10px;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid var(--cnt-linea);
+  box-shadow: 0 20px 40px -24px rgba(0, 43, 92, 0.45);
+  overflow: hidden;
+  justify-self: center;
+}
+.cnt-qr-img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* Una riga che scorre sul QR come uno scanner: invita a inquadrarlo */
+.cnt-qr-scansione {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 0;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--cnt-satispay);
+  box-shadow: 0 0 14px 3px rgba(255, 78, 80, 0.55);
+  opacity: 0.85;
+  animation: cnt-scansiona 2.8s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
-.satispay-btn-link:hover {
-  background: #e63b3d;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 78, 80, 0.4);
+/* =============== Notifica della copia =============== */
+
+.cnt-avviso-posto {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(1.2rem, env(safe-area-inset-bottom));
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding: 0 1rem;
+  pointer-events: none;
 }
 
-.satispay-helper {
-  font-size: 0.85rem;
-  color: #999;
+.cnt-avviso {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding: 0.85rem 1.3rem;
+  border-radius: 999px;
+  background: rgba(0, 26, 56, 0.92);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  animation: cnt-avviso 2.2s cubic-bezier(.16, 1, .3, 1) both;
+}
+.cnt-avviso svg { color: #16c47f; }
+.cnt-avviso.is-errore { background: #b42318; }
+
+/* =============== Telefono =============== */
+
+@media (max-width: 560px) {
+  .cnt-azioni { display: grid; grid-template-columns: 1fr 1fr; }
+  .cnt-azioni .cnt-bottone-pieno { grid-column: 1 / -1; }
+  .cnt-bottone { padding: 0 1rem; }
+
+  /* Sul telefono i pulsanti prendono tutta la larghezza: la scritta
+     finirebbe sotto di loro */
+  .cnt-sigillo { display: none; }
+
+  /* Undici cifre non stanno in mezza colonna senza andare a capo */
+  .cnt-fiscali { grid-template-columns: 1fr; }
+
+  .cnt-carta-piede { flex-direction: column; align-items: stretch; }
+  .cnt-copia-iban { justify-content: center; }
+
+  .cnt-satispay-testo { text-align: center; }
+  .cnt-satispay-bottone { width: 100%; }
 }
 
-/* --- MOBILE QUERY --- */
-@media (max-width: 600px) {
-  .contact-card { padding: 1.5rem; }
-  
-  .phone-btn { 
-    width: 100%; 
-    flex-direction: column; 
-    gap: 0.3rem; 
-    padding: 0.8rem; 
-    border-radius: 12px; 
-  }
-  
-  .name-tag { 
-    border-left: none; 
-    border-top: 1px solid rgba(255,255,255,0.3); 
-    padding-left: 0; 
-    padding-top: 0.3rem; 
-    width: 100%; 
-    text-align: center; 
-  }
-  
-  .iban-code { font-size: 1rem; }
-  
-  .satispay-btn-link {
-    width: 100%;
-  }
+/* =============== Animazioni =============== */
+
+@keyframes cnt-pulsa {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(3); opacity: 0; }
+}
+@keyframes cnt-onda {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+@keyframes cnt-ruota { to { transform: rotate(360deg); } }
+@keyframes cnt-scatto {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes cnt-scansiona {
+  from { transform: translateY(8px); }
+  to { transform: translateY(160px); }
+}
+@keyframes cnt-avviso {
+  0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+  12% { opacity: 1; transform: none; }
+  85% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cnt-sigillo,
+  .cnt-stato-luce::after,
+  .cnt-mappa-onda,
+  .cnt-qr-scansione,
+  .cnt-copia.is-fatto { animation: none; }
+  .cnt-qr-scansione { display: none; }
+  .cnt-avviso { animation: none; }
+  .cnt-mappa-cornice,
+  .cnt-bottone svg,
+  .cnt-telefono-icona,
+  .cnt-mappa-apri svg { transition: none; }
+  .cnt-mappa:hover .cnt-mappa-cornice { transform: none; }
 }

@@ -711,7 +711,7 @@ describe("stagioni e quote automatiche", () => {
 });
 
 describe("abbandono", () => {
-  seAccesa("la segreteria lo segna e lo toglie, e il conto non chiede più niente", async () => {
+  seAccesa("la segreteria lo segna e lo toglie, e il conto segue la regola di gennaio", async () => {
     const { chiedi } = await entra("segreteria");
     const elenco = await chiedi("/admin/atleti");
     const atleta = elenco.corpo.atleti.find((a) => !a.ritirato && !a.abbandonato && a.quotaStagionaleCentesimi);
@@ -720,7 +720,9 @@ describe("abbandono", () => {
     const segnato = await chiedi(`/admin/atleti/${atleta.utenteId}/abbandono`, { method: "POST" });
     expect(segnato.stato).toBe(200);
     expect(segnato.corpo.atleta.abbandonato).toBe(true);
-    expect(segnato.corpo.atleta.conto.dovuto).toBe(0);
+    // Prima di gennaio: la seconda metà non è dovuta, la prima sì
+    expect(segnato.corpo.atleta.conto.secondaDovuta).toBe(new Date().getMonth() < 6 ? true : false);
+    expect(segnato.corpo.atleta.conto.dovuto).toBeGreaterThan(0);
 
     const tolto = await chiedi(`/admin/atleti/${atleta.utenteId}/abbandono`, { method: "DELETE" });
     expect(tolto.stato).toBe(200);
@@ -779,5 +781,28 @@ describe("etichette e cestino delle notizie", () => {
     await chiedi(`/admin/notizie/${id}`, { method: "DELETE" });
     expect((await chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(200);
     expect((await chiedi(`/admin/notizie/${id}`)).stato).toBe(404);
+  });
+});
+
+describe("i dati dell'atleta si controllano sul server", () => {
+  seAccesa("il telefono si ripulisce e ha al massimo dieci cifre", async () => {
+    const { chiedi } = await entra("atleta");
+    const prima = (await chiedi("/iscrizione")).corpo.iscrizione;
+
+    const ok = await chiedi("/iscrizione", { method: "PATCH", body: JSON.stringify({ telefono: "+39 345 123-4567" }) });
+    expect(ok.stato).toBe(200);
+    expect((await chiedi("/iscrizione")).corpo.iscrizione.telefono).toBe("3451234567");
+
+    const lungo = await chiedi("/iscrizione", { method: "PATCH", body: JSON.stringify({ telefono: "345123456789" }) });
+    expect(lungo.stato).toBe(400);
+
+    // Rimesso com'era
+    await chiedi("/iscrizione", { method: "PATCH", body: JSON.stringify({ telefono: prima.telefono ?? "" }) });
+  });
+
+  seAccesa("un codice fiscale nuovo e sbagliato viene rifiutato", async () => {
+    const { chiedi } = await entra("atleta");
+    const esito = await chiedi("/iscrizione", { method: "PATCH", body: JSON.stringify({ codiceFiscale: "RSSMRA80A01L219A" }) });
+    expect(esito.stato).toBe(400);
   });
 });
