@@ -4,7 +4,7 @@ import AboutSection from "./AboutSection";
 import EventDetailsModal from "../../components/EventDetailsModal";
 import ResultsModal from "../../components/ResultsModal";
 import NewsletterForm from "./NewsletterForm";
-import { getLatestPostsByCategory, NOME_CATEGORIA } from "../../api/API.mjs";
+import { getLatestPostsByCategory } from "../../api/API.mjs";
 import { fetchHomeEvents } from "../../api/calendarApi";
 import {
   FaCalendarAlt, FaClock, FaYoutube, FaNewspaper, FaArrowRight,
@@ -380,15 +380,16 @@ export default function HomePage() {
    ===================================================== */
 
 /**
- * L'etichetta della categoria, quando dice qualcosa.
+ * La prima etichetta della notizia, quando ne ha una.
  *
- * "altro" è il valore di chi non ha ancora scelto: mostrarlo lo farebbe
- * sembrare una scelta, e riempirebbe la home di targhette che non
- * distinguono niente.
+ * Una sola: in home le schede sono piccole, e l'elenco completo sta
+ * nell'archivio. Senza etichette niente targhetta, invece di un "Altro"
+ * che non distingue niente.
  */
-function Categoria({ valore }) {
-  if (!valore || valore === "altro") return null;
-  return <span className="hs-categoria">{NOME_CATEGORIA[valore] ?? valore}</span>;
+function Categoria({ etichette }) {
+  const prima = Array.isArray(etichette) ? etichette[0] : null;
+  if (!prima?.nome) return null;
+  return <span className="hs-categoria">{prima.nome}</span>;
 }
 
 function NotiziaGrande({ notizia }) {
@@ -412,7 +413,7 @@ function NotiziaGrande({ notizia }) {
       <span className="hs-notizia-testi">
         <span className="hs-notizia-etichette">
           {notizia.recente && <span className="hs-nuova">Nuova</span>}
-          <Categoria valore={notizia.categoria} />
+          <Categoria etichette={notizia.etichette} />
           <span className="hs-data">{notizia.date}</span>
         </span>
 
@@ -436,7 +437,7 @@ function NotiziaPiccola({ notizia }) {
       <span className="hs-notizia-testi">
         <span className="hs-notizia-etichette">
           {notizia.recente && <span className="hs-nuova">Nuova</span>}
-          <Categoria valore={notizia.categoria} />
+          <Categoria etichette={notizia.etichette} />
           <span className="hs-data">{notizia.date}</span>
         </span>
 

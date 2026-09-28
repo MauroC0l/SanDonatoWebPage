@@ -42,7 +42,10 @@ export function normalizePost(n) {
     image: n.copertina || null,
     imageAlt: n.copertinaAlt || "",
     sport: n.sport,
-    categoria: n.categoria ?? "altro",
+    // Le etichette decise dallo staff, [{ id, nome }]. Sempre un array,
+    // anche da un server che non le manda ancora: chi le legge non deve
+    // controllare che esistano.
+    etichette: Array.isArray(n.etichette) ? n.etichette : [],
     author: n.autore || "Staff",
     date: formatDate(n.pubblicataIl),
     dateISO: n.pubblicataIl,
@@ -163,28 +166,6 @@ export function formatDate(iso) {
  */
 export const SPORT = ["Calcio", "Pallavolo", "Minivolley", "Basket", "Altro"];
 
-/**
- * Di cosa parla una notizia: una domanda diversa da quale sport riguarda.
- *
- * Dei 98 articoli portati da WordPress, 79 avevano sport "Altro" — non
- * erano catalogati male, semplicemente non parlavano di uno sport.
- * Assemblee, feste, tariffe, 5x1000: la vita di una polisportiva è fatta
- * per lo più di questo.
- *
- * La chiave sta nel database, l'etichetta serve a chi legge: cambiare la
- * seconda non costringe a una migrazione.
- */
-export const CATEGORIE = [
-  { valore: "societa", etichetta: "Vita di società" },
-  { valore: "eventi", etichetta: "Feste ed eventi" },
-  { valore: "sport", etichetta: "Sport e risultati" },
-  { valore: "solidarieta", etichetta: "Solidarietà e territorio" },
-  { valore: "altro", etichetta: "Altro" }
-];
-
-export const NOME_CATEGORIA = Object.fromEntries(
-  CATEGORIE.map((c) => [c.valore, c.etichetta])
-);
 
 /** Testo semplice da un frammento HTML, per anteprime e ricerche. */
 export function cleanExcerpt(html = "", limite = 200) {

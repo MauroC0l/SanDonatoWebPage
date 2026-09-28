@@ -140,6 +140,22 @@ nel browser (src/api/adminApi.js). Resta la prima richiesta dopo un po' di
 inattività: la funzione si riavvia e Neon si risveglia (qualche secondo, una
 volta). Si toglie solo con piani a pagamento (Neon senza sospensione).
 
+### Notizie: etichette e cestino (fatto il 28 settembre 2026)
+
+Le quattro categorie fisse sono diventate **etichette** (migrazione 0027,
+tabelle `etichette` e `notizie_etichette`): la redazione le crea, le
+rinomina e le cancella da "Gestisci etichette" nell'editor, e una notizia ne
+può avere più d'una. Le notizie cestinate si vedono nel filtro **Cestino**,
+da dove si ripristinano o si cancellano per sempre ("Svuota il cestino").
+
+Resta da fare:
+
+- la colonna `notizie.categoria` non si usa più: va tolta con una
+  migrazione, insieme a `scripts/classifica-notizie.mjs`, che la scrive
+  ancora;
+- il cestino non si svuota da solo: se serve, una pulizia automatica delle
+  notizie cestinate da più di N giorni (da decidere).
+
 ### Recupero della password via email
 
 Non esiste: la pagina "Password dimenticata" dice che non è ancora attivo.

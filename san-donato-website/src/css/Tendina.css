@@ -96,7 +96,21 @@
   max-height: 17rem;
   overflow-y: auto;
   overscroll-behavior: contain;
+
+  /* Una barra sottile ma sempre visibile: con le barre a scomparsa di Mac e
+     telefoni non si capiva che sotto c'erano altre voci. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--adm-line) transparent;
 }
+
+.tnd-lista::-webkit-scrollbar { width: 8px; }
+.tnd-lista::-webkit-scrollbar-track { background: transparent; }
+.tnd-lista::-webkit-scrollbar-thumb {
+  background: var(--adm-line);
+  border-radius: 999px;
+  border: 2px solid var(--adm-surface);
+}
+.tnd-lista::-webkit-scrollbar-thumb:hover { background: var(--adm-muted); }
 
 .tnd-vuoto {
   padding: 0.9rem 0.6rem;
@@ -166,6 +180,40 @@
 
 .tnd-spunta { flex-shrink: 0; font-size: 0.75rem; color: var(--adm-blue); }
 
+/* ---------- Scelta multipla ---------- */
+
+.tnd-casella {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--adm-line);
+  border-radius: 4px;
+  background: var(--adm-surface);
+  color: #fff;
+  font-size: 0.6rem;
+  transition: background-color .12s, border-color .12s;
+}
+
+.tnd-voce.is-scelta .tnd-casella {
+  background: var(--adm-blue);
+  border-color: var(--adm-blue);
+}
+
+/* Nella multipla più voci sono accese insieme: tutte in blu e in grassetto
+   sarebbe un muro. La casella basta a dire quali sono. */
+.tnd-pannello-multipla .tnd-voce.is-scelta { color: var(--adm-ink); font-weight: 500; }
+.tnd-pannello-multipla .tnd-voce.is-scelta.is-evidenziata { background: var(--adm-line-soft); }
+
+/* ---------- Piede del pannello ---------- */
+
+.tnd-piede {
+  padding: 0.45rem 0.75rem;
+  border-top: 1px solid var(--adm-line-soft);
+  font-size: 0.8rem;
+}
+
 /* Nella barra dei filtri .adm-filter-select dà solo un tetto alla larghezza:
    a un <select> bastava, a un <div> no, perché si stringerebbe sul testo. */
 .tnd.adm-filter-select { flex: 0 1 16rem; width: 16rem; }
@@ -181,6 +229,7 @@
 @media (prefers-reduced-motion: reduce) {
   .tnd-pannello { animation: none; }
   .tnd-freccia { transition: none; }
+  .tnd-casella { transition: none; }
 }
 
 /* Sopra la pagina e non dentro al contenitore: la posizione la calcola il

@@ -10,7 +10,8 @@
 import { urlFile } from "./file.js";
 import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "../db/client.js";
-import { notizie, media, utenti } from "../db/schema.js";
+import { notizie, media, utenti, notizieEtichette } from "../db/schema.js";
+import { etichettePerNotizie } from "./etichette.js";
 
 /**
  * Cosa vede il sito pubblico: pubblicata E con la data di pubblicazione già
@@ -70,8 +71,8 @@ const COLONNE = {
   sommario: notizie.sommario,
   contenuto: notizie.contenuto,
   sport: notizie.sport,
-  categoria: notizie.categoria,
   stato: notizie.stato,
+  cestinataIl: notizie.cestinataIl,
   pubblicataIl: notizie.pubblicataIl,
   creataIl: notizie.creataIl,
   aggiornataIl: notizie.aggiornataIl,
@@ -94,8 +95,10 @@ function daRiga(riga, { conContenuto = true } = {}) {
     sommario: riga.sommario ?? "",
     ...(conContenuto ? { contenuto: riga.contenuto } : {}),
     sport: riga.sport,
-    categoria: riga.categoria,
+    // Riempite dopo, in una sola interrogazione per tutto l'elenco
+    etichette: [],
     stato: riga.stato,
+    cestinataIl: riga.cestinataIl ?? null,
     copertinaId: riga.copertinaId ?? null,
     copertina: urlFile(riga.copertinaChiave, riga.copertinaUrlWp),
     copertinaAlt: riga.copertinaAlt ?? "",
@@ -103,6 +106,13 @@ function daRiga(riga, { conContenuto = true } = {}) {
     pubblicataIl: riga.pubblicataIl,
     aggiornataIl: riga.aggiornataIl
   };
+}
+
+/** Mette a ciascuna notizia le sue etichette. */
+async function conEtichette(elenco) {
+  const mappa = await etichettePerNotizie(elenco.map((n) => n.id));
+  for (const n of elenco) n.etichette = mappa.get(n.id) ?? [];
+  return elenco;
 }
 
 function base(db) {
@@ -123,7 +133,7 @@ export async function elencaNotizie({
   pagina = 1,
   perPagina = 12,
   sport,
-  categoria,
+  etichetta,
   stato,
   cerca,
   soloPubblicate = true,
@@ -166,7 +176,13 @@ export async function elencaNotizie({
   }
 
   if (sport) condizioni.push(eq(notizie.sport, sport));
-  if (categoria) condizioni.push(eq(notizie.categoria, categoria));
+  if (etichetta) {
+    condizioni.push(sql`exists (
+      select 1 from ${notizieEtichette}
+      where ${notizieEtichette.notiziaId} = ${notizie.id}
+        and ${notizieEtichette.etichettaId} = ${Number(etichetta)}
+    )`);
+  }
 
   if (cerca) {
     const modello = `%${cerca}%`;
@@ -180,15 +196,21 @@ export async function elencaNotizie({
     .from(notizie)
     .where(dove);
 
+  /* Il cestino si mostra dall'ultima cestinata: è lì che si va a cercare
+     quella tolta per sbaglio un attimo fa. */
+  const soloCestino = !soloPubblicate && stati.length === 1 && stati[0] === "cestino";
+
   const righe = await base(db)
     .where(dove)
     // Le bozze non hanno data di pubblicazione: si ordinano per creazione
-    .orderBy(desc(sql`coalesce(${notizie.pubblicataIl}, ${notizie.creataIl})`))
+    .orderBy(desc(soloCestino
+      ? sql`coalesce(${notizie.cestinataIl}, ${notizie.aggiornataIl})`
+      : sql`coalesce(${notizie.pubblicataIl}, ${notizie.creataIl})`))
     .limit(perPagina)
     .offset((pagina - 1) * perPagina);
 
   return {
-    notizie: righe.map((r) => daRiga(r, { conContenuto })),
+    notizie: await conEtichette(righe.map((r) => daRiga(r, { conContenuto }))),
     totale,
     pagina,
     perPagina,
@@ -217,7 +239,9 @@ export async function trovaNotizia(identificativo, { soloPubblicate = true } = {
     .orderBy(desc(sql`case when ${notizie.wpId} = ${numero || 0} then 1 else 0 end`))
     .limit(1);
 
-  return righe[0] ? daRiga(righe[0]) : null;
+  if (!righe[0]) return null;
+  const [notizia] = await conEtichette([daRiga(righe[0])]);
+  return notizia;
 }
 
 /** Le ultime notizie di ogni sport, per la home. */
@@ -243,10 +267,9 @@ export async function ultimePerSport(quante = 4) {
     .where(sql`${numerate.posizione} <= ${quante}`)
     .orderBy(desc(sql`coalesce(${notizie.pubblicataIl}, ${notizie.creataIl})`));
 
+  const elenco = await conEtichette(righe.map((r) => daRiga(r, { conContenuto: false })));
   const perSport = {};
-  for (const riga of righe) {
-    (perSport[riga.sport] ??= []).push(daRiga(riga, { conContenuto: false }));
-  }
+  for (const n of elenco) (perSport[n.sport] ??= []).push(n);
   return perSport;
 }
 

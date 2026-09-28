@@ -215,7 +215,8 @@ function versoPannello(n) {
     excerpt: n.sommario ?? "",
     content: n.contenuto ?? "",
     sport: n.sport,
-    categoria: n.categoria ?? "altro",
+    // [{ id, nome }]: al posto della vecchia categoria fissa
+    etichette: n.etichette ?? [],
     status: programmata ? "future" : (STATO_VERSO_PANNELLO[n.stato] ?? n.stato),
     image: n.copertina || null,
     featuredMediaId: n.copertinaId ?? 0,
@@ -223,11 +224,12 @@ function versoPannello(n) {
     // dateISO e non date: è il nome che usano gli elenchi del pannello
     dateISO: n.pubblicataIl,
     pubblicataIl: n.pubblicataIl,
-    modified: n.aggiornataIl
+    modified: n.aggiornataIl,
+    cestinataIl: n.cestinataIl ?? null
   };
 }
 
-export async function listPosts({ search = "", status = "", categoria = "", page = 1, perPage = 20 } = {}) {
+export async function listPosts({ search = "", status = "", etichetta = "", page = 1, perPage = 20 } = {}) {
   const parametri = new URLSearchParams({ pagina: String(page), perPagina: String(perPage) });
   if (search) parametri.set("cerca", search);
 
@@ -243,7 +245,7 @@ export async function listPosts({ search = "", status = "", categoria = "", page
     .map((s) => STATO_VERSO_NOI[s] ?? s);
 
   if (stati.length) parametri.set("stato", stati.join(","));
-  if (categoria) parametri.set("categoria", categoria);
+  if (etichetta) parametri.set("etichetta", String(etichetta));
 
   const risultato = await chiedi(`/admin/notizie?${parametri}`);
 
@@ -266,7 +268,8 @@ function versoBackend(dati) {
   if (dati.content !== undefined) corpo.contenuto = dati.content;
   if (dati.excerpt !== undefined) corpo.sommario = dati.excerpt;
   if (dati.sport !== undefined) corpo.sport = dati.sport;
-  if (dati.categoria !== undefined) corpo.categoria = dati.categoria;
+  // Solo gli identificativi: le etichette si creano e rinominano a parte
+  if (dati.etichette !== undefined) corpo.etichette = dati.etichette.map((e) => (typeof e === "object" ? e.id : e));
   if (dati.status !== undefined) corpo.stato = STATO_VERSO_NOI[dati.status] ?? dati.status;
   // Il pannello parla ancora di "featuredMediaId", parola di WordPress:
   // la traduzione sta qui, non nei componenti.
@@ -312,10 +315,56 @@ export async function updatePost(id, dati) {
   };
 }
 
-/** Sposta nel cestino. Non cancella: si recupera rimettendola in bozza. */
+/** Sposta nel cestino. Non cancella: dal cestino si ripristina. */
 export async function trashPost(id) {
   const { notizia } = await chiedi(`/admin/notizie/${id}`, { method: "DELETE" });
   return { id: notizia.id, status: STATO_VERSO_PANNELLO[notizia.stato] };
+}
+
+/** Fuori dal cestino: torna bozza, da ricontrollare prima di ripubblicarla. */
+export async function restorePost(id) {
+  return updatePost(id, { status: "draft" });
+}
+
+/** Cancella per sempre una notizia che è già nel cestino. */
+export async function deletePostForever(id) {
+  return chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" });
+}
+
+/** Cancella per sempre tutto il cestino. Torna quante ne ha tolte. */
+export async function svuotaCestinoNotizie() {
+  const { eliminate } = await chiedi("/admin/notizie", { method: "DELETE" });
+  return eliminate;
+}
+
+/* =====================================================
+   Etichette delle notizie
+   ===================================================== */
+
+/** Tutte le etichette, in ordine di nome: [{ id, nome, quante }]. */
+export async function listEtichette() {
+  const { etichette } = await chiedi("/admin/etichette");
+  return etichette;
+}
+
+export async function creaEtichetta(nome) {
+  const { etichetta } = await chiedi("/admin/etichette", {
+    method: "POST",
+    body: JSON.stringify({ nome })
+  });
+  return etichetta;
+}
+
+export async function rinominaEtichetta(id, nome) {
+  const { etichetta } = await chiedi(`/admin/etichette/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ nome })
+  });
+  return etichetta;
+}
+
+export async function eliminaEtichetta(id) {
+  return chiedi(`/admin/etichette/${id}`, { method: "DELETE" });
 }
 
 /* =====================================================

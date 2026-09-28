@@ -9,8 +9,10 @@
  * dimenticarselo è difficile.
  */
 
+import { eq } from "drizzle-orm";
 import { getDb } from "../../../../db/client.js";
 import { notizie } from "../../../../db/schema.js";
+import { impostaEtichette } from "../../../etichette.js";
 import { elencaNotizie, slugLibero } from "../../../notizie.js";
 import { ripulisciHtml, soloTesto, creaSlug } from "../../../sanitizza.js";
 import { puo } from "../../../autorizzazioni.js";
@@ -21,10 +23,10 @@ import { leggiCorpo, parametri } from "../../../richiesta.js";
 import { schemaElencoNotizie, schemaNotiziaNuova, valida } from "../../../validazione.js";
 
 async function elenco(req, res) {
-  const { pagina, perPagina, sport, categoria, stato, cerca } = valida(schemaElencoNotizie, parametri(req));
+  const { pagina, perPagina, sport, etichetta, stato, cerca } = valida(schemaElencoNotizie, parametri(req));
 
   const risultato = await elencaNotizie({
-    pagina, perPagina, sport, categoria, stato, cerca,
+    pagina, perPagina, sport, etichetta, stato, cerca,
     soloPubblicate: false
   });
 
@@ -57,7 +59,6 @@ async function crea(req, res) {
     sommario: dati.sommario || soloTesto(contenuto, 200),
     contenuto,
     sport: dati.sport,
-    categoria: dati.categoria,
     stato: statoFinale,
     copertinaId: dati.copertinaId ?? null,
     autoreId: req.utente.id,
@@ -66,6 +67,8 @@ async function crea(req, res) {
     id: notizie.id, slug: notizie.slug,
     stato: notizie.stato, pubblicataIl: notizie.pubblicataIl
   });
+
+  if (dati.etichette) await impostaEtichette(creata.id, dati.etichette);
 
   await annota(req.utente, {
     azione: `notizie.${statoFinale === "pubblicata" ? "pubblica" : "crea"}`,
@@ -82,6 +85,29 @@ async function crea(req, res) {
   }, 201);
 }
 
+/**
+ * Svuota il cestino: cancella per sempre tutte le notizie cestinate.
+ *
+ * Le copertine restano nella libreria dei file: possono servire ad altre
+ * notizie, e i file hanno il loro cestino.
+ */
+async function svuotaCestino(req, res) {
+  const tolte = await getDb()
+    .delete(notizie)
+    .where(eq(notizie.stato, "cestino"))
+    .returning({ id: notizie.id, titolo: notizie.titolo });
+
+  await annota(req.utente, {
+    azione: "notizie.svuota_cestino",
+    tipo: "notizia",
+    id: null,
+    descrizione: `Ha svuotato il cestino delle notizie (${tolte.length})`,
+    dettaglio: { titoli: tolte.map((n) => n.titolo).slice(0, 50) }
+  });
+
+  return json(res, { eliminate: tolte.length });
+}
+
 export default conGestioneErrori(async (req, res) => {
   if (req.method === "GET") {
     return richiedeCapacita("notizie.leggi_bozze", elenco)(req, res);
@@ -89,7 +115,11 @@ export default conGestioneErrori(async (req, res) => {
   if (req.method === "POST") {
     return richiedeCapacita("notizie.scrivi", crea)(req, res);
   }
+  // DELETE sull'elenco intero vuol dire una cosa sola: svuotare il cestino
+  if (req.method === "DELETE") {
+    return richiedeCapacita("notizie.cestina", svuotaCestino)(req, res);
+  }
 
-  res.setHeader("Allow", "GET, POST");
+  res.setHeader("Allow", "GET, POST, DELETE");
   return errore(res, 405, `Metodo ${req.method} non consentito.`);
 });

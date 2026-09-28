@@ -11,9 +11,10 @@
  * clic sbagliato, non deve essere possibile da qui.
  */
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "../../../../db/client.js";
 import { notizie } from "../../../../db/schema.js";
+import { impostaEtichette } from "../../../etichette.js";
 import { trovaNotizia, slugLibero } from "../../../notizie.js";
 import { ripulisciHtml, soloTesto, creaSlug } from "../../../sanitizza.js";
 import { puo } from "../../../autorizzazioni.js";
@@ -57,7 +58,6 @@ async function modifica(req, res) {
 
   if (dati.titolo !== undefined) modifiche.titolo = dati.titolo;
   if (dati.sport !== undefined) modifiche.sport = dati.sport;
-  if (dati.categoria !== undefined) modifiche.categoria = dati.categoria;
   if (dati.copertinaId !== undefined) modifiche.copertinaId = dati.copertinaId;
 
   if (dati.contenuto !== undefined) {
@@ -82,6 +82,9 @@ async function modifica(req, res) {
     } else {
       modifiche.stato = dati.stato;
     }
+
+    // Uscita dal cestino (ripristinata): la data del cestino non vale più
+    if (esistente.stato === "cestino") modifiche.cestinataIl = null;
 
     // La data di pubblicazione si scrive una volta sola: ripubblicare una
     // notizia vecchia non deve farla risalire in cima all'elenco.
@@ -111,6 +114,8 @@ async function modifica(req, res) {
       stato: notizie.stato, pubblicataIl: notizie.pubblicataIl
     });
 
+  if (dati.etichette !== undefined) await impostaEtichette(id, dati.etichette);
+
   const cambioStato = modifiche.stato && modifiche.stato !== esistente.stato;
 
   await annota(req.utente, {
@@ -122,7 +127,12 @@ async function modifica(req, res) {
       : `Ha modificato "${modifiche.titolo ?? esistente.titolo}"`,
     // I nomi dei campi toccati, non il loro contenuto: il registro dice chi
     // ha messo le mani dove, non conserva una copia di ogni versione.
-    dettaglio: { campi: Object.keys(modifiche).filter((c) => c !== "aggiornataIl") }
+    dettaglio: {
+      campi: [
+        ...Object.keys(modifiche).filter((c) => c !== "aggiornataIl"),
+        ...(dati.etichette !== undefined ? ["etichette"] : [])
+      ]
+    }
   });
 
   return json(res, { notizia: aggiornata, inviataInRevisione });
@@ -131,9 +141,30 @@ async function modifica(req, res) {
 async function cestina(req, res) {
   const id = idRichiesto(req);
 
+  /* ?definitiva=1 cancella per sempre, e solo una notizia già nel cestino:
+     la cancellazione definitiva è il secondo passo, mai il primo. */
+  if (parametri(req).definitiva === "1") {
+    const [tolta] = await getDb()
+      .delete(notizie)
+      .where(and(eq(notizie.id, id), eq(notizie.stato, "cestino")))
+      .returning({ id: notizie.id, titolo: notizie.titolo });
+
+    if (!tolta) {
+      return errore(res, 409, "Si cancellano per sempre solo le notizie già nel cestino.");
+    }
+
+    await annota(req.utente, {
+      azione: "notizie.elimina",
+      tipo: "notizia",
+      id,
+      descrizione: `Ha cancellato per sempre "${tolta.titolo}"`
+    });
+    return json(res, { eliminata: tolta });
+  }
+
   const [cestinata] = await getDb()
     .update(notizie)
-    .set({ stato: "cestino", aggiornataIl: new Date() })
+    .set({ stato: "cestino", cestinataIl: new Date(), aggiornataIl: new Date() })
     .where(eq(notizie.id, id))
     .returning({ id: notizie.id, titolo: notizie.titolo, stato: notizie.stato });
 

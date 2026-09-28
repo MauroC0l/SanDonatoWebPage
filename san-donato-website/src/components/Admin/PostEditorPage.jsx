@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   FaArrowLeft, FaSave, FaPaperPlane, FaImage, FaImages, FaTrashAlt, FaUpload,
-  FaExclamationCircle, FaInfoCircle, FaExternalLinkAlt, FaClock, FaRegClock
+  FaExclamationCircle, FaInfoCircle, FaExternalLinkAlt, FaClock, FaRegClock, FaTags
 } from "react-icons/fa";
-import { getPost, createPost, updatePost, uploadMedia, AuthError } from "../../api/adminApi";
-import { SPORT, CATEGORIE } from "../../api/API.mjs";
+import { getPost, createPost, updatePost, uploadMedia, listEtichette, AuthError } from "../../api/adminApi";
+import { SPORT } from "../../api/API.mjs";
 import { prepareImage, formatSize } from "../../utils/prepareImage";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -14,6 +14,7 @@ import RichTextEditor from "./RichTextEditor";
 import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import SceltaDallaLibreria from "./SceltaDallaLibreria";
+import GestioneEtichette from "./GestioneEtichette";
 import "../../css/Admin.css";
 
 const VUOTO = {
@@ -21,7 +22,8 @@ const VUOTO = {
   content: "",
   excerpt: "",
   sport: "Altro",
-  categoria: "altro",
+  // Gli identificativi delle etichette scelte
+  etichette: [],
   status: "draft",
   featuredMediaId: 0,
   image: null,
@@ -43,10 +45,14 @@ const VUOTO = {
 };
 
 /** I campi che, cambiando, valgono come "modifica non salvata". */
-const CAMPI_CONFRONTO = ["title", "content", "excerpt", "sport", "categoria", "featuredMediaId", "pubblicataIl"];
+const CAMPI_CONFRONTO = ["title", "content", "excerpt", "sport", "etichette", "featuredMediaId", "pubblicataIl"];
+
+/* Le etichette sono un elenco: si confrontano ordinate, perché sceglierle
+   in un altro ordine non è una modifica. */
+const confrontabile = (v) => (Array.isArray(v) ? [...v].sort((x, y) => x - y).join(",") : (v ?? ""));
 
 function uguali(a, b) {
-  return CAMPI_CONFRONTO.every((c) => (a[c] ?? "") === (b[c] ?? ""));
+  return CAMPI_CONFRONTO.every((c) => confrontabile(a[c]) === confrontabile(b[c]));
 }
 
 function leggibile(iso) {
@@ -109,7 +115,7 @@ export default function PostEditorPage() {
           content: post.content,
           excerpt: post.excerpt,
           sport: post.sport || "Altro",
-          categoria: post.categoria || "altro",
+          etichette: (post.etichette ?? []).map((e) => e.id),
           status: post.status,
           featuredMediaId: post.featuredMediaId,
           image: post.image,
@@ -238,7 +244,7 @@ export default function PostEditorPage() {
       content: form.content,
       excerpt: form.excerpt.trim(),
       sport: form.sport,
-      categoria: form.categoria,
+      etichette: form.etichette,
       status,
       featuredMediaId: form.featuredMediaId,
 
@@ -270,10 +276,16 @@ export default function PostEditorPage() {
       setForm(salvata);
       setBase(salvata);
 
-      if (isNew) {
+      /* Pubblicata (o programmata, o mandata in revisione): il lavoro su
+         questa notizia è finito, e si torna all'elenco. Una bozza invece
+         resta aperta, perché la si sta ancora scrivendo. */
+      const finita = status === "publish";
+
+      if (isNew && !finita) {
         // Da qui in poi i salvataggi sono aggiornamenti, non nuove notizie
         navigate(`${area}/notizie/${saved.id}`, { replace: true });
       }
+      if (finita) navigate(`${area}/notizie`);
 
       if (saved.inviataInRevisione) {
         avvisa("Inviata in revisione: un amministratore la pubblicherà.", "info");
@@ -310,6 +322,32 @@ export default function PostEditorPage() {
     }
     navigate(`${area}/notizie`);
   };
+
+  /* ---------- Etichette ---------- */
+
+  const [tutteEtichette, setTutteEtichette] = useState([]);
+  const [gestioneAperta, setGestioneAperta] = useState(false);
+  const puoPubblicare = (user?.capabilities ?? []).includes("notizie.pubblica");
+
+  const caricaEtichette = useCallback(() => listEtichette()
+    .then((elenco) => {
+      setTutteEtichette(elenco);
+      /* Un'etichetta cancellata nella finestra sparisce anche da questa
+         notizia: tenerla vorrebbe dire mandare al server un numero che
+         non esiste più. */
+      const esistenti = new Set(elenco.map((e) => e.id));
+      setForm((f) => (f.etichette.every((id) => esistenti.has(id))
+        ? f
+        : { ...f, etichette: f.etichette.filter((id) => esistenti.has(id)) }));
+    })
+    .catch(() => {}), []);
+
+  useEffect(() => { caricaEtichette(); }, [caricaEtichette]);
+
+  const opzioniEtichette = useMemo(
+    () => tutteEtichette.map((e) => ({ valore: e.id, etichetta: e.nome })),
+    [tutteEtichette]
+  );
 
   const opzioniSport = useMemo(
     () => SPORT.map((s) => ({ valore: s, etichetta: s })),
@@ -415,13 +453,13 @@ export default function PostEditorPage() {
               "volley" nel titolo per finire nella sezione giusta. Ora si
               sceglie, e il titolo torna a essere solo un titolo. */}
           <div className="adm-field">
-            <span className="adm-label">Sezione del sito</span>
+            <span className="adm-label">A quale sport vuoi collegare questa notizia:</span>
             <Tendina
               valore={form.sport}
               onChange={(v) => update({ sport: v })}
               opzioni={opzioniSport}
               disabilitato={busy}
-              etichettaAria="Sezione del sito"
+              etichettaAria="Sport a cui collegare la notizia"
             />
           </div>
 
@@ -436,15 +474,34 @@ export default function PostEditorPage() {
               contenuto. Tenerne una sola vorrebbe dire buttare via
               metà dell'informazione. */}
           <div className="adm-field">
-            <span className="adm-label">Di cosa parla</span>
+            <div className="adm-label-riga">
+              <span className="adm-label">Etichette:</span>
+              <button
+                type="button"
+                className="adm-btn adm-btn-ghost adm-btn-piccolo"
+                onClick={() => setGestioneAperta(true)}
+                disabled={busy}
+              >
+                <FaTags /> Gestisci etichette
+              </button>
+            </div>
             <Tendina
-              valore={form.categoria}
-              onChange={(v) => update({ categoria: v })}
-              opzioni={CATEGORIE}
+              multipla
+              valore={form.etichette}
+              onChange={(v) => update({ etichette: v })}
+              opzioni={opzioniEtichette}
               disabilitato={busy}
-              etichettaAria="Categoria della notizia"
+              segnaposto={opzioniEtichette.length ? "Scegli una o più etichette…" : "Nessuna etichetta: creane una con Gestisci etichette"}
+              etichettaAria="Etichette della notizia"
             />
           </div>
+
+          {gestioneAperta && (
+            <GestioneEtichette
+              puoModificare={puoPubblicare}
+              onChiudi={() => { setGestioneAperta(false); caricaEtichette(); }}
+            />
+          )}
 
           <div className="adm-field">
             <span className="adm-label">Testo</span>

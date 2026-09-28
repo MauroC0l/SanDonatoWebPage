@@ -23,7 +23,8 @@ describe("creazione di una notizia", () => {
     });
 
     expect(esito.sport).toBe("Altro");
-    expect(esito.categoria).toBe("altro");
+    // Le etichette non hanno un valore di partenza: nessuna è nessuna
+    expect(esito.etichette).toBeUndefined();
     expect(esito.stato).toBe("bozza");
   });
 
@@ -37,11 +38,12 @@ describe("creazione di una notizia", () => {
       .toThrow();
   });
 
-  it("rifiuta uno sport o una categoria inventati", () => {
+  it("rifiuta uno sport inventato ed etichette che non sono identificativi", () => {
     const base = { titolo: "Un titolo lungo", contenuto: "<p>x</p>" };
 
     expect(() => valida(schemaNotiziaNuova, { ...base, sport: "Curling" })).toThrow();
-    expect(() => valida(schemaNotiziaNuova, { ...base, categoria: "gossip" })).toThrow();
+    expect(() => valida(schemaNotiziaNuova, { ...base, etichette: ["gossip"] })).toThrow();
+    expect(valida(schemaNotiziaNuova, { ...base, etichette: [3, "4"] }).etichette).toEqual([3, 4]);
   });
 });
 
@@ -60,7 +62,7 @@ describe("modifica di una notizia", () => {
     expect(Object.keys(esito)).toEqual(["titolo"]);
     expect(esito.stato).toBeUndefined();
     expect(esito.sport).toBeUndefined();
-    expect(esito.categoria).toBeUndefined();
+    expect(esito.etichette).toBeUndefined();
     expect(esito.pubblicataIl).toBeUndefined();
   });
 
@@ -100,9 +102,9 @@ describe("filtro dell'elenco", () => {
     expect(() => valida(schemaElencoNotizie, { perPagina: 5000 })).toThrow();
   });
 
-  it("filtra per categoria solo con una categoria vera", () => {
-    expect(valida(schemaElencoNotizie, { categoria: "eventi" }).categoria).toBe("eventi");
-    expect(() => valida(schemaElencoNotizie, { categoria: "eventii" })).toThrow();
+  it("filtra per etichetta solo con un identificativo", () => {
+    expect(valida(schemaElencoNotizie, { etichetta: "7" }).etichetta).toBe(7);
+    expect(() => valida(schemaElencoNotizie, { etichetta: "eventi" })).toThrow();
   });
 });
 

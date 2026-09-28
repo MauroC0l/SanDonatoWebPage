@@ -18,6 +18,7 @@ import rotta_admin_atleti_index from "./rotte/admin/atleti/index.js";
 import rotta_admin_calendari_index from "./rotte/admin/calendari/index.js";
 import rotta_admin_calendari_lettura from "./rotte/admin/calendari/lettura.js";
 import rotta_admin_carica_file from "./rotte/admin/carica-file.js";
+import rotta_admin_etichette_index from "./rotte/admin/etichette/index.js";
 import rotta_admin_eventi_index from "./rotte/admin/eventi/index.js";
 import rotta_admin_iscrizioni from "./rotte/admin/iscrizioni.js";
 import rotta_admin_media_index from "./rotte/admin/media/index.js";
@@ -51,6 +52,7 @@ import rotta_admin_atleti_id_legami from "./rotte/admin/atleti/[id]/legami.js";
 import rotta_admin_atleti_id_ritiro from "./rotte/admin/atleti/[id]/ritiro.js";
 import rotta_admin_calendari_id from "./rotte/admin/calendari/[id].js";
 import rotta_admin_calendari_gironi_id from "./rotte/admin/calendari/gironi/[id].js";
+import rotta_admin_etichette_id from "./rotte/admin/etichette/[id].js";
 import rotta_admin_eventi_id from "./rotte/admin/eventi/[id].js";
 import rotta_admin_eventi_id_media from "./rotte/admin/eventi/[id]/media.js";
 import rotta_admin_media_id from "./rotte/admin/media/[id].js";
@@ -73,6 +75,7 @@ const TABELLA = [
   ["admin/calendari",                rotta_admin_calendari_index],
   ["admin/calendari/lettura",        rotta_admin_calendari_lettura],
   ["admin/carica-file",              rotta_admin_carica_file],
+  ["admin/etichette",                rotta_admin_etichette_index],
   ["admin/eventi",                   rotta_admin_eventi_index],
   ["admin/iscrizioni",               rotta_admin_iscrizioni],
   ["admin/media",                    rotta_admin_media_index],
@@ -106,6 +109,7 @@ const TABELLA = [
   ["admin/atleti/[id]/ritiro",       rotta_admin_atleti_id_ritiro],
   ["admin/calendari/[id]",           rotta_admin_calendari_id],
   ["admin/calendari/gironi/[id]",    rotta_admin_calendari_gironi_id],
+  ["admin/etichette/[id]",           rotta_admin_etichette_id],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],
   ["admin/eventi/[id]/media",        rotta_admin_eventi_id_media],
   ["admin/media/[id]",               rotta_admin_media_id],

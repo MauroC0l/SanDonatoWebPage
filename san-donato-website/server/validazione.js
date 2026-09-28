@@ -39,7 +39,8 @@ const CAMPI = {
   contenuto: z.string().min(1, "La notizia è vuota."),
   sommario: z.string().trim().max(500),
   sport: z.enum(SPORT),
-  categoria: z.enum(CATEGORIE),
+  // Gli identificativi delle etichette: sostituiscono quelle di prima
+  etichette: z.array(z.coerce.number().int().positive()).max(20),
   stato: z.enum(STATI),
   slug: z.string().trim().max(90),
   copertinaId: z.number().int().positive().nullable(),
@@ -59,7 +60,7 @@ export const schemaNotiziaNuova = z.object({
   contenuto: CAMPI.contenuto,
   sommario: CAMPI.sommario.optional(),
   sport: CAMPI.sport.optional().default("Altro"),
-  categoria: CAMPI.categoria.optional().default("altro"),
+  etichette: CAMPI.etichette.optional(),
   stato: CAMPI.stato.optional().default("bozza"),
   slug: CAMPI.slug.optional(),
   copertinaId: CAMPI.copertinaId.optional(),
@@ -81,7 +82,7 @@ export const schemaNotiziaModifica = z.object({
   contenuto: CAMPI.contenuto.optional(),
   sommario: CAMPI.sommario.optional(),
   sport: CAMPI.sport.optional(),
-  categoria: CAMPI.categoria.optional(),
+  etichette: CAMPI.etichette.optional(),
   stato: CAMPI.stato.optional(),
   slug: CAMPI.slug.optional(),
   copertinaId: CAMPI.copertinaId.optional(),
@@ -92,7 +93,8 @@ export const schemaElencoNotizie = z.object({
   pagina: z.coerce.number().int().min(1).optional().default(1),
   perPagina: z.coerce.number().int().min(1).max(50).optional().default(12),
   sport: z.enum(SPORT).optional(),
-  categoria: z.enum(CATEGORIE).optional(),
+  // Una sola etichetta alla volta, per identificativo
+  etichetta: z.coerce.number().int().positive().optional(),
 
   /**
    * Uno stato solo oppure più stati separati da virgola.

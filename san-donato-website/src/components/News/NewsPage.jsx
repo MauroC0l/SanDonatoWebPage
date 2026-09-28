@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   FaSearch, FaTimes, FaNewspaper, FaSlidersH, FaArrowRight, FaCalendarAlt
 } from "react-icons/fa";
-import { getAllPosts, CATEGORIE, NOME_CATEGORIA } from "../../api/API.mjs";
+import { getAllPosts } from "../../api/API.mjs";
 import Tendina from "../Admin/Tendina";
 import CampoData from "../Admin/CampoData";
 import "../../css/Admin.css";
@@ -25,9 +25,10 @@ import "../../css/NewsPage.css";
  * dentro al pannello e portano la tavolozza --adm-*: la si dichiara sulla
  * radice di questa pagina, come si fa per le finestre di dialogo.
  *
- * IL FILTRO PER CATEGORIA è la novità che conta: lo sport divideva male un
+ * IL FILTRO PER ETICHETTA è la novità che conta: lo sport divideva male un
  * archivio in cui otto articoli su dieci non parlano di sport ma di
- * assemblee, feste e iscrizioni.
+ * assemblee, feste e iscrizioni. Le etichette le decide lo staff, quindi
+ * l'elenco del filtro non è scritto qui: nasce dalle notizie caricate.
  */
 
 const ORDINI = [
@@ -36,6 +37,12 @@ const ORDINI = [
 ];
 
 const PER_PAGINA = 12;
+
+/* Quante etichette mostra una scheda. Oltre, un "+2": cinque pastiglie in
+   fila su un telefono prenderebbero il posto del titolo. */
+const ETICHETTE_IN_SCHEDA = 2;
+
+const etichetteDi = (post) => (Array.isArray(post?.etichette) ? post.etichette : []);
 
 /* Minivolley è pallavolo per chi legge: come filtro a sé faceva una voce in
    più che quasi nessuno avrebbe premuto. */
@@ -62,6 +69,9 @@ function fineGiornata(iso) {
 /** Una scheda della griglia. Grande per la prima, normale per le altre. */
 function Scheda({ post, grande = false }) {
   const sfondo = post.image || "/logo-poli-sfondo.jpg";
+  const etichette = etichetteDi(post);
+  const inVista = etichette.slice(0, ETICHETTE_IN_SCHEDA);
+  const altre = etichette.length - inVista.length;
 
   return (
     <Link
@@ -74,9 +84,15 @@ function Scheda({ post, grande = false }) {
 
       <span className="nws-testi">
         <span className="nws-etichette">
-          {post.categoria && post.categoria !== "altro" && (
-            <span className="nws-categoria">
-              {NOME_CATEGORIA[post.categoria] ?? post.categoria}
+          {inVista.map((e) => (
+            <span key={e.id} className="nws-etichetta" title={e.nome}>{e.nome}</span>
+          ))}
+          {altre > 0 && (
+            <span
+              className="nws-etichetta nws-etichetta-altre"
+              title={etichette.slice(ETICHETTE_IN_SCHEDA).map((e) => e.nome).join(", ")}
+            >
+              +{altre}
             </span>
           )}
           {post.sport && post.sport !== "Altro" && (
@@ -101,7 +117,7 @@ export default function NewsPage() {
   const [errore, setErrore] = useState("");
 
   const [sport, setSport] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [etichetta, setEtichetta] = useState("");
   const [ordine, setOrdine] = useState("desc");
   const [da, setDa] = useState("");
   const [a, setA] = useState("");
@@ -140,14 +156,20 @@ export default function NewsPage() {
     ];
   }, [notizie]);
 
-  const opzioniCategoria = useMemo(() => {
-    // Solo le categorie che hanno davvero qualcosa dentro: una voce che
-    // torna sempre vuota è una promessa non mantenuta.
-    const presenti = new Set(notizie.map((n) => n.categoria));
+  const opzioniEtichetta = useMemo(() => {
+    // Solo le etichette che hanno davvero qualcosa dentro: una voce che
+    // torna sempre vuota è una promessa non mantenuta. Per id, così due
+    // notizie con la stessa etichetta non la fanno comparire due volte.
+    const presenti = new Map();
+    for (const n of notizie) {
+      for (const e of etichetteDi(n)) presenti.set(String(e.id), e.nome);
+    }
 
     return [
-      { valore: "", etichetta: "Tutte le categorie" },
-      ...CATEGORIE.filter((c) => c.valore !== "altro" && presenti.has(c.valore))
+      { valore: "", etichetta: "Tutte le etichette" },
+      ...[...presenti]
+        .sort(([, x], [, y]) => x.localeCompare(y, "it", { sensitivity: "base" }))
+        .map(([id, nome]) => ({ valore: id, etichetta: nome }))
     ];
   }, [notizie]);
 
@@ -156,7 +178,7 @@ export default function NewsPage() {
 
     return notizie
       .filter((n) => !sport || sportVisibile(n.sport) === sport)
-      .filter((n) => !categoria || n.categoria === categoria)
+      .filter((n) => !etichetta || etichetteDi(n).some((e) => String(e.id) === etichetta))
       .filter((n) => {
         const d = quando(n);
         if (da && d < new Date(da)) return false;
@@ -168,7 +190,7 @@ export default function NewsPage() {
       .sort((x, y) => (ordine === "desc"
         ? quando(y) - quando(x)
         : quando(x) - quando(y)));
-  }, [notizie, sport, categoria, da, a, cerca, ordine]);
+  }, [notizie, sport, etichetta, da, a, cerca, ordine]);
 
   const pagine = Math.max(1, Math.ceil(filtrate.length / PER_PAGINA));
   const paginaValida = Math.min(pagina, pagine);
@@ -186,7 +208,7 @@ export default function NewsPage() {
 
   const azzera = () => {
     setSport("");
-    setCategoria("");
+    setEtichetta("");
     setDa("");
     setA("");
     setCerca("");
@@ -195,7 +217,7 @@ export default function NewsPage() {
     setPagina(1);
   };
 
-  const conFiltri = Boolean(sport || categoria || da || a || cerca);
+  const conFiltri = Boolean(sport || etichetta || da || a || cerca);
 
   return (
     <div className="nws">
@@ -229,11 +251,12 @@ export default function NewsPage() {
 
           <div className="nws-filtri-campi">
             <Tendina
-              valore={categoria}
-              onChange={cambia(setCategoria)}
-              opzioni={opzioniCategoria}
-              segnaposto="Tutte le categorie"
-              etichettaAria="Filtra per categoria"
+              valore={etichetta}
+              onChange={cambia(setEtichetta)}
+              opzioni={opzioniEtichetta}
+              segnaposto="Tutte le etichette"
+              etichettaAria="Filtra per etichetta"
+              vuoto="Nessuna etichetta trovata."
             />
 
             <Tendina

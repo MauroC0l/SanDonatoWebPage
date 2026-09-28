@@ -220,10 +220,13 @@ describe("notizie pubbliche", () => {
     }
   });
 
-  seAccesa("il filtro per categoria rifiuta una categoria inventata", async () => {
+  seAccesa("il filtro per etichetta vuole un identificativo", async () => {
     const chiedi = sessione();
-    expect((await chiedi("/notizie?categoria=eventi")).stato).toBe(200);
-    expect((await chiedi("/notizie?categoria=gossip")).stato).toBe(400);
+    const ok = await chiedi("/notizie?etichetta=1");
+    expect(ok.stato).toBe(200);
+    // Ogni notizia porta le sue etichette, anche vuote
+    for (const n of ok.corpo.notizie) expect(Array.isArray(n.etichette)).toBe(true);
+    expect((await chiedi("/notizie?etichetta=gossip")).stato).toBe(400);
   });
 });
 
@@ -732,5 +735,49 @@ describe("abbandono", () => {
   seAccesa("il cron delle stagioni vuole il segreto", async () => {
     const senza = await fetch(`${BASE}/cron/stagioni`);
     expect(senza.status).toBe(401);
+  });
+});
+
+describe("etichette e cestino delle notizie", () => {
+  seAccesa("si crea, si rinomina e si cancella un'etichetta", async () => {
+    const { chiedi } = await entra("admin");
+    const nome = `Prova ${Date.now()}`;
+
+    const creata = await chiedi("/admin/etichette", { method: "POST", body: JSON.stringify({ nome }) });
+    expect(creata.stato).toBe(201);
+    const id = creata.corpo.etichetta.id;
+
+    // Lo stesso nome con altre maiuscole è la stessa etichetta
+    const doppia = await chiedi("/admin/etichette", { method: "POST", body: JSON.stringify({ nome: nome.toUpperCase() }) });
+    expect(doppia.stato).toBe(409);
+
+    const rinominata = await chiedi(`/admin/etichette/${id}`, { method: "PATCH", body: JSON.stringify({ nome: `${nome} bis` }) });
+    expect(rinominata.stato).toBe(200);
+
+    expect((await chiedi(`/admin/etichette/${id}`, { method: "DELETE" })).stato).toBe(200);
+  });
+
+  seAccesa("una notizia va nel cestino, torna, e si cancella per sempre solo dal cestino", async () => {
+    const { chiedi } = await entra("admin");
+    const creata = await chiedi("/admin/notizie", {
+      method: "POST",
+      body: JSON.stringify({ titolo: "Notizia di prova del cestino", contenuto: "<p>Prova</p>" })
+    });
+    expect(creata.stato).toBe(201);
+    const id = creata.corpo.notizia.id;
+
+    // Fuori dal cestino non si cancella per sempre
+    expect((await chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(409);
+
+    expect((await chiedi(`/admin/notizie/${id}`, { method: "DELETE" })).stato).toBe(200);
+    const cestino = await chiedi("/admin/notizie?stato=cestino");
+    expect(cestino.corpo.notizie.some((n) => n.id === id)).toBe(true);
+
+    const ripristinata = await chiedi(`/admin/notizie/${id}`, { method: "PATCH", body: JSON.stringify({ stato: "bozza" }) });
+    expect(ripristinata.corpo.notizia.stato).toBe("bozza");
+
+    await chiedi(`/admin/notizie/${id}`, { method: "DELETE" });
+    expect((await chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(200);
+    expect((await chiedi(`/admin/notizie/${id}`)).stato).toBe(404);
   });
 });

@@ -15,6 +15,12 @@ import "../../css/Tendina.css";
  * Resta comunque un campo di modulo: freccia giù apre, le frecce scorrono,
  * Invio sceglie, Esc chiude. Chi usa la tastiera non deve accorgersi che
  * non è più un <select>.
+ *
+ * Con `multipla` si sceglie più di una voce: `valore` è un array e
+ * onChange riceve l'array nuovo, con i valori così come stanno nelle
+ * opzioni (numeri restano numeri). Un clic o Invio/Spazio accende e spegne
+ * la voce senza chiudere il pannello: chi mette tre etichette non deve
+ * riaprire la tendina tre volte.
  */
 export default function Tendina({
   valore,
@@ -33,7 +39,13 @@ export default function Tendina({
      contenitore. Serve dove il contenitore taglia o scorre — una tabella
      con lo scorrimento orizzontale — e dove, rimanendo dentro, il pannello
      aprendosi deformava la tabella intera. */
-  sovrapposta = false
+  sovrapposta = false,
+  // Più voci insieme invece di una: vedi sopra
+  multipla = false,
+  /* Una riga in fondo al pannello, fuori dall'elenco che scorre: il posto
+     per un collegamento come "Gestisci le etichette", che deve restare in
+     vista anche quando le voci sono cinquanta. */
+  piede = null
 }) {
   const [aperta, setAperta] = useState(false);
   const [cerca, setCerca] = useState("");
@@ -49,7 +61,30 @@ export default function Tendina({
 
   const conRicerca = cercabile ?? opzioni.length > 8;
 
-  const scelta = opzioni.find((o) => String(o.valore) === String(valore ?? ""));
+  /* Il confronto è sempre fra stringhe: i valori arrivano dal database come
+     numeri e dai moduli come testo, e 3 e "3" sono la stessa voce. */
+  const sceltiMultipla = useMemo(
+    () => (multipla && Array.isArray(valore) ? valore.map(String) : []),
+    [multipla, valore]
+  );
+  const eScelta = (o) => (multipla
+    ? sceltiMultipla.includes(String(o.valore))
+    : String(o.valore) === String(valore ?? ""));
+
+  const scelta = multipla ? null : opzioni.find((o) => String(o.valore) === String(valore ?? ""));
+
+  /* Il testo del pulsante. Con più voci si elencano finché si leggono;
+     oltre, il numero dice di più di una riga troncata a metà nome. */
+  let testoBottone = scelta?.etichetta;
+  if (multipla && sceltiMultipla.length > 0) {
+    const nomi = opzioni
+      .filter((o) => sceltiMultipla.includes(String(o.valore)))
+      .map((o) => o.etichetta);
+    const elenco = nomi.join(", ");
+    testoBottone = nomi.length > 0 && elenco.length <= 32
+      ? elenco
+      : `${sceltiMultipla.length} ${sceltiMultipla.length === 1 ? "selezionata" : "selezionate"}`;
+  }
 
   /* ---------- Voci filtrate e raggruppate ---------- */
 
@@ -83,8 +118,10 @@ export default function Tendina({
     setAperta(true);
     // Si parte dalla voce già scelta, non dalla prima: premendo freccia giù
     // ci si aspetta di muoversi da dove si è, non di ricominciare.
-    setEvidenziata(opzioni.findIndex((o) => String(o.valore) === String(valore ?? "")));
-  }, [disabilitato, opzioni, valore]);
+    setEvidenziata(multipla
+      ? opzioni.findIndex((o) => sceltiMultipla.includes(String(o.valore)))
+      : opzioni.findIndex((o) => String(o.valore) === String(valore ?? "")));
+  }, [disabilitato, opzioni, valore, multipla, sceltiMultipla]);
 
   /* ---------- Pannello sovrapposto ----------
 
@@ -162,6 +199,19 @@ export default function Tendina({
 
   const scegli = (opzione) => {
     if (opzione?.disabilitata) return;
+
+    if (multipla) {
+      if (!opzione) return;
+      const chiave = String(opzione.valore);
+      const attuali = Array.isArray(valore) ? valore : [];
+      // Il pannello resta aperto: si sta componendo un insieme, non
+      // rispondendo a una domanda sola.
+      onChange(sceltiMultipla.includes(chiave)
+        ? attuali.filter((v) => String(v) !== chiave)
+        : [...attuali, opzione.valore]);
+      return;
+    }
+
     onChange(opzione ? String(opzione.valore) : "");
     chiudi();
     // Il focus torna al pulsante: dopo aver scelto con la tastiera non deve
@@ -196,6 +246,13 @@ export default function Tendina({
       case "ArrowUp": e.preventDefault(); muovi(-1); break;
       case "Home": e.preventDefault(); setEvidenziata(0); break;
       case "End": e.preventDefault(); setEvidenziata(righe.length - 1); break;
+      case " ":
+        /* Lo spazio accende una voce solo nella multipla, e mai mentre si
+           scrive nel filtro: lì è uno spazio e basta. */
+        if (!multipla || e.target === campoRicerca.current) break;
+        e.preventDefault();
+        if (evidenziata >= 0) scegli(righe[evidenziata]);
+        break;
       case "Enter":
         e.preventDefault();
         // Senza nulla di evidenziato, con un solo risultato in elenco si
@@ -232,8 +289,8 @@ export default function Tendina({
         aria-controls={aperta ? idLista : undefined}
         aria-label={etichettaAria}
       >
-        <span className={`tnd-valore ${scelta ? "" : "is-vuoto"}`}>
-          {scelta?.etichetta ?? segnaposto}
+        <span className={`tnd-valore ${testoBottone ? "" : "is-vuoto"}`}>
+          {testoBottone ?? segnaposto}
         </span>
         <FaChevronDown className="tnd-freccia" aria-hidden="true" />
       </button>
@@ -241,7 +298,7 @@ export default function Tendina({
       {aperta && disegna(
         <div
           ref={pannelloRef}
-          className={`tnd-pannello ${sovrapposta ? "tnd-pannello-sovrapposto" : ""}`}
+          className={`tnd-pannello ${sovrapposta ? "tnd-pannello-sovrapposto" : ""} ${multipla ? "tnd-pannello-multipla" : ""}`}
           style={sovrapposta ? posizione : undefined}
         >
           {conRicerca && (
@@ -258,7 +315,13 @@ export default function Tendina({
             </div>
           )}
 
-          <ul className="tnd-lista" role="listbox" id={idLista} ref={listaRef}>
+          <ul
+            className="tnd-lista"
+            role="listbox"
+            id={idLista}
+            ref={listaRef}
+            aria-multiselectable={multipla || undefined}
+          >
             {righe.length === 0 && <li className="tnd-vuoto">{vuoto}</li>}
 
             {righe.map((o) => (
@@ -269,14 +332,22 @@ export default function Tendina({
                   type="button"
                   data-indice={o.indice}
                   className={`tnd-voce
-                    ${String(o.valore) === String(valore ?? "") ? "is-scelta" : ""}
+                    ${eScelta(o) ? "is-scelta" : ""}
                     ${o.indice === evidenziata ? "is-evidenziata" : ""}`}
                   role="option"
-                  aria-selected={String(o.valore) === String(valore ?? "")}
+                  aria-selected={eScelta(o)}
                   disabled={o.disabilitata}
                   onClick={() => scegli(o)}
                   onMouseEnter={() => setEvidenziata(o.indice)}
                 >
+                  {/* Nella multipla la casella sta a sinistra, come in un
+                      elenco di spunte: si vede a colpo d'occhio cosa è acceso. */}
+                  {multipla && (
+                    <span className="tnd-casella" aria-hidden="true">
+                      {eScelta(o) && <FaCheck />}
+                    </span>
+                  )}
+
                   {o.colore && (
                     <span
                       className="tnd-pallino"
@@ -290,13 +361,15 @@ export default function Tendina({
                     {o.nota && <span className="tnd-voce-nota">{o.nota}</span>}
                   </span>
 
-                  {String(o.valore) === String(valore ?? "") && (
+                  {!multipla && eScelta(o) && (
                     <FaCheck className="tnd-spunta" aria-hidden="true" />
                   )}
                 </button>
               </li>
             ))}
           </ul>
+
+          {piede && <div className="tnd-piede">{piede}</div>}
         </div>
       )}
     </div>

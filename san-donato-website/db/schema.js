@@ -14,7 +14,7 @@
 
 import {
   pgTable, pgEnum, serial, integer, text, boolean, timestamp, date,
-  doublePrecision, jsonb, index, uniqueIndex
+  doublePrecision, jsonb, index, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -302,8 +302,15 @@ export const notizie = pgTable("notizie", {
   copertinaId: integer("copertina_id").references(() => media.id, { onDelete: "set null" }),
 
   sport: sportNotizia("sport").notNull().default("Altro"),
+  /* NON PIÙ USATA dal 28 settembre 2026: al posto delle quattro categorie
+     fisse ci sono le etichette (tabella etichette), che la redazione crea e
+     rinomina da sola. La migrazione 0027 le ha copiate; la colonna va tolta
+     con una migrazione quando nessuno script la legge più. */
   categoria: categoriaNotizia("categoria").notNull().default("altro"),
   stato: statoNotizia("stato").notNull().default("bozza"),
+
+  // Quando è finita nel cestino: il cestino si mostra dal più recente
+  cestinataIl: timestamp("cestinata_il", { withTimezone: true }),
 
   autoreId: integer("autore_id").references(() => utenti.id, { onDelete: "set null" }),
 
@@ -320,6 +327,34 @@ export const notizie = pgTable("notizie", {
   index("idx_notizie_elenco").on(t.stato, t.pubblicataIl),
   index("idx_notizie_sport").on(t.sport),
   index("idx_notizie_categoria").on(t.categoria)
+]);
+
+/**
+ * Le etichette delle notizie: "Assemblea", "Feste", "5x1000"…
+ *
+ * Le crea, le rinomina e le cancella la redazione, dall'editor delle
+ * notizie. Una notizia ne può avere più d'una: una partita con la raccolta
+ * fondi è tutte e due le cose.
+ *
+ * Il nome è unico senza distinguere maiuscole e minuscole: "feste" e
+ * "Feste" sarebbero due etichette per la stessa cosa, e il filtro del sito
+ * ne mostrerebbe due.
+ */
+export const etichette = pgTable("etichette", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+  creataIl: timestamp("creata_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  uniqueIndex("idx_etichetta_nome").on(sql`lower(${t.nome})`)
+]);
+
+export const notizieEtichette = pgTable("notizie_etichette", {
+  notiziaId: integer("notizia_id").notNull().references(() => notizie.id, { onDelete: "cascade" }),
+  // Cancellare un'etichetta la toglie dalle notizie, non cancella le notizie
+  etichettaId: integer("etichetta_id").notNull().references(() => etichette.id, { onDelete: "cascade" })
+}, (t) => [
+  primaryKey({ columns: [t.notiziaId, t.etichettaId] }),
+  index("idx_etichetta_notizie").on(t.etichettaId)
 ]);
 
 /* =====================================================

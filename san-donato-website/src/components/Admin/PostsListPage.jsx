@@ -2,23 +2,20 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaExternalLinkAlt,
-  FaExclamationCircle, FaInbox, FaImage, FaThLarge, FaBars
+  FaExclamationCircle, FaInbox, FaImage, FaThLarge, FaBars, FaUndo, FaDumpster
 } from "react-icons/fa";
-import { listPosts, trashPost, AuthError } from "../../api/adminApi";
+import {
+  listPosts, trashPost, restorePost, deletePostForever, svuotaCestinoNotizie,
+  listEtichette, AuthError
+} from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import { useVista } from "../../hooks/useVista";
 import Tendina from "./Tendina";
-import { CATEGORIE, NOME_CATEGORIA } from "../../api/API.mjs";
 import ScambiaVista from "./ScambiaVista";
 import "../../css/Admin.css";
 
-/* Il filtro per categoria, con la voce che le tiene tutte in testa. */
-const FILTRI_CATEGORIA = [
-  { valore: "", etichetta: "Tutte le categorie" },
-  ...CATEGORIE
-];
 
 /*
  * Le notizie hanno una copertina, ed è quella che si cerca quando si
@@ -43,7 +40,10 @@ const FILTERS = [
   { key: "publish,future,draft,pending", label: "Tutte" },
   { key: "publish", label: "Pubblicate" },
   { key: "future", label: "Programmate" },
-  { key: "draft,pending", label: "Bozze" }
+  { key: "draft,pending", label: "Bozze" },
+  /* Il cestino: le notizie tolte dal sito, che si possono ripristinare o
+     cancellare per sempre. È l'unico posto dove si vedono. */
+  { key: "trash", label: "Cestino" }
 ];
 
 const STATUS_LABEL = {
@@ -51,6 +51,7 @@ const STATUS_LABEL = {
   draft: "Bozza",
   pending: "In revisione",
   future: "Programmata",
+  trash: "Nel cestino",
   private: "Privata"
 };
 
@@ -81,7 +82,9 @@ export default function PostsListPage() {
   const [status, setStatus] = useState(FILTERS[0].key);
   const [searchInput, setSearchInput] = useState("");
   const [vista, setVista] = useVista("notizie", "lista", ["lista", "griglia"]);
-  const [categoria, setCategoria] = useState("");
+  const [etichetta, setEtichetta] = useState("");
+  const [opzioniEtichette, setOpzioniEtichette] = useState([{ valore: "", etichetta: "Tutte le etichette" }]);
+  const nelCestino = status === "trash";
   const [search, setSearch] = useState("");
   const [reloadToken, setReloadToken] = useState(0);
   const [busyId, setBusyId] = useState(null);
@@ -89,7 +92,7 @@ export default function PostsListPage() {
   // Identifica la richiesta in corso. Confrontandolo con quello dei dati già
   // ricevuti si ricava lo stato di caricamento, senza chiamare setState
   // dentro l'effect: così ogni cambio di filtro produce un solo render.
-  const requestKey = `${status}|${search}|${categoria}|${page}|${reloadToken}`;
+  const requestKey = `${status}|${search}|${etichetta}|${page}|${reloadToken}`;
 
   const [data, setData] = useState({
     key: null, posts: [], total: 0, totalPages: 1, error: ""
@@ -101,7 +104,7 @@ export default function PostsListPage() {
   useEffect(() => {
     let mounted = true;
 
-    listPosts({ search, status, categoria, page })
+    listPosts({ search, status, etichetta, page })
       .then(result => {
         if (mounted) setData({ key: requestKey, ...result, error: "" });
       })
@@ -120,7 +123,17 @@ export default function PostsListPage() {
       });
 
     return () => { mounted = false; };
-  }, [requestKey, search, status, categoria, page, sessionExpired, navigate]);
+  }, [requestKey, search, status, etichetta, page, sessionExpired, navigate]);
+
+  // Le etichette per il filtro: una lettura sola, all'apertura
+  useEffect(() => {
+    listEtichette()
+      .then((elenco) => setOpzioniEtichette([
+        { valore: "", etichetta: "Tutte le etichette" },
+        ...elenco.map((e) => ({ valore: String(e.id), etichetta: e.nome }))
+      ]))
+      .catch(() => {});
+  }, []);
 
   const reload = useCallback(() => setReloadToken(t => t + 1), []);
 
@@ -135,11 +148,58 @@ export default function PostsListPage() {
     setStatus(key);
   };
 
+  /* Un'azione su una notizia, con lo stesso trattamento degli errori per
+     tutte: sessione scaduta all'accesso, il resto in un avviso. */
+  const suNotizia = async (post, azione, riuscita, fallita) => {
+    setBusyId(post?.id ?? "tutte");
+    try {
+      await azione();
+      avvisa(riuscita);
+      reload();
+    } catch (err) {
+      if (err instanceof AuthError) {
+        sessionExpired();
+        navigate("/login", { replace: true });
+        return;
+      }
+      avvisa(err.message || fallita, "errore");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRestore = (post) => suNotizia(
+    post, () => restorePost(post.id),
+    "Notizia ripristinata: è tornata fra le bozze.", "Ripristino non riuscito."
+  );
+
+  const handleDeleteForever = async (post) => {
+    const ok = await conferma({
+      titolo: "Cancellare per sempre?",
+      testo: `"${post.title || "(senza titolo)"}" viene cancellata definitivamente e non si potrà più recuperare.`,
+      conferma: "Cancella per sempre",
+      pericolo: true
+    });
+    if (!ok) return;
+    suNotizia(post, () => deletePostForever(post.id), "Notizia cancellata per sempre.", "Cancellazione non riuscita.");
+  };
+
+  const handleSvuota = async () => {
+    const ok = await conferma({
+      titolo: "Svuotare il cestino?",
+      testo: `${total === 1 ? "La notizia nel cestino viene cancellata" : `Le ${total} notizie nel cestino vengono cancellate`} per sempre, e non si potranno più recuperare.`,
+      conferma: "Svuota il cestino",
+      pericolo: true
+    });
+    if (!ok) return;
+    suNotizia(null, () => svuotaCestinoNotizie(), "Cestino svuotato.", "Non è stato possibile svuotare il cestino.");
+  };
+
   const handleTrash = async (post) => {
     const ok = await conferma({
       titolo: "Spostare nel cestino?",
       testo: `"${post.title || "(senza titolo)"}" sparisce dal sito, ma non viene cancellata: `
-        + "si recupera rimettendola in bozza.",
+        + "la ritrovi nel Cestino, qui fra i filtri, e da lì la puoi ripristinare.",
       conferma: "Sposta nel cestino",
       pericolo: true
     });
@@ -171,9 +231,22 @@ export default function PostsListPage() {
             {loading ? "Caricamento…" : `${total} ${total === 1 ? "notizia" : "notizie"}`}
           </p>
         </div>
-        <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
-          <FaPlus /> Nuova notizia
-        </Link>
+        {nelCestino ? (
+          total > 0 && (
+            <button
+              type="button"
+              className="adm-btn adm-btn-cancella"
+              onClick={handleSvuota}
+              disabled={busyId != null}
+            >
+              <FaDumpster /> Svuota il cestino
+            </button>
+          )
+        ) : (
+          <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
+            <FaPlus /> Nuova notizia
+          </Link>
+        )}
       </div>
 
       <div className="adm-toolbar">
@@ -193,11 +266,11 @@ export default function PostsListPage() {
 
         <Tendina
           className="adm-filter-select"
-          valore={categoria}
-          onChange={(v) => { setPage(1); setCategoria(v); }}
-          opzioni={FILTRI_CATEGORIA}
-          segnaposto="Tutte le categorie"
-          etichettaAria="Filtra per categoria"
+          valore={etichetta}
+          onChange={(v) => { setPage(1); setEtichetta(v); }}
+          opzioni={opzioniEtichette}
+          segnaposto="Tutte le etichette"
+          etichettaAria="Filtra per etichetta"
         />
 
         <ScambiaVista
@@ -239,6 +312,8 @@ export default function PostsListPage() {
           <p>
             {search
               ? `Nessun risultato per "${search}".`
+              : nelCestino
+                ? "Il cestino è vuoto."
               : status === "future"
                 // Un elenco vuoto qui non è una mancanza: vuol dire che non
                 // c'è niente in attesa di uscire, che di solito va bene.
@@ -246,11 +321,13 @@ export default function PostsListPage() {
                   + "una data nel riquadro \"Quando esce\" mentre la scrivi."
                 : "Non ci sono ancora notizie in questa sezione."}
           </p>
-          <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
-            {/* "Scrivi la prima" solo quando l'archivio è davvero vuoto: con
-                un filtro addosso sarebbe falso, le notizie ci sono. */}
-            <FaPlus /> {search || status !== FILTERS[0].key ? "Nuova notizia" : "Scrivi la prima"}
-          </Link>
+          {!nelCestino && (
+            <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
+              {/* "Scrivi la prima" solo quando l'archivio è davvero vuoto: con
+                  un filtro addosso sarebbe falso, le notizie ci sono. */}
+              <FaPlus /> {search || status !== FILTERS[0].key ? "Nuova notizia" : "Scrivi la prima"}
+            </Link>
+          )}
         </div>
       ) : (
         <ul className={vista === "griglia" ? "adm-post-griglia" : "adm-post-list"}>
@@ -271,25 +348,46 @@ export default function PostsListPage() {
                     {STATUS_LABEL[post.status] || post.status}
                   </span>
                   <span className="adm-sport-tag">{post.sport}</span>
-                  {/* La categoria solo quando c'è davvero: "Altro" è il
-                      valore di chi non ha ancora scelto, e mostrarlo come
-                      un'etichetta lo farebbe sembrare una scelta. */}
-                  {post.categoria && post.categoria !== "altro" && (
-                    <span className="adm-categoria-tag">
-                      {NOME_CATEGORIA[post.categoria] ?? post.categoria}
-                    </span>
-                  )}
+                  {(post.etichette ?? []).map((e) => (
+                    <span className="adm-categoria-tag" key={e.id}>{e.nome}</span>
+                  ))}
                   <span className="adm-post-date">
                     {/* Per una programmata la data è un appuntamento, non un
                         archivio: va letta con l'ora e introdotta da "esce". */}
-                    {post.status === "future"
-                      ? `esce il ${formatDateOra(post.dateISO)}`
-                      : formatDate(post.dateISO)}
+                    {post.status === "trash"
+                      ? `nel cestino dal ${formatDate(post.cestinataIl || post.modified)}`
+                      : post.status === "future"
+                        ? `esce il ${formatDateOra(post.dateISO)}`
+                        : formatDate(post.dateISO)}
                   </span>
                   {post.authorName && <span className="adm-post-author">di {post.authorName}</span>}
                 </div>
               </div>
 
+              {nelCestino ? (
+              <div className="adm-post-actions">
+                <button
+                  type="button"
+                  className="adm-icon-btn"
+                  onClick={() => handleRestore(post)}
+                  disabled={busyId != null}
+                  title="Ripristina: torna fra le bozze"
+                  aria-label={`Ripristina ${post.title}`}
+                >
+                  <FaUndo />
+                </button>
+                <button
+                  type="button"
+                  className="adm-icon-btn adm-icon-danger"
+                  onClick={() => handleDeleteForever(post)}
+                  disabled={busyId != null}
+                  title="Cancella per sempre"
+                  aria-label={`Cancella per sempre ${post.title}`}
+                >
+                  <FaTrashAlt />
+                </button>
+              </div>
+              ) : (
               <div className="adm-post-actions">
                 <Link
                   to={`${area}/notizie/${post.id}`}
@@ -321,6 +419,7 @@ export default function PostsListPage() {
                   <FaTrashAlt />
                 </button>
               </div>
+              )}
             </li>
           ))}
         </ul>
