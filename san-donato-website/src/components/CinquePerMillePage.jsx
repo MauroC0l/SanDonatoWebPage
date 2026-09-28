@@ -1,25 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaArrowDown, FaCheck, FaRegCopy } from "react-icons/fa6";
 import "../css/CinquePerMillePage.css";
 import pageData from "../data/CinquePerMille.json";
 import AperturaDocumento, { FasciaParole } from "./Documenti/AperturaDocumento";
 import IndiceDocumento from "./Documenti/IndiceDocumento";
 import AltriDocumenti from "./Documenti/AltriDocumenti";
+import { useDocumenti, dataItaliana } from "../hooks/useDocumenti";
 
+/* I rendiconti non si leggono più da reportsSection.reports: li gestisce
+   l'amministratore (sezione "cinque_per_mille", con anno, importo e data
+   di percezione) e arrivano da /api/documenti, già nell'ordine deciso.
+   Dal JSON restano titolo, testo e intestazioni della tabella. */
 const { fiscalCode, hero, codeSection, facsimile, deadlines, whySection, reportsSection } = pageData;
-const REPORTS = reportsSection?.reports ?? [];
 
 /* Gli importi dei rendiconti sono scritti all'italiana ("€ 2.973,00"):
    servono numeri solo per disegnare la barra di ogni anno. */
-const cifra = (s) => Number(String(s).replace(/[^\d,]/g, "").replace(",", ".")) || 0;
-const MASSIMO = Math.max(1, ...REPORTS.map((r) => cifra(r.amount)));
+const cifra = (s) => Number(String(s ?? "").replace(/[^\d,]/g, "").replace(",", ".")) || 0;
 
-const VOCI = [
-  { id: "c5xm-perche", testo: whySection.title },
-  { id: "c5xm-come", testo: facsimile.sectionTitle },
-  { id: "c5xm-quando", testo: deadlines.title },
-  ...(REPORTS.length ? [{ id: "c5xm-rendiconti", testo: reportsSection.title }] : []),
-];
+/* Le voci dell'indice cambiano solo se i rendiconti ci sono o no: un
+   elenco nuovo a ogni disegno farebbe ripartire l'osservatore dell'indice. */
+function vociIndice(conRendiconti) {
+  return [
+    { id: "c5xm-perche", testo: whySection.title },
+    { id: "c5xm-come", testo: facsimile.sectionTitle },
+    { id: "c5xm-quando", testo: deadlines.title },
+    ...(conRendiconti ? [{ id: "c5xm-rendiconti", testo: reportsSection.title }] : []),
+  ];
+}
 
 const PAROLE = [hero.titleLine1, `C.F. ${fiscalCode}`, "Sport di base", hero.tag];
 
@@ -55,6 +62,12 @@ export default function CinquePerMillePage() {
   const [copiato, setCopiato] = useState(false);
   const timer = useRef(null);
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  const { documenti: rendiconti, caricamento, errore } = useDocumenti("cinque_per_mille");
+  const massimo = Math.max(1, ...rendiconti.map((r) => cifra(r.importo)));
+  // La sezione c'è mentre i rendiconti arrivano, e resta se ce ne sono
+  const conRendiconti = caricamento || rendiconti.length > 0;
+  const voci = useMemo(() => vociIndice(conRendiconti), [conRendiconti]);
 
   const copia = async () => {
     if (!(await copiaTesto(fiscalCode))) return;
@@ -97,16 +110,16 @@ export default function CinquePerMillePage() {
         sottotitolo={hero.subtitle}
         fantasma="5×1000"
         laterale={codice}
-        numeri={REPORTS.length ? [
-          { dt: "Anni rendicontati", dd: REPORTS.length },
-          { dt: "Dal", dd: REPORTS.at(-1).year },
-          { dt: `Rendiconto ${REPORTS[0].year}`, dd: REPORTS[0].amount },
+        numeri={rendiconti.length ? [
+          { dt: "Anni rendicontati", dd: rendiconti.length },
+          { dt: "Dal", dd: rendiconti.at(-1).anno ?? "—" },
+          { dt: `Rendiconto ${rendiconti[0].anno ?? ""}`.trim(), dd: rendiconti[0].importo ?? "—" },
         ] : []}
       />
       <FasciaParole parole={PAROLE} />
 
       <div className="doc-corpo doc-corpo--indice">
-        <IndiceDocumento voci={VOCI} />
+        <IndiceDocumento voci={voci} />
 
         <div className="doc-corpo-colonna">
           {/* ---------- Perché ---------- */}
@@ -171,47 +184,56 @@ export default function CinquePerMillePage() {
           </section>
 
           {/* ---------- Rendiconti ---------- */}
-          {REPORTS.length > 0 && (
+          {conRendiconti && (
             <section id="c5xm-rendiconti" className="doc-sezione" aria-labelledby="c5xm-rend-titolo">
               <p className="doc-etichetta" data-rivela>04 · Trasparenza</p>
               <h2 id="c5xm-rend-titolo" className="doc-h2" data-rivela>{reportsSection.title}</h2>
               <p className="doc-prosa c5xm-rend-testo">{reportsSection.description}</p>
 
+              {errore && <p className="doc-avviso" role="status">{errore}</p>}
+
               {/* Tabella vera sul computer, pila di schede sul telefono.
-                  Entra intera: sono dati da confrontare anno per anno. */}
-              <div className="c5xm-rend-scheda">
-                <table className="c5xm-rend">
-                  <caption className="doc-solo-lettori">{reportsSection.title}</caption>
-                  <thead>
-                    <tr>
-                      {reportsSection.tableHeaders.map((h) => <th key={h} scope="col">{h}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {REPORTS.map((r) => (
-                      <tr key={r.id}>
-                        <th scope="row" className="c5xm-rend-anno" data-label={reportsSection.tableHeaders[0]}>{r.year}</th>
-                        <td className="c5xm-rend-importo" data-label={reportsSection.tableHeaders[1]}>
-                          <span className="c5xm-rend-cifra">{r.amount}</span>
-                          <span className="c5xm-barra" aria-hidden="true">
-                            <span style={{ "--c5xm-quota": cifra(r.amount) / MASSIMO }} />
-                          </span>
-                        </td>
-                        <td className="c5xm-rend-data" data-label={reportsSection.tableHeaders[2]}>
-                          <span className="c5xm-rend-mini">{reportsSection.tableHeaders[2]}</span> {r.date}
-                        </td>
-                        <td className="c5xm-rend-file" data-label={reportsSection.tableHeaders[3]}>
-                          <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="c5xm-scarica">
-                            <FaArrowDown aria-hidden="true" />
-                            <span>Scarica File</span>
-                            <span className="doc-solo-lettori"> del rendiconto {r.year}</span>
-                          </a>
-                        </td>
+                  Entra intera: sono dati da confrontare anno per anno.
+                  Mentre arrivano, al suo posto la sagoma di qualche riga. */}
+              {caricamento ? (
+                <div aria-busy="true">
+                  {[0, 1, 2, 3].map((i) => <span key={i} className="doc-sagoma doc-sagoma--riga" style={{ marginTop: i ? 10 : 0 }} />)}
+                </div>
+              ) : rendiconti.length > 0 && (
+                <div className="c5xm-rend-scheda">
+                  <table className="c5xm-rend">
+                    <caption className="doc-solo-lettori">{reportsSection.title}</caption>
+                    <thead>
+                      <tr>
+                        {reportsSection.tableHeaders.map((h) => <th key={h} scope="col">{h}</th>)}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {rendiconti.map((r) => (
+                        <tr key={r.id}>
+                          <th scope="row" className="c5xm-rend-anno" data-label={reportsSection.tableHeaders[0]}>{r.anno ?? r.titolo}</th>
+                          <td className="c5xm-rend-importo" data-label={reportsSection.tableHeaders[1]}>
+                            <span className="c5xm-rend-cifra">{r.importo ?? "—"}</span>
+                            <span className="c5xm-barra" aria-hidden="true">
+                              <span style={{ "--c5xm-quota": cifra(r.importo) / massimo }} />
+                            </span>
+                          </td>
+                          <td className="c5xm-rend-data" data-label={reportsSection.tableHeaders[2]}>
+                            <span className="c5xm-rend-mini">{reportsSection.tableHeaders[2]}</span> {dataItaliana(r.percepitoIl) || "—"}
+                          </td>
+                          <td className="c5xm-rend-file" data-label={reportsSection.tableHeaders[3]}>
+                            <a href={r.url} target="_blank" rel="noopener noreferrer" className="c5xm-scarica">
+                              <FaArrowDown aria-hidden="true" />
+                              <span>Scarica File</span>
+                              <span className="doc-solo-lettori"> del rendiconto {r.anno ?? r.titolo}</span>
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
           )}
         </div>

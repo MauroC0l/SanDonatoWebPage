@@ -38,7 +38,21 @@ const CAPACITA = {
     /* Le fonti dei calendari ufficiali e il collegamento dei gironi alle
        squadre: decidono cosa entra nel calendario di tutte le squadre, e
        la società ha voluto che fosse una cosa dell'amministratore. */
-    "calendari.gestisci"
+    "calendari.gestisci",
+
+    /* I documenti pubblicati sul sito (privacy, statuto, rendiconti…):
+       sono atti ufficiali della società, e li cambia chi amministra. */
+    "documenti.gestisci",
+
+    /* Correggere l'anagrafica di un iscritto (dati, residenza, recapiti,
+       tutori): deciso dalla società il 28 settembre 2026, al posto della
+       regola di prima per cui i dati li scriveva solo l'interessato. */
+    "anagrafica.modifica",
+
+    /* Cancellare per sempre una notizia dal cestino prima dei 30 giorni:
+       un gesto che non si annulla, e lo fanno solo amministratore e
+       segreteria (28 settembre 2026). */
+    "notizie.elimina"
   ],
 
   /**
@@ -69,9 +83,12 @@ const CAPACITA = {
      * nel sito. La segreteria puo caricare la copia e scrivere tipo e
      * scadenza, che sono gli unici dati leggibili sul foglio stesso.
      *
-     * Anagrafica, recapiti e note restano dell atleta anche qui.
+     * Dal 28 settembre 2026 la segreteria corregge anche anagrafica e
+     * recapiti (vedi "anagrafica.modifica" sotto).
      */
-    "certificato.registra"
+    "certificato.registra",
+    "anagrafica.modifica",
+    "notizie.elimina"
   ],
   editor: [
     "notizie.leggi_bozze",

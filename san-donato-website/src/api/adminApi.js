@@ -1067,3 +1067,47 @@ export async function leggiCalendariOra(fonteId) {
   });
   return esiti;
 }
+
+/* =====================================================
+   Documenti del sito
+   ===================================================== */
+
+/**
+ * Tutti i documenti pubblicati sul sito, anche i nascosti, e le sezioni
+ * in cui possono stare (con la riga "dove compare" di ciascuna).
+ * Solo per l'amministratore.
+ */
+export async function listDocumenti() {
+  return chiedi("/admin/documenti");
+}
+
+/** Arriva in fondo alla sua sezione: poi lo si sposta con le frecce. */
+export async function creaDocumento(dati) {
+  const { documento } = await chiedi("/admin/documenti", {
+    method: "POST",
+    body: JSON.stringify(dati)
+  });
+  return documento;
+}
+
+/** Mandando url o mediaId si cambia il file; senza, resta quello di prima. */
+export async function modificaDocumento(id, dati) {
+  const { documento } = await chiedi(`/admin/documenti/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dati)
+  });
+  return documento;
+}
+
+/** Lo toglie dal sito. Il file resta nella libreria o nella cartella. */
+export async function eliminaDocumento(id) {
+  return chiedi(`/admin/documenti/${id}`, { method: "DELETE" });
+}
+
+/** ids: TUTTI i documenti della sezione, dal primo all'ultimo. */
+export async function riordinaDocumenti(sezione, ids) {
+  return chiedi("/admin/documenti/ordine", {
+    method: "PUT",
+    body: JSON.stringify({ sezione, ids })
+  });
+}

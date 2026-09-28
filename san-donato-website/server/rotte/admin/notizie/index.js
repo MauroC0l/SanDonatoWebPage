@@ -121,7 +121,7 @@ export default conGestioneErrori(async (req, res) => {
   }
   // DELETE sull'elenco intero vuol dire una cosa sola: svuotare il cestino
   if (req.method === "DELETE") {
-    return richiedeCapacita("notizie.cestina", svuotaCestino)(req, res);
+    return richiedeCapacita("notizie.elimina", svuotaCestino)(req, res);
   }
 
   res.setHeader("Allow", "GET, POST, DELETE");

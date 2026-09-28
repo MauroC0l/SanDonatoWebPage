@@ -238,6 +238,12 @@
   flex-wrap: wrap;
 }
 
+/* Per i ruoli con la fila di linguette (tutti tranne l'amministratore, che
+   ha la colonna di lato): le linguette al centro dello schermo, come nel
+   menu del sito pubblico. Le regole di .is-laterale le rimettono in colonna. */
+.adm-topbar-nav .adm-nav,
+.adm-topbar-nav .adm-nav-gruppi { justify-content: center; }
+
 /* ---------- Il marchio ---------- */
 
 .adm-brand {
@@ -4608,6 +4614,9 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  /* Un numero a due cifre non va a capo quando il titolo accanto si allunga */
+  flex-shrink: 0;
+  white-space: nowrap;
   letter-spacing: 0;
 }
 .adm-badge-conta.is-allarme { background: var(--adm-danger); }
@@ -4885,3 +4894,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   .adm-tessera-azione:hover { transform: none; }
   .adm-sagoma { animation: none; }
 }
+
+/* La colonna dell'amministratore resta allineata in alto, non al centro */
+.adm-shell.is-laterale .adm-topbar-nav .adm-nav,
+.adm-shell.is-laterale .adm-topbar-nav .adm-nav-gruppi { justify-content: flex-start; }

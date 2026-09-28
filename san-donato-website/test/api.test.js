@@ -806,3 +806,122 @@ describe("i dati dell'atleta si controllano sul server", () => {
     expect(esito.stato).toBe(400);
   });
 });
+
+describe("documenti del sito", () => {
+  seAccesa("il sito legge solo i pubblicati, per sezione", async () => {
+    const chiedi = sessione();
+    const tutti = await chiedi("/documenti");
+    expect(tutti.stato).toBe(200);
+    expect(tutti.corpo.documenti.length).toBeGreaterThan(0);
+    const privacy = await chiedi("/documenti?sezione=privacy");
+    expect(privacy.corpo.documenti.every((d) => d.sezione === "privacy")).toBe(true);
+    expect((await chiedi("/documenti?sezione=segreti")).stato).toBe(400);
+  });
+
+  seAccesa("l'amministratore aggiunge, nasconde, riordina e toglie", async () => {
+    const { chiedi } = await entra("admin");
+    const creato = await chiedi("/admin/documenti", {
+      method: "POST",
+      body: JSON.stringify({ sezione: "privacy", titolo: "Documento di prova", url: "/documenti/PSD_STATUTO.pdf" })
+    });
+    expect(creato.stato).toBe(201);
+    const id = creato.corpo.documento.id;
+
+    // Un indirizzo che non è un file del sito né un indirizzo web si rifiuta
+    const cattivo = await chiedi(`/admin/documenti/${id}`, { method: "PATCH", body: JSON.stringify({ url: "javascript:alert(1)" }) });
+    expect(cattivo.stato).toBe(400);
+
+    await chiedi(`/admin/documenti/${id}`, { method: "PATCH", body: JSON.stringify({ pubblicato: false }) });
+    const pubblici = await sessione()("/documenti?sezione=privacy");
+    expect(pubblici.corpo.documenti.some((d) => d.id === id)).toBe(false);
+
+    const elenco = await chiedi("/admin/documenti");
+    const ids = elenco.corpo.documenti.filter((d) => d.sezione === "privacy").map((d) => d.id).reverse();
+    expect((await chiedi("/admin/documenti/ordine", { method: "PUT", body: JSON.stringify({ sezione: "privacy", ids }) })).stato).toBe(200);
+
+    expect((await chiedi(`/admin/documenti/${id}`, { method: "DELETE" })).stato).toBe(200);
+    // Rimesso l'ordine di prima
+    await chiedi("/admin/documenti/ordine", { method: "PUT", body: JSON.stringify({ sezione: "privacy", ids: ids.filter((x) => x !== id).reverse() }) });
+  });
+
+  seAccesa("la segreteria non gestisce i documenti", async () => {
+    const { chiedi } = await entra("segreteria");
+    expect((await chiedi("/admin/documenti")).stato).toBe(403);
+  });
+});
+
+describe("regole del 28 settembre", () => {
+  seAccesa("la segreteria corregge l'anagrafica, l'allenatore no", async () => {
+    const segr = await entra("segreteria");
+    const elenco = await segr.chiedi("/admin/atleti");
+    const atleta = elenco.corpo.atleti.find((a) => a.haScheda);
+    const prima = (await segr.chiedi(`/admin/atleti/${atleta.utenteId}`)).corpo.atleta;
+
+    const ok = await segr.chiedi(`/admin/atleti/${atleta.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: "+39 333 123 4567" }) });
+    expect(ok.stato).toBe(200);
+    expect(ok.corpo.atleta.telefono).toBe("3331234567");
+    await segr.chiedi(`/admin/atleti/${atleta.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: prima.telefono ?? "" }) });
+
+    const coach = await entra("coach");
+    const suoi = await coach.chiedi("/admin/atleti");
+    const suo = suoi.corpo.atleti[0];
+    const no = await coach.chiedi(`/admin/atleti/${suo.utenteId}`, { method: "PATCH", body: JSON.stringify({ telefono: "3330000000" }) });
+    expect(no.stato).toBe(403);
+  });
+
+  seAccesa("solo amministratore e segreteria cancellano per sempre dal cestino", async () => {
+    const admin = await entra("admin");
+    const creata = await admin.chiedi("/admin/notizie", { method: "POST", body: JSON.stringify({ titolo: "Da cancellare per prova", contenuto: "<p>x</p>" }) });
+    const id = creata.corpo.notizia.id;
+    await admin.chiedi(`/admin/notizie/${id}`, { method: "DELETE" });
+
+    const editor = sessione();
+    await editor("/accesso", { method: "POST", body: JSON.stringify({ email: "p004@prova.psd", password: "provapsd2026" }) });
+    expect((await editor(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(403);
+    expect((await editor("/admin/notizie", { method: "DELETE" })).stato).toBe(403);
+
+    expect((await admin.chiedi(`/admin/notizie/${id}?definitiva=1`, { method: "DELETE" })).stato).toBe(200);
+  });
+});
+
+describe("quota famiglia fra fratelli", () => {
+  seAccesa("lo sconto va solo a chi lo chiede, e il fratello più grande vede l'avviso", async () => {
+    const { carattereDiControllo } = await import("../server/codice-fiscale.js");
+    const cf = (p) => p + carattereDiControllo(p);
+    const segna = Date.now();
+    const admin = await entra("admin");
+    const segr = await entra("segreteria");
+    const squadre = (await admin.chiedi("/admin/squadre")).corpo;
+    const calcio = (squadre.squadre ?? squadre).find((q) => q.sport === "Calcio");
+
+    async function iscrivi(nome, codice) {
+      const s = sessione();
+      const email = `${nome}.${segna}@prova.psd`;
+      await s("/registrazione", { method: "POST", body: JSON.stringify({ email, password: "provapsd2026!", nome, cognome: "Prova", sport: "Calcio" }) });
+      const r = (await admin.chiedi("/admin/iscrizioni")).corpo.richieste.find((x) => x.email === email);
+      await admin.chiedi("/admin/iscrizioni", { method: "POST", body: JSON.stringify({ id: r.id, approvata: true, squadraId: calcio.id }) });
+      const io = sessione();
+      await io("/accesso", { method: "POST", body: JSON.stringify({ email, password: "provapsd2026!" }) });
+      await io("/iscrizione", { method: "PATCH", body: JSON.stringify({ codiceFiscale: codice }) });
+      return { io, id: (await io("/io")).corpo.utente.id };
+    }
+    const tipo = async (id) => (await segr.chiedi(`/admin/atleti/${id}`)).corpo.atleta.tipoQuota;
+
+    const cfA = cf(`PRVGRN${String(segna).slice(-2)}A01L219`.slice(0, 15));
+    const cfB = cf(`PRVPCL${String(segna).slice(-2)}B41L219`.slice(0, 15));
+    const a = await iscrivi("grande", cfA);
+    const b = await iscrivi("piccola", cfB);
+    const primaA = await tipo(a.id);
+
+    await b.io("/iscrizione/fratelli", { method: "POST", body: JSON.stringify({ codiceFiscale: cfA }) });
+    const lB = (await segr.chiedi(`/admin/atleti/${b.id}`)).corpo.atleta.legami.find((l) => l.stato === "in_attesa");
+    expect(lB.avviso).toBeNull();
+    await segr.chiedi(`/admin/atleti/${b.id}/legami`, { method: "PATCH", body: JSON.stringify({ legameId: lB.id, conferma: true }) });
+    expect(await tipo(b.id)).toBe("Famiglia");
+    expect(await tipo(a.id)).toBe(primaA);
+
+    await a.io("/iscrizione/fratelli", { method: "POST", body: JSON.stringify({ codiceFiscale: cfB }) });
+    const lA = (await segr.chiedi(`/admin/atleti/${a.id}`)).corpo.atleta.legami.find((l) => l.stato === "in_attesa" && l.laSua);
+    expect(lA.avviso).toMatch(/già stato usato/);
+  });
+});

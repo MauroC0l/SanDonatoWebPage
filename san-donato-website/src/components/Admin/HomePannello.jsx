@@ -4,7 +4,8 @@ import {
   FaUserCheck, FaHeartbeat, FaEuroSign, FaCalendarAlt, FaNewspaper,
   FaTrophy, FaExclamationCircle, FaCheckCircle, FaArrowRight, FaClock,
   FaCheckDouble, FaTag, FaRunning, FaPlus, FaSearch, FaPen, FaSitemap,
-  FaUserClock, FaMapMarkerAlt
+  FaUserClock, FaMapMarkerAlt,
+  FaUsers
 } from "react-icons/fa";
 import { getCruscotto, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -107,6 +108,19 @@ function daFare(dati, { area, puoValidare, soloProprie }) {
       conta: dati.risultatiMancanti,
       testo: "Partite già giocate a cui manca il punteggio.",
       a: `${area}/partite`,
+      tono: "is-attenzione"
+    });
+  }
+
+  if (dati.quote?.parenteleDaControllare > 0) {
+    const una = dati.quote.parenteleDaControllare === 1 && dati.quote.primaParentela;
+    voci.push({
+      chiave: "fratelli",
+      icona: FaUsers,
+      titolo: "Fratelli da controllare",
+      conta: dati.quote.parenteleDaControllare,
+      testo: "Richieste della quota famiglia: guarda se sono davvero fratelli.",
+      a: una ? `${area}/atleti/${dati.quote.primaParentela}` : `${area}/atleti?fratelli=da_controllare`,
       tono: "is-attenzione"
     });
   }

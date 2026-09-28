@@ -23,6 +23,7 @@ import {
   puo, squadreGestibili, squadreConAtletiVisibili, sportGestibili
 } from "./autorizzazioni.js";
 import { quotePerUtenti } from "./stagioni.js";
+import { conParentelaDaControllare } from "./legami.js";
 
 /** Fra quanti giorni un certificato è "in scadenza". Stessa soglia del pannello. */
 const GIORNI_PREAVVISO = 30;
@@ -96,7 +97,7 @@ async function statoCertificati(utente) {
 async function quoteAperte(utente) {
   const ammesse = await squadreConAtletiVisibili(utente);
   if (Array.isArray(ammesse) && ammesse.length === 0) {
-    return { daIncassare: 0, quanti: 0, senzaQuota: 0 };
+    return { daIncassare: 0, quanti: 0, senzaQuota: 0, parenteleDaControllare: 0, primaParentela: null };
   }
 
   const condizioni = [eq(richiesteIscrizione.stato, "approvata")];
@@ -126,10 +127,16 @@ async function quoteAperte(utente) {
    */
   const senzaQuota = conti.filter((q) => q.quotaCentesimi == null && q.stato !== "ritirata").length;
 
+  // Fratelli e sorelle dichiarati e non ancora controllati
+  const conParentela = [...await conParentelaDaControllare(righe.map((r) => r.utenteId))];
+
   return {
     daIncassare: aperte.reduce((s, n) => s + n, 0),
     quanti: aperte.length,
-    senzaQuota
+    senzaQuota,
+    parenteleDaControllare: conParentela.length,
+    // Con una sola, la home porta dritta alla sua scheda
+    primaParentela: conParentela[0] ?? null
   };
 }
 

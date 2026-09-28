@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  FaTimes, FaSearch, FaFolder, FaImages, FaCheck, FaExclamationCircle
+  FaTimes, FaSearch, FaFolder, FaImages, FaCheck, FaExclamationCircle, FaFileAlt
 } from "react-icons/fa";
 import { listMedia, AuthError } from "../../api/adminApi";
 import Paginazione from "./Paginazione";
@@ -18,10 +18,36 @@ import "../../css/Libreria.css";
  * un PDF o un video vorrebbe dire far scegliere qualcosa che poi non si
  * vede in pagina.
  *
+ * Con tipo="documento" mostra invece solo i file che non sono immagini né
+ * video (i PDF): la usa la scheda Documenti, dove una foto non c'entra.
+ *
  * Il portale la attacca al body, fuori dal guscio del pannello: dentro
  * finirebbe tagliata dall'overflow della colonna di destra dell'editor.
  */
-export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
+/* Le parole della finestra, per ciascuno dei due tipi */
+const PAROLE = {
+  immagine: {
+    titolo: "Scegli un'immagine dalla libreria",
+    cerca: "Cerca fra le immagini",
+    nessunaFiltri: "Nessuna immagine corrisponde a questi filtri.",
+    nessuna: "Nella libreria non c'è ancora nessuna immagine.",
+    senzaTitolo: "immagine senza titolo",
+    invito: "Scegli un'immagine.",
+    nome: ["immagine", "immagini"]
+  },
+  documento: {
+    titolo: "Scegli un documento dalla libreria",
+    cerca: "Cerca fra i documenti",
+    nessunaFiltri: "Nessun documento corrisponde a questi filtri.",
+    nessuna: "Nella libreria non c'è ancora nessun documento.",
+    senzaTitolo: "documento senza titolo",
+    invito: "Scegli un documento.",
+    nome: ["documento", "documenti"]
+  }
+};
+
+export default function SceltaDallaLibreria({ onScegli, onChiudi, tipo = "immagine" }) {
+  const parole = PAROLE[tipo] ?? PAROLE.immagine;
   const [pagina, setPagina] = useState(1);
   const [cartellaId, setCartellaId] = useState("");
   const [scritto, setScritto] = useState("");
@@ -54,7 +80,7 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
     listMedia({
       pagina,
       perPagina: 24,
-      tipo: "immagine",
+      tipo,
       cartellaId: cartellaId || undefined,
       cerca: cerca || undefined
     })
@@ -71,7 +97,7 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
       });
 
     return () => { attivo = false; };
-  }, [chiave, pagina, cartellaId, cerca, gestisciErrore]);
+  }, [chiave, pagina, cartellaId, cerca, tipo, gestisciErrore]);
 
   const conFile = useMemo(() => cartelle.filter((c) => c.quanti > 0), [cartelle]);
 
@@ -80,7 +106,7 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
       className="scl-velo"
       role="dialog"
       aria-modal="true"
-      aria-label="Scegli un'immagine dalla libreria"
+      aria-label={parole.titolo}
       // Il click sullo sfondo chiude; quello dentro no, altrimenti si
       // chiuderebbe ogni volta che si preme un pulsante.
       onClick={(e) => { if (e.target === e.currentTarget) onChiudi(); }}
@@ -103,7 +129,7 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
               value={scritto}
               onChange={(e) => setScritto(e.target.value)}
               placeholder="Cerca…"
-              aria-label="Cerca fra le immagini"
+              aria-label={parole.cerca}
             />
           </form>
 
@@ -157,9 +183,7 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
             <div className="adm-empty">
               <FaImages className="adm-empty-icon" />
               <p>
-                {cerca || cartellaId
-                  ? "Nessuna immagine corrisponde a questi filtri."
-                  : "Nella libreria non c'è ancora nessuna immagine."}
+                {cerca || cartellaId ? parole.nessunaFiltri : parole.nessuna}
               </p>
             </div>
           ) : (
@@ -176,7 +200,11 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
                     aria-pressed={scelto?.id === file.id}
                   >
                     <span className="lib-anteprima">
-                      <img src={file.url} alt={file.alt || file.titolo || ""} loading="lazy" />
+                      {tipo === "immagine" ? (
+                        <img src={file.url} alt={file.alt || file.titolo || ""} loading="lazy" />
+                      ) : (
+                        <span className="lib-icona"><FaFileAlt aria-hidden="true" /></span>
+                      )}
                     </span>
                     <span className="lib-nome">{file.titolo || "senza titolo"}</span>
                   </button>
@@ -191,14 +219,14 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
               pagine={dati.pagine}
               onCambia={setPagina}
               totale={dati.totale}
-              nome={["immagine", "immagini"]}
+              nome={parole.nome}
             />
           )}
         </div>
 
         <div className="scl-piede">
           <span className="adm-hint">
-            {scelto ? (scelto.titolo || "immagine senza titolo") : "Scegli un'immagine."}
+            {scelto ? (scelto.titolo || parole.senzaTitolo) : parole.invito}
           </span>
 
           <div className="adm-head-actions">

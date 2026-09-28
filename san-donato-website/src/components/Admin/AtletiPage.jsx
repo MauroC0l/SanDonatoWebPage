@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaSearch, FaRunning, FaExclamationCircle, FaHeartbeat,
   FaEuroSign, FaChevronRight, FaFileMedical, FaArrowRight,
-  FaCheckCircle, FaHourglassHalf, FaHistory, FaTimes
+  FaCheckCircle, FaHourglassHalf, FaHistory, FaTimes,
+  FaUsers
 } from "react-icons/fa";
 import { listAtleti, listSquadre, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -37,6 +38,7 @@ const FILTRI = [
   { chiave: "cert_scadenza", etichetta: "In scadenza", conta: "inScadenza", tono: "attenzione" },
   { chiave: "quota_mancante", etichetta: "Quota da impostare", conta: "quotaMancante", tono: "attenzione", conQuote: true },
   { chiave: "quota_aperta", etichetta: "Quota da saldare", conta: "senzaQuota", conQuote: true },
+  { chiave: "fratelli", etichetta: "Fratelli da controllare", conta: "fratelli", tono: "attenzione", conQuote: true },
   // Chi ha smesso durante la stagione: resta in elenco, ma va riconosciuto
   { chiave: "ritirati", etichetta: "Ritirati", conta: "ritirati" },
   // Non hanno rinnovato, o non hanno versato la prima metà
@@ -55,6 +57,7 @@ const VUOTO_FILTRO = {
   cert_scadenza: ["Nessun certificato in scadenza", "Nel prossimo mese non scade niente."],
   quota_mancante: ["Tutti hanno una quota", "Non c'è nessuna tariffa da scegliere."],
   quota_aperta: ["Nessuna quota da saldare", "Chi ha una quota l'ha già versata tutta."],
+  fratelli: ["Nessun fratello da controllare", "Le richieste della quota famiglia sono tutte decise."],
   ritirati: ["Nessun ritirato", "Nessuno ha smesso durante questa stagione."],
   abbandonati: ["Nessun abbandono", "Tutti gli iscritti risultano attivi."]
 };
@@ -133,6 +136,7 @@ export default function AtletiPage() {
     if (q.get("certificato") === "in_scadenza") return "cert_scadenza";
     if (q.get("quota") === "mancante") return "quota_mancante";
     if (q.get("quota") === "aperta") return "quota_aperta";
+    if (q.get("fratelli") === "da_controllare") return "fratelli";
     return "";
   });
 
@@ -224,6 +228,7 @@ export default function AtletiPage() {
       if (filtro === "quota_mancante" && (a.quotaStagionaleCentesimi != null || a.ritirato || a.abbandonato)) return false;
       if (filtro === "ritirati" && !a.ritirato) return false;
       if (filtro === "abbandonati" && !a.abbandonato) return false;
+      if (filtro === "fratelli" && !a.parentelaDaControllare) return false;
 
       if (!cercato) return true;
       return `${a.nomeCompleto} ${a.email} ${a.squadre.map((s) => s.nome).join(" ")}`
@@ -254,10 +259,11 @@ export default function AtletiPage() {
 
     const ritirati = conStato.filter((a) => a.ritirato).length;
     const abbandonati = conStato.filter((a) => a.abbandonato).length;
+    const fratelli = conStato.filter((a) => a.parentelaDaControllare).length;
 
     return {
       scaduti, inScadenza, senzaQuota, daIncassare, daValidare, quotaMancante,
-      ritirati, abbandonati
+      ritirati, abbandonati, fratelli
     };
   }, [conStato]);
 
@@ -322,6 +328,13 @@ export default function AtletiPage() {
       Icona: FaHourglassHalf,
       titolo: riepilogo.inScadenza === 1 ? "1 certificato in scadenza" : `${riepilogo.inScadenza} certificati in scadenza`,
       testo: "Scadono entro un mese: conviene avvisarli ora"
+    },
+    conQuote && riepilogo.fratelli > 0 && {
+      filtro: "fratelli",
+      tono: "is-attenzione",
+      Icona: FaUsers,
+      titolo: riepilogo.fratelli === 1 ? "1 fratello da controllare" : `${riepilogo.fratelli} fratelli da controllare`,
+      testo: "Apri la scheda e conferma o respingi la quota famiglia"
     },
     conQuote && riepilogo.quotaMancante > 0 && {
       filtro: "quota_mancante",

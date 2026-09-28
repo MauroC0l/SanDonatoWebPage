@@ -89,7 +89,10 @@ const formatDateOra = (iso) => {
 };
 
 export default function PostsListPage() {
-  const { sessionExpired } = useAuth();
+  const { user, sessionExpired } = useAuth();
+  /* Cancellare per sempre prima dei 30 giorni: solo amministratore e
+     segreteria (28 settembre 2026). Gli altri ripristinano e aspettano. */
+  const puoEliminare = (user?.capabilities ?? []).includes("notizie.elimina");
   const area = useArea();
   const { avvisa, conferma } = useDialoghi();
   const navigate = useNavigate();
@@ -317,8 +320,9 @@ export default function PostsListPage() {
           <p>
             Qui le notizie restano <strong>{giorniCestino} giorni</strong>, poi si cancellano
             da sole. Fino ad allora, <strong>Ripristina</strong> le rimette fra le bozze.
+            {!puoEliminare && " Cancellarle prima lo possono fare solo amministratore e segreteria."}
           </p>
-          {total > 0 && (
+          {total > 0 && puoEliminare && (
             <button
               type="button"
               className="adm-btn adm-btn-cancella"
@@ -434,16 +438,18 @@ export default function PostsListPage() {
                 >
                   <FaUndo /> Ripristina
                 </button>
-                <button
-                  type="button"
-                  className="adm-icon-btn adm-icon-danger"
-                  onClick={() => handleDeleteForever(post)}
-                  disabled={busyId != null}
-                  title="Cancella per sempre"
-                  aria-label={`Cancella per sempre ${post.title}`}
-                >
-                  <FaTrashAlt />
-                </button>
+                {puoEliminare && (
+                  <button
+                    type="button"
+                    className="adm-icon-btn adm-icon-danger"
+                    onClick={() => handleDeleteForever(post)}
+                    disabled={busyId != null}
+                    title="Cancella per sempre"
+                    aria-label={`Cancella per sempre ${post.title}`}
+                  >
+                    <FaTrashAlt />
+                  </button>
+                )}
               </div>
               ) : (
               <div className="adm-post-actions">

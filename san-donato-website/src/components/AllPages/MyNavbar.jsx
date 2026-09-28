@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { FaChevronDown, FaDownload } from "react-icons/fa";
 import MenuSchermo from "./MenuSchermo";
-import { VOCI, DOCUMENTI } from "./vociMenu";
+import { VOCI, PAGINE_DOCUMENTI, useVociDocumenti } from "./vociMenu";
 import "../../css/MyNavbar.css";
 
 const RIDOTTO = "(prefers-reduced-motion: reduce)";
@@ -39,7 +39,8 @@ export default function MyNavbar() {
   const burgerRef = useRef(null);
   const menuAperto = menu !== "chiuso";
 
-  const documentoAttivo = DOCUMENTI.some((d) => !d.download && d.to === pathname);
+  const documentoAttivo = PAGINE_DOCUMENTI.some((d) => d.to === pathname);
+  const documenti = useVociDocumenti();
 
   // Cambiando pagina menu e tendina si chiudono da soli. Durante il
   // disegno e non in un effetto: così non c'è un fotogramma con la pagina
@@ -221,10 +222,10 @@ export default function MyNavbar() {
           </button>
 
           <div id="nb-documenti" className="nb-tendina-menu" hidden={!docsOpen}>
-            {DOCUMENTI.map((link) => (
+            {documenti.map((link) => (
               link.download ? (
                 <a
-                  key={link.to}
+                  key={link.chiave}
                   href={link.to}
                   className="nb-tendina-voce"
                   download
@@ -237,7 +238,7 @@ export default function MyNavbar() {
                   <FaDownload className="nb-tendina-scarica" aria-label="da scaricare" />
                 </a>
               ) : (
-                <NavLink key={link.to} to={link.to} className="nb-tendina-voce" onClick={() => setDocsOpen(false)}>
+                <NavLink key={link.chiave} to={link.to} className="nb-tendina-voce" onClick={() => setDocsOpen(false)}>
                   <span className="nb-tendina-icona" aria-hidden="true">{link.icon}</span>
                   {link.label}
                 </NavLink>

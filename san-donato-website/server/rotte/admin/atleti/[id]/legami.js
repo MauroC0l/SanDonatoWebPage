@@ -77,7 +77,8 @@ export default conGestioneErrori(
     );
 
     /* Deciso dalla società il 28 settembre 2026: confermare applica da sé
-       la tariffa famiglia a chi ha dichiarato, per la stagione in corso.
+       la tariffa famiglia, per la stagione in corso, SOLO a chi l'ha
+       chiesta (il secondo figlio). Il fratello già iscritto tiene la sua.
        Una tariffa scelta a mano dalla segreteria però resta. */
     const tariffa = dati.conferma
       ? await applicaTariffaFamiglia(deciso.utenteId, deciso.stagioneId, req.utente.id)

@@ -61,7 +61,7 @@ const TIPI_CERTIFICATO = [
  */
 const GRUPPI = [
   {
-    titolo: "Chi sei",
+    titolo: "I tuoi dati",
     campi: [
       { chiave: "dataNascita", etichetta: "Data di nascita", tipo: "date", obbligatorio: true },
 
@@ -76,7 +76,7 @@ const GRUPPI = [
     ]
   },
   {
-    titolo: "Dove abiti",
+    titolo: "La tua residenza",
     sottotitolo: "Serve per i moduli federali, che lo chiedono per intero.",
     campi: [
       { chiave: "provincia", etichetta: "Provincia", tipo: "suggerito", elenco: "province", obbliga: true },
@@ -551,7 +551,7 @@ export default function IscrizionePage() {
 
       <p className="aa-legenda">
         <span className="adm-obbligatorio" aria-hidden="true">*</span>
-        {" "}= serve per completare l&apos;iscrizione. Il resto è facoltativo, ma aiuta.
+        {" "}campo obbligatorio
       </p>
 
       <form id="modulo-iscrizione" onSubmit={salva}>
@@ -569,7 +569,7 @@ export default function IscrizionePage() {
                   {datiCompleti ? <><FaCheckCircle aria-hidden="true" /> Completo</> : "Manca qualcosa"}
                 </span>
               </h2>
-              <p className="aa-sezione-sotto">Come sui documenti.</p>
+              <p className="aa-sezione-sotto">Recupera i dati dai tuoi documenti.</p>
 
               <div className="adm-campi">{gruppoDati.campi.map(casella)}</div>
             </section>

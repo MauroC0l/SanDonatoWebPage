@@ -46,6 +46,8 @@ const importaSquadrePage = () => import("./SquadrePage");
 const SquadrePage = lazy(importaSquadrePage);
 const importaCalendariUfficialiPage = () => import("./CalendariUfficialiPage");
 const CalendariUfficialiPage = lazy(importaCalendariUfficialiPage);
+const importaDocumentiPage = () => import("./DocumentiPage");
+const DocumentiPage = lazy(importaDocumentiPage);
 const importaRecuperoPasswordPage = () => import("./RecuperoPasswordPage");
 const RecuperoPasswordPage = lazy(importaRecuperoPasswordPage);
 const importaSceltaPasswordPage = () => import("./SceltaPasswordPage");
@@ -175,6 +177,7 @@ const SCHERMATE = [
   importaStagioniPage,
   importaSquadrePage,
   importaCalendariUfficialiPage,
+  importaDocumentiPage,
   importaRecuperoPasswordPage,
   importaSceltaPasswordPage,
   importaHomePannello,
@@ -449,6 +452,18 @@ export default function AdminRoot({ section }) {
               element={
                 <Riservato una={["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"]}>
                   <Pigra cosa="della libreria"><LibreriaPage /></Pigra>
+                </Riservato>
+              }
+            />
+
+            {/* ---------- Documenti del sito ----------
+                Statuto, privacy, policy, rendiconti: atti ufficiali della
+                società, quindi solo chi amministra. */}
+            <Route
+              path="documenti"
+              element={
+                <Riservato una={["documenti.gestisci"]}>
+                  <Pigra cosa="dei documenti"><DocumentiPage /></Pigra>
                 </Riservato>
               }
             />

@@ -2,13 +2,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUserPlus, FaExclamationCircle, FaCheckCircle, FaUsers,
-  FaTimes, FaPlus, FaSearch, FaPencilAlt, FaKey, FaSave, FaChevronDown, FaUndo
+  FaTimes, FaPlus, FaSearch, FaPencilAlt, FaKey, FaSave, FaChevronDown, FaUndo,
+  FaIdCard
 } from "react-icons/fa";
 import {
   listUtenti, createUtente, updateUtente, listSquadre,
   associaSquadra, dissociaSquadra, riapriRichiesta, AuthError
 } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
+import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import Paginazione from "./Paginazione";
@@ -58,6 +60,18 @@ const NOME_RUOLO = Object.fromEntries(RUOLI.map((r) => [r.valore, r.etichetta]))
 // Chi può essere associato a una squadra: la segreteria no, decide su
 // tutte senza gestirne alcuna.
 const GESTISCE_SQUADRE = ["admin", "editor", "coach"];
+
+/*
+ * Chi ha una scheda da iscritto: atleti e allenatori, che versano la quota
+ * anche loro (vedi IscrizionePage).
+ *
+ * Qui si cambiano solo i dati dell'ACCOUNT — nome, cognome, email con cui
+ * si entra. Anagrafica, residenza e recapiti stanno sulla scheda, e dal 28
+ * settembre 2026 amministratore e segreteria li correggono da lì: il
+ * pulsante porta alla scheda invece di rifare qui lo stesso modulo, che
+ * avrebbe voluto dire due posti dove un dato si corregge in due modi.
+ */
+const HA_SCHEDA = ["atleta", "coach"];
 
 function quandoAccesso(iso) {
   if (!iso) return { testo: "Mai entrato", allarme: true };
@@ -137,6 +151,7 @@ function Dato({ etichetta, children }) {
 export default function PersonePage() {
   const navigate = useNavigate();
   const { user, sessionExpired } = useAuth();
+  const area = useArea();
 
   // Segreteria e amministratori: sono i due ruoli con "iscrizioni.decidi_tutte".
   const decideIscrizioni = (user?.capabilities ?? []).includes("iscrizioni.decidi_tutte");
@@ -449,8 +464,9 @@ export default function PersonePage() {
               ? `${visibili.length} di ${persone.length}`
               : `${persone.length} account`}
             {" "}· chi entra nel sito, con che ruolo e su quali squadre.
-            Con la freccia accanto a una persona le cambi ruolo, squadre o
-            password. In fondo all&apos;elenco chi non entra da tempo.
+            Con la freccia accanto a una persona le cambi ruolo, squadre,
+            nome, email o password; da lì si apre anche la scheda con i suoi
+            dati anagrafici. In fondo all&apos;elenco chi non entra da tempo.
           </p>
         </div>
 
@@ -716,7 +732,14 @@ export default function PersonePage() {
                     <tr key={`${persona.id}-dettaglio`} className="adm-riga-dettaglio">
                       <td colSpan={5}>
                         {inModifica ? (
-                          <form onSubmit={salvaModifica}>
+                          <form onSubmit={salvaModifica} aria-labelledby={`account-${persona.id}`}>
+                            {/* Un titolo che dice cosa si sta cambiando:
+                                senza, tre caselle comparse al posto della
+                                scheda non si capiva se fossero già il
+                                modulo o ancora la scheda da leggere. */}
+                            <p className="adm-gruppo-titolo" id={`account-${persona.id}`}>
+                              Dati dell&apos;account di {persona.nomeCompleto}
+                            </p>
                             <div className="adm-campi">
                               <label className="adm-field">
                                 <span className="adm-label">Nome</span>
@@ -761,6 +784,13 @@ export default function PersonePage() {
                               </label>
                             </div>
 
+                            {HA_SCHEDA.includes(persona.ruolo) && (
+                              <p className="adm-hint">
+                                Data di nascita, codice fiscale, indirizzo e telefoni
+                                stanno sulla sua scheda: &laquo;Dati anagrafici e contatti&raquo;.
+                              </p>
+                            )}
+
                             <div className="adm-scheda-azioni">
                               <button
                                 type="button"
@@ -789,6 +819,10 @@ export default function PersonePage() {
                                   nota: r.spiegazione
                                 }))}
                                 disabilitato={seStesso}
+                                /* Sovrapposta: aperta dentro alla riga, la
+                                   spingeva giù e allargava la tabella; ora
+                                   il pannello sta sopra alla pagina. */
+                                sovrapposta
                                 etichettaAria={`Ruolo di ${persona.nomeCompleto}`}
                               />
                               <span className="adm-hint">
@@ -830,6 +864,7 @@ export default function PersonePage() {
                                       }))}
                                     segnaposto="+ squadra…"
                                     vuoto="Già in tutte le squadre."
+                                    sovrapposta
                                     etichettaAria={`Aggiungi una squadra a ${persona.nomeCompleto}`}
                                   />
                                 </div>
@@ -842,11 +877,23 @@ export default function PersonePage() {
                               <div className="adm-scheda-azioni">
                                 <button
                                   type="button"
-                                  className="adm-btn adm-btn-ghost"
+                                  className="adm-btn adm-btn-secondary"
                                   onClick={() => apriModifica(persona)}
+                                  title="Nome, cognome ed email con cui entra"
                                 >
                                   <FaPencilAlt /> Modifica i dati
                                 </button>
+
+                                {HA_SCHEDA.includes(persona.ruolo) && (
+                                  <button
+                                    type="button"
+                                    className="adm-btn adm-btn-secondary"
+                                    onClick={() => navigate(`${area}/atleti/${persona.id}`)}
+                                    title="Data di nascita, codice fiscale, residenza, telefoni e genitori"
+                                  >
+                                    <FaIdCard /> Dati anagrafici e contatti
+                                  </button>
+                                )}
 
                                 <button
                                   type="button"

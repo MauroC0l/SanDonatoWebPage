@@ -6,6 +6,7 @@ import AperturaDocumento, { FasciaParole } from "./Documenti/AperturaDocumento";
 import { spezzaTitolo } from "./Documenti/spezzaTitolo";
 import SchedaFile from "./Documenti/SchedaFile";
 import AltriDocumenti from "./Documenti/AltriDocumenti";
+import { useDocumenti, formatoDi } from "../hooks/useDocumenti";
 
 const PAROLE = ["Privacy", "Trasparenza", "Protezione dei dati", "GDPR"];
 
@@ -15,7 +16,10 @@ const PAROLE = ["Privacy", "Trasparenza", "Protezione dei dati", "GDPR"];
  * scheda del file, grande, da prendere al volo.
  */
 export default function PrivacyPage() {
-  const { header, content, documents } = privacyData;
+  // I documenti non stanno più in Privacy.json: li gestisce
+  // l'amministratore e arrivano da /api/documenti (vedi useDocumenti.js)
+  const { header, content } = privacyData;
+  const { documenti, caricamento, errore } = useDocumenti("privacy");
   const { email } = headerData.contactInfo;
   const { prima, accesa } = spezzaTitolo(header.title);
 
@@ -29,7 +33,7 @@ export default function PrivacyPage() {
         sottotitolo={header.subtitle}
         fantasma="GDPR"
         numeri={[
-          { dt: "Documenti", dd: documents.length },
+          { dt: "Documenti", dd: caricamento ? "…" : documenti.length },
           { dt: "Normativa", dd: "GDPR" },
           { dt: "Formato", dd: "PDF" },
         ]}
@@ -53,13 +57,25 @@ export default function PrivacyPage() {
           </a>
         </section>
 
-        <ul className="doc-file-griglia prv-documenti" data-rivela-gruppo aria-label="Documenti da scaricare">
-          {documents.map((doc, i) => (
+        {/* La chiave cambia quando i documenti arrivano: l'elenco nasce di
+            nuovo e il movimento lo fa comparire, invece di trovarsi dentro
+            schede nuove in un gruppo che ha già fatto la sua entrata. */}
+        <ul
+          key={caricamento ? "attesa" : "pronto"}
+          className="doc-file-griglia prv-documenti"
+          data-rivela-gruppo={caricamento ? undefined : ""}
+          aria-label="Documenti da scaricare"
+          aria-busy={caricamento || undefined}
+        >
+          {caricamento && <li><span className="doc-sagoma" /></li>}
+          {errore && <li><p className="doc-avviso" role="status">{errore}</p></li>}
+          {documenti.map((doc, i) => (
             <li key={doc.id}>
               <SchedaFile
-                titolo={doc.label}
-                testo={doc.description}
-                href={doc.fileUrl}
+                titolo={doc.titolo}
+                testo={doc.descrizione}
+                href={doc.url}
+                formato={formatoDi(doc.url)}
                 scarica
                 numero={i + 1}
               />

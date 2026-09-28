@@ -187,7 +187,11 @@ export default function QuotePage() {
 
   /* Le automatiche (Prima iscrizione, Rinnovo, Famiglia) e quella degli
      allenatori le assegna il sito; le altre si scelgono scheda per scheda */
-  const automatiche = tariffe.filter((t) => t.automatica || t.perAllenatori);
+  /* Quella degli allenatori in fondo: le tre degli atleti sono quelle che
+     si guardano di più, e stanno insieme in cima. */
+  const automatiche = tariffe
+    .filter((t) => t.automatica || t.perAllenatori)
+    .sort((a, b) => Number(Boolean(a.perAllenatori)) - Number(Boolean(b.perAllenatori)));
   const aMano = tariffe.filter((t) => !t.automatica && !t.perAllenatori);
 
   /** Una tariffa del listino, o il suo modulo se la si sta modificando. */
@@ -538,7 +542,7 @@ export default function QuotePage() {
           <section className="adm-sezione prs-tariffe">
             <div className="adm-sezione-testa">
               <div>
-                <h2 className="adm-sezione-titolo">Si scelgono a mano</h2>
+                <h2 className="adm-sezione-titolo">Altre tipologie di quote</h2>
                 <p className="adm-sezione-sotto">
                   Per i casi particolari: la segreteria le sceglie dalla scheda
                   dell&apos;atleta, alla voce Quota.

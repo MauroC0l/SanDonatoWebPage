@@ -74,7 +74,10 @@ const dataONull = z.preprocess(
   z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La data va scritta come 2026-05-14.").nullable()
 );
 
-const schemaMiei = z.object({
+/* Esportato: la segreteria e l'amministratore correggono gli stessi campi
+   dalla scheda dell'atleta (server/rotte/admin/atleti/[id].js), con le
+   stesse regole. */
+export const schemaMiei = z.object({
   dataNascita: dataONull.optional(),
   luogoNascita: vuotoENull(120).optional(),
   provinciaNascita: vuotoENull(60).optional(),

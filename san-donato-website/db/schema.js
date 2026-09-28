@@ -303,6 +303,54 @@ export const notizie = pgTable("notizie", {
 ]);
 
 /**
+ * In quale punto del sito compare un documento.
+ *
+ *   menu              il menu "Documenti" in alto (vademecum, statuto…)
+ *   privacy           la pagina Privacy
+ *   tutela_minori     le policy delle federazioni, pagina Tutela minori
+ *   safeguarding      gli atti della Responsabile Safeguarding, stessa pagina
+ *   contributi        il rendiconto dei contributi pubblici
+ *   cinque_per_mille  i rendiconti del 5x1000, uno per anno
+ */
+export const sezioneDocumento = pgEnum("sezione_documento", [
+  "menu", "privacy", "tutela_minori", "safeguarding", "contributi", "cinque_per_mille"
+]);
+
+/**
+ * I documenti pubblicati sul sito: prima erano scritti a mano nei file di
+ * dati delle pagine, e cambiarne uno voleva dire toccare il codice. Da
+ * qui li gestisce l'amministratore (scheda "Documenti").
+ *
+ * Il file è un indirizzo: un PDF che sta già nel sito ("/documenti/…"),
+ * uno della libreria, o uno esterno. Se viene dalla libreria c'è anche
+ * mediaId, così cancellare il file non lascia un collegamento rotto senza
+ * che nessuno se ne accorga.
+ */
+export const documenti = pgTable("documenti", {
+  id: serial("id").primaryKey(),
+  sezione: sezioneDocumento("sezione").notNull(),
+  titolo: text("titolo").notNull(),
+  descrizione: text("descrizione"),
+  url: text("url").notNull(),
+  mediaId: integer("media_id").references(() => media.id, { onDelete: "set null" }),
+
+  // Solo per i rendiconti del 5x1000: l'anno, l'importo e quando è arrivato
+  anno: text("anno"),
+  importo: text("importo"),
+  percepitoIl: date("percepito_il"),
+
+  ordine: integer("ordine").notNull().default(0),
+  // Nascosto e non cancellato: un documento vecchio si toglie dal sito senza perderlo
+  pubblicato: boolean("pubblicato").notNull().default(true),
+
+  aggiornatoDa: integer("aggiornato_da").references(() => utenti.id, { onDelete: "set null" }),
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow(),
+  aggiornatoIl: timestamp("aggiornato_il", { withTimezone: true }).notNull().defaultNow()
+}, (t) => [
+  index("idx_documenti_sezione").on(t.sezione, t.ordine)
+]);
+
+/**
  * Le etichette delle notizie: "Assemblea", "Feste", "5x1000"…
  *
  * Le crea, le rinomina e le cancella la redazione, dall'editor delle

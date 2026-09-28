@@ -4,8 +4,13 @@ import pageData from "../data/Contributi.json";
 import AperturaDocumento, { FasciaParole } from "./Documenti/AperturaDocumento";
 import { spezzaTitolo } from "./Documenti/spezzaTitolo";
 import AltriDocumenti from "./Documenti/AltriDocumenti";
+import { useDocumenti, formatoDi } from "../hooks/useDocumenti";
 
-const { hero, covidTable, singleDocument, footer } = pageData;
+/* Il rendiconto da scaricare non sta più nel JSON (singleDocument): lo
+   gestisce l'amministratore, sezione "contributi", e arriva da
+   /api/documenti. La tabella dei contributi invece resta nel JSON: sono
+   righe di testo, non file. */
+const { hero, covidTable, footer } = pageData;
 
 /* Gli importi nel JSON sono scritti all'italiana ("3.549"): per il totale
    e per le barre servono numeri. Il totale non è un dato nuovo, è la somma
@@ -31,6 +36,11 @@ const PAROLE = ["Trasparenza", hero.legalRef, "Contributi pubblici", "Rendiconto
  */
 export default function ContributiPage() {
   const { prima, accesa } = spezzaTitolo(hero.title);
+  // Il primo della sezione è il rendiconto ufficiale; se non c'è, la
+  // fascia per scaricarlo e il pulsante in alto non compaiono.
+  const { documenti, errore } = useDocumenti("contributi");
+  const rendiconto = documenti[0] ?? null;
+  const formato = rendiconto ? formatoDi(rendiconto.url) : "";
 
   return (
     <div className="doc cpub">
@@ -46,9 +56,9 @@ export default function ContributiPage() {
             <FaScaleBalanced aria-hidden="true" /> {hero.legalRef}
           </span>
         )}
-        azioni={(
+        azioni={rendiconto && (
           <a
-            href={singleDocument.link}
+            href={rendiconto.url}
             className="doc-btn doc-btn--pieno"
             data-magnete
             target="_blank"
@@ -112,31 +122,35 @@ export default function ContributiPage() {
         </section>
 
         {/* ---------- Il rendiconto ---------- */}
-        <section className="cpub-scarica-cornice" aria-labelledby="cpub-scarica-titolo" data-rivela="zoom">
-          <div className="cpub-scarica">
-            <div className="mv-aurora cpub-scarica-aurora" aria-hidden="true" />
-            <div className="cpub-scarica-dentro">
-              <div className="cpub-scarica-foglio" aria-hidden="true">
-                <span>{singleDocument.fileSize}</span>
+        {rendiconto && (
+          <section key={rendiconto.id} className="cpub-scarica-cornice" aria-labelledby="cpub-scarica-titolo" data-rivela="zoom">
+            <div className="cpub-scarica">
+              <div className="mv-aurora cpub-scarica-aurora" aria-hidden="true" />
+              <div className="cpub-scarica-dentro">
+                <div className="cpub-scarica-foglio" aria-hidden="true">
+                  <span>{formato}</span>
+                </div>
+                <div className="cpub-scarica-testo">
+                  <p className="cpub-scarica-occhiello">02 · Documento ufficiale</p>
+                  <h2 id="cpub-scarica-titolo">{rendiconto.titolo}</h2>
+                  {rendiconto.descrizione && <p>{rendiconto.descrizione}</p>}
+                </div>
+                <a
+                  href={rendiconto.url}
+                  className="doc-btn doc-btn--pieno cpub-scarica-btn"
+                  data-magnete
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                >
+                  <FaArrowDown aria-hidden="true" /> Scarica {formato}
+                </a>
               </div>
-              <div className="cpub-scarica-testo">
-                <p className="cpub-scarica-occhiello">02 · Documento ufficiale</p>
-                <h2 id="cpub-scarica-titolo">{singleDocument.title}</h2>
-                <p>{singleDocument.description}</p>
-              </div>
-              <a
-                href={singleDocument.link}
-                className="doc-btn doc-btn--pieno cpub-scarica-btn"
-                data-magnete
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-              >
-                <FaArrowDown aria-hidden="true" /> Scarica {singleDocument.fileSize}
-              </a>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
+
+        {errore && <p className="doc-avviso" role="status">Il rendiconto da scaricare non si è caricato. Riprova fra poco.</p>}
 
         {/* ---------- Nota ---------- */}
         <aside className="cpub-nota" aria-labelledby="cpub-nota-titolo">

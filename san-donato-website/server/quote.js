@@ -379,6 +379,7 @@ export async function applicaTariffaFamiglia(utenteId, stagioneId, autoreId) {
   if (!famiglia) return null;
 
   const db = getDb();
+
   await assicuraIscrizione(utenteId, stagione);
 
   const automatiche = db.select({ id: tipiQuota.id }).from(tipiQuota)

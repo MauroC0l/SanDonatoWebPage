@@ -4,7 +4,7 @@ import { FaFacebookF, FaInstagram, FaYoutube, FaChevronDown, FaDownload, FaArrow
 import { SiTiktok } from "react-icons/si";
 import { FiMapPin, FiMail, FiLogIn, FiUserPlus } from "react-icons/fi";
 import { attesaAreaRiservata } from "../../precarica";
-import { VOCI, DOCUMENTI } from "./vociMenu";
+import { VOCI, PAGINE_DOCUMENTI, useVociDocumenti } from "./vociMenu";
 import { MARCHIO } from "./marchio";
 import headerData from "../../data/TopHeader.json";
 
@@ -31,7 +31,8 @@ const ATTIVABILI = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-
  */
 export default function MenuSchermo({ uscita, chiudi, burgerRef, barraRef, pathname }) {
   const pannelloRef = useRef(null);
-  const documentoAttivo = DOCUMENTI.some((d) => !d.download && d.to === pathname);
+  const documentoAttivo = PAGINE_DOCUMENTI.some((d) => d.to === pathname);
+  const documenti = useVociDocumenti();
   // I documenti partono aperti se si è già su uno di loro
   const [docsAperti, setDocsAperti] = useState(documentoAttivo);
 
@@ -125,15 +126,15 @@ export default function MenuSchermo({ uscita, chiudi, burgerRef, barraRef, pathn
               </button>
 
               <div id="ms-documenti" className="ms-documenti" hidden={!docsAperti}>
-                {DOCUMENTI.map((doc) => (
+                {documenti.map((doc) => (
                   doc.download ? (
-                    <a key={doc.to} href={doc.to} className="ms-documento" download target="_blank" rel="noopener noreferrer" onClick={chiudi}>
+                    <a key={doc.chiave} href={doc.to} className="ms-documento" download target="_blank" rel="noopener noreferrer" onClick={chiudi}>
                       <span aria-hidden="true">{doc.icon}</span>
                       {doc.label}
                       <FaDownload className="ms-scarica" aria-label="da scaricare" />
                     </a>
                   ) : (
-                    <NavLink key={doc.to} to={doc.to} className="ms-documento" onClick={chiudi}>
+                    <NavLink key={doc.chiave} to={doc.to} className="ms-documento" onClick={chiudi}>
                       <span aria-hidden="true">{doc.icon}</span>
                       {doc.label}
                     </NavLink>

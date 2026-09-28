@@ -77,16 +77,6 @@ export default function RiquadroQuota({ iscrizione, conStorico = true, apriSubit
   const pagabile = manca != null && manca > 0;
   const [pagamento, setPagamento] = useState(() => (apriSubito && pagabile ? { importo: null } : null));
 
-  /* Le due strade — tutto subito, o metà adesso e metà da gennaio — come
-     due pulsanti con la cifra scritta sopra, invece di una frase da
-     leggere e di un campo da riempire: chi paga sceglie con un tocco, e
-     sa già quanto gli verrà chiesto. La metà si propone solo finché la
-     prima non è coperta. */
-  const restoPrimaMeta = conto?.primaMeta != null && conto.secondaDovuta && pagabile
-    ? Math.max(0, conto.primaMeta - versato)
-    : 0;
-  const conMeta = restoPrimaMeta > 0 && restoPrimaMeta < manca;
-
   // I versamenti arrivano dal più vecchio: l'ultimo è in fondo.
   const ultimo = versamenti.length ? versamenti[versamenti.length - 1] : null;
 
@@ -185,20 +175,12 @@ export default function RiquadroQuota({ iscrizione, conStorico = true, apriSubit
                 onClick={() => setPagamento({ importo: null })}
               >
                 <FaCreditCard aria-hidden="true" />
-                {conMeta ? "Paga tutto" : "Paga"}{" "}
+                Paga quota{" "}
                 <span className="aa-cifra-btn">{euro(manca)}</span>
               </button>
-
-              {conMeta && (
-                <button
-                  type="button"
-                  className="adm-btn adm-btn-ghost"
-                  onClick={() => setPagamento({ importo: restoPrimaMeta })}
-                >
-                  {versato > 0 ? "Completa la prima metà" : "Paga metà adesso"}{" "}
-                  <span className="aa-cifra-btn">{euro(restoPrimaMeta)}</span>
-                </button>
-              )}
+              {/* Un pulsante solo (28 settembre 2026): se pagare tutto o
+                  una metà si sceglie nella finestra che si apre, dove le
+                  due cifre sono già pronte. */}
             </div>
           )}
 

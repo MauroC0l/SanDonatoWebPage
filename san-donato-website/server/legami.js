@@ -239,7 +239,8 @@ export async function legamiPerSegreteria(utenteId) {
         indirizzo: schedeAtleta.indirizzo,
         civico: schedeAtleta.civico,
         cap: schedeAtleta.cap,
-        citta: schedeAtleta.citta
+        citta: schedeAtleta.citta,
+        codiceFiscale: schedeAtleta.codiceFiscale
       })
       .from(schedeAtleta)
       .innerJoin(utenti, eq(utenti.id, schedeAtleta.utenteId))
@@ -262,8 +263,52 @@ export async function legamiPerSegreteria(utenteId) {
   );
   const corrente = await stagioneCorrente();
 
+  /*
+   * Il fratello "capostipite" non ha lo sconto (regola del 28 settembre
+   * 2026). La tariffa famiglia la prende chi arriva dopo e indica il codice
+   * fiscale di un fratello già iscritto: se B e C hanno indicato quello di
+   * A, lo sconto è loro, e A resta con la sua quota. Se A a sua volta
+   * chiede lo sconto indicando B, la segreteria deve saperlo prima di
+   * decidere: di norma quella richiesta va respinta.
+   *
+   * Si guarda la stagione della dichiarazione: la stagione dopo si rifà
+   * tutto da capo.
+   */
+  /* Si guarda il CODICE FISCALE usato, non l'account a cui il sito l'aveva
+     collegato: è il codice fiscale che dà diritto allo sconto, ed è quello
+     che il fratello più grande non può "riusare" per sé. */
+  const codici = [...new Set([...schede.values()]
+    .map((sc) => normalizzaCodiceFiscale(sc.codiceFiscale ?? ""))
+    .filter(Boolean))];
+  const giaUsato = codici.length ? await db
+    .select({
+      codice: legamiFamiliari.codiceFiscaleDichiarato,
+      stagioneId: legamiFamiliari.stagioneId,
+      utenteId: legamiFamiliari.utenteId,
+      nome: utenti.nome,
+      cognome: utenti.cognome,
+      email: utenti.email
+    })
+    .from(legamiFamiliari)
+    .innerJoin(utenti, eq(utenti.id, legamiFamiliari.utenteId))
+    .where(and(
+      inArray(legamiFamiliari.codiceFiscaleDichiarato, codici),
+      eq(legamiFamiliari.stato, "confermato")
+    )) : [];
+  const chiLoHaUsato = (utente, stagioneId) => {
+    const suo = normalizzaCodiceFiscale(schede.get(utente)?.codiceFiscale ?? "");
+    if (!suo) return [];
+    return giaUsato
+      .filter((g) => g.codice === suo && g.stagioneId === stagioneId && g.utenteId !== utente)
+      .map((g) => [g.nome, g.cognome].filter(Boolean).join(" ") || g.email)
+      // Una persona sola anche se ha dichiarato più volte
+      .filter((nome, i, tutti) => tutti.indexOf(nome) === i);
+  };
+
   return righe.map((r) => {
     const uno = schede.get(r.utenteId);
+    // Chi chiede lo sconto è già il fratello di cui altri l'hanno ottenuto?
+    const usatoDa = r.stato === "in_attesa" ? chiLoHaUsato(r.utenteId, r.stagioneId) : [];
     const altro = r.utenteCollegatoId ? schede.get(r.utenteCollegatoId) : null;
 
     return {
@@ -294,6 +339,12 @@ export async function legamiPerSegreteria(utenteId) {
           stessoIndirizzo: confrontaIndirizzo(uno, altro),
           iscrittoNellaStagione: iscritti.has(`${r.utenteCollegatoId}:${r.stagioneId}`)
         }
+        : null,
+
+      /* L'avviso per la segreteria, già scritto: la scheda lo mostra così
+         com'è accanto ai pulsanti per decidere. */
+      avviso: usatoDa.length
+        ? `Attenzione: il codice fiscale di ${[r.nome, r.cognome].filter(Boolean).join(" ") || r.email} è già stato usato da ${usatoDa.join(", ")} per ottenere la quota famiglia. Lo sconto spetta ai fratelli che arrivano dopo, non a chi è già iscritto: di norma questa richiesta va respinta.`
         : null
     };
   });
@@ -326,6 +377,21 @@ function confrontaIndirizzo(a, b) {
 }
 
 /**
+ * Chi, fra le persone indicate, ha dichiarato un fratello o una sorella
+ * che la segreteria non ha ancora controllato. Serve all'elenco degli
+ * atleti e alla home dello staff: senza, una dichiarazione restava ferma
+ * finché qualcuno non apriva per caso la scheda giusta.
+ */
+export async function conParentelaDaControllare(ids) {
+  if (!ids.length) return new Set();
+  const righe = await getDb()
+    .selectDistinct({ utenteId: legamiFamiliari.utenteId })
+    .from(legamiFamiliari)
+    .where(and(inArray(legamiFamiliari.utenteId, ids), eq(legamiFamiliari.stato, "in_attesa")));
+  return new Set(righe.map((r) => r.utenteId));
+}
+
+/**
  * La segreteria decide: è un fratello o no.
  *
  * Decidere NON assegna nessuna tariffa. Sono due gesti separati perché
@@ -345,6 +411,7 @@ export async function decidiLegame(id, { stato, motivo = null }, decisore) {
     .returning({
       id: legamiFamiliari.id,
       utenteId: legamiFamiliari.utenteId,
+      utenteCollegatoId: legamiFamiliari.utenteCollegatoId,
       stagioneId: legamiFamiliari.stagioneId,
       stato: legamiFamiliari.stato
     });

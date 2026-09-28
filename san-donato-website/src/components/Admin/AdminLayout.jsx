@@ -8,7 +8,8 @@ import {
   FaCalendarCheck,
   FaUserCircle,
   FaChalkboardTeacher,
-  FaLayerGroup
+  FaLayerGroup,
+  FaFileAlt
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -56,6 +57,8 @@ const SEZIONI = [
   { a: "stagioni", etichetta: "Stagioni", gruppo: "Quote e stagioni", Icona: FaLayerGroup, capacita: ["quote.gestisci"] },
   { a: "utenti", etichetta: "Utenti", gruppo: "Persone", Icona: FaUsers, capacita: ["utenti.gestisci"] },
   { a: "libreria", etichetta: "Libreria", gruppo: "Comunicazione", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
+  // I file che il sito mette a disposizione: statuto, privacy, rendiconti
+  { a: "documenti", etichetta: "Documenti", gruppo: "Comunicazione", Icona: FaFileAlt, capacita: ["documenti.gestisci"] },
   { a: "registro", etichetta: "Registro", gruppo: "Sistema", Icona: FaHistory, capacita: ["registro.leggi"] },
 
   /* In fondo, dopo tutto quello che si amministra, perché è l'unica voce
@@ -92,7 +95,7 @@ const SOGLIA_GRUPPI = 8;
  */
 const PRIORITA_MOBILE = [
   "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
-  "eventi", "iscrizione", "allenatori", "stagioni", "squadre", "calendari", "utenti", "registro"
+  "eventi", "iscrizione", "allenatori", "stagioni", "squadre", "calendari", "documenti", "utenti", "registro"
 ];
 
 /**

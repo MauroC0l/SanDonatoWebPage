@@ -1,0 +1,186 @@
+/* =====================================================
+   Documenti del sito (prefisso dcm-)
+
+   La scheda in cui l'amministratore gestisce i file che il sito mette a
+   disposizione: statuto, privacy, policy, rendiconti. Tutto quello che si
+   può si prende da Admin.css (sezioni, schede, pulsanti, sagome): qui solo
+   i pezzi propri, cioè la riga di un documento con le frecce per
+   spostarlo e il modulo per aggiungerlo.
+   ===================================================== */
+
+/* ---------- Attesa ---------- */
+.dcm-sagoma-sezione { margin-top: 2rem; }
+
+/* ---------- Sezione ---------- */
+.dcm-sezione .adm-sezione-titolo .adm-badge-conta { font-size: .78rem; }
+.dcm-dove-icona { display: inline-block; margin-right: .15rem; color: var(--adm-arancio-testo); font-size: .8em; vertical-align: -.05em; }
+
+/* Una sezione senza documenti: il riquadro tratteggiato dice "qui va
+   qualcosa" senza la solennità di un .adm-vuoto-amico ripetuto sei volte */
+.dcm-vuoto {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 1.5px dashed var(--adm-line-strong);
+  border-radius: var(--adm-r-l);
+  color: var(--adm-muted);
+  font-size: .92rem;
+}
+
+/* ---------- Un documento ---------- */
+.dcm-doc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: .9rem;
+  align-items: start;
+  padding: 1rem 1.1rem;
+}
+.dcm-doc.is-nascosto { background: var(--adm-surface-2); border-style: dashed; }
+.dcm-doc.is-nascosto .dcm-doc-titolo,
+.dcm-doc.is-nascosto .dcm-doc-descrizione { color: var(--adm-muted); }
+
+/* Le frecce in colonna, col numero del posto in mezzo */
+.dcm-frecce {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+}
+.dcm-freccia { width: var(--adm-tocco); height: 36px; }
+.dcm-posizione {
+  min-width: 1.6rem;
+  color: var(--adm-muted);
+  font-size: .8rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.dcm-doc-corpo { display: grid; gap: .4rem; min-width: 0; }
+
+.dcm-doc-titolo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: 1.04rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+}
+
+.dcm-doc-descrizione {
+  margin: 0;
+  color: var(--adm-ink-2);
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+.dcm-doc-dati {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .4rem .6rem;
+  margin: .1rem 0 0;
+}
+.dcm-doc-data { color: var(--adm-muted); font-size: .85rem; }
+
+.dcm-doc-file,
+.dcm-file-scelto {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  min-width: 0;
+  margin: 0;
+  color: var(--adm-muted);
+  font-size: .85rem;
+}
+.dcm-doc-file > svg,
+.dcm-file-scelto > svg { flex-shrink: 0; color: var(--adm-arancio-testo); }
+
+/* Il nome del file su una riga: i nomi dei PDF sono lunghissimi, e
+   andando a capo spingerebbero "Apri" chissà dove */
+.dcm-file-nome {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dcm-apri {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  flex-shrink: 0;
+  padding: .15rem .1rem;
+  color: var(--adm-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+.dcm-apri svg { font-size: .75em; }
+.dcm-apri:hover { text-decoration: underline; }
+.dcm-apri:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; border-radius: 4px; }
+
+.dcm-doc-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: .35rem;
+}
+
+/* ---------- Il modulo ---------- */
+.dcm-posto-modulo { list-style: none; }
+.dcm-modulo { margin-bottom: 1rem; }
+.dcm-descrizione { min-height: 4.2rem; resize: vertical; }
+
+.dcm-file {
+  display: grid;
+  gap: .7rem;
+  min-width: 0;
+  margin: 0 0 1rem;
+  padding: .9rem 1rem 1rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-m);
+  background: var(--adm-surface-2);
+}
+.dcm-file legend { padding: 0 .35rem; }
+
+.dcm-file-scelto {
+  padding: .6rem .75rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-s);
+  background: var(--adm-surface);
+  color: var(--adm-ink);
+  font-weight: 600;
+}
+
+.dcm-file-scelte { display: flex; flex-wrap: wrap; gap: .5rem; }
+.dcm-file-scelte .adm-btn.is-scelto {
+  border-color: var(--adm-blue);
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue-dark);
+}
+
+.dcm-indirizzo { margin: 0; }
+.dcm-indirizzo code {
+  padding: 0 .25rem;
+  border-radius: 4px;
+  background: var(--adm-line-soft);
+  font-size: .9em;
+}
+
+/* Anno, importo e data del 5x1000 affiancati quando c'è posto */
+.dcm-rendiconto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0 1rem;
+}
+
+@media (max-width: 560px) {
+  .dcm-doc { gap: .65rem; padding: .85rem .8rem; }
+  .dcm-freccia { width: 40px; }
+  /* Sul telefono i tre pulsanti del file uno sotto l'altro, larghi */
+  .dcm-file-scelte .adm-btn { flex: 1 1 100%; justify-content: center; }
+}

@@ -709,3 +709,40 @@
   .doc-altri-voce:hover { translate: none; }
   .doc-file:hover .doc-file-foglio { rotate: none; }
 }
+
+/* ---------- Attesa e intoppi dei documenti ----------
+   I file arrivano da /api/documenti un attimo dopo la pagina: al loro
+   posto una sagoma della scheda, alta come lei, così niente salta quando
+   arrivano. Se non arrivano, una riga lo dice e il resto della pagina
+   resta com'è. */
+.doc-sagoma {
+  display: block;
+  min-height: 250px;
+  border-radius: 26px;
+  background: linear-gradient(100deg, #e9eef6 30%, #f5f8fc 50%, #e9eef6 70%);
+  background-size: 220% 100%;
+  animation: doc-onda 1.4s infinite linear;
+}
+.doc-sagoma--riga { min-height: 64px; border-radius: 16px; }
+@keyframes doc-onda {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+.doc-avviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #fff4e5;
+  border: 1px solid #f5d6a8;
+  color: #7a4100;
+  font-size: .92rem;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-sagoma { animation: none; }
+}

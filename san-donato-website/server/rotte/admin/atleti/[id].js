@@ -2,17 +2,16 @@
  * /api/admin/atleti/:id — la scheda di un atleta.
  *
  *   GET    anagrafica, certificato, quota e versamenti
- *   PATCH  scrive SOLO la quota della stagione
+ *   PATCH  ciascuno la sua parte: la quota (quote.gestisci), il certificato
+ *          consegnato su carta (certificato.registra), l'anagrafica e i
+ *          recapiti (anagrafica.modifica)
  *
- * LA REGOLA: chi vede i dati di una persona non li modifica. Anagrafica,
- * recapiti, tutore e certificato medico sono dell'atleta, e li scrive lui
- * dalla propria area (/api/iscrizione). Nemmeno un amministratore li tocca
- * da qui: non è una svista, è la regola.
- *
- * Quello che resta allo staff è la quota della stagione, che non è un dato
- * personale ma un numero deciso dalla società — insieme ai versamenti, che
- * stanno nell'endpoint accanto. Se potesse deciderla l'atleta non sarebbe
- * una quota, sarebbe un'offerta.
+ * LA REGOLA, CAMBIATA IL 28 SETTEMBRE 2026. Prima i dati personali li
+ * scriveva solo l'atleta, dalla sua area. La società ha deciso che
+ * amministratore e segreteria possano correggerli: un indirizzo sbagliato o
+ * un tutore mancante non devono aspettare che la famiglia entri nel sito.
+ * Le note dell'atleta restano sue. Ogni correzione finisce nel registro,
+ * con i nomi dei campi toccati.
  *
  * Lo schema elenca il solo campo ammesso invece di escludere quelli vietati:
  * un campo aggiunto domani alla tabella non diventa scrivibile per sbaglio.
@@ -31,6 +30,8 @@ import { leggiCorpo, parametri } from "../../../richiesta.js";
 import { valida } from "../../../validazione.js";
 import { trovaTipoQuota } from "../../../quote.js";
 import { salvaQuotaStagione, stagioneRichiesta } from "../../../stagioni.js";
+import { schemaMiei } from "../../iscrizione.js";
+import { codiceFiscaleValido, normalizzaCodiceFiscale } from "../../../codice-fiscale.js";
 
 /**
  * Quello che può scrivere chi tiene i conti: la quota, e basta.
@@ -101,8 +102,9 @@ async function leggi(req, res) {
 async function modifica(req, res) {
   const tieneIConti = puo(req.utente, "quote.gestisci");
   const registraCertificati = puo(req.utente, "certificato.registra");
+  const correggeAnagrafica = puo(req.utente, "anagrafica.modifica");
 
-  if (!tieneIConti && !registraCertificati) {
+  if (!tieneIConti && !registraCertificati && !correggeAnagrafica) {
     throw new ErroreHttp(403, "Da qui non si modifica nulla: i dati li scrive l'atleta.");
   }
 
@@ -118,10 +120,24 @@ async function modifica(req, res) {
   /* Ogni permesso apre solo la sua porzione, e le due si sommano. I campi
      fuori da entrambe non vengono rifiutati con un errore: gli schemi li
      scartano, e se non resta niente lo si dice sotto. */
+  /* L'anagrafica: gli stessi campi e le stesse regole della pagina
+     dell'atleta, senza certificato e note (quelli hanno i loro canali). */
+  const schemaAnagrafica = schemaMiei.omit({
+    tipoCertificato: true, certificatoScadenza: true, certificatoMediaId: true, note: true
+  });
+
   const dati = {
+    ...(correggeAnagrafica ? valida(schemaAnagrafica, corpo) : {}),
     ...(tieneIConti ? valida(schemaQuota, corpo) : {}),
     ...(registraCertificati ? valida(schemaCertificato, corpo) : {})
   };
+
+  // Un codice fiscale nuovo dev'essere giusto; quello già salvato si lascia
+  if (dati.codiceFiscale
+    && normalizzaCodiceFiscale(esistente.codiceFiscale ?? "") !== dati.codiceFiscale
+    && !codiceFiscaleValido(dati.codiceFiscale)) {
+    throw new ErroreHttp(400, "Questo codice fiscale non torna: ricontrollalo, basta una lettera diversa.");
+  }
 
   /*
    * Dalla tariffa scelta all'importo scritto sulla scheda.
@@ -166,14 +182,19 @@ async function modifica(req, res) {
 
   const tocca = Object.keys(dati);
   const soloQuota = tocca.every((c) => c === "quotaStagionaleCentesimi" || c === "tipoQuotaId");
+  const certificato = ["tipoCertificato", "certificatoScadenza", "certificatoMediaId"];
+  const soloCertificato = tocca.every((c) => certificato.includes(c));
 
   await annota(req.utente, {
-    azione: soloQuota ? "atleti.quota" : "atleti.certificato",
+    azione: soloQuota ? "atleti.quota" : soloCertificato ? "atleti.certificato" : "atleti.anagrafica",
     tipo: "atleta",
     id,
     descrizione: soloQuota
       ? `Ha impostato la quota di ${esistente.nomeCompleto}`
-      : `Ha registrato il certificato di ${esistente.nomeCompleto}`,
+      : soloCertificato
+        ? `Ha registrato il certificato di ${esistente.nomeCompleto}`
+        : `Ha corretto i dati di ${esistente.nomeCompleto}`,
+    // I nomi dei campi, non i valori: il registro non è una copia dei dati personali
     dettaglio: { campi: tocca }
   });
 

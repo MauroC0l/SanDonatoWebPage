@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { FaArrowDown, FaArrowRight } from "react-icons/fa6";
-import { DOCUMENTI } from "../AllPages/vociMenu";
+import { useVociDocumenti } from "../AllPages/vociMenu";
 
 /**
  * In fondo a ogni pagina dei documenti, gli altri documenti: chi cerca lo
@@ -12,7 +12,11 @@ import { DOCUMENTI } from "../AllPages/vociMenu";
  */
 export default function AltriDocumenti() {
   const { pathname } = useLocation();
-  const altri = DOCUMENTI.filter((d) => d.to !== pathname);
+  const altri = useVociDocumenti().filter((d) => d.to !== pathname);
+  // I file arrivano dopo le pagine: la griglia rinasce quando cambiano, così
+  // il movimento la fa comparire intera invece di lasciare le voci nuove
+  // senza comparsa (o quelle vecchie a metà).
+  const firma = altri.map((d) => d.chiave).join("|");
 
   return (
     <section className="doc-altri" aria-labelledby="doc-altri-titolo">
@@ -23,7 +27,7 @@ export default function AltriDocumenti() {
             Gli altri <em>documenti</em>.
           </h2>
         </header>
-        <ul className="doc-altri-griglia" data-rivela-gruppo>
+        <ul key={firma} className="doc-altri-griglia" data-rivela-gruppo>
           {altri.map((d) => {
             const contenuto = (
               <>
@@ -36,7 +40,7 @@ export default function AltriDocumenti() {
               </>
             );
             return (
-              <li key={d.to}>
+              <li key={d.chiave}>
                 {d.download ? (
                   <a href={d.to} className="doc-altri-voce" download target="_blank" rel="noopener noreferrer">
                     {contenuto}

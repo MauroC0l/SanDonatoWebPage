@@ -4,7 +4,8 @@ import {
   FaArrowLeft, FaArrowRight, FaSave, FaExclamationCircle, FaHeartbeat, FaEuroSign,
   FaUserCircle, FaFileMedical, FaExternalLinkAlt,
   FaInfoCircle, FaUsers, FaUpload, FaCheckCircle, FaTimesCircle,
-  FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory
+  FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory, FaPencilAlt,
+  FaExclamationTriangle
 } from "react-icons/fa";
 import {
   getAtleta, salvaSchedaAtleta,
@@ -22,6 +23,7 @@ import { anni } from "../../utils/eta";
 import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import Ritratto from "./Ritratto";
+import ModificaAnagrafica from "./ModificaAnagrafica";
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
 import "../../css/admin/Persone.css";
@@ -116,21 +118,25 @@ function Dato({ etichetta, children }) {
 /**
  * La scheda di un atleta: chi è, se può giocare, se ha pagato.
  *
- * Si LEGGE, quasi tutto. Anagrafica, recapiti, tutore e note sono dati della
- * persona e li scrive lei dalla propria area: nemmeno un amministratore li
- * tocca da qui.
+ * Si apre soprattutto per LEGGERE. Anagrafica, recapiti e tutore li scrive
+ * di norma la persona stessa dalla propria area; le note restano solo sue.
  *
- * Restano scrivibili due cose, con due permessi diversi:
+ * Si scrivono da qui tre cose, ognuna col suo permesso:
  *
  *   quote.gestisci        la quota della stagione e i versamenti, che non
  *                         sono dati personali ma i conti della società
  *   certificato.registra  tipo, scadenza e copia del certificato, per chi
  *                         lo consegna su carta in sede
+ *   anagrafica.modifica   dati, residenza, recapiti e tutori, per chi porta
+ *                         il modulo in sede o detta un numero al telefono.
+ *                         Deciso dalla società il 28 settembre 2026: prima
+ *                         nemmeno un amministratore li toccava, e un errore
+ *                         si correggeva solo chiedendolo all'interessato.
  *
- * Un allenatore non ha né l uno né l altro, e le quote non gli arrivano
- * proprio: il server non gliele manda. I campi in sola lettura sono la stessa
- * regola che applica il server — un modulo che il salvataggio rifiuterebbe
- * sarebbe solo un modo elaborato di far perdere tempo a chi lo compila.
+ * Amministratore e segreteria li hanno tutti e tre. Un allenatore nessuno, e
+ * le quote non gli arrivano proprio: il server non gliele manda. I pulsanti
+ * seguono la stessa regola del server — un modulo che il salvataggio
+ * rifiuterebbe sarebbe solo un modo elaborato di far perdere tempo.
  */
 export default function SchedaAtletaPage() {
   const { id } = useParams();
@@ -178,6 +184,16 @@ export default function SchedaAtletaPage() {
   const tieneIConti = capacita.includes("quote.gestisci");
   const registraCertificati = capacita.includes("certificato.registra");
   const puoScrivere = tieneIConti || registraCertificati;
+  // Dal 28 settembre 2026: amministratore e segreteria correggono i dati
+  const correggeAnagrafica = capacita.includes("anagrafica.modifica");
+  // Nome, cognome ed email stanno sull'account, che si cambia da Utenti
+  const gestisceUtenti = capacita.includes("utenti.gestisci");
+
+  /* La correzione dei dati: null a scheda normale, altrimenti il gruppo da
+     cui si comincia ("persona", "contatti", "tutori"). Un modo della stessa
+     scheda e non una pagina nuova: salvando o annullando si torna dove si
+     era, con la stessa linguetta aperta. */
+  const [inCorrezione, setInCorrezione] = useState(null);
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -189,18 +205,13 @@ export default function SchedaAtletaPage() {
     avvisa(err.message || "Operazione non riuscita.", "errore");
   }, [navigate, sessionExpired, avvisa]);
 
+  /* Solo quello che si scrive dalla scheda stessa: l'anagrafica ha il suo
+     modulo (ModificaAnagrafica), e tenerne qui una copia vorrebbe dire
+     vedere "modifiche da salvare" dopo averla salvata dall'altra parte. */
   const daAtleta = (a) => ({
-    dataNascita: a.dataNascita ?? "",
-    luogoNascita: a.luogoNascita ?? "",
-    codiceFiscale: a.codiceFiscale ?? "",
-    telefono: a.telefono ?? "",
-    indirizzo: a.indirizzo ?? "",
-    tutoreNome: a.tutoreNome ?? "",
-    tutoreTelefono: a.tutoreTelefono ?? "",
     tipoCertificato: a.tipoCertificato ?? "",
     certificatoScadenza: a.certificatoScadenza ?? "",
-    tipoQuotaId: a.tipoQuotaId ? String(a.tipoQuotaId) : "",
-    note: a.note ?? ""
+    tipoQuotaId: a.tipoQuotaId ? String(a.tipoQuotaId) : ""
   });
 
   /* Le tariffe si leggono una volta sola: servono a riempire la tendina, e
@@ -251,6 +262,26 @@ export default function SchedaAtletaPage() {
       el.scrollIntoView({ behavior: piano ? "auto" : "smooth", block: "start" });
       el.focus?.({ preventScroll: true });
     }));
+  };
+
+  /* ---------- Correzione dei dati ---------- */
+
+  const correggi = (gruppo) => {
+    setErrore("");
+    setInCorrezione(gruppo);
+  };
+
+  // Si torna sulla linguetta da cui si era partiti, in cima alla scheda
+  const chiudiCorrezione = () => {
+    const daContatti = inCorrezione === "contatti" || inCorrezione === "tutori";
+    setInCorrezione(null);
+    vai(daContatti ? "contatti" : "scheda", daContatti ? "prs-contatti" : "prs-anagrafica");
+  };
+
+  const correzioneSalvata = (aggiornato) => {
+    setAtleta(aggiornato);
+    avvisa("Dati salvati.", "ok");
+    chiudiCorrezione();
   };
 
   /* ---------- Salvataggio della scheda ---------- */
@@ -327,14 +358,32 @@ export default function SchedaAtletaPage() {
    * tariffa scelta a mano dalla segreteria resta. Lo fa il server
    * (applicaTariffaFamiglia), e l'avviso dice qual è stato l'esito.
    */
-  const decidiLegame = async (legameId, conferma) => {
+  const decidiLegame = async (legame, siConferma) => {
     let motivo;
 
-    if (!conferma) {
+    /* Con l'avviso del server — il codice fiscale del fratello maggiore è
+       già servito ad altri per la quota famiglia — confermare è l'eccezione:
+       si può, ma solo dopo averlo letto una seconda volta, con parole che
+       non si scorrono via come un "sei sicuro?". */
+    if (siConferma && legame.avviso) {
+      const ok = await conferma({
+        titolo: "Confermare lo stesso?",
+        testo: legame.avviso,
+        conferma: "Conferma comunque",
+        pericolo: true
+      });
+      if (!ok) return;
+    }
+
+    if (!siConferma) {
       motivo = await chiediTesto({
         titolo: "Perché non la riconosci?",
         testo: "Lo legge chi l'ha dichiarata, nella sua pagina.",
         segnaposto: "Es. il codice fiscale è di un genitore, non di un fratello.",
+        // Nel caso dell'avviso il motivo è già noto: lo si propone scritto
+        valoreIniziale: legame.avviso
+          ? "Lo sconto famiglia spetta ai fratelli che si iscrivono dopo: il fratello indicato l'ha già dato ad altri."
+          : undefined,
         conferma: "Respingi"
       });
       if (!motivo) return;
@@ -342,17 +391,17 @@ export default function SchedaAtletaPage() {
 
     setSalvataggio(true);
     try {
-      const esito = await decidiParentela(id, { legameId, conferma, motivo });
+      const esito = await decidiParentela(id, { legameId: legame.id, conferma: siConferma, motivo });
       setAtleta(esito.atleta);
       setForm(daAtleta(esito.atleta));
       avvisa(
-        !conferma
+        !siConferma
           ? "Parentela respinta."
           : esito.tariffaApplicata
             ? `Parentela confermata: applicata la tariffa "${esito.tariffaApplicata}".`
             // Una tariffa scelta a mano resta, oppure la famiglia è spenta
             : "Parentela confermata. La tariffa attuale è stata lasciata com'era.",
-        conferma ? "ok" : "info"
+        siConferma ? "ok" : "info"
       );
     } catch (err) {
       gestisciErrore(err);
@@ -617,7 +666,15 @@ export default function SchedaAtletaPage() {
       testo: legamiInAttesa === 1
         ? <>Un <strong>fratello o sorella</strong> dichiarato da confermare.</>
         : <><strong>{legamiInAttesa} fratelli o sorelle</strong> dichiarati da confermare.</>,
-      azione: { etichetta: "Conferma fratello", primaria: true, vista: "quota", ancora: "prs-fratelli" }
+      // "Conferma" non si suggerisce dove il server consiglia di respingere
+      azione: {
+        etichetta: (atleta.legami ?? []).some((l) => l.stato === "in_attesa" && l.avviso)
+          ? "Controlla la parentela"
+          : "Conferma fratello",
+        primaria: true,
+        vista: "quota",
+        ancora: "prs-fratelli"
+      }
     });
   }
 
@@ -641,7 +698,8 @@ export default function SchedaAtletaPage() {
       tono: "",
       Icona: FaInfoCircle,
       testo: <>Deve ancora inserire <strong>{altroChemanca.join(", ")}</strong> dalla sua area.</>,
-      azione: null
+      // Chi può correggere i dati può anche scriverli al posto suo, se li ha
+      azione: correggeAnagrafica ? { etichetta: "Inseriscili tu", correggi: "persona" } : null
     });
   }
 
@@ -653,7 +711,9 @@ export default function SchedaAtletaPage() {
       tono: "is-attenzione",
       Icona: FaPhoneAlt,
       testo: <>È minorenne e <strong>non ha indicato un adulto da chiamare</strong>.</>,
-      azione: { etichetta: "Vedi i contatti", vista: "contatti" }
+      azione: correggeAnagrafica
+        ? { etichetta: "Aggiungi un contatto", correggi: "tutori" }
+        : { etichetta: "Vedi i contatti", vista: "contatti" }
     });
   }
 
@@ -745,6 +805,24 @@ export default function SchedaAtletaPage() {
         </div>
       )}
 
+      {/* ---------- La correzione dei dati ----------
+          Prende il posto di tutto quello che sta sotto alla testata: chi
+          corregge un indirizzo non deve avere accanto certificato e quota
+          da salvare con un altro pulsante. Le modifiche lasciate a metà
+          nella scheda restano, e si ritrovano tornando indietro. */}
+      {inCorrezione ? (
+        <ModificaAnagrafica
+          key={inCorrezione}
+          id={id}
+          atleta={atleta}
+          partenza={inCorrezione}
+          puoCambiareAccount={gestisceUtenti}
+          onSalvato={correzioneSalvata}
+          onAnnulla={chiudiCorrezione}
+          onSessioneScaduta={() => { sessionExpired(); navigate("/login", { replace: true }); }}
+        />
+      ) : (<>
+
       {/* ---------- Le due domande ----------
           Può giocare? Ha pagato? Prima di leggere qualunque altra cosa. Sono
           anche pulsanti: toccarle porta dove si guarda il dettaglio. */}
@@ -799,7 +877,9 @@ export default function SchedaAtletaPage() {
                   <button
                     type="button"
                     className={`adm-btn ${d.azione.primaria ? "adm-btn-primary" : "adm-btn-ghost"}`}
-                    onClick={() => (d.azione.file ? scegliFile() : vai(d.azione.vista, d.azione.ancora))}
+                    onClick={() => (d.azione.file ? scegliFile()
+                      : d.azione.correggi ? correggi(d.azione.correggi)
+                        : vai(d.azione.vista, d.azione.ancora))}
                     disabled={salvataggio || caricandoFile}
                   >
                     {d.azione.etichetta} <FaArrowRight aria-hidden="true" />
@@ -858,15 +938,28 @@ export default function SchedaAtletaPage() {
         {vista === "scheda" && (
           <div className="adm-editor-grid prs-scheda-griglia">
             <div className="adm-editor-col">
-              <section className="adm-panel">
-                <h2 className="adm-panel-title">
-                  <FaUserCircle aria-hidden="true" /> Anagrafica
-                </h2>
+              <section className="adm-panel prs-ancora" id="prs-anagrafica" tabIndex={-1}>
+                <div className="prs-titolo-azione">
+                  <h2 className="adm-panel-title">
+                    <FaUserCircle aria-hidden="true" /> Anagrafica
+                  </h2>
+                  {/* Il pulsante accanto al titolo, e non in fondo: chi
+                      trova un dato sbagliato lo trova leggendo, e la
+                      correzione deve stare dove sta guardando. */}
+                  {correggeAnagrafica && (
+                    <button
+                      type="button"
+                      className="adm-btn adm-btn-secondary adm-btn-piccolo"
+                      onClick={() => correggi("persona")}
+                    >
+                      <FaPencilAlt aria-hidden="true" /> Modifica i dati
+                    </button>
+                  )}
+                </div>
 
-                {/* Sempre in sola lettura, per chiunque.
-                    I dati di una persona li scrive quella persona, dalla sua
-                    area: dall'altra parte si leggono e basta. Non è un
-                    permesso mancante da aggiungere un giorno, è la regola. */}
+                {/* Qui si legge soltanto: la correzione ha il suo modulo,
+                    che si apre col pulsante qui sopra per chi ha il
+                    permesso. Un allenatore il pulsante non lo vede. */}
                 {GRUPPI.map((gruppo) => (
                   <div className="adm-gruppo" key={gruppo.titolo}>
                     <p className="adm-gruppo-titolo">{gruppo.titolo}</p>
@@ -888,9 +981,13 @@ export default function SchedaAtletaPage() {
                 )}
 
                 <p className="adm-hint">
-                  Questi dati li compila {atleta.nomeCompleto} dalla propria area,
-                  nella pagina Iscrizione. Se c&apos;è un errore, il modo di
-                  correggerlo è chiederglielo.
+                  {correggeAnagrafica
+                    ? <>Li compila {atleta.nomeCompleto} dalla propria pagina
+                      Iscrizione; se c&apos;è un errore puoi correggerlo tu con
+                      &laquo;Modifica i dati&raquo;. Le note le scrive solo lui.</>
+                    : <>Questi dati li compila {atleta.nomeCompleto} dalla propria
+                      area, nella pagina Iscrizione. Se c&apos;è un errore, lo
+                      corregge lui oppure la segreteria.</>}
                 </p>
               </section>
             </div>
@@ -1071,18 +1168,31 @@ export default function SchedaAtletaPage() {
             all'allenatore: è lui che è in campo quando serve davvero. Il
             numero è un pulsante grande: si preme col pollice, di corsa. */}
         {vista === "contatti" && (
-          <section className="adm-panel prs-contatti">
-            <h2 className="adm-panel-title">
-              <FaPhoneAlt aria-hidden="true" /> Contatti
-            </h2>
+          <section className="adm-panel prs-contatti prs-ancora" id="prs-contatti" tabIndex={-1}>
+            <div className="prs-titolo-azione">
+              <h2 className="adm-panel-title">
+                <FaPhoneAlt aria-hidden="true" /> Contatti
+              </h2>
+              {correggeAnagrafica && (
+                <button
+                  type="button"
+                  className="adm-btn adm-btn-secondary adm-btn-piccolo"
+                  onClick={() => correggi("contatti")}
+                >
+                  <FaPencilAlt aria-hidden="true" /> Modifica i dati
+                </button>
+              )}
+            </div>
 
             {minore && !atleta.tutoreTelefono && (
               <p className="adm-alert adm-alert-warn" role="status">
                 <FaExclamationCircle aria-hidden="true" />
                 <span>
                   {atleta.nomeCompleto} è minorenne e non ha indicato nessun
-                  adulto da chiamare. Glielo si può chiedere: lo compila
-                  dalla sua pagina Iscrizione.
+                  adulto da chiamare.{" "}
+                  {correggeAnagrafica
+                    ? "Se il numero ce l'hai, puoi aggiungerlo tu con \"Modifica i dati\"; altrimenti lo compila lui dalla sua pagina Contatti."
+                    : "Glielo si può chiedere: lo compila dalla sua pagina Contatti."}
                 </span>
               </p>
             )}
@@ -1137,8 +1247,12 @@ export default function SchedaAtletaPage() {
             </div>
 
             <p className="adm-hint">
-              Anche questi li scrive {atleta.nomeCompleto} dalla propria
-              area, secondo contatto compreso.
+              {correggeAnagrafica
+                ? <>Li scrive {atleta.nomeCompleto} dalla propria area, secondo
+                  contatto compreso; un numero cambiato puoi correggerlo tu.</>
+                : <>Li scrive {atleta.nomeCompleto} dalla propria area, secondo
+                  contatto compreso. Un numero sbagliato lo corregge lui oppure
+                  la segreteria.</>}
             </p>
           </section>
         )}
@@ -1263,7 +1377,7 @@ export default function SchedaAtletaPage() {
 
                   <ul className="adm-legami">
                     {atleta.legami.map((l) => (
-                      <li key={l.id} className={`adm-legame prs-legame is-${l.stato}`}>
+                      <li key={l.id} className={`adm-legame prs-legame is-${l.stato} ${l.stato === "in_attesa" && l.avviso ? "ha-avviso" : ""}`}>
                         <div className="adm-legame-chi">
                           <span className="adm-legame-titolo">
                             {/* Chi ha dichiarato chi. Sulla scheda di un
@@ -1305,26 +1419,63 @@ export default function SchedaAtletaPage() {
                           {l.stato === "respinto" && l.motivo && (
                             <span className="adm-legame-motivo">{l.motivo}</span>
                           )}
+
+                          {/* L'avviso del server, così com'è: lo scrive lui
+                              perché sa chi ha già usato quel codice fiscale,
+                              cosa che da qui non si vede. */}
+                          {l.stato === "in_attesa" && l.avviso && (
+                            <p className="prs-legame-avviso" role="note">
+                              <FaExclamationTriangle aria-hidden="true" />
+                              <span>{l.avviso}</span>
+                            </p>
+                          )}
                         </div>
 
                         {l.stato === "in_attesa" ? (
+                          /* Con l'avviso il gesto suggerito si rovescia:
+                             "Respingi" diventa il pulsante pieno e viene
+                             prima, confermare resta possibile ma chiede
+                             di rileggere l'avviso. */
                           <div className="adm-legame-azioni">
-                            <button
-                              type="button"
-                              className="adm-btn adm-btn-primary"
-                              onClick={() => decidiLegame(l.id, true)}
-                              disabled={salvataggio}
-                            >
-                              <FaCheckCircle /> Sì, sono fratelli
-                            </button>
-                            <button
-                              type="button"
-                              className="adm-btn adm-btn-ghost"
-                              onClick={() => decidiLegame(l.id, false)}
-                              disabled={salvataggio}
-                            >
-                              <FaTimesCircle /> No
-                            </button>
+                            {l.avviso ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn-primary"
+                                  onClick={() => decidiLegame(l, false)}
+                                  disabled={salvataggio}
+                                >
+                                  <FaTimesCircle /> Respingi
+                                </button>
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn-ghost"
+                                  onClick={() => decidiLegame(l, true)}
+                                  disabled={salvataggio}
+                                >
+                                  <FaCheckCircle /> Conferma lo stesso
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn-primary"
+                                  onClick={() => decidiLegame(l, true)}
+                                  disabled={salvataggio}
+                                >
+                                  <FaCheckCircle /> Sì, sono fratelli
+                                </button>
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn-ghost"
+                                  onClick={() => decidiLegame(l, false)}
+                                  disabled={salvataggio}
+                                >
+                                  <FaTimesCircle /> No
+                                </button>
+                              </>
+                            )}
                           </div>
                         ) : (
                           <span className={`adm-status ${l.stato === "confermato" ? "adm-status-publish" : "adm-status-respinta"}`}>
@@ -1534,6 +1685,7 @@ export default function SchedaAtletaPage() {
           </div>
         )}
       </form>
+      </>)}
     </div>
   );
 }

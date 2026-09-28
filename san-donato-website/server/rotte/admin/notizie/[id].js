@@ -144,6 +144,9 @@ async function cestina(req, res) {
   /* ?definitiva=1 cancella per sempre, e solo una notizia già nel cestino:
      la cancellazione definitiva è il secondo passo, mai il primo. */
   if (parametri(req).definitiva === "1") {
+    if (!puo(req.utente, "notizie.elimina")) {
+      throw new ErroreHttp(403, "Cancellare per sempre una notizia lo fanno solo amministratore e segreteria. Resta nel cestino: sparirà da sola dopo 30 giorni.");
+    }
     const [tolta] = await getDb()
       .delete(notizie)
       .where(and(eq(notizie.id, id), eq(notizie.stato, "cestino")))

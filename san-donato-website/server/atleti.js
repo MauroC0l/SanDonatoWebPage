@@ -19,7 +19,7 @@ import {
   utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media, iscrizioniStagione
 } from "../db/schema.js";
 import { urlFile } from "./file.js";
-import { legamiPerSegreteria } from "./legami.js";
+import { legamiPerSegreteria, conParentelaDaControllare } from "./legami.js";
 import {
   quotePerUtenti, quotaDi, versamentiDi, storicoStagioni, stagioneCorrente
 } from "./stagioni.js";
@@ -311,6 +311,8 @@ async function aggiungiConti(atleti, { conQuote, stagione }) {
      allenatore deve sapere che un ragazzo ha smesso — i soldi solo chi
      tiene i conti. */
   const conti = await quotePerUtenti(atleti.map((a) => a.utenteId), stagione);
+  // Solo a chi tiene i conti, come i legami stessi
+  const parentele = conQuote ? await conParentelaDaControllare(atleti.map((a) => a.utenteId)) : new Set();
   for (const a of atleti) {
     const q = conti.get(a.utenteId);
     a.ritirato = q?.stato === "ritirata";
@@ -323,6 +325,7 @@ async function aggiungiConti(atleti, { conQuote, stagione }) {
       a.versatoCentesimi = q?.versatoCentesimi ?? 0;
       // Quanto è dovuto davvero: senza la seconda metà per chi ha smesso prima di gennaio
       a.dovutoCentesimi = q?.dovutoCentesimi ?? null;
+      a.parentelaDaControllare = parentele.has(a.utenteId);
     }
   }
 }
