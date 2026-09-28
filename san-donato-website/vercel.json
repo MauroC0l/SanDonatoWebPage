@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": [
+    "fra1"
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -14,6 +17,10 @@
     {
       "path": "/api/cron/calendari",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/stagioni",
+      "schedule": "0 0 * * *"
     }
   ],
   "functions": {

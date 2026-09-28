@@ -51,8 +51,18 @@ const MODI = [
   }
 ];
 
-export default function SchermataPagamento({ quota, versato, onChiudi }) {
+export default function SchermataPagamento({ quota, versato, conto = null, onChiudi }) {
   const residuo = quota == null ? null : Math.max(0, quota - versato);
+
+  /* Quanto manca alla prima metà, se ne manca: è l'altra cifra che ha
+     senso proporre oltre al "tutto". Le metà le calcola il server (la
+     prima prende il centesimo dispari), qui non si rifanno i conti. Chi
+     la prima metà l'ha già versata, o non deve la seconda, ha davanti
+     una cifra sola: quella che resta. */
+  const restoPrimaMeta = conto?.primaMeta != null && conto.secondaDovuta && residuo > 0
+    ? Math.max(0, conto.primaMeta - versato)
+    : 0;
+  const soloSeconda = conto?.primaMeta != null && conto.secondaDovuta && restoPrimaMeta === 0;
 
   const [modo, setModo] = useState("carta");
   const [quanto, setQuanto] = useState(() => versoCampo(residuo ?? 0));
@@ -159,9 +169,13 @@ export default function SchermataPagamento({ quota, versato, onChiudi }) {
                   </div>
                 </label>
 
-                {/* Si può versare un acconto: è quello che succede davvero,
-                    e un modulo che accetta solo l'intero costringerebbe
-                    comunque a passare in segreteria. */}
+                {/* Le due scelte sono quelle della quota: tutta subito,
+                    oppure la prima metà adesso e la seconda da gennaio.
+                    Una "metà" di quello che resta, come c'era prima, dopo
+                    un acconto non corrispondeva più a nessuna delle due.
+                    La cifra resta comunque libera: un acconto diverso è
+                    quello che succede davvero, e un modulo che non lo
+                    accetta costringerebbe a passare in segreteria. */}
                 {residuo != null && residuo > 0 && (
                   <div className="pag-scorciatoie">
                     <button
@@ -169,16 +183,26 @@ export default function SchermataPagamento({ quota, versato, onChiudi }) {
                       className="adm-chip"
                       onClick={() => setQuanto(versoCampo(residuo))}
                     >
-                      Tutto ({euro(residuo)})
+                      {soloSeconda ? "Seconda metà" : versato > 0 ? "Tutto il resto" : "Tutta la quota"} ({euro(residuo)})
                     </button>
-                    <button
-                      type="button"
-                      className="adm-chip"
-                      onClick={() => setQuanto(versoCampo(Math.round(residuo / 2)))}
-                    >
-                      Metà ({euro(Math.round(residuo / 2))})
-                    </button>
+                    {restoPrimaMeta > 0 && restoPrimaMeta < residuo && (
+                      <button
+                        type="button"
+                        className="adm-chip"
+                        onClick={() => setQuanto(versoCampo(restoPrimaMeta))}
+                      >
+                        {versato > 0 ? "Il resto della prima metà" : "Prima metà"} ({euro(restoPrimaMeta)})
+                      </button>
+                    )}
                   </div>
+                )}
+
+                {restoPrimaMeta > 0 && restoPrimaMeta < residuo && (
+                  <p className="adm-hint">
+                    Puoi versarla tutta subito oppure in due metà: la prima
+                    entro il 31 ottobre, la seconda
+                    ({euro(conto.secondaMeta)}) da gennaio.
+                  </p>
                 )}
 
                 {!valido && (

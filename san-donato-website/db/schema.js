@@ -1041,7 +1041,11 @@ export const stagioni = pgTable("stagioni", {
 
 export const statoIscrizioneStagione = pgEnum("stato_iscrizione_stagione", [
   "attiva",
-  "ritirata" // ha smesso durante la stagione: la sua storia resta
+  "ritirata", // ha smesso durante la stagione: la sua storia resta
+  /* Non ha rinnovato, o non ha versato la prima metà entro la scadenza:
+     per la stagione non c'è. Lo segna la segreteria, oppure il sito da
+     solo (vedi server/manutenzione-stagioni.js). */
+  "abbandonata"
 ]);
 
 /**
@@ -1077,6 +1081,12 @@ export const iscrizioniStagione = pgTable("iscrizioni_stagione", {
   ritiratoIl: date("ritirato_il"),
   motivoRitiro: text("motivo_ritiro"),
   ritiroRegistratoDa: integer("ritiro_registrato_da").references(() => utenti.id, { onDelete: "set null" }),
+
+  /* L'abbandono: da quando, e se l'ha deciso il sito. Uno automatico si
+     annulla da solo quando la prima metà arriva; uno della segreteria no,
+     lo toglie solo lei. */
+  abbandonataIl: date("abbandonata_il"),
+  abbandonoAutomatico: boolean("abbandono_automatico").notNull().default(false),
 
   /* Le squadre in cui ha giocato quella stagione, copiate qui: le squadre
      di oggi dicono dove gioca adesso, non dove giocava due anni fa. Si

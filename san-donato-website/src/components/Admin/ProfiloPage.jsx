@@ -5,7 +5,7 @@ import {
   FaExclamationCircle, FaHourglassHalf, FaCheckCircle, FaTimesCircle,
   FaCamera, FaTrash, FaEuroSign
 } from "react-icons/fa";
-import { getProfilo, aggiornaProfilo, uploadMedia, AuthError } from "../../api/adminApi";
+import { getProfilo, getIscrizione, aggiornaProfilo, uploadMedia, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import { areaDi } from "../../utils/percorsi";
@@ -33,6 +33,42 @@ function dataLunga(iso) {
   return new Date(iso).toLocaleDateString("it-IT", {
     day: "2-digit", month: "long", year: "numeric"
   });
+}
+
+/*
+ * Le date della stagione come si dicono: "1° luglio 2026", con l'ordinale
+ * sul primo del mese come si scrive in italiano. Arrivano come
+ * "2026-07-01", un giorno e basta: si leggono a pezzi e non con new Date(),
+ * che le prenderebbe per la mezzanotte UTC e in certi fusi orari le
+ * sposterebbe al giorno prima.
+ */
+const MESI = [
+  "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+  "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
+];
+
+function giornoStagione(iso) {
+  const [anno, mese, giorno] = String(iso ?? "").slice(0, 10).split("-").map(Number);
+  if (!anno || !mese || !giorno) return null;
+  return `${giorno === 1 ? "1°" : giorno} ${MESI[mese - 1]} ${anno}`;
+}
+
+/**
+ * A che punto è l'iscrizione alla stagione, se non è quella normale.
+ *
+ * "statoStagione" è il dato nuovo; "ritirato" c'era prima, e resta come
+ * ripiego finché il server non manda l'altro.
+ */
+function statoStagione(iscrizione) {
+  const stato = iscrizione.statoStagione ?? (iscrizione.ritirato ? "ritirata" : "attiva");
+  if (stato === "ritirata") {
+    const il = giornoStagione(iscrizione.ritiratoIl);
+    return { testo: il ? `Ritirato il ${il}` : "Ritirato", classe: "adm-status-draft" };
+  }
+  if (stato === "abbandonata") {
+    return { testo: "Iscrizione abbandonata: contatta la segreteria", classe: "adm-status-respinta" };
+  }
+  return null;
 }
 
 /*
@@ -74,6 +110,7 @@ export default function ProfiloPage() {
   const [salvataggio, setSalvataggio] = useState(false);
   const [immagineInCorso, setImmagineInCorso] = useState(false);
   const [errore, setErrore] = useState("");
+  const [iscrizione, setIscrizione] = useState(null);
 
   // Chi aspetta una squadra legge e basta: il server rifiuterebbe comunque
   // la modifica, e mostrare campi che non si possono salvare è una presa in giro.
@@ -107,6 +144,23 @@ export default function ProfiloPage() {
 
     return () => { attivo = false; };
   }, [gestisciErrore]);
+
+  /* La stagione a cui si è iscritti: solo per chi un'iscrizione ce l'ha
+     (atleti e allenatori). È un di più rispetto al profilo, quindi se la
+     chiamata non riesce la riga semplicemente non c'è: un errore in cima
+     alla pagina per un dato secondario spaventerebbe per niente. */
+  const conIscrizione = user?.capabilities?.includes("iscrizione.propria") ?? false;
+
+  useEffect(() => {
+    if (!conIscrizione) return undefined;
+    let attivo = true;
+
+    getIscrizione()
+      .then((i) => { if (attivo) setIscrizione(i); })
+      .catch(() => { if (attivo) setIscrizione(null); });
+
+    return () => { attivo = false; };
+  }, [conIscrizione]);
 
   /**
    * Carica la foto e la collega al proprio account.
@@ -217,6 +271,9 @@ export default function ProfiloPage() {
     form.email.trim().toLowerCase() !== profilo.email;
 
   const appartenenza = profilo.appartenenza;
+
+  const stagione = conIscrizione ? iscrizione?.stagione ?? null : null;
+  const statoIscrizione = stagione ? statoStagione(iscrizione) : null;
 
   // Richiesta respinta: il messaggio in cima cambia, e il riquadro "la tua
   // squadra" non lo ripete più in fondo alla pagina.
@@ -423,6 +480,24 @@ export default function ProfiloPage() {
 
               <Dato etichetta="Iscritto dal">{dataLunga(profilo.creatoIl)}</Dato>
 
+              {/* Il periodo per esteso e non il solo "2026/27": è da lì
+                  che si capisce fin quando vale la quota di quest'anno. */}
+              {stagione && (
+                <Dato etichetta="Stagione">
+                  <span className="prf-stagione">
+                    <strong>{stagione.nome}</strong>
+                    {giornoStagione(stagione.inizio) && giornoStagione(stagione.fine) && (
+                      <span className="prf-stagione-periodo">
+                        dal {giornoStagione(stagione.inizio)} al {giornoStagione(stagione.fine)}
+                      </span>
+                    )}
+                    {statoIscrizione && (
+                      <span className={`adm-status ${statoIscrizione.classe}`}>{statoIscrizione.testo}</span>
+                    )}
+                  </span>
+                </Dato>
+              )}
+
               <Dato etichetta="Ultimo accesso">
                 {profilo.ultimoAccesso
                   ? <><FaClock aria-hidden="true" /> {dataLunga(profilo.ultimoAccesso)}</>
@@ -474,8 +549,12 @@ export default function ProfiloPage() {
                   La stagione va dal <strong>1° luglio</strong> al <strong>30 giugno</strong> dell&apos;anno dopo.
                 </li>
                 <li>
-                  La quota è divisa in <strong>due metà</strong>: la prima si versa a inizio
-                  stagione, la seconda è dovuta da gennaio.
+                  La quota è divisa in <strong>due metà</strong>: la prima si versa entro il
+                  31 ottobre, la seconda è dovuta da gennaio.
+                </li>
+                <li>
+                  Puoi versarla <strong>tutta subito</strong>, in una volta sola,
+                  oppure in due metà: quando paghi scegli tu quanto versare.
                 </li>
                 <li>
                   Se smetti prima del 1° gennaio, la seconda metà non la devi: nella

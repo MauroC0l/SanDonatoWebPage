@@ -3,41 +3,162 @@
    Quello che serve solo a questa pagina; il resto è in Admin.css.
    ===================================================== */
 
-/* Il titolo dei gironi è anche l'interruttore che li apre e li chiude:
-   ha l'aspetto del titolo, non di un pulsante, ma tutta la riga si preme. */
-.adm-cal-apri {
+/* Un solo passo per tutto il cassetto: altezza, contenuto e freccia si
+   muovono insieme. Parte veloce e rallenta alla fine, come un cassetto
+   vero che si ferma da sé, invece di arrivare in fondo a velocità piena. */
+.adm-cal-torneo {
+  --cal-durata: 320ms;
+  --cal-curva: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* ---------- L'intestazione del torneo, con il pulsante a destra ---------- */
+
+.adm-cal-testata {
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.2rem 0.45rem;
-  width: 100%;
-  margin: 0;
-  padding: 0.3rem 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
+  gap: 0.75rem;
 }
 
-.adm-cal-apri:hover { color: var(--adm-ink, inherit); }
-.adm-cal-apri:focus-visible { outline: 2px solid var(--adm-blue); outline-offset: 3px; border-radius: 4px; }
+/* In modifica a sinistra c'è un modulo alto mezza pagina: il pulsante
+   centrato su quello finirebbe in mezzo ai campi. Sta in alto. */
+.adm-cal-testata.is-modulo { align-items: flex-start; }
 
-.adm-cal-apri .adm-hint { margin: 0; text-transform: none; letter-spacing: 0; font-weight: 500; }
+.adm-cal-testata-testo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 0.75rem;
+}
 
-/* La freccia punta a destra da chiusa e in giù da aperta */
-.adm-cal-freccia {
+/* Il pulsante tondo che apre i gironi. Il colore pieno solo da aperto:
+   a colpo d'occhio si vede quali tornei sono aperti anche scorrendo. */
+.adm-cal-apri {
   flex-shrink: 0;
-  transform: rotate(-90deg);
-  transition: transform .15s ease;
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--adm-line);
+  border-radius: 50%;
+  background: var(--adm-surface);
+  color: var(--adm-muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background-color .2s ease,
+    border-color .2s ease,
+    color .2s ease,
+    box-shadow .2s ease,
+    transform .15s ease;
 }
 
-.adm-cal-freccia.is-aperta { transform: none; }
+.adm-cal-apri:hover {
+  background: var(--adm-blue-soft);
+  border-color: #c9d8f7;
+  color: var(--adm-blue);
+}
 
+.adm-cal-apri:active { transform: scale(.93); }
+
+.adm-cal-apri:focus-visible {
+  outline: 2px solid var(--adm-blue);
+  outline-offset: 2px;
+}
+
+.adm-cal-apri.is-aperto {
+  background: var(--adm-blue-soft);
+  border-color: var(--adm-blue);
+  color: var(--adm-blue);
+  box-shadow: 0 2px 8px -3px rgba(11, 79, 209, .35);
+}
+
+/* Giù da chiuso, su da aperto: dice cosa succede premendolo */
+.adm-cal-freccia {
+  display: block;
+  transition: transform var(--cal-durata) var(--cal-curva);
+}
+
+.adm-cal-apri.is-aperto .adm-cal-freccia { transform: rotate(180deg); }
+
+/* ---------- Il cassetto dei gironi ----------
+
+   L'altezza si anima con la griglia: una riga da 0fr a 1fr va da niente
+   all'altezza vera del contenuto, qualunque sia, senza misurarla in
+   JavaScript e senza un max-height inventato che sbaglia i tempi.
+
+   Da chiuso il cassetto occupa zero, ma la scheda è una griglia con i suoi
+   spazi tra un pezzo e l'altro: il margine negativo si mangia quello sopra
+   al cassetto, altrimenti tra intestazione e pulsanti resterebbe un buco. */
+.adm-cal-cassetto {
+  display: grid;
+  grid-template-rows: 0fr;
+  margin-top: -0.75rem;
+  transition:
+    grid-template-rows var(--cal-durata) var(--cal-curva),
+    margin-top var(--cal-durata) var(--cal-curva);
+}
+
+.adm-cal-cassetto.is-aperto {
+  grid-template-rows: 1fr;
+  margin-top: 0;
+}
+
+/* Il taglio che nasconde quello che non ci sta ancora. Qualche pixel in
+   più ai lati, riassorbito dal margine, perché il bordo di un campo con il
+   fuoco non venga tagliato a metà.
+
+   visibility dopo la chiusura, e non subito: resta visibile per tutta la
+   corsa e si spegne alla fine, così anche un vecchio browser che non
+   conosce "inert" non ci fa entrare il tabulatore. */
+.adm-cal-cassetto-dentro {
+  min-height: 0;
+  overflow: hidden;
+  margin-inline: -4px;
+  padding-inline: 4px;
+  visibility: hidden;
+  transition: visibility 0s linear var(--cal-durata);
+}
+
+.adm-cal-cassetto.is-aperto .adm-cal-cassetto-dentro {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* Il contenuto scivola giù di poco mentre compare: si capisce che esce da
+   sotto all'intestazione, invece di spuntare dal nulla */
+.adm-cal-cassetto-contenuto {
+  padding-bottom: 4px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity calc(var(--cal-durata) * .6) ease,
+    transform var(--cal-durata) var(--cal-curva);
+}
+
+.adm-cal-cassetto.is-aperto .adm-cal-cassetto-contenuto {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--cal-durata) ease 60ms,
+    transform var(--cal-durata) var(--cal-curva);
+}
+
+.adm-cal-gironi-titolo .adm-hint { margin: 0; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+/* Chi ha chiesto meno movimento lo trova aperto o chiuso, senza corsa */
 @media (prefers-reduced-motion: reduce) {
-  .adm-cal-freccia { transition: none; }
+  .adm-cal-apri,
+  .adm-cal-freccia,
+  .adm-cal-cassetto,
+  .adm-cal-cassetto-dentro,
+  .adm-cal-cassetto-contenuto,
+  .adm-cal-cassetto.is-aperto .adm-cal-cassetto-dentro,
+  .adm-cal-cassetto.is-aperto .adm-cal-cassetto-contenuto {
+    transition: none;
+  }
+
+  .adm-cal-apri:active { transform: none; }
+  .adm-cal-cassetto-contenuto { transform: none; }
 }

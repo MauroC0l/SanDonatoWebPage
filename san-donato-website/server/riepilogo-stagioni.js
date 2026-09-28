@@ -52,7 +52,8 @@ export async function riepilogoStagioni() {
     const sue = iscrizioni.filter((i) => i.stagioneId === s.id);
     const precedente = stagioneDi(`${Number(s.inizio.slice(0, 4)) - 1}-09-01`).nome;
 
-    const atleti = sue.filter((i) => Array.isArray(i.squadre) && i.squadre.length > 0);
+    // Chi ha abbandonato non conta fra gli iscritti: quella stagione non c'era
+    const atleti = sue.filter((i) => Array.isArray(i.squadre) && i.squadre.length > 0 && i.stato !== "abbandonata");
     const allenatori = sue.filter((i) => i.ruolo === "coach");
 
     let dovuto = 0;
@@ -65,8 +66,10 @@ export async function riepilogoStagioni() {
       const v = versatoDi.get(`${i.utenteId}:${s.id}`) ?? 0;
       const conto = contoStagione(i, v, s);
       versato += v;
+      // Chi ha abbandonato non deve niente e non ha "saldato": non si conta
+      if (i.stato === "abbandonata") continue;
       if (conto.dovuto == null) {
-        if (i.stato !== "ritirata") senzaQuota += 1;
+        if (i.stato === "attiva") senzaQuota += 1;
         continue;
       }
       dovuto += conto.dovuto;
@@ -90,6 +93,7 @@ export async function riepilogoStagioni() {
       atleti: atleti.length,
       allenatori: allenatori.length,
       ritirati: sue.filter((i) => i.stato === "ritirata").length,
+      abbandonati: sue.filter((i) => i.stato === "abbandonata").length,
       primeIscrizioni: atleti.length - rinnovi,
       rinnovi,
       perSport: Object.entries(perSport)

@@ -324,11 +324,16 @@ export async function assegnaQuoteAutomatiche(utentiIds) {
   const [allenatori, gia] = await Promise.all([
     db.select({ id: utenti.id }).from(utenti)
       .where(and(inArray(utenti.id, ids), eq(utenti.ruolo, "coach"))),
+    /* Chi ha già una quota, e chi quest'anno non c'è (ritirato o
+       abbandonato): a nessuno dei due si assegna niente. */
     db.select({ utenteId: iscrizioniStagione.utenteId }).from(iscrizioniStagione)
       .where(and(
         inArray(iscrizioniStagione.utenteId, ids),
         eq(iscrizioniStagione.stagioneId, stagione.id),
-        sql`${iscrizioniStagione.quotaCentesimi} is not null`
+        or(
+          sql`${iscrizioniStagione.quotaCentesimi} is not null`,
+          ne(iscrizioniStagione.stato, "attiva")
+        )
       ))
   ]);
   const esclusi = new Set([...allenatori.map((r) => r.id), ...gia.map((r) => r.utenteId)]);

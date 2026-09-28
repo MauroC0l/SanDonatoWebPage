@@ -183,6 +183,13 @@
       "when": 1790547826823,
       "tag": "0025_free_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790586118593,
+      "tag": "0026_lumpy_jigsaw",
+      "breakpoints": true
     }
   ]
 }

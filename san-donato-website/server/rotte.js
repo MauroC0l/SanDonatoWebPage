@@ -30,6 +30,7 @@ import rotta_admin_stagioni from "./rotte/admin/stagioni.js";
 import rotta_admin_utenti from "./rotte/admin/utenti.js";
 import rotta_cambia_password from "./rotte/cambia-password.js";
 import rotta_cron_calendari from "./rotte/cron/calendari.js";
+import rotta_cron_stagioni from "./rotte/cron/stagioni.js";
 import rotta_cruscotto from "./rotte/cruscotto.js";
 import rotta_eventi_index from "./rotte/eventi/index.js";
 import rotta_eventi_risultati from "./rotte/eventi/risultati.js";
@@ -44,6 +45,7 @@ import rotta_registrazione from "./rotte/registrazione.js";
 import rotta_squadre from "./rotte/squadre.js";
 import rotta_uscita from "./rotte/uscita.js";
 import rotta_admin_atleti_id from "./rotte/admin/atleti/[id].js";
+import rotta_admin_atleti_id_abbandono from "./rotte/admin/atleti/[id]/abbandono.js";
 import rotta_admin_atleti_id_certificato from "./rotte/admin/atleti/[id]/certificato.js";
 import rotta_admin_atleti_id_legami from "./rotte/admin/atleti/[id]/legami.js";
 import rotta_admin_atleti_id_ritiro from "./rotte/admin/atleti/[id]/ritiro.js";
@@ -83,6 +85,7 @@ const TABELLA = [
   ["admin/utenti",                   rotta_admin_utenti],
   ["cambia-password",                rotta_cambia_password],
   ["cron/calendari",                 rotta_cron_calendari],
+  ["cron/stagioni",                  rotta_cron_stagioni],
   ["cruscotto",                      rotta_cruscotto],
   ["eventi",                         rotta_eventi_index],
   ["eventi/risultati",               rotta_eventi_risultati],
@@ -97,6 +100,7 @@ const TABELLA = [
   ["squadre",                        rotta_squadre],
   ["uscita",                         rotta_uscita],
   ["admin/atleti/[id]",              rotta_admin_atleti_id],
+  ["admin/atleti/[id]/abbandono",    rotta_admin_atleti_id_abbandono],
   ["admin/atleti/[id]/certificato",  rotta_admin_atleti_id_certificato],
   ["admin/atleti/[id]/legami",       rotta_admin_atleti_id_legami],
   ["admin/atleti/[id]/ritiro",       rotta_admin_atleti_id_ritiro],

@@ -9,7 +9,7 @@ import {
 import {
   getAtleta, salvaSchedaAtleta,
   uploadMedia, validaCertificato, decidiParentela, listTariffe,
-  segnaRitiro, annullaRitiro, AuthError
+  segnaRitiro, annullaRitiro, segnaAbbandono, annullaAbbandono, AuthError
 } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -149,7 +149,7 @@ export default function SchedaAtletaPage() {
   const navigate = useNavigate();
   const { user, sessionExpired } = useAuth();
   const area = useArea();
-  const { avvisa, chiediTesto } = useDialoghi();
+  const { avvisa, chiediTesto, conferma } = useDialoghi();
   // La stagione scelta in alto: le passate si guardano e basta
   const { stagioneId, scegli: scegliStagione } = useStagione();
 
@@ -394,6 +394,42 @@ export default function SchedaAtletaPage() {
     }
   };
 
+  /**
+   * "Abbandonato": per la stagione in corso non c'è — non ha rinnovato, o
+   * non ha mai versato. Non chiude l'account e non cancella niente; il
+   * conto non gli chiede più la quota. Si riattiva con un clic.
+   */
+  const abbandona = async () => {
+    const ok = await conferma({
+      titolo: `Segnare ${atleta.nomeCompleto} come abbandonato?`,
+      testo: "Per questa stagione non risulterà iscritto e la quota non gli sarà più chiesta. L'account resta: può ancora entrare, e lo si riattiva quando vuoi.",
+      conferma: "Segna come abbandonato"
+    });
+    if (!ok) return;
+
+    setSalvataggio(true);
+    try {
+      setAtleta(await segnaAbbandono(id));
+      avvisa("Segnato come abbandonato.", "ok");
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      setSalvataggio(false);
+    }
+  };
+
+  const riattiva = async () => {
+    setSalvataggio(true);
+    try {
+      setAtleta(await annullaAbbandono(id));
+      avvisa("Riattivato: di nuovo iscritto alla stagione.", "ok");
+    } catch (err) {
+      gestisciErrore(err);
+    } finally {
+      setSalvataggio(false);
+    }
+  };
+
   /* ---------- Copia del certificato ---------- */
 
   const caricaCertificato = async (evento) => {
@@ -530,6 +566,7 @@ export default function SchedaAtletaPage() {
               <h1 className="adm-page-title">
                 {atleta.nomeCompleto}
                 {atleta.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
+                {atleta.abbandonato && <span className="adm-badge-ritirato is-abbandonato">Abbandonato</span>}
               </h1>
 
               {/* Email, stato e data di apertura stavano in un riquadro
@@ -645,7 +682,7 @@ export default function SchedaAtletaPage() {
           l'allenatore l'avviso non compare: la quota non gli arriva
           proprio, e segnalargli una mancanza che non può colmare sarebbe
           solo un rimprovero a vuoto. */}
-      {tieneIConti && atleta.quotaStagionaleCentesimi == null && !atleta.ritirato && (
+      {tieneIConti && atleta.quotaStagionaleCentesimi == null && !atleta.ritirato && !atleta.abbandonato && (
         <div className="adm-alert adm-alert-warn" role="status">
           <FaEuroSign aria-hidden="true" />
           <span>
@@ -944,10 +981,29 @@ export default function SchedaAtletaPage() {
             {vista === "quota" && tieneIConti && !soloLettura && (
             <section className="adm-panel">
               <h2 className="adm-panel-title">
-                <FaDoorOpen aria-hidden="true" /> Ritiro
+                <FaDoorOpen aria-hidden="true" /> Ritiro e abbandono
               </h2>
 
-              {atleta.ritirato ? (
+              {atleta.abbandonato ? (
+                <>
+                  <p className="adm-conto">
+                    <span>Abbandonato dal {dataLeggibile(atleta.abbandonatoIl)}</span>
+                    <span className="adm-hint">
+                      {atleta.abbandonoAutomatico
+                        ? "L'ha segnato il sito: non ha rinnovato, o non ha versato la prima metà in tempo. Se la versa, torna attivo da solo."
+                        : "L'ha segnato la segreteria."}
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-secondary"
+                    onClick={riattiva}
+                    disabled={salvataggio}
+                  >
+                    <FaUndo /> Riattiva per questa stagione
+                  </button>
+                </>
+              ) : atleta.ritirato ? (
                 <>
                   <p className="adm-conto">
                     <span>Ritirato il {dataLeggibile(atleta.ritiratoIl)}</span>
@@ -986,6 +1042,19 @@ export default function SchedaAtletaPage() {
                       <FaDoorOpen /> Segna il ritiro
                     </button>
                   </div>
+
+                  <p className="adm-hint adm-abbandono-spiega">
+                    Se invece non ha rinnovato, o non ha mai cominciato:
+                    per la stagione non c&apos;è e non deve la quota.
+                  </p>
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-ghost"
+                    onClick={abbandona}
+                    disabled={salvataggio}
+                  >
+                    Segna come abbandonato
+                  </button>
                 </>
               )}
             </section>)}

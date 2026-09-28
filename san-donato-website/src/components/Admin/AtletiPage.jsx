@@ -30,7 +30,9 @@ const FILTRI = [
   // Solo per chi tiene i conti: agli altri le quote non arrivano nemmeno.
   { chiave: "quota_aperta", etichetta: "Quota da saldare", conQuote: true },
   // Chi ha smesso durante la stagione: resta in elenco, ma va riconosciuto
-  { chiave: "ritirati", etichetta: "Ritirati" }
+  { chiave: "ritirati", etichetta: "Ritirati" },
+  // Non hanno rinnovato, o non hanno versato la prima metà
+  { chiave: "abbandonati", etichetta: "Abbandonati" }
 ];
 
 function eta(dataNascita, oggi) {
@@ -179,8 +181,9 @@ export default function AtletiPage() {
       if (filtro === "cert_scadenza" && a.cert.chiave !== "in_scadenza") return false;
       if (filtro === "quota_aperta" && !(a.manca > 0)) return false;
       if (filtro === "cert_da_validare" && !(a.certificatoStato === "da_validare" && a.certificatoCaricato)) return false;
-      if (filtro === "quota_mancante" && (a.quotaStagionaleCentesimi != null || a.ritirato)) return false;
+      if (filtro === "quota_mancante" && (a.quotaStagionaleCentesimi != null || a.ritirato || a.abbandonato)) return false;
       if (filtro === "ritirati" && !a.ritirato) return false;
+      if (filtro === "abbandonati" && !a.abbandonato) return false;
 
       if (!cercato) return true;
       return `${a.nomeCompleto} ${a.email} ${a.squadre.map((s) => s.nome).join(" ")}`
@@ -207,7 +210,7 @@ export default function AtletiPage() {
     /* Chi non ha ancora una quota decisa: non compare né fra chi deve dei
        soldi né fra chi è a posto, e resta fermo finché la segreteria non
        ci pensa. */
-    const quotaMancante = conStato.filter((a) => a.quotaStagionaleCentesimi == null && !a.ritirato).length;
+    const quotaMancante = conStato.filter((a) => a.quotaStagionaleCentesimi == null && !a.ritirato && !a.abbandonato).length;
 
     return { scaduti, inScadenza, senzaQuota, daIncassare, daValidare, quotaMancante };
   }, [conStato]);
@@ -386,6 +389,7 @@ export default function AtletiPage() {
                     <span className="adm-atleta-nome">
                       {a.nomeCompleto}
                       {a.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
+                      {a.abbandonato && <span className="adm-badge-ritirato is-abbandonato">Abbandonato</span>}
                     </span>
                     <span className="adm-atleta-sotto">
                       {a.squadre.map((s) => s.nome).join(", ")}

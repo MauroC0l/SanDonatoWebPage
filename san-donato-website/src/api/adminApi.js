@@ -52,7 +52,63 @@ export class AuthError extends Error {}
  * la password, un messaggio che parlava di una sessione che non aveva mai
  * aperto.
  */
-async function chiedi(percorso, opzioni = {}, { eSessione = true } = {}) {
+/*
+ * Le letture dell'area riservata, ricordate per un minuto.
+ *
+ * Passando da una scheda all'altra e tornando indietro, ogni pagina
+ * richiedeva da capo gli stessi dati, e sulla demo ogni richiesta costa
+ * qualche centinaio di millisecondi. Adesso la seconda apertura entro un
+ * minuto è immediata.
+ *
+ * Il rischio di mostrare un dato vecchio è piccolo per costruzione:
+ *   - QUALUNQUE scrittura (salvataggio, cancellazione, caricamento) svuota
+ *     tutto, quindi le proprie modifiche si vedono sempre subito;
+ *   - resta solo quello che cambia un'altra persona nello stesso minuto,
+ *     e basta ricaricare la pagina per vederlo;
+ *   - /io, la sessione, non si ricorda mai: dice chi si è adesso.
+ */
+const DURATA_RICORDO = 60 * 1000;
+const ricordate = new Map();
+
+export function dimenticaLetture() {
+  ricordate.clear();
+}
+
+function daRicordare(percorso, opzioni) {
+  const metodo = (opzioni.method ?? "GET").toUpperCase();
+  return metodo === "GET" && !percorso.startsWith("/io");
+}
+
+async function chiedi(percorso, opzioni = {}, impostazioni = {}) {
+  const metodo = (opzioni.method ?? "GET").toUpperCase();
+
+  if (daRicordare(percorso, opzioni)) {
+    const trovata = ricordate.get(percorso);
+    if (trovata && Date.now() - trovata.quando < DURATA_RICORDO) {
+      // Una copia: chi la riceve può modificarla senza toccare il ricordo
+      return structuredClone(trovata.dati);
+    }
+    // Due pagine che chiedono la stessa cosa insieme fanno una richiesta sola
+    if (trovata?.inCorso) return structuredClone(await trovata.inCorso);
+
+    const inCorso = chiediAlServer(percorso, opzioni, impostazioni);
+    ricordate.set(percorso, { quando: 0, inCorso });
+    try {
+      const dati = await inCorso;
+      ricordate.set(percorso, { quando: Date.now(), dati });
+      return structuredClone(dati);
+    } catch (err) {
+      ricordate.delete(percorso);
+      throw err;
+    }
+  }
+
+  // Una scrittura cambia qualcosa: niente di ricordato è più sicuro
+  if (metodo !== "GET") ricordate.clear();
+  return chiediAlServer(percorso, opzioni, impostazioni);
+}
+
+async function chiediAlServer(percorso, opzioni = {}, { eSessione = true } = {}) {
   const risposta = await fetch(`${BASE}${percorso}`, {
     // Il cookie di sessione viaggia da solo, ma solo se lo chiediamo
     credentials: "same-origin",
@@ -842,6 +898,17 @@ export async function segnaRitiro(utenteId, { data, motivo } = {}) {
     method: "POST",
     body: JSON.stringify({ data, motivo })
   });
+  return atleta;
+}
+
+/** Segna la persona come abbandonata per la stagione in corso. Torna la scheda. */
+export async function segnaAbbandono(utenteId) {
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/abbandono`, { method: "POST" });
+  return atleta;
+}
+
+export async function annullaAbbandono(utenteId) {
+  const { atleta } = await chiedi(`/admin/atleti/${utenteId}/abbandono`, { method: "DELETE" });
   return atleta;
 }
 

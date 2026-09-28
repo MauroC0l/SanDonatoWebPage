@@ -583,6 +583,14 @@ export default function CalendariUfficialiPage() {
 
         return (
           <section key={fonte.id} className={`adm-panel adm-cal-torneo ${fonte.attiva || inModifica ? "" : "is-disattivato"}`}>
+            {/* L'intestazione e, alla sua destra, il pulsante che apre i
+                gironi. Centrato sull'intestazione e non sulla scheda
+                intera: la scheda si allunga quando si apre, l'intestazione
+                no, e così il pulsante resta fermo dove lo si è premuto.
+                C'è anche in modifica, quando il modulo prende il posto
+                dell'intestazione: lì sta in alto, accanto al titolo. */}
+            <div className={`adm-cal-testata ${inModifica ? "is-modulo" : ""}`}>
+            <div className="adm-cal-testata-testo">
             {inModifica ? (
               <ModuloFonte
                 titolo={`Modifica "${fonte.nome}"`}
@@ -615,8 +623,24 @@ export default function CalendariUfficialiPage() {
               {fonte.ultimaLettura ? `Letto ${quando(fonte.ultimaLettura)}` : "Mai letto"}
               {fonte.riepilogo && ` · ${raccontoLettura(fonte.riepilogo)}`}
             </p>
+            </>)}
+            </div>
 
-            {errori.length > 0 && (
+            <button
+              type="button" className={`adm-cal-apri ${aperto ? "is-aperto" : ""}`}
+              aria-expanded={aperto} aria-controls={idGironi}
+              aria-label={aperto ? "Nascondi i gironi" : "Mostra i gironi"}
+              title={aperto ? "Nascondi i gironi" : "Mostra i gironi"}
+              onClick={() => apriChiudi(fonte.id, aperto)}
+            >
+              <FaChevronDown className="adm-cal-freccia" aria-hidden="true" />
+            </button>
+            </div>
+
+            {/* Fuori dall'intestazione: un elenco di file non letti è
+                lungo, e il pulsante centrato su di esso scenderebbe a metà
+                scheda */}
+            {!inModifica && errori.length > 0 && (
               <div className="adm-alert adm-alert-warn adm-cal-errori">
                 <FaExclamationTriangle />
                 <div>
@@ -628,26 +652,25 @@ export default function CalendariUfficialiPage() {
                 </div>
               </div>
             )}
-            </>)}
 
-            {/* L'interruttore sta sul titolo dei gironi e non sull'intestazione
-                del torneo: così c'è anche mentre la scheda è in modifica, quando
-                l'intestazione lascia il posto al modulo */}
+            {/* Il cassetto dei gironi. Nascosti e non smontati: un girone a
+                metà rinomina, chiuso e riaperto, ritrova il nome che si
+                stava scrivendo. Da chiuso è "inert": resta nella pagina per
+                l'animazione, ma né il tabulatore né un lettore di schermo ci
+                entrano. (React 18 non conosce l'attributo: la stringa vuota
+                lo accende, undefined lo toglie.) */}
+            <div
+              id={idGironi}
+              className={`adm-cal-cassetto ${aperto ? "is-aperto" : ""}`}
+              inert={aperto ? undefined : ""}
+            >
+            <div className="adm-cal-cassetto-dentro">
+            <div className="adm-cal-cassetto-contenuto">
             <h3 className="adm-panel-title adm-cal-gironi-titolo">
-              <button
-                type="button" className="adm-cal-apri"
-                aria-expanded={aperto} aria-controls={idGironi}
-                onClick={() => apriChiudi(fonte.id, aperto)}
-              >
-                <FaChevronDown className={`adm-cal-freccia ${aperto ? "is-aperta" : ""}`} aria-hidden="true" />
-                <span>Gironi con una nostra squadra · {suoi.length}</span>
-                {suoi.length > 0 && <span className="adm-hint">({iscritte} con la squadra iscritta)</span>}
-              </button>
+              <span>Gironi con una nostra squadra · {suoi.length}</span>
+              {suoi.length > 0 && <span className="adm-hint">({iscritte} con la squadra iscritta)</span>}
             </h3>
 
-            {/* Nascosti e non smontati: un girone a metà rinomina, chiuso e
-                riaperto, ritrova il nome che si stava scrivendo */}
-            <div id={idGironi} hidden={!aperto}>
             {suoi.length === 0 ? (
               <p className="adm-hint">
                 {fonte.ultimaLettura
@@ -664,6 +687,8 @@ export default function CalendariUfficialiPage() {
                 ))}
               </ul>
             )}
+            </div>
+            </div>
             </div>
 
             {!inModifica && <footer className="adm-cal-fonte-azioni">

@@ -29,6 +29,7 @@ import { getDb } from "../../db/client.js";
 import { squadre, richiesteIscrizione, schedeAtleta, media, pagamenti } from "../../db/schema.js";
 import { salvaScheda, cosaManca, minorenne } from "../atleti.js";
 import { assicuraQuotaAllenatore, assegnaQuoteAutomatiche } from "../quote.js";
+import { passaggioDiStagione } from "../manutenzione-stagioni.js";
 import { quotaDi, versamentiDi } from "../stagioni.js";
 import { legamiDichiaratiDa } from "../legami.js";
 import { urlFile } from "../notizie.js";
@@ -141,7 +142,11 @@ async function leggi(req, res) {
     .from(richiesteIscrizione)
     .where(and(eq(richiesteIscrizione.utenteId, req.utente.id), eq(richiesteIscrizione.stato, "approvata")))
     .limit(1);
-  if (inSquadra) await assegnaQuoteAutomatiche([req.utente.id]);
+  if (inSquadra) {
+    // Il 1° luglio la stagione nuova c'è già, anche se nessuno ha aperto l'elenco
+    await passaggioDiStagione();
+    await assegnaQuoteAutomatiche([req.utente.id]);
+  }
 
   const [scheda] = await db
     .select({
@@ -274,6 +279,9 @@ async function leggi(req, res) {
       conto: stagione.conto,
       ritirato: stagione.stato === "ritirata",
       ritiratoIl: stagione.ritiratoIl,
+      // "attiva", "ritirata" o "abbandonata": il profilo lo mostra accanto alla stagione
+      statoStagione: stagione.stato ?? "attiva",
+      abbandonatoIl: stagione.abbandonataIl ?? null,
       pagamenti: versamenti,
 
       /**

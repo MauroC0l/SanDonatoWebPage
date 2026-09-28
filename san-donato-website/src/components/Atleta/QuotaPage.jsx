@@ -6,10 +6,8 @@ import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
 import { euro } from "../../utils/soldi";
 import RiquadroQuota, { ElencoVersamenti } from "./RiquadroQuota";
-import RiquadroFratelli from "./RiquadroFratelli";
 import "../../css/Admin.css";
 import "../../css/Quota.css";
-import "../../css/Iscrizione.css";
 
 /**
  * Quota e versamenti: quanto si deve, quanto si è versato, quando.
@@ -91,17 +89,6 @@ export default function QuotaPage() {
           qui sotto, e una finestra che lo ripete coprirebbe la pagina per
           mostrare quello che c'era già. */}
       <RiquadroQuota iscrizione={iscrizione} conStorico={false} />
-
-      {/* La quota per la famiglia si chiede qui, dove si vede quanto si
-          paga: la tariffa la assegna il sito, dopo che la segreteria ha
-          controllato. Solo a chi gioca: un allenatore ha la sua. */}
-      {iscrizione?.gioca && (
-        <RiquadroFratelli
-          fratelli={iscrizione?.fratelli ?? []}
-          onAggiornati={(elenco) => setIscrizione({ ...iscrizione, fratelli: elenco })}
-          onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
-        />
-      )}
 
       <section className="adm-panel">
         <h2 className="adm-panel-title">

@@ -3622,3 +3622,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-stg-sport li { padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--adm-blue-soft); color: var(--adm-blue-dark); font-size: 0.82rem; }
 .adm-stg-barra { height: 0.55rem; border-radius: 999px; background: var(--adm-line-soft); overflow: hidden; margin: 0.8rem 0 0.35rem; }
 .adm-stg-barra > span { display: block; height: 100%; background: var(--adm-ok); }
+
+/* Abbandonato: grigio e non arancione, perché per la stagione non c'è */
+.adm-badge-ritirato.is-abbandonato { background: var(--adm-line-soft); color: var(--adm-muted); }
+.adm-abbandono-spiega { margin-top: 1rem; }

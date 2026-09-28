@@ -10,7 +10,8 @@ describe("la stagione di una data", () => {
   it("gennaio è ancora della stagione cominciata l'anno prima", () => {
     const s = stagioneDi("2027-01-15");
     expect(s).toEqual({
-      nome: "2026/27", inizio: "2026-07-01", fine: "2027-06-30", inizioSecondaMeta: "2027-01-01"
+      nome: "2026/27", inizio: "2026-07-01", fine: "2027-06-30", inizioSecondaMeta: "2027-01-01",
+      scadenzaPrimaMeta: "2026-10-31"
     });
   });
 
@@ -51,6 +52,13 @@ describe("il conto di una stagione", () => {
   it("chi ha saldato e poi si ritira resta a credito", () => {
     const c = contoStagione({ quotaCentesimi: 20000, stato: "ritirata", ritiratoIl: "2026-10-10" }, 20000, stagione);
     expect(c.residuo).toBe(-10000);
+  });
+
+  it("chi ha abbandonato non deve niente, e quello che ha versato è credito", () => {
+    const c = contoStagione({ quotaCentesimi: 25000, stato: "abbandonata" }, 3000, stagione);
+    expect(c.dovuto).toBe(0);
+    expect(c.residuo).toBe(-3000);
+    expect(c.secondaDovuta).toBe(false);
   });
 
   it("senza quota non c'è niente da dovere, ma il versato si vede", () => {

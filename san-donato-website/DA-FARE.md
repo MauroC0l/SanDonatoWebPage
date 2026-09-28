@@ -99,12 +99,18 @@ Resta aperto:
 
 - **per quanti anni si tengono i dati di chi non torna**: lo deve dire chi
   segue la privacy della società. Non è ancora stato chiesto;
-- **il rinnovo del 1° luglio — DA DECIDERE.** Oggi chi resta in squadra
-  entra da solo nella stagione nuova con la quota Rinnovo, e a chi non torna
-  va segnato il ritiro a mano. Le alternative proposte: A) così com'è,
-  automatico; B) lo conferma l'atleta dalla sua area ("Rinnovo per la
-  2027/28"), e chi non conferma non entra; C) lo fa la segreteria,
-  selezionando chi rinnova. Consigliata la B;
+- **il rinnovo del 1° luglio — FATTO (deciso il 28 settembre 2026).** Tutti
+  gli iscritti passano da soli alla stagione nuova con la quota Rinnovo, da
+  saldare; chi aveva la quota famiglia o un'altra passa a Rinnovo e rifà la
+  richiesta. Chi si era ritirato o aveva abbandonato arriva come
+  "abbandonato" (server/manutenzione-stagioni.js, cron /api/cron/stagioni);
+- **abbandono automatico — SPENTO finché non ci sono i pagamenti.** Chi non
+  versa la prima metà entro il **31 ottobre** (scadenza da confermare con la
+  società) passa ad "abbandonato"; se poi la versa, torna attivo da solo.
+  Si accende con `ABBANDONI_AUTOMATICI=1` su Vercel: oggi i versamenti non si
+  registrano, e acceso segnerebbe come abbandonati tutti;
+- **chi è "abbandonato" non deve la quota** e l'account resta aperto (può
+  entrare e tornare). Scelte fatte nel codice, da confermare con la società;
 - **"prima di gennaio" è la data del ritiro**, non quella dei versamenti:
   scelta fatta nel codice, da confermare con la società;
 - **il pagamento online in due rate**: quando arriverà, deve scrivere
@@ -118,6 +124,16 @@ Resta aperto:
 ---
 
 ## Segnalati dalla società il 28 settembre 2026
+
+### Velocità dell'area riservata
+
+Sulla demo ogni cambio di pagina costava 2-3 secondi: le funzioni di Vercel
+giravano negli Stati Uniti (la regione predefinita) e il database Neon sta a
+Francoforte, quindi ogni interrogazione attraversava l'oceano. Da qui
+`"regions": ["fra1"]` in vercel.json, e le letture ricordate per un minuto
+nel browser (src/api/adminApi.js). Resta la prima richiesta dopo un po' di
+inattività: la funzione si riavvia e Neon si risveglia (qualche secondo, una
+volta). Si toglie solo con piani a pagamento (Neon senza sospensione).
 
 ### Recupero della password via email
 

@@ -12,21 +12,9 @@
  * niente e dirlo. La schermata dei calendari mostra l'avviso.
  */
 
-import { timingSafeEqual } from "node:crypto";
 import { json, errore, conGestioneErrori, soloMetodi } from "../../risposte.js";
 import { sincronizzaTutte } from "../../calendari/sincronizza.js";
-
-function autorizzata(req) {
-  const segreto = process.env.CRON_SECRET;
-  if (!segreto) return false;
-
-  const atteso = Buffer.from(`Bearer ${segreto}`);
-  const ricevuto = Buffer.from(String(req.headers.authorization ?? ""));
-
-  // Confronto a tempo costante: con un confronto normale, il tempo di
-  // risposta direbbe quanti caratteri del segreto sono giusti.
-  return atteso.length === ricevuto.length && timingSafeEqual(atteso, ricevuto);
-}
+import { cronAutorizzato as autorizzata } from "../../cron-segreto.js";
 
 export default conGestioneErrori(async (req, res) => {
   if (!soloMetodi(req, res, ["GET"])) return;

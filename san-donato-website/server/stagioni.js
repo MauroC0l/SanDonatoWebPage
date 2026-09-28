@@ -48,7 +48,11 @@ export function stagioneDi(dataIso) {
     inizio: `${a}-07-01`,
     fine: `${a + 1}-06-30`,
     // Da questo giorno è dovuta la seconda metà della quota
-    inizioSecondaMeta: `${a + 1}-01-01`
+    inizioSecondaMeta: `${a + 1}-01-01`,
+    /* Entro questo giorno va versata la prima metà: dopo, chi non l'ha
+       versata passa da solo ad "abbandonato" (scelta da confermare con la
+       società: vedi DA-FARE.md). */
+    scadenzaPrimaMeta: `${a}-10-31`
   };
 }
 
@@ -74,6 +78,16 @@ export function contoStagione(iscrizione, versato, stagione) {
 
   const primaMeta = Math.ceil(quota / 2);
   const secondaMeta = quota - primaMeta;
+
+  /* Chi ha abbandonato — non ha rinnovato, o non ha mai versato la prima
+     metà — per la stagione non c'è, e non deve niente. Quello che ha
+     versato resta, come credito (scelta da confermare con la società). */
+  if (iscrizione.stato === "abbandonata") {
+    return {
+      quota, primaMeta, secondaMeta, secondaDovuta: false, abbandonata: true,
+      dovuto: 0, versato, residuo: -versato
+    };
+  }
 
   const ritirata = iscrizione.stato === "ritirata" && iscrizione.ritiratoIl;
   const secondaDovuta = !ritirata || String(iscrizione.ritiratoIl) >= stagione.inizioSecondaMeta;
@@ -103,8 +117,17 @@ export function contoStagione(iscrizione, versato, stagione) {
  * bisogno la trova già pronta, perché la crea lei. Due richieste insieme
  * non la creano due volte: il nome è unico.
  */
+/* Le stagioni già trovate, per nome. Una stagione, una volta creata, non
+   cambia più: rileggerla a ogni richiesta voleva dire due interrogazioni
+   in più per ogni pagina aperta, e sulla demo ciascuna è un viaggio fino
+   al database. */
+const giaTrovate = new Map();
+
 export async function stagionePer(dataIso = oggiRoma()) {
   const s = stagioneDi(dataIso);
+  const ricordata = giaTrovate.get(s.nome);
+  if (ricordata) return ricordata;
+
   const db = getDb();
 
   await db.insert(stagioni)
@@ -112,7 +135,9 @@ export async function stagionePer(dataIso = oggiRoma()) {
     .onConflictDoNothing({ target: stagioni.nome });
 
   const [riga] = await db.select().from(stagioni).where(eq(stagioni.nome, s.nome)).limit(1);
-  return { ...riga, inizioSecondaMeta: s.inizioSecondaMeta };
+  const trovata = { ...riga, inizioSecondaMeta: s.inizioSecondaMeta };
+  giaTrovate.set(s.nome, trovata);
+  return trovata;
 }
 
 export const stagioneCorrente = () => stagionePer(oggiRoma());
@@ -198,7 +223,9 @@ export async function quotePerUtenti(ids, stagione = null) {
         tipoQuota: tipiQuota.nome,
         stato: iscrizioniStagione.stato,
         ritiratoIl: iscrizioniStagione.ritiratoIl,
-        motivoRitiro: iscrizioniStagione.motivoRitiro
+        motivoRitiro: iscrizioniStagione.motivoRitiro,
+        abbandonataIl: iscrizioniStagione.abbandonataIl,
+        abbandonoAutomatico: iscrizioniStagione.abbandonoAutomatico
       })
       .from(iscrizioniStagione)
       .leftJoin(tipiQuota, eq(tipiQuota.id, iscrizioniStagione.tipoQuotaId))
@@ -222,6 +249,8 @@ export async function quotePerUtenti(ids, stagione = null) {
       stato: i?.stato ?? null,
       ritiratoIl: i?.ritiratoIl ?? null,
       motivoRitiro: i?.motivoRitiro ?? null,
+      abbandonataIl: i?.abbandonataIl ?? null,
+      abbandonoAutomatico: i?.abbandonoAutomatico ?? false,
       conto
     });
   }
@@ -243,6 +272,7 @@ export function descriviStagione(s, corrente) {
     inizio: s.inizio,
     fine: s.fine,
     inizioSecondaMeta: s.inizioSecondaMeta ?? stagioneDi(s.inizio).inizioSecondaMeta,
+    scadenzaPrimaMeta: stagioneDi(s.inizio).scadenzaPrimaMeta,
     inCorso: s.id === corrente.id,
     // Una stagione futura non esiste: le righe nascono solo quando servono
     passata: s.inizio < corrente.inizio
@@ -403,9 +433,61 @@ export async function annullaRitiro(utenteId) {
   const s = await stagioneCorrente();
   const [salvata] = await getDb().update(iscrizioniStagione)
     .set({ stato: "attiva", ritiratoIl: null, motivoRitiro: null, ritiroRegistratoDa: null, aggiornataIl: new Date() })
-    .where(and(eq(iscrizioniStagione.utenteId, Number(utenteId)), eq(iscrizioniStagione.stagioneId, s.id)))
+    .where(and(
+      eq(iscrizioniStagione.utenteId, Number(utenteId)),
+      eq(iscrizioniStagione.stagioneId, s.id),
+      eq(iscrizioniStagione.stato, "ritirata")
+    ))
     .returning();
   if (!salvata) throw new ErroreHttp(404, "Nessuna iscrizione a questa stagione da riaprire.");
+  return { iscrizione: salvata, stagione: s };
+}
+
+/* =====================================================
+   Abbandono
+   ===================================================== */
+
+/**
+ * La segreteria segna che una persona, per la stagione in corso, non c'è:
+ * non ha rinnovato, o ha smesso prima di cominciare. Non tocca l'account —
+ * può ancora entrare, vedere la sua pagina e tornare — e non cancella
+ * niente: la stagione resta scritta com'era, con lo stato "abbandonata".
+ */
+export async function segnaAbbandono(utenteId, autoreId) {
+  const s = await stagioneCorrente();
+  const iscrizione = await assicuraIscrizione(utenteId, s);
+  const [salvata] = await getDb().update(iscrizioniStagione)
+    .set({
+      stato: "abbandonata",
+      abbandonataIl: oggiRoma(),
+      abbandonoAutomatico: false,
+      ritiratoIl: null,
+      motivoRitiro: null,
+      aggiornataDa: autoreId ?? null,
+      aggiornataIl: new Date()
+    })
+    .where(eq(iscrizioniStagione.id, iscrizione.id))
+    .returning();
+  return { iscrizione: salvata, stagione: s };
+}
+
+export async function annullaAbbandono(utenteId, autoreId) {
+  const s = await stagioneCorrente();
+  const [salvata] = await getDb().update(iscrizioniStagione)
+    .set({
+      stato: "attiva",
+      abbandonataIl: null,
+      abbandonoAutomatico: false,
+      aggiornataDa: autoreId ?? null,
+      aggiornataIl: new Date()
+    })
+    .where(and(
+      eq(iscrizioniStagione.utenteId, Number(utenteId)),
+      eq(iscrizioniStagione.stagioneId, s.id),
+      eq(iscrizioniStagione.stato, "abbandonata")
+    ))
+    .returning();
+  if (!salvata) throw new ErroreHttp(404, "Questa persona non risulta come abbandonata.");
   return { iscrizione: salvata, stagione: s };
 }
 

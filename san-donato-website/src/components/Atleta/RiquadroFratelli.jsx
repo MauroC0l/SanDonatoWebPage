@@ -13,10 +13,14 @@ import { dichiaraFratello, ritiraFratello } from "../../api/adminApi";
  * dimenticava pagava di più senza sapere di averne diritto.
  *
  * QUI SI DICHIARA E BASTA, e va detto chiaramente a chi compila: la
- * tariffa non cambia da sola. Il motivo è la regola che regge tutto il
- * sito — i propri dati li scrive l'interessato, la quota la decide la
- * società — e un campo del modulo che abbassa l'importo dovuto sarebbe
- * l'atleta che si scrive la propria quota.
+ * quota per la famiglia la applica il sito, ma solo dopo che la
+ * segreteria ha confermato la parentela. Il motivo è la regola che regge
+ * tutto il sito — i propri dati li scrive l'interessato, la quota la
+ * decide la società — e un campo del modulo che abbassa l'importo dovuto
+ * da solo sarebbe l'atleta che si scrive la propria quota.
+ *
+ * Sta nella pagina dell'iscrizione, sotto al modulo: una parentela è un
+ * dato di chi si iscrive, come gli altri che si compilano lì.
  *
  * E non si dice mai se quel codice fiscale corrisponde a un iscritto:
  * rispondere "trovato" vorrebbe dire che chiunque può provare il codice

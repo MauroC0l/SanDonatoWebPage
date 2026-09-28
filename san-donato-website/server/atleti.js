@@ -24,6 +24,7 @@ import {
   quotePerUtenti, quotaDi, versamentiDi, storicoStagioni, stagioneCorrente
 } from "./stagioni.js";
 import { assegnaQuoteAutomatiche } from "./quote.js";
+import { manutenzioneStagioni } from "./manutenzione-stagioni.js";
 
 /*
  * La tabella media entra due volte nella stessa interrogazione — una per il
@@ -234,8 +235,11 @@ export async function elencaAtleti({
 
   const atleti = [...perUtente.values()];
 
-  /* Chi gioca e non ha ancora una quota prende quella automatica: prima
-     iscrizione, rinnovo o famiglia. Non la sceglie più nessuno. */
+  /* Prima il passaggio di stagione e gli abbandoni, poi le quote: chi non
+     ha rinnovato non deve ricevere una quota che non paga. Poi chi gioca e
+     non ha ancora una quota prende quella automatica: prima iscrizione,
+     rinnovo o famiglia. Non la sceglie più nessuno. */
+  await manutenzioneStagioni();
   await assegnaQuoteAutomatiche(atleti.map((a) => a.utenteId));
 
   await aggiungiConti(atleti, { conQuote, stagione: corrente });
@@ -311,6 +315,9 @@ async function aggiungiConti(atleti, { conQuote, stagione }) {
     const q = conti.get(a.utenteId);
     a.ritirato = q?.stato === "ritirata";
     a.ritiratoIl = q?.ritiratoIl ?? null;
+    a.abbandonato = q?.stato === "abbandonata";
+    a.abbandonatoIl = q?.abbandonataIl ?? null;
+    a.statoStagione = q?.stato ?? null;
     if (conQuote) {
       a.quotaStagionaleCentesimi = q?.quotaCentesimi ?? null;
       a.versatoCentesimi = q?.versatoCentesimi ?? 0;
@@ -455,6 +462,10 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
     stagione: stagione.stagione,
     ritirato: stagione.stato === "ritirata",
     ritiratoIl: stagione.ritiratoIl,
+    abbandonato: stagione.stato === "abbandonata",
+    abbandonatoIl: stagione.abbandonataIl,
+    abbandonoAutomatico: stagione.abbandonoAutomatico,
+    statoStagione: stagione.stato ?? null,
     storico,
 
     ...(conQuote ? {

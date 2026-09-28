@@ -58,6 +58,19 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
   const dovuto = conto?.dovuto ?? quota;
   const stagione = iscrizione?.stagione ?? null;
 
+  /* La scadenza della prima metà, scritta per intero: "entro il 31 ottobre
+     2026" si ricorda, "entro l'inizio della stagione" no. La data arriva
+     come "2026-10-31" e si legge a pezzi, senza passare da new Date(), che
+     con il fuso la sposterebbe al giorno prima. */
+  const entroIl = (() => {
+    const [a, m, g] = String(stagione?.scadenzaPrimaMeta ?? "").split("-").map(Number);
+    if (!a) return "a inizio stagione";
+    const mese = new Date(2000, m - 1, 1).toLocaleDateString("it-IT", { month: "long" });
+    return `entro il ${g === 1 ? "1°" : g} ${mese} ${a}`;
+  })();
+  // "da gennaio 2027": l'anno lo dà la stagione, che comincia l'anno prima
+  const annoSecondaMeta = stagione?.inizioSecondaMeta ? ` ${stagione.inizioSecondaMeta.slice(0, 4)}` : "";
+
   // Il residuo esiste solo se la quota è stata decisa: senza, "manca tutto"
   // e "non manca niente" sarebbero la stessa cosa scritta a caso.
   const manca = dovuto == null ? null : dovuto - versato;
@@ -100,11 +113,17 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
               <span className="qta-sotto">
                 ancora da versare, su una quota di {euro(quota)}
               </span>
+              {/* Tutta insieme o in due volte lo sceglie la famiglia: va
+                  detto qui, dove si guarda la cifra, e non solo nella
+                  finestra di pagamento — chi vede 300 € da versare deve
+                  sapere subito che non deve darli tutti a settembre. */}
               {conto?.quota != null && (
                 <span className="qta-sotto">
-                  {conto.secondaDovuta
-                    ? <>In due metà: {euro(conto.primaMeta)} a inizio stagione e {euro(conto.secondaMeta)} da gennaio{stagione ? " " + stagione.inizioSecondaMeta.slice(0, 4) : ""}.</>
-                    : <>Hai smesso prima di gennaio: la seconda metà ({euro(conto.secondaMeta)}) non è dovuta.</>}
+                  {!conto.secondaDovuta
+                    ? <>Hai smesso prima di gennaio: la seconda metà ({euro(conto.secondaMeta)}) non è dovuta.</>
+                    : versato >= conto.primaMeta
+                      ? <>La prima metà è a posto: la seconda ({euro(conto.secondaMeta)}) si versa da gennaio{annoSecondaMeta}.</>
+                      : <>Puoi versarla tutta subito oppure in due metà: {euro(conto.primaMeta)} {entroIl} e {euro(conto.secondaMeta)} da gennaio{annoSecondaMeta}.</>}
                 </span>
               )}
             </>
@@ -193,6 +212,7 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
         <SchermataPagamento
           quota={dovuto}
           versato={versato}
+          conto={conto}
           onChiudi={() => setPagamentoAperto(false)}
         />
       )}

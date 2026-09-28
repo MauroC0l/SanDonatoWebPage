@@ -2,7 +2,7 @@
 
 /* ---------- Come funziona la quota ----------
 
-   Quattro regole brevi, una per riga: in un paragrafo solo si leggevano
+   Poche regole brevi, una per riga: in un paragrafo solo si leggevano
    come un regolamento, divise si trovano a colpo d'occhio. */
 .prf-quota-punti {
   display: grid;
@@ -14,3 +14,22 @@
 }
 
 .prf-quota-punti li::marker { color: var(--adm-blue); }
+
+/* ---------- La stagione, nel riquadro dell'account ----------
+
+   Il nome in grassetto e sotto il periodo, su righe sue: "dal 1° luglio
+   2026 al 30 giugno 2027" accanto al nome andava a capo a metà nella
+   colonna stretta. La targhetta dello stato, quando c'è, sta per ultima. */
+.prf-stagione {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .2rem;
+}
+
+.prf-stagione-periodo {
+  font-size: .85rem;
+  color: var(--adm-muted);
+}
+
+.prf-stagione .adm-status { white-space: normal; }

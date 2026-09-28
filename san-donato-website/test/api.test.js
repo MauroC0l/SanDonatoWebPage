@@ -706,3 +706,31 @@ describe("stagioni e quote automatiche", () => {
     expect(esito.stato).toBe(409);
   });
 });
+
+describe("abbandono", () => {
+  seAccesa("la segreteria lo segna e lo toglie, e il conto non chiede più niente", async () => {
+    const { chiedi } = await entra("segreteria");
+    const elenco = await chiedi("/admin/atleti");
+    const atleta = elenco.corpo.atleti.find((a) => !a.ritirato && !a.abbandonato && a.quotaStagionaleCentesimi);
+    expect(atleta, "serve un atleta attivo con una quota").toBeTruthy();
+
+    const segnato = await chiedi(`/admin/atleti/${atleta.utenteId}/abbandono`, { method: "POST" });
+    expect(segnato.stato).toBe(200);
+    expect(segnato.corpo.atleta.abbandonato).toBe(true);
+    expect(segnato.corpo.atleta.conto.dovuto).toBe(0);
+
+    const tolto = await chiedi(`/admin/atleti/${atleta.utenteId}/abbandono`, { method: "DELETE" });
+    expect(tolto.stato).toBe(200);
+    expect(tolto.corpo.atleta.abbandonato).toBe(false);
+  });
+
+  seAccesa("l'allenatore non lo può segnare", async () => {
+    const { chiedi } = await entra("coach");
+    expect((await chiedi("/admin/atleti/1/abbandono", { method: "POST" })).stato).toBe(403);
+  });
+
+  seAccesa("il cron delle stagioni vuole il segreto", async () => {
+    const senza = await fetch(`${BASE}/cron/stagioni`);
+    expect(senza.status).toBe(401);
+  });
+});

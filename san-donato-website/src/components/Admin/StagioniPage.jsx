@@ -69,6 +69,7 @@ function SchedaStagione({ s, prima, onApri }) {
             <Numero valore={s.primeIscrizioni} testo="prime iscrizioni" />
             <Numero valore={s.rinnovi} testo="rinnovi" />
             <Numero valore={s.ritirati} testo="ritirati" tono={s.ritirati ? "is-attenzione" : ""} />
+            <Numero valore={s.abbandonati ?? 0} testo="abbandonati" tono={s.abbandonati ? "is-attenzione" : ""} />
             <Numero valore={s.allenatori} testo="allenatori con quota" />
           </div>
           <Variazione ora={s.atleti} prima={prima?.atleti} />
