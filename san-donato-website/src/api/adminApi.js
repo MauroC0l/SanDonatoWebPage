@@ -308,17 +308,29 @@ export async function trashPost(id) {
 /**
  * Carica un file nella libreria media di WordPress.
  * Il nome file viene ripulito: WordPress rifiuta caratteri non ASCII.
+ *
+ * Il file viaggia come allegato di un modulo (multipart/form-data, campo
+ * "file") e NON come corpo grezzo con Content-Disposition. Sul nostro
+ * hosting una POST con il file grezzo non arriva mai alla REST API:
+ * WordPress la tratta come una pagina, risponde 301 verso la home e poi
+ * 403, e il browser — che vede un rinvio senza intestazioni CORS — la
+ * interrompe con un errore di rete ("Impossibile contattare il server").
+ * La stessa richiesta come modulo arriva alla REST API come le altre.
+ * Verificato il 28 settembre 2026.
+ *
+ * Nessun Content-Type impostato a mano: lo scrive il browser, con il
+ * separatore del modulo, e scritto da noi sarebbe sbagliato.
  */
 export async function uploadMedia(file, { title } = {}) {
   const safeName = buildSafeFileName(file.name || "immagine.jpg");
 
+  const modulo = new FormData();
+  modulo.append("file", file, safeName);
+
   const response = await request(wpUrl("/media"), {
     method: "POST",
-    headers: authHeaders({
-      "Content-Disposition": `attachment; filename="${safeName}"`,
-      "Content-Type": file.type || "application/octet-stream"
-    }),
-    body: file
+    headers: authHeaders(),
+    body: modulo
   });
 
   const media = await response.json();
