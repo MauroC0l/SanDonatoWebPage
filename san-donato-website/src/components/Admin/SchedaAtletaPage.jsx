@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  FaArrowLeft, FaSave, FaExclamationCircle, FaHeartbeat, FaEuroSign,
-  FaUserCircle, FaPlus, FaTrashAlt, FaFileMedical, FaExternalLinkAlt,
-  FaInfoCircle, FaUsers, FaClock, FaUpload, FaCheckCircle, FaTimesCircle,
+  FaArrowLeft, FaArrowRight, FaSave, FaExclamationCircle, FaHeartbeat, FaEuroSign,
+  FaUserCircle, FaFileMedical, FaExternalLinkAlt,
+  FaInfoCircle, FaUsers, FaUpload, FaCheckCircle, FaTimesCircle,
   FaHourglassHalf, FaPhoneAlt, FaDoorOpen, FaUndo, FaHistory
 } from "react-icons/fa";
 import {
@@ -22,9 +22,9 @@ import { anni } from "../../utils/eta";
 import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import Ritratto from "./Ritratto";
-import ScambiaVista from "./ScambiaVista";
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
+import "../../css/admin/Persone.css";
 
 const TIPI_CERTIFICATO = [
   { valore: "", etichetta: "Non indicato" },
@@ -112,18 +112,6 @@ function Dato({ etichetta, children }) {
   );
 }
 
-
-/** Un riquadro della striscia di riepilogo in cima. */
-function Riquadro({ icona: Icona, valore, testo, tono = "" }) {
-  return (
-    <div className={`adm-riquadro adm-riquadro-statico ${tono}`}>
-      <span className="adm-riquadro-numero adm-riquadro-breve">
-        <Icona aria-hidden="true" /> {valore}
-      </span>
-      <span className="adm-riquadro-testo">{testo}</span>
-    </div>
-  );
-}
 
 /**
  * La scheda di un atleta: chi è, se può giocare, se ha pagato.
@@ -244,6 +232,27 @@ export default function SchedaAtletaPage() {
 
   useEffect(() => { carica(); }, [carica]);
 
+  /**
+   * Porta a una linguetta e, se serve, a un riquadro preciso dentro.
+   *
+   * È il gesto dei pulsanti "Controlla il certificato", "Conferma
+   * fratello": dicono cosa fare, e poi ci portano. Si aspetta che la
+   * linguetta sia disegnata (due giri di schermo) prima di scorrere, o il
+   * riquadro ancora non c'è. Il fuoco segue, per chi usa la tastiera.
+   */
+  const vai = (nuovaVista, ancora) => {
+    setVista(nuovaVista);
+    if (!ancora) return;
+
+    const piano = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const el = document.getElementById(ancora);
+      if (!el) return;
+      el.scrollIntoView({ behavior: piano ? "auto" : "smooth", block: "start" });
+      el.focus?.({ preventScroll: true });
+    }));
+  };
+
   /* ---------- Salvataggio della scheda ---------- */
 
   const salva = async (evento) => {
@@ -313,11 +322,10 @@ export default function SchedaAtletaPage() {
   /**
    * Conferma o respinge una parentela dichiarata.
    *
-   * Confermare NON cambia la quota, ed è voluto: dice che sono fratelli, e
-   * basta. La tariffa agevolata si sceglie qui sopra, un momento dopo,
-   * perché "sono fratelli?" è un fatto da verificare e "quanto paga?" una
-   * decisione della società — e le decisioni sulle quote restano di chi le
-   * tiene, non di un automatismo.
+   * Confermare applica da sé la tariffa Famiglia (deciso dalla società il 28
+   * settembre 2026), ma solo al posto di una quota vuota o automatica: una
+   * tariffa scelta a mano dalla segreteria resta. Lo fa il server
+   * (applicaTariffaFamiglia), e l'avviso dice qual è stato l'esito.
    */
   const decidiLegame = async (legameId, conferma) => {
     let motivo;
@@ -433,6 +441,9 @@ export default function SchedaAtletaPage() {
 
   /* ---------- Copia del certificato ---------- */
 
+  // Apre la scelta del file: dal pulsante del riquadro e da quello in cima
+  const scegliFile = () => inputFile.current?.click();
+
   const caricaCertificato = async (evento) => {
     const file = evento.target.files?.[0];
     evento.target.value = "";
@@ -464,9 +475,11 @@ export default function SchedaAtletaPage() {
 
   if (caricamento) {
     return (
-      <div className="adm-loading">
-        <div className="adm-spinner" />
-        <p>Caricamento della scheda…</p>
+      <div className="adm-page" aria-busy="true" aria-label="Caricamento della scheda">
+        <span className="adm-sagoma adm-sagoma-titolo" />
+        <span className="adm-sagoma adm-sagoma-riga" style={{ width: "50%" }} />
+        <span className="adm-sagoma adm-sagoma-scheda" />
+        <span className="adm-sagoma adm-sagoma-scheda" />
       </div>
     );
   }
@@ -474,25 +487,18 @@ export default function SchedaAtletaPage() {
   if (!atleta) {
     return (
       <div className="adm-page">
-        <div className="adm-alert adm-alert-error" role="alert">
-          <FaExclamationCircle /> <span>{errore || "Atleta non trovato."}</span>
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaUserCircle aria-hidden="true" /></span>
+          <h2>Scheda non trovata</h2>
+          <p>{errore || "Questa persona non c'è più, oppure non è in una delle tue squadre."}</p>
+          <button type="button" className="adm-btn adm-btn-primary" onClick={() => navigate(`${area}/atleti`)}>
+            <FaArrowLeft /> Torna agli atleti
+          </button>
         </div>
-        <button type="button" className="adm-btn adm-btn-ghost" onClick={() => navigate(`${area}/atleti`)}>
-          <FaArrowLeft /> Torna agli atleti
-        </button>
       </div>
     );
   }
 
-  /*
-   * C'è davvero qualcosa da salvare?
-   *
-   * Un pulsante "Salva" sempre acceso su una scheda che si apre soprattutto
-   * per guardare chiede di premerlo, e chi lo preme non sa mai se ha
-   * cambiato qualcosa. Compare quando serve e sparisce quando non serve
-   * più: la sua presenza è essa stessa l'avviso che ci sono modifiche
-   * non salvate.
-   */
   /*
    * Le tariffe proponibili.
    *
@@ -511,6 +517,15 @@ export default function SchedaAtletaPage() {
       }))
   ];
 
+  /*
+   * C'è davvero qualcosa da salvare?
+   *
+   * Un pulsante "Salva" sempre acceso su una scheda che si apre soprattutto
+   * per guardare chiede di premerlo, e chi lo preme non sa mai se ha
+   * cambiato qualcosa. Compare quando serve e sparisce quando non serve
+   * più: la sua presenza è essa stessa l'avviso che ci sono modifiche
+   * non salvate.
+   */
   const originale = daAtleta(atleta);
   const sporco = Object.keys(originale).some((c) => (form[c] ?? "") !== (originale[c] ?? ""));
 
@@ -537,117 +552,185 @@ export default function SchedaAtletaPage() {
   // Una stagione passata si legge e basta: quota e ritiro non si toccano più
   const soloLettura = Boolean(atleta.stagione && !atleta.stagione.inCorso);
   const manca = conto?.dovuto == null ? null : conto.residuo;
+  const attivo = !atleta.ritirato && !atleta.abbandonato;
+  const senzaQuota = atleta.quotaStagionaleCentesimi == null;
 
-  const tonoCert = cert.chiave === "scaduto" ? "is-allarme"
-    : cert.chiave === "in_scadenza" ? "is-attenzione" : "";
+  const legamiInAttesa = (atleta.legami ?? []).filter((l) => l.stato === "in_attesa").length;
+
+  const tonoCert = cert.chiave === "scaduto" || cert.chiave === "respinto" ? "is-allarme"
+    : ["in_scadenza", "da_controllare", "senza_file", "mancante"].includes(cert.chiave) ? "is-attenzione"
+      : cert.chiave === "valido" ? "is-ok" : "";
+
+  const tonoQuota = senzaQuota ? (attivo ? "is-attenzione" : "")
+    : manca > 0 ? "is-allarme" : "is-ok";
+
+  /*
+   * Cosa c'è da fare su questa scheda, detto in parole e con il pulsante
+   * accanto.
+   *
+   * Prima le stesse cose erano sparse: il certificato da controllare nella
+   * colonna di destra, il fratello da confermare in fondo alla linguetta
+   * della quota — dove nessuno lo trovava se non andava a cercarlo. Qui
+   * stanno tutte in cima, e ogni pulsante porta dove si risolve.
+   */
+  const daFare = [];
+
+  if (registraCertificati && haCertificato && atleta.certificatoStato === "da_validare" && cert.chiave !== "scaduto") {
+    daFare.push({
+      chiave: "cert-controllo",
+      tono: "is-attenzione",
+      Icona: FaFileMedical,
+      testo: <>Ha caricato il certificato: <strong>aspetta il tuo controllo</strong>.</>,
+      azione: { etichetta: "Controlla il certificato", primaria: true, vista: "scheda", ancora: "prs-certificato" }
+    });
+  } else if (cert.chiave === "scaduto" || cert.chiave === "mancante" || cert.chiave === "senza_file" || cert.chiave === "respinto") {
+    daFare.push({
+      chiave: "cert-manca",
+      tono: cert.chiave === "senza_file" || cert.chiave === "mancante" ? "is-attenzione" : "is-allarme",
+      Icona: FaHeartbeat,
+      testo: cert.chiave === "scaduto"
+        ? <>Il certificato è <strong>scaduto</strong>: non può scendere in campo finché non ne consegna uno nuovo.</>
+        : cert.chiave === "respinto"
+          ? <>Il certificato è stato <strong>respinto</strong>: deve consegnarne uno giusto.</>
+          : cert.chiave === "senza_file"
+            ? <>Ha scritto la scadenza ma <strong>manca la copia</strong> del certificato.</>
+            : <>Non ha ancora consegnato il <strong>certificato medico</strong>.</>,
+      azione: registraCertificati
+        ? { etichetta: "Carica tu la copia", file: true }
+        : null
+    });
+  } else if (cert.chiave === "in_scadenza") {
+    daFare.push({
+      chiave: "cert-scade",
+      tono: "is-attenzione",
+      Icona: FaHourglassHalf,
+      testo: <>Il certificato <strong>{quantoManca(cert.giorni)}</strong>: conviene ricordarglielo.</>,
+      azione: null
+    });
+  }
+
+  if (tieneIConti && legamiInAttesa > 0) {
+    daFare.push({
+      chiave: "fratelli",
+      tono: "is-attenzione",
+      Icona: FaUsers,
+      testo: legamiInAttesa === 1
+        ? <>Un <strong>fratello o sorella</strong> dichiarato da confermare.</>
+        : <><strong>{legamiInAttesa} fratelli o sorelle</strong> dichiarati da confermare.</>,
+      azione: { etichetta: "Conferma fratello", primaria: true, vista: "quota", ancora: "prs-fratelli" }
+    });
+  }
+
+  if (tieneIConti && senzaQuota && attivo && !soloLettura) {
+    daFare.push({
+      chiave: "quota",
+      tono: "is-attenzione",
+      Icona: FaEuroSign,
+      testo: <><strong>Nessuna quota assegnata</strong>: vede <em>da definire</em> e non può pagare.</>,
+      azione: { etichetta: "Scegli la tariffa", primaria: true, vista: "quota", ancora: "prs-tariffa" }
+    });
+  }
+
+  /* Cosa manca perché l'iscrizione sia completa. Lo dice il server, che
+     è lo stesso conto che vede l'atleta nella sua area: così segreteria e
+     atleta leggono la stessa frase. Il certificato è già detto sopra. */
+  const altroChemanca = (atleta.manca ?? []).filter((m) => !/certificato/i.test(m));
+  if (altroChemanca.length > 0) {
+    daFare.push({
+      chiave: "manca",
+      tono: "",
+      Icona: FaInfoCircle,
+      testo: <>Deve ancora inserire <strong>{altroChemanca.join(", ")}</strong> dalla sua area.</>,
+      azione: null
+    });
+  }
+
+  // Un minorenne senza nessuno da chiamare: va visto subito, non la sera
+  // che serve.
+  if (minore && !atleta.tutoreTelefono) {
+    daFare.push({
+      chiave: "tutore",
+      tono: "is-attenzione",
+      Icona: FaPhoneAlt,
+      testo: <>È minorenne e <strong>non ha indicato un adulto da chiamare</strong>.</>,
+      azione: { etichetta: "Vedi i contatti", vista: "contatti" }
+    });
+  }
+
+  const nomeTariffa = atleta.tipoQuota
+    ?? tariffe.find((t) => t.id === atleta.tipoQuotaId)?.nome
+    ?? null;
+
+  const percento = conto?.dovuto > 0
+    ? Math.min(100, Math.round((atleta.versatoCentesimi / conto.dovuto) * 100))
+    : 0;
+
+  const viste = [
+    { valore: "scheda", etichetta: "Scheda", Icona: FaUserCircle, conta: registraCertificati && daFare.some((d) => d.chiave === "cert-controllo") ? 1 : 0 },
+    { valore: "contatti", etichetta: "Contatti", Icona: FaPhoneAlt, conta: 0 },
+    /* La quota solo a chi tiene i conti: a un allenatore quei numeri non
+       arrivano nemmeno dal server, e una linguetta che apre una pagina
+       vuota è peggio di una linguetta che non c'è. */
+    ...(tieneIConti
+      ? [{
+        valore: "quota",
+        etichetta: "Quota",
+        Icona: FaEuroSign,
+        conta: legamiInAttesa + (senzaQuota && attivo && !soloLettura ? 1 : 0)
+      }]
+      : [])
+  ];
 
   return (
-    <div className="adm-page adm-editor-page">
-      <div className="adm-page-head">
-        <div className="adm-head-left">
-          <button
-            type="button"
-            className="adm-btn adm-btn-ghost"
-            onClick={() => navigate(`${area}/atleti`)}
-          >
-            <FaArrowLeft /> Atleti
-          </button>
+    <div className="adm-page prs-pagina prs-scheda">
+      <button
+        type="button"
+        className="adm-btn adm-btn-ghost adm-btn-piccolo prs-indietro"
+        onClick={() => navigate(`${area}/atleti`)}
+      >
+        <FaArrowLeft /> Tutti gli atleti
+      </button>
 
-          {/* Foto e nome sulla stessa riga: aprendo una scheda la prima
-              domanda è sempre "di chi è", e la faccia risponde prima del
-              nome. */}
-          <div className="adm-titolo-con-foto">
-            <Ritratto
-              nome={atleta.nomeCompleto}
-              url={atleta.immagineUrl}
-              dimensione="l"
-            />
+      {/* ---------- Chi è ----------
+          Foto e nome sulla stessa riga: aprendo una scheda la prima domanda
+          è sempre "di chi è", e la faccia risponde prima del nome. Email,
+          stato e data dell'account accanto: sono l'etichetta di chi si sta
+          guardando, non un riquadro da leggere. */}
+      <header className="prs-testata">
+        <Ritratto nome={atleta.nomeCompleto} url={atleta.immagineUrl} dimensione="l" />
 
-            <div className="adm-testata-atleta">
-              <h1 className="adm-page-title">
-                {atleta.nomeCompleto}
-                {atleta.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
-                {atleta.abbandonato && <span className="adm-badge-ritirato is-abbandonato">Abbandonato</span>}
-              </h1>
-
-              {/* Email, stato e data di apertura stavano in un riquadro
-                  loro in fondo alla colonna di destra: tre righe che non si
-                  cambiano mai, messe dove si guarda per ultimo. Accanto al
-                  nome sono quello che sono — l'etichetta di chi si sta
-                  guardando — e liberano un riquadro intero. */}
-              <div className="adm-testata-dati">
-                <a href={`mailto:${atleta.email}`} className="adm-email">{atleta.email}</a>
-
-                <span className={`adm-status ${atleta.stato === "attivo" ? "adm-status-publish" : "adm-status-draft"}`}>
-                  {atleta.stato === "attivo" ? "Attivo" : atleta.stato}
-                </span>
-
-                <span className="adm-testata-dal">
-                  account dal {new Date(atleta.creatoIl).toLocaleDateString("it-IT", {
-                    day: "2-digit", month: "short", year: "numeric"
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="prs-testata-chi">
+          <p className="adm-occhiello">
+            Atleta{atleta.stagione ? ` · stagione ${atleta.stagione.nome}` : ""}
+          </p>
+          <h1 className="adm-page-title">
+            {atleta.nomeCompleto}
+            {atleta.ritirato && <span className="adm-badge-ritirato">Ritirato</span>}
+            {atleta.abbandonato && <span className="adm-badge-ritirato is-abbandonato">Abbandonato</span>}
+          </h1>
+          <p className="prs-testata-dati">
+            <span>{atleta.squadre.map((s) => s.nome).join(", ") || "Nessuna squadra"}</span>
+            {eta != null && <span>{eta} anni</span>}
+            <a href={`mailto:${atleta.email}`} className="adm-email">{atleta.email}</a>
+            {atleta.stato !== "attivo" && (
+              <span className="adm-status adm-status-draft">{atleta.stato}</span>
+            )}
+            <span className="prs-testata-nota">
+              {atleta.ultimoAccesso
+                ? `ultimo accesso ${new Date(atleta.ultimoAccesso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}`
+                : "mai entrato nel sito"}
+              {" · account dal "}
+              {new Date(atleta.creatoIl).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}
+            </span>
+          </p>
         </div>
-
-        {puoScrivere && (sporco || salvataggio) && (
-          <div className="adm-head-actions">
-            {/* In cima e non solo in fondo all'anagrafica: la scadenza del
-                certificato e la quota stanno nella colonna di destra, e chi
-                le cambia non deve andarsi a cercare il pulsante altrove. */}
-            <button
-              type="submit"
-              form="scheda-atleta"
-              className="adm-btn adm-btn-primary"
-              disabled={salvataggio}
-            >
-              <FaSave /> {salvataggio ? "Salvataggio…" : "Salva la scheda"}
-            </button>
-          </div>
-        )}
-      </div>
+      </header>
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">
           <FaExclamationCircle /> <span>{errore}</span>
         </div>
       )}
-
-
-      {/* Le tre domande che ci si fa aprendo una scheda, prima di leggere
-          qualunque altra cosa: può giocare? ha pagato? in che squadra sta? */}
-      <div className="adm-riepilogo">
-        <Riquadro
-          icona={FaHeartbeat}
-          valore={cert.etichetta}
-          testo={cert.giorni != null ? quantoManca(cert.giorni) : "nessuna scadenza registrata"}
-          tono={tonoCert}
-        />
-        {tieneIConti && <Riquadro
-          icona={FaEuroSign}
-          valore={manca == null ? "—" : manca > 0 ? euro(manca) : "Saldata"}
-          testo={manca == null
-            ? "quota non impostata"
-            : manca > 0
-              ? `versati ${euro(atleta.versatoCentesimi)} su ${euro(conto.dovuto)}`
-              : `${euro(atleta.versatoCentesimi)} incassati`}
-          tono={manca > 0 ? "is-attenzione" : ""}
-        />}
-        <Riquadro
-          icona={FaUsers}
-          valore={atleta.squadre.map((s) => s.nome).join(", ") || "—"}
-          testo={atleta.squadre.length === 1 ? "squadra" : "squadre"}
-        />
-        <Riquadro
-          icona={FaClock}
-          valore={atleta.ultimoAccesso
-            ? new Date(atleta.ultimoAccesso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })
-            : "Mai"}
-          testo="ultimo accesso al sito"
-        />
-      </div>
 
       {soloLettura && (
         <div className="adm-alert adm-alert-info" role="status">
@@ -662,143 +745,349 @@ export default function SchedaAtletaPage() {
         </div>
       )}
 
-      {/* Cosa manca perché l'iscrizione sia completa.
-
-          Lo dice il server, che è lo stesso conto che vede l'atleta nella
-          sua area: così segreteria e atleta leggono la stessa frase, e
-          nessuno dei due deve indovinare cosa aspetta l'altro. */}
-      {atleta.manca?.length > 0 && (
-        <div className="adm-alert adm-alert-warn" role="status">
-          <FaExclamationCircle aria-hidden="true" />
-          <span>
-            L&apos;atleta deve ancora inserire{" "}
-            <strong>{atleta.manca.join(", ")}</strong>.
+      {/* ---------- Le due domande ----------
+          Può giocare? Ha pagato? Prima di leggere qualunque altra cosa. Sono
+          anche pulsanti: toccarle porta dove si guarda il dettaglio. */}
+      <div className="prs-stati">
+        <button
+          type="button"
+          className={`prs-stato-carta ${tonoCert}`}
+          onClick={() => vai("scheda", "prs-certificato")}
+        >
+          <span className="prs-stato-icona"><FaHeartbeat aria-hidden="true" /></span>
+          <span className="prs-stato-cosa">Certificato medico</span>
+          <span className="prs-stato-valore">{cert.etichetta}</span>
+          <span className="prs-stato-nota">
+            {cert.giorni != null ? quantoManca(cert.giorni) : "nessuna scadenza registrata"}
           </span>
-        </div>
-      )}
+        </button>
 
-      {/* La quota non decisa è un buco di chi tiene i conti, non
-          dell'atleta: lui vede scritto "da definire" e non può farci
-          niente, e intanto non gli si può chiedere di pagare. Per
-          l'allenatore l'avviso non compare: la quota non gli arriva
-          proprio, e segnalargli una mancanza che non può colmare sarebbe
-          solo un rimprovero a vuoto. */}
-      {tieneIConti && atleta.quotaStagionaleCentesimi == null && !atleta.ritirato && !atleta.abbandonato && (
-        <div className="adm-alert adm-alert-warn" role="status">
-          <FaEuroSign aria-hidden="true" />
-          <span>
-            Nessuna quota assegnata: {atleta.nomeCompleto} vede
-            {" "}<em>da definire</em> e non può pagare. Si sceglie la
-            tariffa in <strong>Quota e versamenti</strong>.
-          </span>
-        </div>
-      )}
-
-      <div className="adm-viste">
-        <ScambiaVista
-          vista={vista}
-          onCambia={setVista}
-          etichetta="Cosa guardare di questa persona"
-          /* La quota solo a chi tiene i conti: a un allenatore quei numeri
-             non arrivano nemmeno dal server, e una linguetta che apre una
-             pagina vuota è peggio di una linguetta che non c'è. */
-          opzioni={[
-            { valore: "scheda", etichetta: "Scheda", Icona: FaUserCircle },
-            { valore: "contatti", etichetta: "Contatti", Icona: FaPhoneAlt },
-            ...(tieneIConti
-              ? [{ valore: "quota", etichetta: "Quota e versamenti", Icona: FaEuroSign }]
-              : [])
-          ]}
-        />
+        {tieneIConti && (
+          <button
+            type="button"
+            className={`prs-stato-carta ${tonoQuota}`}
+            onClick={() => vai("quota", "prs-quota")}
+          >
+            <span className="prs-stato-icona"><FaEuroSign aria-hidden="true" /></span>
+            <span className="prs-stato-cosa">Quota{nomeTariffa ? ` · ${nomeTariffa}` : ""}</span>
+            <span className="prs-stato-valore">
+              {manca == null ? "Da impostare"
+                : manca > 0 ? `${euro(manca)} da versare`
+                  : "Saldata"}
+            </span>
+            <span className="prs-stato-nota">
+              {manca == null
+                ? "nessuna tariffa scelta"
+                : `versati ${euro(atleta.versatoCentesimi)} su ${euro(conto.dovuto)}`}
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* Un modulo solo per tutta la scheda, anagrafica e colonna di destra
-          insieme: i campi stanno in due posti ma sono la stessa cosa, e si
-          salvano con un gesto solo. Il pulsante sta in cima e li raggiunge
-          entrambi con l'attributo form. */}
+      {/* ---------- Cosa c'è da fare ---------- */}
+      {daFare.length > 0 ? (
+        <section className="prs-cosa-fare" aria-labelledby="scheda-da-fare">
+          <h2 className="prs-cosa-fare-titolo" id="scheda-da-fare">
+            {daFare.length === 1 ? "C'è una cosa da sistemare" : `Ci sono ${daFare.length} cose da sistemare`}
+          </h2>
+          <ul>
+            {daFare.map((d) => (
+              <li key={d.chiave} className={d.tono}>
+                <span className="prs-cosa-icona"><d.Icona aria-hidden="true" /></span>
+                <span className="prs-cosa-testo">{d.testo}</span>
+                {d.azione && (
+                  <button
+                    type="button"
+                    className={`adm-btn ${d.azione.primaria ? "adm-btn-primary" : "adm-btn-ghost"}`}
+                    onClick={() => (d.azione.file ? scegliFile() : vai(d.azione.vista, d.azione.ancora))}
+                    disabled={salvataggio || caricandoFile}
+                  >
+                    {d.azione.etichetta} <FaArrowRight aria-hidden="true" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <p className="prs-tutto-ok" role="status">
+          <FaCheckCircle aria-hidden="true" />
+          <span><strong>Tutto in ordine.</strong> Per {atleta.nome || atleta.nomeCompleto} non c&apos;è niente da sistemare.</span>
+        </p>
+      )}
+
+      {/* Il file del certificato si sceglie da qui, fuori dalle linguette:
+          lo apre anche il pulsante "Carica tu la copia" in cima, che deve
+          funzionare qualunque linguetta sia aperta. */}
+      {registraCertificati && (
+        <input
+          ref={inputFile}
+          type="file"
+          accept="application/pdf,image/jpeg,image/png,image/webp"
+          hidden
+          onChange={caricaCertificato}
+        />
+      )}
+
+      {/* ---------- Le linguette ----------
+          Tre viste della stessa scheda e non tre pagine: i contatti si
+          cercano di corsa, e cambiare indirizzo per arrivarci vorrebbe dire
+          perdere quello che si stava guardando. Con le parole sempre
+          scritte, anche sul telefono: tre icone da sole non si capiscono. */}
+      <div className="prs-viste" role="group" aria-label="Cosa guardare di questa persona">
+        {viste.map(({ valore, etichetta, Icona, conta }) => (
+          <button
+            key={valore}
+            type="button"
+            className={`prs-vista ${vista === valore ? "is-active" : ""}`}
+            onClick={() => setVista(valore)}
+            aria-pressed={vista === valore}
+          >
+            <Icona aria-hidden="true" />
+            <span>{etichetta}</span>
+            {conta > 0 && <span className="adm-badge-conta is-attenzione">{conta}</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Un modulo solo per tutta la scheda: certificato e quota stanno in
+          due linguette diverse ma si salvano con un gesto solo, dalla barra
+          in fondo che compare quando c'è qualcosa di cambiato. */}
       <form id="scheda-atleta" onSubmit={salva}>
-        <div className="adm-editor-grid">
-          <div className="adm-editor-col">
-            {/* ---------- Anagrafica ---------- */}
-            {vista === "scheda" && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaUserCircle aria-hidden="true" /> Anagrafica
-              </h2>
+        {/* ---------- Scheda: certificato e anagrafica ---------- */}
+        {vista === "scheda" && (
+          <div className="adm-editor-grid prs-scheda-griglia">
+            <div className="adm-editor-col">
+              <section className="adm-panel">
+                <h2 className="adm-panel-title">
+                  <FaUserCircle aria-hidden="true" /> Anagrafica
+                </h2>
 
-              {/* Sempre in sola lettura, per chiunque.
-                  I dati di una persona li scrive quella persona, dalla sua
-                  area: dall'altra parte si leggono e basta. Non è un
-                  permesso mancante da aggiungere un giorno, è la regola. */}
-              {GRUPPI.map((gruppo) => (
-                <div className="adm-gruppo" key={gruppo.titolo}>
-                  <p className="adm-gruppo-titolo">{gruppo.titolo}</p>
-                  <dl className="adm-scheda-dati">
-                    {gruppo.campi.map((c) => (
-                      <Dato etichetta={c.etichetta} key={c.chiave}>
-                        {c.tipo === "date" ? dataLeggibile(atleta[c.chiave]) : atleta[c.chiave]}
-                      </Dato>
-                    ))}
-                    {gruppo.conEmail && (
-                      <Dato etichetta="Email">
-                        <a href={`mailto:${atleta.email}`} className="adm-email">
-                          {atleta.email}
-                        </a>
-                      </Dato>
+                {/* Sempre in sola lettura, per chiunque.
+                    I dati di una persona li scrive quella persona, dalla sua
+                    area: dall'altra parte si leggono e basta. Non è un
+                    permesso mancante da aggiungere un giorno, è la regola. */}
+                {GRUPPI.map((gruppo) => (
+                  <div className="adm-gruppo" key={gruppo.titolo}>
+                    <p className="adm-gruppo-titolo">{gruppo.titolo}</p>
+                    <dl className="adm-scheda-dati">
+                      {gruppo.campi.map((c) => (
+                        <Dato etichetta={c.etichetta} key={c.chiave}>
+                          {c.tipo === "date" ? dataLeggibile(atleta[c.chiave]) : atleta[c.chiave]}
+                        </Dato>
+                      ))}
+                    </dl>
+                  </div>
+                ))}
+
+                {atleta.note && (
+                  <div className="adm-gruppo">
+                    <p className="adm-gruppo-titolo">Cose da sapere</p>
+                    <p className="adm-nota-richiesta">{atleta.note}</p>
+                  </div>
+                )}
+
+                <p className="adm-hint">
+                  Questi dati li compila {atleta.nomeCompleto} dalla propria area,
+                  nella pagina Iscrizione. Se c&apos;è un errore, il modo di
+                  correggerlo è chiederglielo.
+                </p>
+              </section>
+            </div>
+
+            {/* Il certificato prima dell'anagrafica sul telefono (vedi il
+                CSS): è la cosa che si viene a fare, l'anagrafica si legge. */}
+            <aside className="adm-editor-side">
+              <section className="adm-panel prs-ancora" id="prs-certificato" tabIndex={-1}>
+                <h2 className="adm-panel-title">
+                  <FaHeartbeat aria-hidden="true" /> Certificato medico
+                </h2>
+
+                <p className={`adm-cert adm-cert-grande ${cert.classe}`}>
+                  {cert.etichetta}
+                  {cert.giorni != null && <span className="adm-cert-nota">{quantoManca(cert.giorni)}</span>}
+                </p>
+
+                {/* Il controllo della segreteria è un'altra cosa dalla
+                    scadenza: un foglio può essere in corso di validità e
+                    comunque sbagliato — pagina mancante, sport sbagliato,
+                    nome di un altro. */}
+                {haCertificato && (
+                  <div className={`adm-validazione is-${atleta.certificatoStato}`}>
+                    <span className="adm-validazione-stato">
+                      {atleta.certificatoStato === "valido" && <><FaCheckCircle aria-hidden="true" /> Controllato e accettato</>}
+                      {atleta.certificatoStato === "da_validare" && <><FaHourglassHalf aria-hidden="true" /> Da controllare</>}
+                      {atleta.certificatoStato === "rifiutato" && <><FaTimesCircle aria-hidden="true" /> Respinto</>}
+                    </span>
+
+                    {atleta.certificatoStato === "rifiutato" && atleta.certificatoMotivo && (
+                      <span className="adm-validazione-motivo">{atleta.certificatoMotivo}</span>
                     )}
+
+                    {registraCertificati && atleta.certificatoStato !== "valido" && (
+                      <>
+                        {/* Il controllo in due passi, detti: prima si
+                            guarda il foglio, poi si decide. Il pulsante
+                            per aprirlo sta qui e non più in fondo. */}
+                        <span className="adm-validazione-motivo">
+                          Apri la copia e guarda che nome, tipo e scadenza siano giusti.
+                        </span>
+                        {atleta.certificatoUrl && (
+                          <a
+                            href={atleta.certificatoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="adm-btn adm-btn-ghost adm-btn-block"
+                          >
+                            <FaFileMedical /> Apri la copia <FaExternalLinkAlt />
+                          </a>
+                        )}
+                        <div className="adm-validazione-azioni">
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn-primary"
+                            onClick={() => decidiCertificato(true)}
+                            disabled={salvataggio}
+                          >
+                            <FaCheckCircle /> Accetta
+                          </button>
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn-ghost"
+                            onClick={() => decidiCertificato(false)}
+                            disabled={salvataggio}
+                          >
+                            <FaTimesCircle /> Respingi
+                          </button>
+                        </div>
+                      </>
+                    )}
+
+                    {registraCertificati && atleta.certificatoStato === "valido" && (
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn-ghost adm-btn-piccolo"
+                        onClick={() => decidiCertificato(false)}
+                        disabled={salvataggio}
+                      >
+                        Revoca l&apos;approvazione
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {registraCertificati ? (
+                  <div className="prs-campi-cert">
+                    <div className="adm-field">
+                      <span className="adm-label">Tipo</span>
+                      <Tendina
+                        valore={form.tipoCertificato}
+                        onChange={(v) => setForm({ ...form, tipoCertificato: v })}
+                        opzioni={TIPI_CERTIFICATO}
+                        disabilitato={salvataggio}
+                        etichettaAria="Tipo di certificato"
+                      />
+                    </div>
+
+                    <div className="adm-field">
+                      <span className="adm-label">Scadenza</span>
+                      <CampoData
+                        valore={form.certificatoScadenza ? `${form.certificatoScadenza}T00:00:00` : ""}
+                        onChange={(v) => setForm({
+                          ...form,
+                          // La colonna e un date senza ora: si tiene solo la parte
+                          // del giorno, in ora locale, o il fuso la sposterebbe.
+                          certificatoScadenza: v ? giornoLocale(v) : ""
+                        })}
+                        disabilitato={salvataggio}
+                        etichettaAria="Scadenza del certificato"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <dl className="adm-dati">
+                    <Dato etichetta="Tipo">
+                      {atleta.tipoCertificato === "agonistico" ? "Agonistico"
+                        : atleta.tipoCertificato === "non_agonistico" ? "Non agonistico" : null}
+                    </Dato>
+                    <Dato etichetta="Scadenza">{dataLeggibile(atleta.certificatoScadenza)}</Dato>
                   </dl>
-                </div>
-              ))}
+                )}
 
-              {atleta.note && (
-                <div className="adm-gruppo">
-                  <p className="adm-gruppo-titolo">Cose da sapere</p>
-                  <p className="adm-nota-richiesta">{atleta.note}</p>
-                </div>
-              )}
+                {/* Il file e una cosa a parte dalla scadenza: si puo sapere quando
+                    scade senza averne la copia, ed e il caso piu comune. */}
+                <div className="adm-cert-file">
+                  {/* Se c'è da controllarlo, il pulsante per aprirlo sta già
+                      nel riquadro qui sopra: due uguali confondono */}
+                  {atleta.certificatoUrl && !(registraCertificati && atleta.certificatoStato !== "valido") && (
+                    <a
+                      href={atleta.certificatoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="adm-btn adm-btn-ghost adm-btn-block"
+                    >
+                      <FaFileMedical /> Apri il certificato <FaExternalLinkAlt />
+                    </a>
+                  )}
+                  {!atleta.certificatoUrl && (
+                    <p className="adm-hint" style={{ marginTop: 0 }}>
+                      Nessun file caricato.
+                    </p>
+                  )}
 
-              <p className="adm-hint">
-                Questi dati li compila {atleta.nomeCompleto} dalla propria area,
-                nella pagina Iscrizione. Se c&apos;è un errore, il modo di
-                correggerlo è chiederglielo.
+                  {registraCertificati ? (
+                    <>
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn-secondary adm-btn-block"
+                        onClick={scegliFile}
+                        disabled={caricandoFile || salvataggio}
+                      >
+                        <FaUpload />
+                        {caricandoFile
+                          ? "Caricamento…"
+                          : atleta.certificatoUrl ? "Sostituisci la copia" : "Carica la copia"}
+                      </button>
+                      <p className="adm-hint">
+                        Per chi lo consegna su carta in sede: lo carichi tu al
+                        posto suo. Chi ce l&apos;ha in digitale fa prima a
+                        caricarlo dalla propria pagina Iscrizione.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="adm-hint">
+                      Lo consegna l&apos;atleta dalla propria pagina Iscrizione, oppure
+                      su carta in segreteria. Se manca o è scaduto, va sollecitato.
+                    </p>
+                  )}
+                </div>
+              </section>
+            </aside>
+          </div>
+        )}
+
+        {/* ---------- Contatti ----------
+            Chi c'è dietro al ragazzo, e come lo si chiama. Visibile anche
+            all'allenatore: è lui che è in campo quando serve davvero. Il
+            numero è un pulsante grande: si preme col pollice, di corsa. */}
+        {vista === "contatti" && (
+          <section className="adm-panel prs-contatti">
+            <h2 className="adm-panel-title">
+              <FaPhoneAlt aria-hidden="true" /> Contatti
+            </h2>
+
+            {minore && !atleta.tutoreTelefono && (
+              <p className="adm-alert adm-alert-warn" role="status">
+                <FaExclamationCircle aria-hidden="true" />
+                <span>
+                  {atleta.nomeCompleto} è minorenne e non ha indicato nessun
+                  adulto da chiamare. Glielo si può chiedere: lo compila
+                  dalla sua pagina Iscrizione.
+                </span>
               </p>
-            </section>
             )}
 
-            {/* ---------- Contatti ----------
-                Chi c'è dietro al ragazzo, e come lo si chiama. Visibile
-                anche all'allenatore: è lui che è in campo quando serve
-                davvero, e non gli si può chiedere di passare dalla
-                segreteria per avere un numero di telefono. */}
-            {vista === "contatti" && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaPhoneAlt aria-hidden="true" /> Contatti
-              </h2>
-
-              <div className="adm-gruppo">
-                <p className="adm-gruppo-titolo">I suoi recapiti</p>
-                <dl className="adm-scheda-dati">
-                  <Dato etichetta="Cellulare">
-                    {atleta.telefono && (
-                      <a href={`tel:${atleta.telefono}`} className="adm-email">
-                        {atleta.telefono}
-                      </a>
-                    )}
-                  </Dato>
-
-                  {/* L'email sta sull'account e non sulla scheda, ma si
-                      cerca qui insieme al telefono. */}
-                  <Dato etichetta="Email">
-                    {atleta.email && (
-                      <a href={`mailto:${atleta.email}`} className="adm-email">
-                        {atleta.email}
-                      </a>
-                    )}
-                  </Dato>
-                </dl>
-              </div>
-
+            <div className="prs-contatti-griglia">
               {CONTATTI.map((contatto, indice) => {
                 const nome = atleta[`${contatto.prefisso}Nome`];
                 const parentela = atleta[`${contatto.prefisso}Parentela`];
@@ -806,544 +1095,444 @@ export default function SchedaAtletaPage() {
                 const email = atleta[`${contatto.prefisso}Email`];
 
                 /* Il secondo contatto compare solo se c'è: un riquadro
-                    di "non indicato" ripetuto quattro volte fa sembrare
-                    incompleta una scheda che non lo è. */
+                   di "non indicato" ripetuto fa sembrare incompleta una
+                   scheda che non lo è. */
                 if (indice > 0 && !nome && !telefono && !email) return null;
 
                 return (
-                  <div className="adm-gruppo" key={contatto.prefisso}>
-                    <p className="adm-gruppo-titolo">{contatto.titolo}</p>
-                    <dl className="adm-scheda-dati">
-                      <Dato etichetta={parentela || "Nome e cognome"}>{nome}</Dato>
-
-                      <Dato etichetta="Telefono">
-                        {telefono && (
-                          <a href={`tel:${telefono}`} className="adm-email">{telefono}</a>
-                        )}
-                      </Dato>
-
-                      {email && (
-                        <Dato etichetta="Email">
-                          <a href={`mailto:${email}`} className="adm-email">{email}</a>
-                        </Dato>
-                      )}
-                    </dl>
+                  <div className="prs-contatto" key={contatto.prefisso}>
+                    <p className="prs-contatto-titolo">{contatto.titolo}</p>
+                    <p className="prs-contatto-nome">
+                      {nome || <em>non indicato</em>}
+                      {parentela && <span> · {parentela}</span>}
+                    </p>
+                    {telefono ? (
+                      <a href={`tel:${telefono}`} className="adm-btn adm-btn-primary prs-chiama">
+                        <FaPhoneAlt aria-hidden="true" /> {telefono}
+                      </a>
+                    ) : (
+                      <p className="adm-hint">Nessun telefono indicato.</p>
+                    )}
+                    {email && <a href={`mailto:${email}`} className="adm-email">{email}</a>}
                   </div>
                 );
               })}
 
-              {/* Un minorenne senza nessuno da chiamare è un buco che va
-                  visto subito, non scoperto la sera che serve. */}
-              {minore && !atleta.tutoreTelefono && (
-                <p className="adm-alert adm-alert-warn" role="status">
-                  <FaExclamationCircle aria-hidden="true" />
-                  <span>
-                    {atleta.nomeCompleto} è minorenne e non ha indicato nessun
-                    adulto da chiamare. Glielo si può chiedere: lo compila
-                    dalla sua pagina Iscrizione.
-                  </span>
-                </p>
-              )}
-
-              <p className="adm-hint">
-                Anche questi li scrive {atleta.nomeCompleto} dalla propria
-                area, secondo contatto compreso.
-              </p>
-            </section>
-            )}
-
-            {/* ---------- Quota e versamenti ----------
-                Solo a chi tiene i conti. Per un allenatore non e nascosta:
-                non arriva proprio, il server non gliela manda. */}
-            {vista === "quota" && tieneIConti && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaEuroSign aria-hidden="true" /> Quota e versamenti
-                {atleta.stagione && <span className="adm-panel-sotto"> · stagione {atleta.stagione.nome}</span>}
-              </h2>
-
-              <div className="adm-campi">
-                {tieneIConti && (
-                  <label className="adm-field">
-                    <span className="adm-label">Quota della stagione</span>
-                    {/* Si SCEGLIE fra le tariffe, non si batte un importo:
-                        sessanta cifre scritte a mano ogni anno vogliono dire
-                        qualche 200 al posto di 250 e gli sconti applicati a
-                        memoria, senza poter più rispondere a "quanti hanno
-                        lo sconto fratello". Le tariffe stanno in Quote. */}
-                    <Tendina
-                      valore={form.tipoQuotaId}
-                      onChange={(v) => setForm({ ...form, tipoQuotaId: v })}
-                      opzioni={opzioniTariffa}
-                      disabilitato={salvataggio || soloLettura}
-                      segnaposto="Nessuna quota"
-                      etichettaAria="Tariffa applicata"
-                    />
-                    <span className="adm-hint">
-                      {tariffe.length === 0
-                        ? "Non c'è ancora nessuna tariffa: le crea un amministratore dalla sezione Quote."
-                        : soloLettura
-                          ? "Stagione passata: la quota di allora resta com'era."
-                          : "Prima iscrizione, rinnovo o famiglia li assegna il sito da solo. Si cambia qui solo per un caso particolare."}
-                    </span>
-                  </label>
+              {/* I suoi recapiti dopo quelli degli adulti: per un
+                  ragazzo, chi si chiama per primo è un genitore. */}
+              <div className="prs-contatto">
+                <p className="prs-contatto-titolo">{minore ? "Il ragazzo" : "I suoi recapiti"}</p>
+                <p className="prs-contatto-nome">{atleta.nomeCompleto}</p>
+                {atleta.telefono ? (
+                  <a href={`tel:${atleta.telefono}`} className="adm-btn adm-btn-secondary prs-chiama">
+                    <FaPhoneAlt aria-hidden="true" /> {atleta.telefono}
+                  </a>
+                ) : (
+                  <p className="adm-hint">Nessun cellulare indicato.</p>
                 )}
+                {/* L'email sta sull'account e non sulla scheda, ma si
+                    cerca qui insieme al telefono. */}
+                {atleta.email && <a href={`mailto:${atleta.email}`} className="adm-email">{atleta.email}</a>}
+              </div>
+            </div>
 
-                {/* Iscritto dal giorno del PRIMO versamento, non da quello
-                    in cui si è creato l'account: è la data che vale sul
-                    tesseramento, ed è l'unica che la società può mostrare a
-                    un genitore che la chiede. */}
-                <div className="adm-field">
-                  <span className="adm-label">Iscritto dal</span>
-                  <p className="adm-conto">
-                    {atleta.iscrittoDal
-                      ? <span>{dataLeggibile(atleta.iscrittoDal)}</span>
-                      : <span className="adm-hint">non ancora: nessun versamento registrato</span>}
-                  </p>
+            <p className="adm-hint">
+              Anche questi li scrive {atleta.nomeCompleto} dalla propria
+              area, secondo contatto compreso.
+            </p>
+          </section>
+        )}
+
+        {/* ---------- Quota e versamenti ----------
+            Solo a chi tiene i conti. Per un allenatore non è nascosta:
+            non arriva proprio, il server non gliela manda. */}
+        {vista === "quota" && tieneIConti && (
+          <div className="prs-quota-griglia">
+            <div className="prs-colonna">
+              <section className="adm-panel prs-ancora" id="prs-quota" tabIndex={-1}>
+                <h2 className="adm-panel-title">
+                  <FaEuroSign aria-hidden="true" /> Quota della stagione
+                  {atleta.stagione && <span className="adm-panel-sotto">{atleta.stagione.nome}</span>}
+                </h2>
+
+                {/* Il saldo per primo e grande: è la risposta che si cerca */}
+                <div className={`prs-saldo ${tonoQuota}`}>
+                  <span className="prs-saldo-cifra">
+                    {conto?.dovuto == null ? "Da impostare"
+                      : manca > 0 ? euro(manca)
+                        : manca < 0 ? "Saldata, con un avanzo" : "Saldata"}
+                  </span>
+                  <span className="prs-saldo-testo">
+                    {conto?.dovuto == null
+                      ? "Nessuna tariffa scelta: non può ancora pagare."
+                      : manca > 0
+                        ? `ancora da versare · versati ${euro(atleta.versatoCentesimi)} su ${euro(conto.dovuto)}`
+                        : manca < 0
+                          ? `versati ${euro(atleta.versatoCentesimi)}: ${euro(-manca)} in più del dovuto`
+                          : `${euro(atleta.versatoCentesimi)} versati`}
+                  </span>
+                  {conto?.dovuto > 0 && (
+                    <span
+                      className="prs-barra"
+                      role="img"
+                      aria-label={`Versato il ${percento}% di ${euro(conto.dovuto)}`}
+                    >
+                      <span style={{ width: `${percento}%` }} />
+                    </span>
+                  )}
                 </div>
 
                 {/* Le due metà: la seconda è dovuta da gennaio, e solo da
                     chi a gennaio c'è ancora. */}
                 {conto?.quota != null && (
-                  <div className="adm-field">
-                    <span className="adm-label">Due metà</span>
-                    <p className="adm-conto adm-conto-meta">
-                      <span>Prima metà {euro(conto.primaMeta)}</span>
-                      <span className={conto.secondaDovuta ? "" : "adm-meta-annullata"}>
-                        Seconda metà {euro(conto.secondaMeta)}
+                  <div className="prs-meta">
+                    <div className="prs-meta-una">
+                      <span className="prs-stato-cosa">Prima metà</span>
+                      <strong>{euro(conto.primaMeta)}</strong>
+                      <span className="prs-stato-nota">
+                        {atleta.stagione?.scadenzaPrimaMeta
+                          ? `entro il ${dataLeggibile(atleta.stagione.scadenzaPrimaMeta)}`
+                          : "all'iscrizione"}
+                      </span>
+                    </div>
+                    <div className={`prs-meta-una ${conto.secondaDovuta ? "" : "is-annullata"}`}>
+                      <span className="prs-stato-cosa">Seconda metà</span>
+                      <strong>{euro(conto.secondaMeta)}</strong>
+                      <span className="prs-stato-nota">
                         {conto.secondaDovuta
-                          ? ` · da gennaio ${atleta.stagione?.inizioSecondaMeta?.slice(0, 4) ?? ""}`
-                          : " · non dovuta, ritirato prima di gennaio"}
+                          ? `da gennaio ${atleta.stagione?.inizioSecondaMeta?.slice(0, 4) ?? ""}`
+                          : "non dovuta: ha smesso prima di gennaio"}
                       </span>
-                    </p>
+                    </div>
                   </div>
                 )}
 
-                <div className="adm-field">
-                  <span className="adm-label">Situazione</span>
-                  <p className="adm-conto">
-                    <span>{euro(atleta.versatoCentesimi)} versati</span>
-                    {conto?.dovuto != null && (
-                      <span className={`adm-quota ${manca > 0 ? "is-aperta" : "is-saldata"}`}>
-                        {manca > 0
-                          ? `${euro(manca)} ancora da versare`
-                          : manca < 0 ? `${euro(-manca)} in più` : "Saldata"}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {atleta.pagamenti.length === 0 ? (
-                <p className="adm-hint">Nessun versamento registrato.</p>
-              ) : (
-                /* Divisi per anno, con il totale di ciascuno: la quota è di
-                   una stagione ma i versamenti si accumulano per sempre, e
-                   in un elenco unico "quanto ha pagato quest'anno" non si
-                   risponde più. */
-                raggruppaPerAnno(atleta.pagamenti).map(({ anno, righe, totale }) => (
-                  <div key={anno} className="adm-pagamenti-anno">
-                    <p className="adm-gruppo-titolo">
-                      {anno} <span className="adm-pagamenti-totale">{euro(totale)}</span>
-                    </p>
-
-                    <ul className="adm-pagamenti">
-                      {righe.map((p) => (
-                        <li key={p.id} className="adm-pagamento">
-                          <span className={`adm-pagamento-importo ${p.importoCentesimi < 0 ? "is-rimborso" : ""}`}>
-                            {euro(p.importoCentesimi)}
-                          </span>
-                          <span className="adm-pagamento-quando">{dataLeggibile(p.pagatoIl)}</span>
-                          <span className="adm-pagamento-come">{NOME_METODO[p.metodo] ?? p.metodo}</span>
-                          <span className="adm-pagamento-causale">{p.causale || "—"}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
-              )}
-
-              {/*
-                * Qui non c'è niente da premere, ed è voluto.
-                *
-                * I versamenti non si scrivono a mano da nessun ruolo: un
-                * importo battuto a mano non ha riscontro da nessuna parte,
-                * e la cassa tornerebbe solo perché qualcuno ha scritto il
-                * numero giusto. A scriverli sarà la notifica del fornitore
-                * del pagamento online. La spiegazione sta nel codice e non
-                * a schermo: a chi guarda la scheda di un atleta non serve
-                * sapere perché un pulsante che non ha mai visto non c'è.
-                */}
-            </section>)}
-
-            {/* ---------- Ritiro durante la stagione ----------
-                Sotto alla quota perché è lì che si vede cosa cambia: la
-                seconda metà che non è più dovuta. */}
-            {vista === "quota" && tieneIConti && !soloLettura && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaDoorOpen aria-hidden="true" /> Ritiro e abbandono
-              </h2>
-
-              {atleta.abbandonato ? (
-                <>
-                  <p className="adm-conto">
-                    <span>Abbandonato dal {dataLeggibile(atleta.abbandonatoIl)}</span>
-                    <span className="adm-hint">
-                      {atleta.abbandonoAutomatico
-                        ? "L'ha segnato il sito: non ha rinnovato, o non ha versato la prima metà. Se la versa, torna attivo da solo."
-                        : "L'ha segnato la segreteria."}
-                    </span>
-                  </p>
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn-secondary"
-                    onClick={riattiva}
-                    disabled={salvataggio}
-                  >
-                    <FaUndo /> Riattiva per questa stagione
-                  </button>
-                </>
-              ) : atleta.ritirato ? (
-                <>
-                  <p className="adm-conto">
-                    <span>Ritirato il {dataLeggibile(atleta.ritiratoIl)}</span>
-                    {atleta.motivoRitiro && <span className="adm-hint">{atleta.motivoRitiro}</span>}
-                  </p>
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn-ghost"
-                    onClick={riapri}
-                    disabled={salvataggio}
-                  >
-                    <FaUndo /> Annulla il ritiro
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="adm-hint">
-                    Se smette durante la stagione. Resta nell&apos;elenco e nella
-                    squadra con i suoi conti; se smette prima di gennaio la
-                    seconda metà della quota non è più dovuta.
-                  </p>
-                  <div className="adm-ritiro-azioni">
-                    <CampoData
-                      valore={dataRitiro ? `${dataRitiro}T00:00:00` : ""}
-                      onChange={(v) => setDataRitiro(v ? giornoLocale(v) : "")}
-                      disabilitato={salvataggio}
-                      segnaposto="Oggi"
-                      etichettaAria="Giorno del ritiro"
-                    />
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn-secondary"
-                      onClick={ritira}
-                      disabled={salvataggio}
-                    >
-                      <FaDoorOpen /> Segna il ritiro
-                    </button>
-                  </div>
-
-                  <p className="adm-hint adm-abbandono-spiega">
-                    Se invece non ha rinnovato, o non ha mai cominciato:
-                    per la stagione non c&apos;è; prima di gennaio non deve la seconda metà.
-                  </p>
-                  <button
-                    type="button"
-                    className="adm-btn adm-btn-ghost"
-                    onClick={abbandona}
-                    disabled={salvataggio}
-                  >
-                    Segna come abbandonato
-                  </button>
-                </>
-              )}
-            </section>)}
-
-            {/* ---------- Le stagioni passate ----------
-                Quello che resta per sempre: dove giocava, quanto doveva,
-                quanto ha versato. Non si modifica. */}
-            {vista === "quota" && tieneIConti && (atleta.storico ?? []).length > 0 && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaHistory aria-hidden="true" /> Stagioni passate
-              </h2>
-              <ul className="adm-storico">
-                {atleta.storico.map((st) => (
-                  <li key={st.stagioneId} className="adm-storico-riga">
-                    <span className="adm-storico-nome">{st.nome}</span>
-                    <span className="adm-storico-squadre">
-                      {st.squadre.map((q) => q.nome).join(", ") || "—"}
-                    </span>
-                    <span className="adm-storico-conto">
-                      {st.conto?.dovuto == null
-                        ? "nessuna quota"
-                        : `${euro(st.conto.versato)} su ${euro(st.conto.dovuto)}`}
-                      {st.conto?.residuo > 0 && <strong> · mancano {euro(st.conto.residuo)}</strong>}
-                    </span>
-                    {st.stato === "ritirata" && (
-                      <span className="adm-badge-ritirato">Ritirato il {dataLeggibile(st.ritiratoIl)}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>)}
-
-            {/* ---------- Fratelli e sorelle dichiarati ----------
-
-                Sotto alla quota e non altrove: è lì che serve, nel momento
-                in cui si sceglie la tariffa. Compare solo se qualcosa è
-                stato dichiarato — un pannello vuoto su ogni scheda sarebbe
-                una domanda in più su centocinquanta pagine.
-
-                Il sistema ha già cercato la persona e confrontato cognome e
-                indirizzo; quello che NON può fare è dire se sono davvero
-                fratelli, perché il codice fiscale non contiene la famiglia.
-                Perciò decide una persona. */}
-            {vista === "quota" && tieneIConti && (atleta.legami ?? []).length > 0 && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaUsers aria-hidden="true" /> Fratelli e sorelle dichiarati
-              </h2>
-
-              <ul className="adm-legami">
-                {atleta.legami.map((l) => (
-                  <li key={l.id} className={`adm-legame is-${l.stato}`}>
-                    <div className="adm-legame-chi">
-                      <span className="adm-legame-titolo">
-                        {/* Chi ha dichiarato chi. Sulla scheda di un
-                            ragazzo conta sapere anche quando è stato
-                            NOMINATO da qualcun altro: la tariffa ridotta
-                            riguarda uno dei due, e per deciderlo bisogna
-                            vedere la coppia intera. */}
-                        {l.laSua
-                          ? <>Ha dichiarato <strong>{l.codiceFiscale}</strong></>
-                          : <><strong>{l.dichiarataDa}</strong> ha dichiarato lui</>}
-                        {l.stagione && <span className="adm-hint"> · {l.stagione}</span>}
-                      </span>
-
-                      <span className="adm-legame-esito">
-                        {l.trovato ? (
-                          <>
-                            Il sito ha trovato <strong>{l.trovato.nomeCompleto}</strong>
-                            {l.trovato.stessoCognome && ", stesso cognome"}
-                            {l.trovato.stessoIndirizzo && ", stesso indirizzo"}
-                            {!l.trovato.stessoCognome && !l.trovato.stessoIndirizzo
-                              && " — ma cognome e indirizzo non coincidono"}
-                            {/* Il sito lo segnala e basta: decide la
-                                segreteria, che sa se sta per rinnovare. */}
-                            {!l.trovato.iscrittoNellaStagione && (
-                              <strong className="adm-legame-avviso">
-                                {" "}Attenzione: nella stagione {l.stagione} non risulta iscritto.
-                              </strong>
-                            )}
-                          </>
-                        ) : (
-                          /* Due cose diverse, e le distingue solo una
-                             persona: un errore di battitura, oppure un
-                             fratello che non si è ancora iscritto. */
-                          <>Nessun iscritto ha questo codice fiscale: o è
-                            scritto male, o quel fratello non si è ancora iscritto.</>
-                        )}
-                      </span>
-
-                      {l.stato === "respinto" && l.motivo && (
-                        <span className="adm-legame-motivo">{l.motivo}</span>
-                      )}
-                    </div>
-
-                    {l.stato === "in_attesa" ? (
-                      <div className="adm-legame-azioni">
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn-secondary"
-                          onClick={() => decidiLegame(l.id, true)}
-                          disabled={salvataggio}
-                        >
-                          <FaCheckCircle /> Sono fratelli
-                        </button>
-                        <button
-                          type="button"
-                          className="adm-btn adm-btn-ghost"
-                          onClick={() => decidiLegame(l.id, false)}
-                          disabled={salvataggio}
-                        >
-                          <FaTimesCircle /> No
-                        </button>
-                      </div>
-                    ) : (
-                      <span className={`adm-status ${l.stato === "confermato" ? "adm-status-publish" : "adm-status-respinta"}`}>
-                        {l.stato === "confermato" ? "Confermata" : "Respinta"}
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-
-              <p className="adm-hint">
-                Confermare non cambia la quota: la tariffa agevolata si
-                sceglie qui sopra, fra le tariffe.
-              </p>
-            </section>)}
-          </div>
-
-          {vista === "scheda" && (
-          <aside className="adm-editor-side">
-            {/* ---------- Certificato medico ---------- */}
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaHeartbeat aria-hidden="true" /> Certificato medico
-              </h2>
-
-              <p className={`adm-cert adm-cert-grande ${cert.classe}`}>
-                {cert.etichetta}
-                {cert.giorni != null && <span className="adm-cert-nota">{quantoManca(cert.giorni)}</span>}
-              </p>
-
-              {/* Il controllo della segreteria è un'altra cosa dalla
-                  scadenza: un foglio può essere in corso di validità e
-                  comunque sbagliato — pagina mancante, sport sbagliato,
-                  nome di un altro. */}
-              {haCertificato && (
-                <div className={`adm-validazione is-${atleta.certificatoStato}`}>
-                  <span className="adm-validazione-stato">
-                    {atleta.certificatoStato === "valido" && <><FaCheckCircle aria-hidden="true" /> Controllato e accettato</>}
-                    {atleta.certificatoStato === "da_validare" && <><FaHourglassHalf aria-hidden="true" /> Da controllare</>}
-                    {atleta.certificatoStato === "rifiutato" && <><FaTimesCircle aria-hidden="true" /> Respinto</>}
+                <label className="adm-field prs-ancora" id="prs-tariffa">
+                  <span className="adm-label">Tariffa</span>
+                  {/* Si SCEGLIE fra le tariffe, non si batte un importo:
+                      sessanta cifre scritte a mano ogni anno vogliono dire
+                      qualche 200 al posto di 250 e gli sconti applicati a
+                      memoria, senza poter più rispondere a "quanti hanno
+                      lo sconto fratello". Le tariffe stanno in Quote. */}
+                  <Tendina
+                    valore={form.tipoQuotaId}
+                    onChange={(v) => setForm({ ...form, tipoQuotaId: v })}
+                    opzioni={opzioniTariffa}
+                    disabilitato={salvataggio || soloLettura}
+                    segnaposto="Nessuna quota"
+                    etichettaAria="Tariffa applicata"
+                  />
+                  <span className="adm-hint">
+                    {tariffe.length === 0
+                      ? "Non c'è ancora nessuna tariffa: le crea un amministratore dalla sezione Quote."
+                      : soloLettura
+                        ? "Stagione passata: la quota di allora resta com'era."
+                        : "Prima iscrizione, rinnovo o famiglia li assegna il sito da solo. Si cambia qui solo per un caso particolare."}
                   </span>
+                </label>
 
-                  {atleta.certificatoStato === "rifiutato" && atleta.certificatoMotivo && (
-                    <span className="adm-validazione-motivo">{atleta.certificatoMotivo}</span>
-                  )}
+                {/* Iscritto dal giorno del PRIMO versamento, non da quello
+                    in cui si è creato l'account: è la data che vale sul
+                    tesseramento, ed è l'unica che la società può mostrare a
+                    un genitore che la chiede. */}
+                <p className="prs-riga-dato">
+                  <span>Iscritto dal</span>
+                  {atleta.iscrittoDal
+                    ? <strong>{dataLeggibile(atleta.iscrittoDal)}</strong>
+                    : <em>non ancora: nessun versamento registrato</em>}
+                </p>
+              </section>
 
-                  {registraCertificati && atleta.certificatoStato !== "valido" && (
-                    <div className="adm-validazione-azioni">
+              {/* ---------- Fratelli e sorelle dichiarati ----------
+
+                  Accanto alla quota: è lì che serve, nel momento in cui si
+                  sceglie la tariffa. Compare solo se qualcosa è stato
+                  dichiarato — un pannello vuoto su ogni scheda sarebbe una
+                  domanda in più su centocinquanta pagine.
+
+                  Il sistema ha già cercato la persona e confrontato cognome
+                  e indirizzo; quello che NON può fare è dire se sono davvero
+                  fratelli, perché il codice fiscale non contiene la
+                  famiglia. Perciò decide una persona. */}
+              {(atleta.legami ?? []).length > 0 && (
+                <section className="adm-panel prs-ancora" id="prs-fratelli" tabIndex={-1}>
+                  <h2 className="adm-panel-title">
+                    <FaUsers aria-hidden="true" /> Fratelli e sorelle
+                    {legamiInAttesa > 0 && <span className="adm-badge-conta is-attenzione">{legamiInAttesa}</span>}
+                  </h2>
+
+                  <ul className="adm-legami">
+                    {atleta.legami.map((l) => (
+                      <li key={l.id} className={`adm-legame prs-legame is-${l.stato}`}>
+                        <div className="adm-legame-chi">
+                          <span className="adm-legame-titolo">
+                            {/* Chi ha dichiarato chi. Sulla scheda di un
+                                ragazzo conta sapere anche quando è stato
+                                NOMINATO da qualcun altro: la tariffa ridotta
+                                riguarda uno dei due, e per deciderlo bisogna
+                                vedere la coppia intera. */}
+                            {l.laSua
+                              ? <>Ha dichiarato <strong>{l.codiceFiscale}</strong></>
+                              : <><strong>{l.dichiarataDa}</strong> ha dichiarato lui</>}
+                            {l.stagione && <span className="adm-hint"> · {l.stagione}</span>}
+                          </span>
+
+                          <span className="adm-legame-esito">
+                            {l.trovato ? (
+                              <>
+                                Il sito ha trovato <strong>{l.trovato.nomeCompleto}</strong>
+                                {l.trovato.stessoCognome && ", stesso cognome"}
+                                {l.trovato.stessoIndirizzo && ", stesso indirizzo"}
+                                {!l.trovato.stessoCognome && !l.trovato.stessoIndirizzo
+                                  && " — ma cognome e indirizzo non coincidono"}
+                                {/* Il sito lo segnala e basta: decide la
+                                    segreteria, che sa se sta per rinnovare. */}
+                                {!l.trovato.iscrittoNellaStagione && (
+                                  <strong className="adm-legame-avviso">
+                                    {" "}Attenzione: nella stagione {l.stagione} non risulta iscritto.
+                                  </strong>
+                                )}
+                              </>
+                            ) : (
+                              /* Due cose diverse, e le distingue solo una
+                                 persona: un errore di battitura, oppure un
+                                 fratello che non si è ancora iscritto. */
+                              <>Nessun iscritto ha questo codice fiscale: o è
+                                scritto male, o quel fratello non si è ancora iscritto.</>
+                            )}
+                          </span>
+
+                          {l.stato === "respinto" && l.motivo && (
+                            <span className="adm-legame-motivo">{l.motivo}</span>
+                          )}
+                        </div>
+
+                        {l.stato === "in_attesa" ? (
+                          <div className="adm-legame-azioni">
+                            <button
+                              type="button"
+                              className="adm-btn adm-btn-primary"
+                              onClick={() => decidiLegame(l.id, true)}
+                              disabled={salvataggio}
+                            >
+                              <FaCheckCircle /> Sì, sono fratelli
+                            </button>
+                            <button
+                              type="button"
+                              className="adm-btn adm-btn-ghost"
+                              onClick={() => decidiLegame(l.id, false)}
+                              disabled={salvataggio}
+                            >
+                              <FaTimesCircle /> No
+                            </button>
+                          </div>
+                        ) : (
+                          <span className={`adm-status ${l.stato === "confermato" ? "adm-status-publish" : "adm-status-respinta"}`}>
+                            {l.stato === "confermato" ? "Confermati" : "Respinta"}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <p className="adm-hint">
+                    Confermando, il sito passa da solo alla tariffa Famiglia se
+                    la quota era stata assegnata in automatico; una tariffa
+                    scelta a mano resta com&apos;è.
+                  </p>
+                </section>
+              )}
+
+              <section className="adm-panel">
+                <h2 className="adm-panel-title">
+                  <FaHistory aria-hidden="true" /> Versamenti
+                </h2>
+
+                {atleta.pagamenti.length === 0 ? (
+                  <p className="adm-hint" style={{ margin: 0 }}>Nessun versamento registrato.</p>
+                ) : (
+                  /* Divisi per anno, con il totale di ciascuno: la quota è di
+                     una stagione ma i versamenti si accumulano per sempre, e
+                     in un elenco unico "quanto ha pagato quest'anno" non si
+                     risponde più. */
+                  raggruppaPerAnno(atleta.pagamenti).map(({ anno, righe, totale }) => (
+                    <div key={anno} className="adm-pagamenti-anno">
+                      <p className="adm-gruppo-titolo">
+                        {anno} <span className="adm-pagamenti-totale">{euro(totale)}</span>
+                      </p>
+
+                      <ul className="adm-pagamenti">
+                        {righe.map((p) => (
+                          <li key={p.id} className="adm-pagamento">
+                            <span className={`adm-pagamento-importo ${p.importoCentesimi < 0 ? "is-rimborso" : ""}`}>
+                              {euro(p.importoCentesimi)}
+                            </span>
+                            <span className="adm-pagamento-quando">{dataLeggibile(p.pagatoIl)}</span>
+                            <span className="adm-pagamento-come">{NOME_METODO[p.metodo] ?? p.metodo}</span>
+                            <span className="adm-pagamento-causale">{p.causale || "—"}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                )}
+
+                {/*
+                  * Qui non c'è niente da premere, ed è voluto.
+                  *
+                  * I versamenti non si scrivono a mano da nessun ruolo: un
+                  * importo battuto a mano non ha riscontro da nessuna parte,
+                  * e la cassa tornerebbe solo perché qualcuno ha scritto il
+                  * numero giusto. A scriverli sarà la notifica del fornitore
+                  * del pagamento online.
+                  */}
+              </section>
+            </div>
+
+            <div className="prs-colonna">
+              {/* ---------- Ritiro e abbandono ----------
+                  Accanto alla quota perché è lì che si vede cosa cambia: la
+                  seconda metà che non è più dovuta. Due casi diversi, due
+                  riquadri: chi ha smesso durante la stagione e chi per la
+                  stagione non c'è mai stato. */}
+              {!soloLettura && (
+                <section className="adm-panel">
+                  <h2 className="adm-panel-title">
+                    <FaDoorOpen aria-hidden="true" /> Ha smesso?
+                  </h2>
+
+                  {atleta.abbandonato ? (
+                    <div className="prs-esito is-attenzione">
+                      <strong>Abbandonato dal {dataLeggibile(atleta.abbandonatoIl)}</strong>
+                      <span>
+                        {atleta.abbandonoAutomatico
+                          ? "L'ha segnato il sito: non ha rinnovato, o non ha versato la prima metà. Se la versa, torna attivo da solo."
+                          : "L'ha segnato la segreteria."}
+                      </span>
                       <button
                         type="button"
-                        className="adm-btn adm-btn-primary"
-                        onClick={() => decidiCertificato(true)}
+                        className="adm-btn adm-btn-secondary"
+                        onClick={riattiva}
                         disabled={salvataggio}
                       >
-                        <FaCheckCircle /> Accetta
-                      </button>
-                      <button
-                        type="button"
-                        className="adm-btn adm-btn-ghost"
-                        onClick={() => decidiCertificato(false)}
-                        disabled={salvataggio}
-                      >
-                        Respingi
+                        <FaUndo /> Riattiva per questa stagione
                       </button>
                     </div>
-                  )}
+                  ) : atleta.ritirato ? (
+                    <div className="prs-esito is-attenzione">
+                      <strong>Ritirato il {dataLeggibile(atleta.ritiratoIl)}</strong>
+                      {atleta.motivoRitiro && <span>{atleta.motivoRitiro}</span>}
+                      <button
+                        type="button"
+                        className="adm-btn adm-btn-secondary"
+                        onClick={riapri}
+                        disabled={salvataggio}
+                      >
+                        <FaUndo /> Annulla il ritiro
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="prs-scelte">
+                      <div className="prs-scelta">
+                        <strong>Si è ritirato durante la stagione</strong>
+                        <span className="adm-hint">
+                          Resta nell&apos;elenco e nella squadra con i suoi conti;
+                          se smette prima di gennaio la seconda metà non è più dovuta.
+                        </span>
+                        <div className="adm-ritiro-azioni">
+                          <CampoData
+                            valore={dataRitiro ? `${dataRitiro}T00:00:00` : ""}
+                            onChange={(v) => setDataRitiro(v ? giornoLocale(v) : "")}
+                            disabilitato={salvataggio}
+                            segnaposto="Oggi"
+                            etichettaAria="Giorno del ritiro"
+                          />
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn-ghost"
+                            onClick={ritira}
+                            disabled={salvataggio}
+                          >
+                            <FaDoorOpen /> Segna il ritiro
+                          </button>
+                        </div>
+                      </div>
 
-                  {registraCertificati && atleta.certificatoStato === "valido" && (
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn-ghost adm-btn-block"
-                      onClick={() => decidiCertificato(false)}
-                      disabled={salvataggio}
-                    >
-                      Revoca l&apos;approvazione
-                    </button>
+                      <div className="prs-scelta">
+                        <strong>Non ha rinnovato, o non ha mai cominciato</strong>
+                        <span className="adm-hint">
+                          Per la stagione non c&apos;è; prima di gennaio non deve la
+                          seconda metà. Si riattiva quando vuoi.
+                        </span>
+                        <div>
+                          <button
+                            type="button"
+                            className="adm-btn adm-btn-ghost"
+                            onClick={abbandona}
+                            disabled={salvataggio}
+                          >
+                            Segna come abbandonato
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </div>
+                </section>
               )}
 
-              {registraCertificati ? (
-                <>
-                  <div className="adm-field">
-                    <span className="adm-label">Tipo</span>
-                    <Tendina
-                      valore={form.tipoCertificato}
-                      onChange={(v) => setForm({ ...form, tipoCertificato: v })}
-                      opzioni={TIPI_CERTIFICATO}
-                      disabilitato={salvataggio}
-                      etichettaAria="Tipo di certificato"
-                    />
-                  </div>
-
-                  <div className="adm-field">
-                    <span className="adm-label">Scadenza</span>
-                    <CampoData
-                      valore={form.certificatoScadenza ? `${form.certificatoScadenza}T00:00:00` : ""}
-                      onChange={(v) => setForm({
-                        ...form,
-                        // La colonna e un date senza ora: si tiene solo la parte
-                        // del giorno, in ora locale, o il fuso la sposterebbe.
-                        certificatoScadenza: v ? giornoLocale(v) : ""
-                      })}
-                      disabilitato={salvataggio}
-                      etichettaAria="Scadenza del certificato"
-                    />
-                  </div>
-                </>
-              ) : (
-                <dl className="adm-dati">
-                  <Dato etichetta="Tipo">
-                    {atleta.tipoCertificato === "agonistico" ? "Agonistico"
-                      : atleta.tipoCertificato === "non_agonistico" ? "Non agonistico" : null}
-                  </Dato>
-                  <Dato etichetta="Scadenza">{dataLeggibile(atleta.certificatoScadenza)}</Dato>
-                </dl>
+              {/* ---------- Le stagioni passate ----------
+                  Quello che resta per sempre: dove giocava, quanto doveva,
+                  quanto ha versato. Non si modifica. */}
+              {(atleta.storico ?? []).length > 0 && (
+                <section className="adm-panel">
+                  <h2 className="adm-panel-title">
+                    <FaHistory aria-hidden="true" /> Stagioni passate
+                  </h2>
+                  <ul className="adm-storico">
+                    {atleta.storico.map((st) => (
+                      <li key={st.stagioneId} className="adm-storico-riga">
+                        <span className="adm-storico-nome">{st.nome}</span>
+                        <span className="adm-storico-squadre">
+                          {st.squadre.map((q) => q.nome).join(", ") || "—"}
+                        </span>
+                        <span className="adm-storico-conto">
+                          {st.conto?.dovuto == null
+                            ? "nessuna quota"
+                            : `${euro(st.conto.versato)} su ${euro(st.conto.dovuto)}`}
+                          {st.conto?.residuo > 0 && <strong> · mancano {euro(st.conto.residuo)}</strong>}
+                        </span>
+                        {st.stato === "ritirata" && (
+                          <span className="adm-badge-ritirato">Ritirato il {dataLeggibile(st.ritiratoIl)}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               )}
+            </div>
+          </div>
+        )}
 
-              {/* Il file e una cosa a parte dalla scadenza: si puo sapere quando
-                  scade senza averne la copia, ed e il caso piu comune. */}
-              <div className="adm-cert-file">
-                {atleta.certificatoUrl ? (
-                  <a
-                    href={atleta.certificatoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="adm-btn adm-btn-ghost adm-btn-block"
-                  >
-                    <FaFileMedical /> Apri il certificato <FaExternalLinkAlt />
-                  </a>
-                ) : (
-                  <p className="adm-hint" style={{ marginTop: 0 }}>
-                    Nessun file caricato.
-                  </p>
-                )}
-
-                {registraCertificati ? (
-                  <>
-                    <input
-                      ref={inputFile}
-                      type="file"
-                      accept="application/pdf,image/jpeg,image/png,image/webp"
-                      hidden
-                      onChange={caricaCertificato}
-                    />
-                    <button
-                      type="button"
-                      className="adm-btn adm-btn-secondary adm-btn-block"
-                      onClick={() => inputFile.current?.click()}
-                      disabled={caricandoFile || salvataggio}
-                    >
-                      <FaUpload />
-                      {caricandoFile
-                        ? "Caricamento…"
-                        : atleta.certificatoUrl ? "Sostituisci la copia" : "Carica la copia"}
-                    </button>
-                    <p className="adm-hint">
-                      Serve a chi consegna il certificato su carta in sede: lo
-                      carichi tu al posto suo. Chi ce l'ha in formato digitale
-                      fa prima a caricarlo dalla propria pagina Iscrizione.
-                    </p>
-                  </>
-                ) : (
-                  <p className="adm-hint">
-                    Lo consegna l'atleta dalla propria pagina Iscrizione, oppure
-                    su carta in segreteria. Se manca o e scaduto, va sollecitato.
-                  </p>
-                )}
-              </div>
-            </section>
-
-          </aside>
-          )}
-        </div>
+        {/* ---------- Salva ----------
+            In fondo e attaccata al bordo mentre si scorre, su ogni schermo:
+            le cose che si cambiano stanno in due linguette diverse, e chi
+            le cambia non deve andarsi a cercare il pulsante. */}
+        {puoScrivere && (sporco || salvataggio) && (
+          <div className="adm-barra-azioni-fissa prs-salva" role="region" aria-label="Modifiche da salvare">
+            <span className="prs-salva-testo">Hai cambiato qualcosa: ricordati di salvare.</span>
+            <button
+              type="button"
+              className="adm-btn adm-btn-ghost"
+              onClick={() => setForm(daAtleta(atleta))}
+              disabled={salvataggio}
+            >
+              Annulla
+            </button>
+            <button type="submit" className="adm-btn adm-btn-primary" disabled={salvataggio}>
+              <FaSave /> {salvataggio ? "Salvataggio…" : "Salva"}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

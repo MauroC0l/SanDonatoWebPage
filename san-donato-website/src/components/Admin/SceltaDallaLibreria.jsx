@@ -217,6 +217,10 @@ export default function SceltaDallaLibreria({ onScegli, onChiudi }) {
         </div>
       </div>
     </div>,
-    document.body
+    /* Dentro al guscio dell area riservata e non in fondo al body: è lì
+       che sono dichiarati colori e misure (--adm-*), e fuori pulsanti e
+       campi perdevano la tavolozza. Il guscio non ha trasformazioni, quindi
+       la finestra resta fissata alla finestra del browser. */
+    document.querySelector(".adm-shell") ?? document.body
   );
 }

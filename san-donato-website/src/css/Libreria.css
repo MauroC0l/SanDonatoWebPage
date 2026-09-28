@@ -547,23 +547,9 @@
   background: rgba(10, 18, 32, .55);
   backdrop-filter: blur(2px);
 
-  /* Il portale attacca la finestra al body, fuori da .adm-shell: senza
-     queste variabili i pulsanti del pannello resterebbero bianchi su
-     bianco, perché la tavolozza --adm-* è dichiarata là dentro. */
-  --adm-surface: #ffffff;
-  --adm-bg: #f1f4f9;
-  --adm-line: #dde3ec;
-  --adm-line-soft: #eef1f6;
-  --adm-ink: #16202e;
-  --adm-muted: #5b6a80;
-  --adm-blue: #0b4fd1;
-  --adm-blue-dark: #0940a8;
-  --adm-blue-soft: #e7eefc;
-  --adm-danger: #b42318;
-  --adm-danger-soft: #fdecea;
-  --adm-radius: 12px;
-  --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
-
+  /* La finestra si apre dentro al guscio (.adm-shell), da cui eredita
+     la tavolozza --adm-*: niente copie dei colori qui, che restavano
+     indietro a ogni ritocco. */
   color: var(--adm-ink);
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
@@ -813,4 +799,102 @@
   .lib-cartelle, .lib-fisse, .lib-cartelle-elenco { align-items: center; }
   .lib-cartella { flex: 0 0 auto; }
   .lib-cartella-nome { overflow: visible; }
+}
+
+/* =====================================================
+   Ritocchi del nuovo aspetto (vedi la Guida rapida in Admin.css)
+   ===================================================== */
+
+/* La testata: un <div> semplice e non .adm-head-left, la cui base di
+   20rem sul telefono (testata in colonna) diventava un'altezza vuota */
+.lib-testa { flex: 1 1 18rem; min-width: 0; }
+@media (max-width: 760px) {
+  .lib-testa { flex-basis: auto; }
+}
+
+/* Le cartelle in un riquadro bianco come il resto delle schede, fermo
+   sotto alla barra in alto e non sotto al bordo della finestra */
+@media (min-width: 701px) {
+  .lib-cartelle {
+    top: calc(var(--adm-testata-h) + 1rem);
+    padding: .5rem;
+    background: var(--adm-surface);
+    border: 1px solid rgba(0, 43, 92, .08);
+    border-radius: var(--adm-r-l);
+    box-shadow: var(--adm-shadow-s);
+  }
+  .lib-cartella { min-height: 40px; padding: 8px 10px; border-radius: var(--adm-r-s); font-size: .9rem; }
+  .lib-cartella-riga { border-radius: var(--adm-r-s); }
+  .lib-nuova-cartella { min-height: 40px; }
+}
+
+.lib-cartella:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: -3px; }
+.lib-cartella-quanti { font-variant-numeric: tabular-nums; }
+
+/* Il cestino scelto in rosso: chi ci guarda dentro deve sapere dove sta */
+.lib-cestino.is-scelta,
+.lib-cestino.is-scelta:hover { background: var(--adm-danger-soft); color: var(--adm-danger); }
+.lib-cestino.is-scelta svg { color: var(--adm-danger); }
+
+/* Le schede dei file: gli stessi angoli tondi delle altre schede */
+.lib-scheda { border-radius: var(--adm-radius); }
+.lib-scheda:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+
+/* Telefono: le cartelle come pillole in una striscia che scorre, con il
+   bordo destro sfumato — è il segno che di là ce ne sono altre */
+@media (max-width: 700px) {
+  .lib-cartelle {
+    gap: .4rem;
+    margin: 0 -1rem;
+    padding: 0 1rem .5rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
+  }
+  .lib-cartelle::-webkit-scrollbar { display: none; }
+  .lib-fisse, .lib-cartelle-elenco { gap: .4rem; }
+  .lib-cartella {
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 1px solid var(--adm-line);
+    border-radius: var(--adm-r-pill);
+    background: var(--adm-surface);
+    font-weight: 600;
+  }
+  .lib-cartella.is-scelta,
+  .lib-cartella-riga.is-scelta .lib-cartella { border-color: transparent; }
+  .lib-nuova-cartella { flex: 0 0 auto; min-height: 40px; white-space: nowrap; border-radius: var(--adm-r-pill); }
+  .lib-vuoto { padding-inline: 1rem; }
+}
+
+@media (max-width: 700px) {
+  /* "Chi ha caricato" nella stessa striscia, in riga: in colonna la
+     rendeva alta tre voci, con un buco sopra e sotto ai file */
+  .lib-persone {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: .4rem;
+    margin: 0 0 0 .4rem;
+    padding: 0 0 0 .8rem;
+    border-top: 0;
+    border-left: 1px solid var(--adm-line);
+  }
+  .lib-persone .lib-gruppo-titolo { display: inline; padding: 0; white-space: nowrap; }
+}
+
+/* Dove c'è la barra delle sezioni in basso il cassetto le passa sopra:
+   sotto, "Metti nel cestino" e "Salva" finivano coperti */
+@media (max-width: 1099px) {
+  .lib-velo { z-index: 69; }
+  .lib-pannello { z-index: 70; }
+}
+
+/* "Scegli dalla libreria" sul telefono: la X in fondo a destra come in
+   ogni finestra, e i due pulsanti larghi quanto lo schermo, su una riga */
+@media (max-width: 600px) {
+  .scl-testa > .adm-icon-btn { margin-left: auto; }
+  .scl-piede .adm-head-actions { width: 100%; flex-wrap: nowrap; }
+  .scl-piede .adm-btn { flex: 1 1 auto; white-space: nowrap; }
+  .scl-piede .adm-btn-primary { flex-grow: 2; }
 }

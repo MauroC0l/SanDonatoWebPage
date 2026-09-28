@@ -115,7 +115,9 @@ export default function RichTextEditor({ value, onChange, onNormalizzato, disabl
    * come punto di partenza invece che come modifica.
    */
   useEffect(() => {
-    if (!editor) return;
+    // In sviluppo React monta, smonta e rimonta: il primo editor è già
+    // distrutto quando questo effetto parte, e leggerlo lancia un errore.
+    if (!editor || editor.isDestroyed) return;
     const html = editor.getHTML();
     normalizzato.current?.(html === "<p></p>" ? "" : html);
   }, [editor]);
@@ -123,7 +125,7 @@ export default function RichTextEditor({ value, onChange, onNormalizzato, disabl
   // Il contenuto arriva in modo asincrono quando si modifica una notizia
   // esistente: va riversato nell'editor una volta caricato.
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return;
     const incoming = value || "";
     if (incoming !== editor.getHTML() && incoming !== "") {
       editor.commands.setContent(incoming, { emitUpdate: false });

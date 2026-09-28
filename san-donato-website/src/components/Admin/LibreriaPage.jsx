@@ -506,9 +506,10 @@ export default function LibreriaPage() {
   const nessunFiltro = !cerca && !tag && !cartellaId && !tipo && !persona;
 
   return (
-    <div className="adm-page">
+    <div className="adm-page lib-pagina">
       <div className="adm-page-head">
-        <div className="adm-head-left">
+        <div className="lib-testa">
+          <p className="adm-occhiello">Comunicazione</p>
           <h1 className="adm-page-title">
             {soloMie ? "La tua libreria" : "Libreria"}
           </h1>
@@ -813,15 +814,36 @@ export default function LibreriaPage() {
                 ))}
               </ul>
             ) : dati.media.length === 0 ? (
-              <div className="adm-empty">
-                <FaImages className="adm-empty-icon" />
+              <div className="adm-vuoto-amico lib-vuoto">
+                <span className="adm-vuoto-icona">
+                  {cartellaId === "cestino" ? <FaTrashAlt /> : <FaImages />}
+                </span>
+                <h2>
+                  {cartellaId === "cestino"
+                    ? "Il cestino è vuoto"
+                    : nessunFiltro
+                      ? "Ancora nessun file"
+                      : "Nessun file qui"}
+                </h2>
                 <p>
                   {cartellaId === "cestino"
-                    ? "Il cestino è vuoto."
+                    ? `I file che butti restano qui ${giorniCestino} giorni, e fino ad allora si possono ripescare.`
                     : nessunFiltro
-                      ? "Non c'è ancora nessun file. Caricane uno con il pulsante in alto."
-                      : "Nessun file corrisponde a questi filtri."}
+                      ? "Foto delle partite, locandine, documenti: caricali una volta e li ritrovi qui ogni volta che servono."
+                      : "Nessun file corrisponde a questi filtri, o la cartella è ancora vuota."}
                 </p>
+                {/* Il pulsante anche qui, dove si guarda: in un posto vuoto
+                    la domanda è "e adesso?", e la risposta sta sotto al naso */}
+                {cartellaId !== "cestino" && (nessunFiltro || cartellaScelta) && (
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn-primary"
+                    onClick={() => campoFile.current?.click()}
+                    disabled={caricando || !archivioPronto}
+                  >
+                    <FaUpload /> {cartellaScelta ? `Carica in ${cartellaScelta.nome}` : "Carica il primo file"}
+                  </button>
+                )}
               </div>
             ) : (
               <ul className={`lib-griglia ${caricamento ? "is-attesa" : ""}`}>

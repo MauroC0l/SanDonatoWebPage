@@ -1,106 +1,133 @@
-import React from "react";
-import { FaChild, FaFileContract, FaUserShield, FaDownload, FaChevronRight } from "react-icons/fa";
+import { FaEnvelope, FaUserShield } from "react-icons/fa6";
 import "../css/TutelaMinoriPage.css";
 import pageData from "../data/TutelaMinori.json";
+import AperturaDocumento, { FasciaParole } from "./Documenti/AperturaDocumento";
+import { spezzaTitolo } from "./Documenti/spezzaTitolo";
+import SchedaFile from "./Documenti/SchedaFile";
+import IndiceDocumento from "./Documenti/IndiceDocumento";
+import AltriDocumenti from "./Documenti/AltriDocumenti";
 
+const { header, intro, documents, safeguarding } = pageData;
+const DOC_SAFEGUARDING = safeguarding.documents ?? [];
+
+/* Le voci dell'indice fuori dal componente: un elenco nuovo a ogni disegno
+   farebbe ripartire l'osservatore dell'indice ogni volta. */
+const VOCI = [
+  { id: "tml-impegno", testo: intro.title },
+  { id: "tml-responsabile", testo: safeguarding.title },
+  ...(DOC_SAFEGUARDING.length ? [{ id: "tml-safeguarding", testo: "Documentazione Safeguarding" }] : []),
+  { id: "tml-ufficiali", testo: "Documenti Ufficiali" },
+];
+
+const PAROLE = ["Ambiente sicuro", "Inclusivo", "Rispettoso", "Tutela dei minori", "Safeguarding"];
+
+/**
+ * Tutela dei minori: l'impegno, la persona a cui scrivere e i documenti.
+ * La persona sta anche nell'apertura, a destra: chi arriva qui per una
+ * segnalazione deve trovare l'indirizzo senza scorrere.
+ */
 export default function TutelaMinoriPage() {
-  const { header, intro, documents, safeguarding } = pageData;
+  const { prima, accesa } = spezzaTitolo(header.title);
+  const mail = `mailto:${safeguarding.contactEmail}`;
+
+  const referente = (
+    <aside className="tml-referente mv-vetro" aria-label={safeguarding.title}>
+      <span className="tml-referente-icona" aria-hidden="true"><FaUserShield /></span>
+      <p className="tml-referente-ruolo">{safeguarding.title}</p>
+      <p className="tml-referente-nome">{safeguarding.officerName}</p>
+      <a href={mail} className="doc-btn doc-btn--pieno tml-referente-btn" data-magnete>
+        <FaEnvelope aria-hidden="true" /> Scrivi alla responsabile
+      </a>
+    </aside>
+  );
 
   return (
-    <div className="tml-page-wrapper tml-fade-in">
-      
-      {/* HEADER HERO */}
-      <header className="tml-header">
-        <div className="tml-header-content">
-          <div className="tml-icon-badge">
-            <FaChild />
-          </div>
-          <h1 className="tml-title">{header.title}</h1>
-          <p className="tml-subtitle">{header.subtitle}</p>
-        </div>
-      </header>
+    <div className="doc tml">
+      <AperturaDocumento
+        id="tml-titolo"
+        occhiello="Safeguarding"
+        prima={prima}
+        accesa={accesa}
+        sottotitolo={header.subtitle}
+        fantasma="TUTELA"
+        laterale={referente}
+        numeri={[
+          { dt: "Documenti", dd: documents.length + DOC_SAFEGUARDING.length },
+          { dt: "Policy federali", dd: documents.length },
+          { dt: "Responsabile", dd: safeguarding.officerName },
+        ]}
+      />
+      <FasciaParole parole={PAROLE} />
 
-      <div className="tml-container">
-        
-        {/* SEZIONE INTRODUTTIVA */}
-        <section className="tml-intro-card" data-rivela>
-          <h2>{intro.title}</h2>
-          <p>{intro.text}</p>
-        </section>
+      <div className="doc-corpo doc-corpo--indice">
+        <IndiceDocumento voci={VOCI} />
 
-        {/* GRIGLIA DOCUMENTI SAFEGUARDING (Aggiunta sotto) */}
-        {safeguarding.documents && safeguarding.documents.length > 0 && (
-          <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
-            <h3 className="tml-section-title" data-rivela="sinistra">Documentazione Safeguarding</h3>
-            <div className="tml-docs-grid" data-rivela-gruppo>
-              {safeguarding.documents.map((doc) => (
-                <div key={doc.id} className="tml-doc-card">
-                  <div className="tml-doc-icon">
-                    <FaFileContract />
-                  </div>
-                  <div className="tml-doc-content">
-                    <h4>{doc.title}</h4>
-                    <p>{doc.description}</p>
-                    <a 
-                      href={doc.fileUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="tml-download-btn"
-                    >
-                      Scarica PDF <FaDownload />
+        <div className="doc-corpo-colonna">
+          {/* L'impegno: la frase grande, senza comparsa — si legge subito */}
+          <section id="tml-impegno" className="doc-sezione tml-impegno" aria-labelledby="tml-impegno-titolo">
+            <p className="doc-etichetta">01 · Impegno</p>
+            <h2 id="tml-impegno-titolo" className="doc-h2">{intro.title}</h2>
+            <p className="doc-attacco tml-attacco">{intro.text}</p>
+          </section>
+
+          <section id="tml-responsabile" className="doc-sezione" aria-labelledby="tml-resp-titolo">
+            <div className="tml-blocco-cornice" data-rivela="zoom">
+              <div className="tml-blocco">
+                <div className="mv-aurora tml-blocco-aurora" aria-hidden="true" />
+                <div className="tml-blocco-dentro">
+                  <span className="tml-blocco-icona" aria-hidden="true"><FaUserShield /></span>
+                  <p className="tml-blocco-occhiello">02 · Segnalazioni e informazioni</p>
+                  <h2 id="tml-resp-titolo" className="tml-blocco-titolo">{safeguarding.title}</h2>
+                  <p className="tml-blocco-testo">{safeguarding.description}</p>
+                  <div className="tml-contatto">
+                    <span className="tml-contatto-ruolo">
+                      Contatto Ufficiale: <strong>{safeguarding.officerName}</strong>
+                    </span>
+                    <a href={mail} className="tml-contatto-mail">
+                      <FaEnvelope aria-hidden="true" />
+                      <span>{safeguarding.contactEmail}</span>
                     </a>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </section>
-        )}
-        
-        {/* SAFEGUARDING OFFICER */}
-        <section className="tml-safeguarding-block" data-rivela="zoom">
-          <div className="tml-sg-icon">
-            <FaUserShield />
-          </div>
-          <div className="tml-sg-content">
-            <h3>{safeguarding.title}</h3>
-            <p>{safeguarding.description}</p>
-            
-            <div className="tml-officer-box">
-               <span className="tml-officer-role">Contatto Ufficiale: {safeguarding.officerName}</span>
-               <a href={`mailto:${safeguarding.contactEmail}`} className="tml-officer-email">
-                 {safeguarding.contactEmail} <FaChevronRight />
-               </a>
-            </div>
-          </div>
-        </section>
 
-        {/* GRIGLIA DOCUMENTI UFFICIALI */}
-        <section className="tml-docs-section" style={{ marginTop: '3rem' }}>
-          <h3 className="tml-section-title" data-rivela="sinistra">Documenti Ufficiali</h3>
-          <div className="tml-docs-grid" data-rivela-gruppo>
-            {documents.map((doc) => (
-              <div key={doc.id} className="tml-doc-card">
-                <div className="tml-doc-icon">
-                  <FaFileContract />
-                </div>
-                <div className="tml-doc-content">
-                  <h4>{doc.title}</h4>
-                  <p>{doc.description}</p>
-                  <a 
-                    href={doc.fileUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="tml-download-btn"
-                  >
-                    Scarica PDF <FaDownload />
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+          {DOC_SAFEGUARDING.length > 0 && (
+            <section id="tml-safeguarding" className="doc-sezione" aria-labelledby="tml-sg-titolo">
+              <p className="doc-etichetta" data-rivela>03 · Policy interne</p>
+              <h2 id="tml-sg-titolo" className="doc-h2" data-rivela>
+                Documentazione <em>Safeguarding</em>
+              </h2>
+              <ul className="doc-file-griglia doc-file-griglia--tre" data-rivela-gruppo>
+                {DOC_SAFEGUARDING.map((doc, i) => (
+                  <li key={doc.id}>
+                    <SchedaFile titolo={doc.title} testo={doc.description} href={doc.fileUrl} numero={i + 1} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
+          <section id="tml-ufficiali" className="doc-sezione" aria-labelledby="tml-uff-titolo">
+            <p className="doc-etichetta" data-rivela>
+              {DOC_SAFEGUARDING.length ? "04" : "03"} · Federazioni ed enti
+            </p>
+            <h2 id="tml-uff-titolo" className="doc-h2" data-rivela>
+              Documenti <em>Ufficiali</em>
+            </h2>
+            <ul className="doc-file-griglia doc-file-griglia--tre" data-rivela-gruppo>
+              {documents.map((doc, i) => (
+                <li key={doc.id}>
+                  <SchedaFile titolo={doc.title.trim()} testo={doc.description} href={doc.fileUrl} numero={i + 1} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
       </div>
+
+      <AltriDocumenti />
     </div>
   );
 }

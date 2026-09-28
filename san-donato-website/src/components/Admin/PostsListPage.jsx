@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaExternalLinkAlt,
-  FaExclamationCircle, FaInbox, FaImage, FaThLarge, FaBars, FaUndo, FaDumpster
+  FaExclamationCircle, FaImage, FaThLarge, FaBars, FaUndo, FaDumpster,
+  FaNewspaper, FaRegClock, FaRegEdit, FaCheckCircle, FaLayerGroup
 } from "react-icons/fa";
 import {
   listPosts, trashPost, restorePost, deletePostForever, svuotaCestinoNotizie,
@@ -15,6 +16,7 @@ import { useVista } from "../../hooks/useVista";
 import Tendina from "./Tendina";
 import ScambiaVista from "./ScambiaVista";
 import "../../css/Admin.css";
+import "../../css/admin/Notizie.css";
 
 
 /*
@@ -37,13 +39,13 @@ const VISTE = [
  * tutto quello che non è nel cestino, che è appunto "Tutte".
  */
 const FILTERS = [
-  { key: "publish,future,draft,pending", label: "Tutte" },
-  { key: "publish", label: "Pubblicate" },
-  { key: "future", label: "Programmate" },
-  { key: "draft,pending", label: "Bozze" },
+  { key: "publish,future,draft,pending", label: "Tutte", Icona: FaLayerGroup },
+  { key: "publish", label: "Pubblicate", Icona: FaCheckCircle },
+  { key: "future", label: "Programmate", Icona: FaRegClock },
+  { key: "draft,pending", label: "Bozze", Icona: FaRegEdit },
   /* Il cestino: le notizie tolte dal sito, che si possono ripristinare o
      cancellare per sempre. È l'unico posto dove si vedono. */
-  { key: "trash", label: "Cestino" }
+  { key: "trash", label: "Cestino", Icona: FaTrashAlt }
 ];
 
 const STATUS_LABEL = {
@@ -237,50 +239,64 @@ export default function PostsListPage() {
     }
   };
 
+  // Il pulsante del vuoto: "Scrivi la prima" solo quando l'archivio è
+  // davvero vuoto; con un filtro addosso sarebbe falso, le notizie ci sono.
+  const archivioVuoto = !search && !etichetta && status === FILTERS[0].key;
+
   return (
-    <div className="adm-page">
-      <div className="adm-page-head">
+    <div className="adm-page ntz-pagina">
+      <header className="adm-page-head ntz-testa">
         <div>
+          <p className="adm-occhiello">Comunicazione</p>
           <h1 className="adm-page-title">Notizie</h1>
           <p className="adm-page-sub">
-            {loading ? "Caricamento…" : `${total} ${total === 1 ? "notizia" : "notizie"}`}
+            {loading
+              ? "Caricamento…"
+              : nelCestino
+                ? `${total} ${total === 1 ? "notizia" : "notizie"} nel cestino`
+                : `${total} ${total === 1 ? "notizia" : "notizie"} · scrivi, programma e pubblica sul sito`}
           </p>
         </div>
-        {nelCestino ? (
-          total > 0 && (
-            <button
-              type="button"
-              className="adm-btn adm-btn-cancella"
-              onClick={handleSvuota}
-              disabled={busyId != null}
-            >
-              <FaDumpster /> Svuota il cestino
-            </button>
-          )
-        ) : (
-          <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
-            <FaPlus /> Nuova notizia
-          </Link>
-        )}
-      </div>
+        {/* "Nuova notizia" c'è sempre, anche nel cestino: è il gesto per cui
+            si entra qui nove volte su dieci. Svuotare il cestino sta dentro
+            al cestino, accanto alla spiegazione dei trenta giorni. */}
+        <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary ntz-nuova">
+          <FaPlus /> Nuova notizia
+        </Link>
+      </header>
 
-      <div className="adm-toolbar">
-        <div className="adm-filters" role="group" aria-label="Filtra per stato">
-          {FILTERS.map(filter => (
-            <button
-              key={filter.key}
-              type="button"
-              className={`adm-chip ${status === filter.key ? "is-active" : ""}`}
-              onClick={() => handleFilter(filter.key)}
-              aria-pressed={status === filter.key}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+      {/* Gli stati come linguette su una riga sola: sul telefono scorrono
+          di lato invece di andare a capo su tre righe. Il cestino in fondo
+          e staccato, perché non è un tipo di notizia ma un posto. */}
+      <nav className="ntz-linguette" aria-label="Filtra per stato">
+        {FILTERS.map(({ key, label, Icona }) => (
+          <button
+            key={key}
+            type="button"
+            className={`ntz-linguetta ${key === "trash" ? "is-cestino" : ""} ${status === key ? "is-active" : ""}`}
+            onClick={() => handleFilter(key)}
+            aria-pressed={status === key}
+          >
+            <Icona aria-hidden="true" /> {label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="ntz-strumenti">
+        <form className="adm-search ntz-cerca" onSubmit={handleSearch} role="search">
+          <FaSearch className="adm-search-icon" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Cerca nel titolo o nel testo…"
+            aria-label="Cerca fra le notizie"
+          />
+          <button type="submit" className="adm-btn adm-btn-ghost">Cerca</button>
+        </form>
 
         <Tendina
-          className="adm-filter-select"
+          className="adm-filter-select ntz-etichetta"
           valore={etichetta}
           onChange={(v) => { setPage(1); setEtichetta(v); }}
           opzioni={opzioniEtichette}
@@ -293,27 +309,25 @@ export default function PostsListPage() {
           onCambia={setVista}
           opzioni={VISTE}
         />
-
-        <form className="adm-search" onSubmit={handleSearch} role="search">
-          <FaSearch className="adm-search-icon" />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Cerca nel titolo o nel testo…"
-            aria-label="Cerca fra le notizie"
-          />
-          <button type="submit" className="adm-btn adm-btn-ghost">Cerca</button>
-        </form>
       </div>
 
       {nelCestino && (
-        <div className="adm-alert adm-alert-info" role="status">
-          <FaExclamationCircle aria-hidden="true" />
-          <span>
-            Le notizie nel cestino vengono <strong>cancellate per sempre dopo {giorniCestino} giorni</strong>.
-            Fino ad allora, con <strong>Ripristina</strong> tornano fra le bozze.
-          </span>
+        <div className="ntz-cestino-avviso" role="status">
+          <span className="ntz-cestino-icona" aria-hidden="true"><FaTrashAlt /></span>
+          <p>
+            Qui le notizie restano <strong>{giorniCestino} giorni</strong>, poi si cancellano
+            da sole. Fino ad allora, <strong>Ripristina</strong> le rimette fra le bozze.
+          </p>
+          {total > 0 && (
+            <button
+              type="button"
+              className="adm-btn adm-btn-cancella"
+              onClick={handleSvuota}
+              disabled={busyId != null}
+            >
+              <FaDumpster /> Svuota il cestino
+            </button>
+          )}
         </div>
       )}
 
@@ -326,38 +340,47 @@ export default function PostsListPage() {
       )}
 
       {loading ? (
-        <div className="adm-loading">
-          <div className="adm-spinner" />
-          <p>Caricamento delle notizie…</p>
-        </div>
+        /* Sagome al posto della rotella: la pagina ha già la sua forma e
+           quando le notizie arrivano non salta niente. */
+        <ul className="adm-post-list" aria-hidden="true">
+          {[0, 1, 2].map((i) => <li key={i} className="adm-sagoma ntz-sagoma" />)}
+        </ul>
       ) : posts.length === 0 ? (
-        <div className="adm-empty">
-          <FaInbox className="adm-empty-icon" />
-          <h2>Nessuna notizia trovata</h2>
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona">{nelCestino ? <FaTrashAlt /> : <FaNewspaper />}</span>
+          <h2>
+            {search
+              ? "Nessuna notizia trovata"
+              : nelCestino
+                ? "Il cestino è vuoto"
+                : status === "future"
+                  ? "Niente in programma"
+                  : archivioVuoto ? "Ancora nessuna notizia" : "Qui non c'è niente"}
+          </h2>
           <p>
             {search
-              ? `Nessun risultato per "${search}".`
+              ? `Nessun risultato per "${search}". Prova con un'altra parola.`
               : nelCestino
-                ? "Il cestino è vuoto."
-              : status === "future"
-                // Un elenco vuoto qui non è una mancanza: vuol dire che non
-                // c'è niente in attesa di uscire, che di solito va bene.
-                ? "Nessuna notizia in attesa di uscire. Ne programmi una scegliendo "
-                  + "una data nel riquadro \"Quando esce\" mentre la scrivi."
-                : "Non ci sono ancora notizie in questa sezione."}
+                ? "Le notizie che togli dal sito passano di qui, e per un mese si possono ancora ripristinare."
+                : status === "future"
+                  // Un elenco vuoto qui non è una mancanza: vuol dire che non
+                  // c'è niente in attesa di uscire, che di solito va bene.
+                  ? "Nessuna notizia in attesa di uscire. Ne programmi una scegliendo "
+                    + "una data nel riquadro \"Quando esce\" mentre la scrivi."
+                  : archivioVuoto
+                    ? "Una partita vinta, una festa, un avviso alle famiglie: scrivilo qui e compare sul sito."
+                    : "Non ci sono notizie con questi filtri."}
           </p>
           {!nelCestino && (
             <Link to={`${area}/notizie/nuova`} className="adm-btn adm-btn-primary">
-              {/* "Scrivi la prima" solo quando l'archivio è davvero vuoto: con
-                  un filtro addosso sarebbe falso, le notizie ci sono. */}
-              <FaPlus /> {search || status !== FILTERS[0].key ? "Nuova notizia" : "Scrivi la prima"}
+              <FaPlus /> {archivioVuoto ? "Scrivi la prima" : "Nuova notizia"}
             </Link>
           )}
         </div>
       ) : (
-        <ul className={vista === "griglia" ? "adm-post-griglia" : "adm-post-list"}>
+        <ul className={vista === "griglia" ? "adm-post-griglia ntz-griglia" : "adm-post-list ntz-lista"}>
           {posts.map(post => (
-            <li key={post.id} className={`adm-post-row ${busyId === post.id ? "is-busy" : ""}`}>
+            <li key={post.id} className={`adm-post-row ntz-riga ${busyId === post.id ? "is-busy" : ""}`}>
               <div className="adm-post-thumb">
                 {post.image
                   ? <img src={post.image} alt="" loading="lazy" />
@@ -365,28 +388,36 @@ export default function PostsListPage() {
               </div>
 
               <div className="adm-post-main">
-                <Link to={`${area}/notizie/${post.id}`} className="adm-post-title">
-                  {post.title || "(senza titolo)"}
-                </Link>
+                {/* Nel cestino il titolo non porta all'editor: una notizia
+                    cestinata si ripristina, non si corregge. */}
+                {nelCestino ? (
+                  <span className="adm-post-title">{post.title || "(senza titolo)"}</span>
+                ) : (
+                  <Link to={`${area}/notizie/${post.id}`} className="adm-post-title">
+                    {post.title || "(senza titolo)"}
+                  </Link>
+                )}
                 <div className="adm-post-meta">
-                  <span className={`adm-status adm-status-${post.status}`}>
-                    {STATUS_LABEL[post.status] || post.status}
-                  </span>
+                  {!nelCestino && (
+                    <span className={`adm-status adm-status-${post.status}`}>
+                      {STATUS_LABEL[post.status] || post.status}
+                    </span>
+                  )}
                   <span className="adm-sport-tag">{post.sport}</span>
                   {(post.etichette ?? []).map((e) => (
                     <span className="adm-categoria-tag" key={e.id}>{e.nome}</span>
                   ))}
-                  <span className="adm-post-date">
-                    {/* Per una programmata la data è un appuntamento, non un
-                        archivio: va letta con l'ora e introdotta da "esce". */}
-                    {post.status === "trash"
-                      ? <GiorniNelCestino tempo={tempoNelCestino(post, adesso, giorniCestino)} />
-                      : post.status === "future"
-                        ? `esce il ${formatDateOra(post.dateISO)}`
-                        : formatDate(post.dateISO)}
-                  </span>
-                  {post.authorName && <span className="adm-post-author">di {post.authorName}</span>}
                 </div>
+                <p className="ntz-quando">
+                  {/* Per una programmata la data è un appuntamento, non un
+                      archivio: va letta con l'ora e introdotta da "esce". */}
+                  {post.status === "trash"
+                    ? <GiorniNelCestino tempo={tempoNelCestino(post, adesso, giorniCestino)} />
+                    : post.status === "future"
+                      ? <><FaRegClock aria-hidden="true" /> esce il {formatDateOra(post.dateISO)}</>
+                      : formatDate(post.dateISO)}
+                  {post.authorName && <span className="adm-post-author"> · di {post.authorName}</span>}
+                </p>
               </div>
 
               {nelCestino ? (
@@ -395,7 +426,7 @@ export default function PostsListPage() {
                     viene a fare nel cestino, e deve vedersi al primo colpo */}
                 <button
                   type="button"
-                  className="adm-btn adm-btn-secondary adm-btn-piccolo"
+                  className="adm-btn adm-btn-secondary"
                   onClick={() => handleRestore(post)}
                   disabled={busyId != null}
                   title="Torna fra le bozze"
@@ -416,13 +447,14 @@ export default function PostsListPage() {
               </div>
               ) : (
               <div className="adm-post-actions">
+                {/* "Modifica" scritto: una matita sola non dice a tutti
+                    che è da lì che si corregge la notizia. */}
                 <Link
                   to={`${area}/notizie/${post.id}`}
-                  className="adm-icon-btn"
-                  title="Modifica"
+                  className="adm-btn adm-btn-ghost ntz-modifica"
                   aria-label={`Modifica ${post.title}`}
                 >
-                  <FaPencilAlt />
+                  <FaPencilAlt /> Modifica
                 </Link>
                 {post.status === "publish" && (
                   <Link

@@ -1,318 +1,314 @@
-/* ==========================================
-   GLASSMORPHISM CONTAINER
-   ========================================== */
+/* =====================================================
+   Risultati della settimana (ResultsModal.jsx) — prefisso rm-
+
+   La stessa famiglia della scheda di un evento (EventDetailsModal.css):
+   testata blu con il reticolo, schede bianche, il punteggio come un
+   tabellone. Sul telefono sale dal basso.
+
+   Prima qui c'erano anche ".spinner", ".font-mono" e "@keyframes spin":
+   nomi senza prefisso, che finivano addosso al modulo della newsletter
+   (che ha uno ".spinner" suo). Ora sono tutti rm-.
+   ===================================================== */
+
 .rm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(8px);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: rm-fadeIn 0.3s ease-out;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 18, 42, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  animation: rm-fadeIn .25s ease-out;
 }
+
+.rm-overlay *,
+.rm-overlay *::before,
+.rm-overlay *::after { box-sizing: border-box; }
 
 .rm-container {
-    background: #f8fafc;
-    width: 100%;
-    max-width: 480px; /* Leggermente più stretto per un look più mobile-first */
-    height: 85vh;
-    max-height: 750px;
-    border-radius: 24px;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: rm-slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  height: min(85vh, 760px);
+  overflow: hidden;
+  border-radius: 28px;
+  background: #f3f5f9;
+  box-shadow: 0 40px 90px -30px rgba(0, 18, 42, .7);
+  animation: rm-slideUp .45s cubic-bezier(.16, 1, .3, 1);
 }
 
-/* ==========================================
-   HEADER
-   ========================================== */
+.rm-container :focus-visible { outline: 3px solid #ff6600; outline-offset: 2px; }
+
+/* ---------- Testata ---------- */
+
 .rm-header {
-    padding: 1rem 1.5rem; /* Header leggermente più basso */
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 1.3rem 1.35rem;
+  color: #fff;
+  background:
+    radial-gradient(60% 120% at 100% 0%, rgba(255, 102, 0, .35), transparent 65%),
+    linear-gradient(150deg, #003a7a 0%, #002b5c 45%, #001a38 100%);
+}
+
+.rm-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(200deg, #000, transparent 70%);
+  -webkit-mask-image: linear-gradient(200deg, #000, transparent 70%);
 }
 
 .rm-header-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
 }
 
 .rm-header-title h2 {
-    margin: 0;
-    font-size: 1.1rem; /* Titolo leggermente più piccolo */
-    font-weight: 800;
-    color: #0f172a;
-    letter-spacing: -0.5px;
-    text-transform: uppercase;
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  color: #fff;
 }
 
 .rm-trophy-icon {
-    color: #f59e0b;
-    font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #ff8a3d, #ff6600);
+  color: #fff;
+  box-shadow: 0 10px 20px -10px rgba(255, 102, 0, .9);
 }
 
 .rm-close-btn {
-    background: #f1f5f9;
-    border: none;
-    color: #64748b;
-    width: 30px; /* Bottone leggermente più piccolo */
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color .2s ease, transform .3s cubic-bezier(.16, 1, .3, 1);
 }
 
-.rm-close-btn:hover {
-    background: #e2e8f0;
-    color: #ef4444;
-}
+.rm-close-btn:hover { background: rgba(255, 255, 255, .24); transform: rotate(90deg); }
 
-/* ==========================================
-   CONTENT LIST & SCROLLBAR
-   ========================================== */
+/* ---------- Elenco ---------- */
+
 .rm-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 1rem; /* Meno padding laterale nel contenitore principale */
-    background: #f1f5f9;
-    
-    /* Modern Scrollbar (Firefox) */
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-}
-
-/* Modern Scrollbar (Chrome, Safari, Edge) */
-.rm-content::-webkit-scrollbar {
-    width: 5px; /* Scrollbar ancora più sottile */
-}
-
-.rm-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.rm-content::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 20px;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+  scrollbar-width: thin;
 }
 
 .rm-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem; /* Spazio tra le card ridotto */
+  display: grid;
+  gap: .75rem;
 }
 
-/* ==========================================
-   RESULT CARD STYLE (COMPACT & MODERN)
-   ========================================== */
 .rm-card {
-    background: white;
-    border-radius: 14px; /* Raggio leggermente ridotto */
-    /* Ombra più sofisticata e "layered" */
-    box-shadow: 
-        0 1px 3px 0 rgba(0, 0, 0, 0.05), 
-        0 1px 2px -1px rgba(0, 0, 0, 0.05);
-    padding: 1.2rem 1rem; /* Padding interno ridotto significativamente per compattezza */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid rgba(0, 43, 92, .07);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(11, 27, 51, .04), 0 14px 30px -22px rgba(11, 27, 51, .35);
 }
 
-.rm-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        0 4px 6px -1px rgba(0, 0, 0, 0.07), 
-        0 2px 4px -2px rgba(0, 0, 0, 0.07);
-}
-
-/* HEADER INTERNO CARD */
 .rm-card-header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem; /* Meno spazio sotto l'header */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
 }
 
 .rm-date {
-    font-size: 0.7rem; /* Data più piccola */
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.5px;
+  color: #6b778a;
+  font-size: .78rem;
+  font-weight: 700;
 }
+
+.rm-date::first-letter { text-transform: uppercase; }
 
 .rm-category-badge {
-    color: white;
-    font-size: 0.6rem; /* Badge più piccolo */
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 5px;
-    letter-spacing: 0.5px;
+  overflow: hidden;
+  padding: .22rem .65rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* HERO SCORE (IL RISULTATO - RIDOTTO) */
 .rm-hero-score {
-    /* Margini verticali molto ridotti per avvicinare il risultato */
-    margin: 0.25rem 0 1rem 0; 
+  display: flex;
+  justify-content: center;
+  margin: .7rem 0 .2rem;
+  padding: .7rem;
+  border-radius: 16px;
+  background: linear-gradient(150deg, #002b5c, #001a38);
+  color: #fff;
 }
 
 .rm-score-display {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* Gap ridotto tra i numeri */
-    font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: baseline;
+  gap: .6rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .rm-score-num {
-    font-size: 2.75rem; /* Dimensione significativamente ridotta (era 3.5rem) */
-    font-weight: 900;
-    line-height: 1;
-    color: #0f172a;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -1px; /* Tracking più stretto per un look moderno */
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.04em;
 }
 
 .rm-score-divider {
-    font-size: 1.5rem; /* Divisore ridotto */
-    color: #cbd5e1;
-    font-weight: 300;
-    margin-top: -4px;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #ff6600;
 }
 
 .rm-score-text {
-    font-size: 1.25rem; /* Testo fallback ridotto */
-    font-weight: 500;
-    color: #334155;
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
-/* DETAILS SECTION (Compact) */
 .rm-details-container {
-    width: 100%;
-    border-top: 1px dashed #e2e8f0;
-    padding-top: 0.8rem; /* Meno padding sopra i dettagli */
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem; /* Meno spazio tra le righe dei dettagli */
+  display: grid;
+  gap: .5rem;
+  margin-top: .6rem;
 }
 
 .rm-detail-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
 }
 
 .rm-icon-wrapper {
-    margin-top: 1px;
-    font-size: 0.9rem; /* Icone leggermente più piccole */
-    opacity: 0.8;
-    flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: #f1f4f9;
+  font-size: .85rem;
 }
 
 .rm-detail-content {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .rm-label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: #94a3b8;
-    margin-bottom: 1px;
+  color: #6b778a;
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 .rm-value {
-    font-size: 0.85rem; /* Valori leggermente più piccoli */
-    font-weight: 600;
-    color: #334155;
-    line-height: 1.3;
+  color: #0b1b33;
+  font-size: .88rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
-.font-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    padding: 1px 5px;
-    border-radius: 4px;
-    display: inline-block;
-    font-size: 0.8rem;
+.rm-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .84rem;
 }
 
-/* LOADER & EMPTY STATES */
-.rm-loader {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #94a3b8;
-    gap: 1rem;
-}
+/* ---------- Attesa e vuoto ---------- */
 
-.spinner {
-    width: 36px; /* Spinner leggermente più piccolo */
-    height: 36px;
-    border: 3px solid #e2e8f0;
-    border-top: 3px solid #0f172a;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
+.rm-loader,
 .rm-empty {
-    text-align: center;
-    color: #94a3b8;
-    margin-top: 3rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  height: 100%;
+  min-height: 14rem;
+  color: #6b778a;
+  text-align: center;
+}
+
+.rm-loader p,
+.rm-empty p { margin: 0; font-size: .95rem; }
+
+.rm-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #e3e8f0;
+  border-top-color: #ff6600;
+  border-radius: 50%;
+  animation: rm-gira .8s linear infinite;
 }
 
 .rm-empty-icon {
-    opacity: 0.3;
-    font-size: 3rem; /* Icona empty ridotta */
+  width: 64px;
+  height: 64px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 102, 0, .1);
+  color: #ff6600;
 }
 
-/* ANIMATIONS */
-@keyframes rm-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rm-slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes rm-fadeIn { from { opacity: 0; } }
+@keyframes rm-slideUp { from { transform: translateY(24px) scale(.97); opacity: 0; } }
+@keyframes rm-sale { from { transform: translateY(100%); } }
+@keyframes rm-gira { to { transform: rotate(360deg); } }
 
-/* MOBILE RESPONSIVE */
+/* ---------- Telefono: sale dal basso ---------- */
+
 @media (max-width: 600px) {
-    .rm-container {
-        height: 90vh;
-        max-height: none;
-        border-radius: 24px 24px 0 0;
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .rm-card {
-         padding: 1rem 0.8rem; /* Ancora più compatto su mobile */
-    }
+  .rm-overlay { align-items: flex-end; padding: 0; }
 
-    .rm-score-num {
-        font-size: 2.5rem; /* Risultato leggermente più piccolo su mobile */
-    }
+  .rm-container {
+    max-width: none;
+    height: 88svh;
+    border-radius: 28px 28px 0 0;
+    animation: rm-sale .45s cubic-bezier(.16, 1, .3, 1);
+  }
+
+  .rm-content { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-overlay,
+  .rm-container { animation: none; }
+  .rm-spinner { animation-duration: 2.4s; }
+  .rm-close-btn { transition: none; }
+  .rm-close-btn:hover { transform: none; }
 }

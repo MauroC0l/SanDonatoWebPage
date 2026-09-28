@@ -2,9 +2,10 @@
  * La sagoma della pagina di accesso.
  *
  * Ricalca la stessa griglia della pagina vera (Admin.css, .alg-page): due
- * colonne su schermo largo, una sola sotto i 900 pixel. Se le due misure
- * divergessero, al momento dello scambio la pagina farebbe un salto — che è
- * esattamente quello che una sagoma esiste per evitare.
+ * colonne su schermo largo, una sola sotto i 900 pixel, con la fascia blu
+ * in cima e la scheda che ci sale sopra. Se le due misure divergessero, al
+ * momento dello scambio la pagina farebbe un salto — che è esattamente
+ * quello che una sagoma esiste per evitare.
  *
  * Compare dopo un quarto di secondo come le altre attese: quasi sempre il
  * codice arriva prima e non si vede nulla.
@@ -16,7 +17,7 @@
 
   display: grid;
   grid-template-columns: 1.05fr 1fr;
-  background: #f1f4f9;
+  background: #f4f6fa;
 
   animation: attesa-compare .18s ease .25s both;
 }
@@ -30,7 +31,9 @@
   justify-content: center;
   gap: 1.1rem;
   padding: clamp(2rem, 5vw, 4rem);
-  background: linear-gradient(150deg, #0a52c9 0%, #06326f 55%, #041c3f 100%);
+  background:
+    radial-gradient(70% 90% at 100% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, #002b5c 0%, #001a38 70%, #00132b 100%);
 }
 
 .sga-modulo {
@@ -40,16 +43,17 @@
   padding: clamp(1.5rem, 4vw, 3rem);
 }
 
+/* La scheda bianca, tonda come quella vera */
 .sga-scheda {
   display: flex;
   flex-direction: column;
   gap: .9rem;
 
-  width: min(26rem, 100%);
-  padding: 2rem;
-  border-radius: 16px;
+  width: min(27rem, 100%);
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  border-radius: 28px;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 18px 40px -24px rgba(16, 32, 56, .35);
+  box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -28px rgba(0, 26, 56, .5);
 }
 
 /* ---------- I pezzi ---------- */
@@ -59,8 +63,8 @@
 .sga-campo,
 .sga-pulsante {
   display: block;
-  border-radius: 8px;
-  background: rgba(16, 32, 56, .09);
+  border-radius: 10px;
+  background: rgba(11, 21, 38, .08);
 
   /* Il respiro lento è quello che distingue una sagoma da un errore di
      caricamento: una pagina grigia e ferma sembra rotta. */
@@ -69,28 +73,32 @@
 
 /* Sul pannello blu il grigio non si vedrebbe: lì le forme sono chiare. */
 .sga-lato .sga-logo,
-.sga-lato .sga-riga { background: rgba(255, 255, 255, .18); }
+.sga-lato .sga-riga { background: rgba(255, 255, 255, .16); }
 
+/* La tessera del logo, come nella pagina vera */
 .sga-logo {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
+  width: clamp(120px, 13vw, 168px);
+  height: clamp(120px, 13vw, 168px);
+  margin-bottom: 1rem;
+  border-radius: 34px;
 }
 
+.sga-lato .sga-riga { width: 60%; max-width: 20rem; }
 .sga-riga { height: 14px; width: 100%; }
-.sga-riga-titolo { height: 22px; width: 70%; }
+.sga-riga-titolo { height: 34px; width: 55%; }
+.sga-lato .sga-riga-titolo { height: 44px; }
 .sga-riga-corta { width: 45%; }
 
 .sga-campo {
-  height: 44px;
-  border-radius: 10px;
+  height: 58px;
+  border-radius: 16px;
 }
 
 .sga-pulsante {
-  height: 46px;
+  height: 56px;
   margin-top: .4rem;
-  border-radius: 10px;
-  background: rgba(11, 79, 209, .18);
+  border-radius: 999px;
+  background: rgba(242, 97, 0, .22);
 }
 
 @keyframes sga-respiro {
@@ -101,9 +109,18 @@
 /* ---------- Schermi stretti ---------- */
 
 @media (max-width: 900px) {
-  /* Come la pagina vera: il pannello blu sparisce e resta il modulo. */
-  .sga-pagina { grid-template-columns: minmax(0, 1fr); }
+  /* Come la pagina vera: il pannello blu sparisce, resta una fascia blu in
+     cima e la scheda che ci sale sopra. */
+  .sga-pagina {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    background:
+      linear-gradient(160deg, #002b5c, #001a38) top / 100% 15rem no-repeat,
+      #f4f6fa;
+  }
   .sga-lato { display: none; }
+  .sga-modulo { padding: calc(1.25rem + 40px + 3.4rem) 1rem 2rem; align-items: flex-start; }
+  .sga-scheda { padding: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

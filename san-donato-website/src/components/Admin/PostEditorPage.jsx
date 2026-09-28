@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   FaArrowLeft, FaSave, FaPaperPlane, FaImage, FaImages, FaTrashAlt, FaUpload,
-  FaExclamationCircle, FaInfoCircle, FaExternalLinkAlt, FaClock, FaRegClock, FaTags
+  FaExclamationCircle, FaInfoCircle, FaExternalLinkAlt, FaRegClock, FaTags
 } from "react-icons/fa";
 import { getPost, createPost, updatePost, uploadMedia, listEtichette, AuthError } from "../../api/adminApi";
 import { SPORT } from "../../api/API.mjs";
@@ -16,6 +16,7 @@ import CampoData from "./CampoData";
 import SceltaDallaLibreria from "./SceltaDallaLibreria";
 import GestioneEtichette from "./GestioneEtichette";
 import "../../css/Admin.css";
+import "../../css/admin/Notizie.css";
 
 const VUOTO = {
   title: "",
@@ -379,44 +380,54 @@ export default function PostEditorPage() {
       ? "Programma"
       : isPublished ? "Aggiorna" : "Pubblica";
 
+  /* A che punto è la notizia, detto in una riga: è la prima cosa che
+     chiede chi riapre un articolo ("ma è già online?"). */
+  const statoDetto = isNew || (!isPublished && form.status !== "pending")
+    ? { classe: "adm-status-draft", nome: "Bozza", testo: "Non è visibile sul sito finché non la pubblichi." }
+    : form.status === "pending"
+      ? { classe: "adm-status-pending", nome: "In revisione", testo: "Aspetta che un amministratore la pubblichi." }
+      : programmata
+        ? { classe: "adm-status-future", nome: "Programmata", testo: `Esce da sola ${leggibile(form.pubblicataIl)}.` }
+        : { classe: "adm-status-publish", nome: "Pubblicata", testo: "È online sul sito." };
+
+  /* I due pulsanti, uguali nel riquadro a lato (computer) e nella barra
+     in fondo (telefono): scritti una volta sola, perché due copie prima o
+     poi finiscono per dire cose diverse. */
+  const pulsanti = (
+    <>
+      <button
+        type="button"
+        className="adm-btn adm-btn-ghost"
+        onClick={() => save("draft")}
+        disabled={busy}
+      >
+        <FaSave /> Salva bozza
+      </button>
+      <button
+        type="button"
+        className="adm-btn adm-btn-primary"
+        onClick={() => save(canPublish ? "publish" : "pending")}
+        disabled={busy}
+      >
+        <FaPaperPlane />
+        {saving ? "Salvataggio…" : etichettaPubblica}
+      </button>
+    </>
+  );
+
   return (
-    <div className="adm-page adm-editor-page">
-      <div className="adm-page-head">
-        <div className="adm-head-left">
-          <button type="button" className="adm-btn adm-btn-ghost" onClick={handleBack}>
-            <FaArrowLeft /> Notizie
-          </button>
+    <div className="adm-page adm-editor-page ntz-editor">
+      <header className="ntz-editor-testa">
+        <button type="button" className="ntz-indietro" onClick={handleBack}>
+          <FaArrowLeft aria-hidden="true" /> Tutte le notizie
+        </button>
+        <div className="ntz-editor-titolo">
           <h1 className="adm-page-title">
             {isNew ? "Nuova notizia" : "Modifica notizia"}
           </h1>
-          {!isNew && (
-            <span className={`adm-status adm-status-${form.status}`}>
-              {programmata ? "Programmata" : isPublished ? "Pubblicata" : "Bozza"}
-            </span>
-          )}
           {dirty && <span className="adm-non-salvato">modifiche non salvate</span>}
         </div>
-
-        <div className="adm-head-actions">
-          <button
-            type="button"
-            className="adm-btn adm-btn-ghost"
-            onClick={() => save("draft")}
-            disabled={busy}
-          >
-            <FaSave /> Salva bozza
-          </button>
-          <button
-            type="button"
-            className="adm-btn adm-btn-primary"
-            onClick={() => save(canPublish ? "publish" : "pending")}
-            disabled={busy}
-          >
-            <FaPaperPlane />
-            {saving ? "Salvataggio…" : etichettaPubblica}
-          </button>
-        </div>
-      </div>
+      </header>
 
       {error && (
         <div className="adm-alert adm-alert-error" role="alert">
@@ -424,171 +435,202 @@ export default function PostEditorPage() {
         </div>
       )}
 
-      {programmata && (
-        <div className="adm-alert adm-alert-info">
-          <FaClock />
-          <span>
-            Questa notizia non è ancora sul sito: comparirà da sola{" "}
-            <strong>{leggibile(form.pubblicataIl)}</strong>.
-          </span>
-        </div>
-      )}
-
-      <div className="adm-editor-grid">
-        <div className="adm-editor-col">
-          <label className="adm-field">
-            <span className="adm-label">Titolo</span>
-            <input
-              type="text"
-              className="adm-input adm-input-title"
+      <div className="adm-editor-grid ntz-editor-griglia">
+        {/* ---------- Il foglio: solo titolo e testo ----------
+            Tutto il resto (sport, etichette, copertina, data) sta nella
+            colonna accanto: mentre si scrive si guarda il testo, e basta. */}
+        <div className="ntz-foglio">
+          <label className="ntz-titolo-campo">
+            <span className="adm-solo-lettori">Titolo</span>
+            {/* Un'area di testo e non un campo di una riga: un titolo
+                lungo sul telefono si legge per intero, andando a capo,
+                invece di scorrere di lato nascosto. L'invio non va a capo:
+                un titolo è una riga sola, anche quando se ne vedono due. */}
+            <textarea
+              rows={1}
               value={form.title}
-              onChange={(e) => update({ title: e.target.value })}
-              placeholder="Es. Il Calcio Under 14 vince il derby"
+              onChange={(e) => update({ title: e.target.value.replace(/\s*\n+\s*/g, " ") })}
+              onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+              placeholder="Scrivi il titolo…"
               disabled={busy}
+              aria-invalid={error === "Il titolo è obbligatorio." || undefined}
             />
           </label>
 
-          {/* Lo sport era dedotto dal titolo, perché su WordPress non
-              esisteva un campo: chi scriveva doveva infilare la parola
-              "volley" nel titolo per finire nella sezione giusta. Ora si
-              sceglie, e il titolo torna a essere solo un titolo. */}
-          <div className="adm-field">
-            <span className="adm-label">A quale sport vuoi collegare questa notizia:</span>
-            <Tendina
-              valore={form.sport}
-              onChange={(v) => update({ sport: v })}
-              opzioni={opzioniSport}
-              disabilitato={busy}
-              etichettaAria="Sport a cui collegare la notizia"
-            />
-          </div>
-
-          <div className="adm-sport-hint">
-            <FaInfoCircle />
-            <span>Comparirà nella sezione <strong>{form.sport}</strong> del sito.</span>
-          </div>
-
-          {/* La categoria è un'altra cosa dallo sport, e le due non si
-              sostituiscono: una festa di Natale del settore calcio è
-              "Calcio" per la sezione e "Feste ed eventi" per il
-              contenuto. Tenerne una sola vorrebbe dire buttare via
-              metà dell'informazione. */}
-          <div className="adm-field">
-            <div className="adm-label-riga">
-              <span className="adm-label">Etichette:</span>
-              <button
-                type="button"
-                className="adm-btn adm-btn-ghost adm-btn-piccolo"
-                onClick={() => setGestioneAperta(true)}
-                disabled={busy}
-              >
-                <FaTags /> Gestisci etichette
-              </button>
-            </div>
-            <Tendina
-              multipla
-              valore={form.etichette}
-              onChange={(v) => update({ etichette: v })}
-              opzioni={opzioniEtichette}
-              disabilitato={busy}
-              segnaposto={opzioniEtichette.length ? "Scegli una o più etichette…" : "Nessuna etichetta: creane una con Gestisci etichette"}
-              etichettaAria="Etichette della notizia"
-            />
-          </div>
-
-          {gestioneAperta && (
-            <GestioneEtichette
-              puoModificare={puoPubblicare}
-              onChiudi={() => { setGestioneAperta(false); caricaEtichette(); }}
-            />
-          )}
-
-          <div className="adm-field">
-            <span className="adm-label">Testo</span>
-            <RichTextEditor
-              value={form.content}
-              onChange={(html) => update({ content: html })}
-              onNormalizzato={allineaContenuto}
-              disabled={busy}
-            />
-          </div>
+          <RichTextEditor
+            value={form.content}
+            onChange={(html) => update({ content: html })}
+            onNormalizzato={allineaContenuto}
+            disabled={busy}
+          />
         </div>
 
-        <aside className="adm-editor-side">
-          {/* ---------- Quando esce ---------- */}
-          <section className="adm-panel">
+        <aside className="adm-editor-side ntz-lato">
+          {/* ---------- Pubblicazione ---------- */}
+          <section className="adm-panel ntz-pannello-pubblica">
             <h2 className="adm-panel-title">
-              <FaRegClock aria-hidden="true" /> Quando esce
+              <FaPaperPlane aria-hidden="true" /> Pubblicazione
             </h2>
 
-            <div className="adm-scelta-uscita">
-              <label className="adm-check">
-                <input
-                  type="radio"
-                  name="uscita"
-                  checked={!nelFuturo}
-                  onChange={subito}
-                  disabled={busy}
-                />
-                <span className="adm-check-box adm-check-tondo" aria-hidden="true" />
-                <span>{isPublished && !programmata ? "Lascia la data di uscita" : "Appena la pubblico"}</span>
-              </label>
+            <p className="ntz-stato">
+              <span className={`adm-status ${statoDetto.classe}`}>{statoDetto.nome}</span>
+              <span>{statoDetto.testo}</span>
+            </p>
 
-              <label className="adm-check">
-                <input
-                  type="radio"
-                  name="uscita"
-                  checked={nelFuturo}
-                  onChange={() => update({ pubblicataIl: fraPoco(), programmata: true })}
-                  disabled={busy}
-                />
-                <span className="adm-check-box adm-check-tondo" aria-hidden="true" />
-                <span>A una data che scelgo io</span>
-              </label>
-            </div>
+            <fieldset className="ntz-uscita">
+              <legend className="adm-label"><FaRegClock aria-hidden="true" /> Quando esce</legend>
 
-            {nelFuturo ? (
-              <>
-                <CampoData
-                  valore={form.pubblicataIl}
-                  onChange={(v) => update({ pubblicataIl: v || null })}
-                  conOra
-                  disabilitato={busy}
-                  etichettaAria="Data di uscita"
-                />
-                <p className="adm-hint">
-                  Resta invisibile sul sito e compare da sola a quest&apos;ora:
-                  nessuno deve ricordarsi di tornare a pubblicarla. Con una data
-                  già passata esce subito, ma porta la data che hai scritto.
-                </p>
-              </>
-            ) : (
-              form.pubblicataIl && (
-                <p className="adm-hint">Uscita il {leggibile(form.pubblicataIl)}.</p>
-              )
+              <div className="adm-scelta-uscita">
+                <label className="adm-check">
+                  <input
+                    type="radio"
+                    name="uscita"
+                    checked={!nelFuturo}
+                    onChange={subito}
+                    disabled={busy}
+                  />
+                  <span className="adm-check-box adm-check-tondo" aria-hidden="true" />
+                  <span>{isPublished && !programmata ? "Lascia la data di uscita" : "Appena la pubblico"}</span>
+                </label>
+
+                <label className="adm-check">
+                  <input
+                    type="radio"
+                    name="uscita"
+                    checked={nelFuturo}
+                    onChange={() => update({ pubblicataIl: fraPoco(), programmata: true })}
+                    disabled={busy}
+                  />
+                  <span className="adm-check-box adm-check-tondo" aria-hidden="true" />
+                  <span>A una data che scelgo io</span>
+                </label>
+              </div>
+
+              {nelFuturo ? (
+                <>
+                  <CampoData
+                    valore={form.pubblicataIl}
+                    onChange={(v) => update({ pubblicataIl: v || null })}
+                    conOra
+                    disabilitato={busy}
+                    etichettaAria="Data di uscita"
+                  />
+                  <p className="adm-hint">
+                    Resta invisibile sul sito e compare da sola a quest&apos;ora:
+                    nessuno deve ricordarsi di tornare a pubblicarla. Con una data
+                    già passata esce subito, ma porta la data che hai scritto.
+                  </p>
+                </>
+              ) : (
+                form.pubblicataIl && (
+                  <p className="adm-hint">Uscita il {leggibile(form.pubblicataIl)}.</p>
+                )
+              )}
+            </fieldset>
+
+            {!canPublish && (
+              <p className="ntz-nota-revisione">
+                <FaInfoCircle aria-hidden="true" />
+                <span>
+                  Il tuo account può scrivere notizie ma non pubblicarle: con
+                  &quot;Invia in revisione&quot; la passi a un amministratore.
+                </span>
+              </p>
+            )}
+
+            <div className="ntz-pulsanti-lato">{pulsanti}</div>
+
+            {!isNew && isPublished && !programmata && (
+              <Link to={`/news/${id}`} target="_blank" className="adm-inline-link ntz-vedi">
+                Vedi sul sito <FaExternalLinkAlt aria-hidden="true" />
+              </Link>
             )}
           </section>
 
+          {/* ---------- Dove compare ---------- */}
           <section className="adm-panel">
-            <h2 className="adm-panel-title">Immagine di copertina</h2>
+            <h2 className="adm-panel-title">
+              <FaTags aria-hidden="true" /> Dove compare
+            </h2>
+
+            {/* Lo sport era dedotto dal titolo, perché su WordPress non
+                esisteva un campo: chi scriveva doveva infilare la parola
+                "volley" nel titolo per finire nella sezione giusta. Ora si
+                sceglie, e il titolo torna a essere solo un titolo. */}
+            <div className="adm-field">
+              <span className="adm-label">Sport</span>
+              <Tendina
+                valore={form.sport}
+                onChange={(v) => update({ sport: v })}
+                opzioni={opzioniSport}
+                disabilitato={busy}
+                etichettaAria="Sport a cui collegare la notizia"
+              />
+              <span className="adm-hint">
+                Compare nella sezione <strong>{form.sport}</strong> del sito.
+              </span>
+            </div>
+
+            {/* La categoria è un'altra cosa dallo sport, e le due non si
+                sostituiscono: una festa di Natale del settore calcio è
+                "Calcio" per la sezione e "Feste ed eventi" per il
+                contenuto. Tenerne una sola vorrebbe dire buttare via
+                metà dell'informazione. */}
+            <div className="adm-field ntz-campo-ultimo">
+              <div className="adm-label-riga">
+                <span className="adm-label">Etichette</span>
+                <button
+                  type="button"
+                  className="adm-inline-link ntz-gestisci"
+                  onClick={() => setGestioneAperta(true)}
+                  disabled={busy}
+                >
+                  Gestisci etichette
+                </button>
+              </div>
+              <Tendina
+                multipla
+                valore={form.etichette}
+                onChange={(v) => update({ etichette: v })}
+                opzioni={opzioniEtichette}
+                disabilitato={busy}
+                segnaposto={opzioniEtichette.length ? "Scegli una o più etichette…" : "Nessuna etichetta: creane una con Gestisci etichette"}
+                etichettaAria="Etichette della notizia"
+              />
+            </div>
+          </section>
+
+          {/* ---------- Copertina ---------- */}
+          <section className="adm-panel">
+            <h2 className="adm-panel-title">
+              <FaImage aria-hidden="true" /> Immagine di copertina
+            </h2>
 
             {form.image ? (
-              <div className="adm-cover">
+              <div className="adm-cover ntz-copertina">
                 <img src={form.image} alt="Anteprima della copertina" />
                 <button
                   type="button"
-                  className="adm-btn adm-btn-ghost adm-btn-block"
+                  className="adm-icon-btn adm-icon-danger ntz-copertina-togli"
                   onClick={removeImage}
                   disabled={busy}
+                  title="Togli la copertina"
+                  aria-label="Togli la copertina"
                 >
-                  <FaTrashAlt /> Rimuovi
+                  <FaTrashAlt />
                 </button>
               </div>
             ) : (
-              <div className="adm-cover-empty">
-                <FaImage />
-                <p>Nessuna immagine. Verrà usato il logo della Polisportiva.</p>
-              </div>
+              <button
+                type="button"
+                className="adm-cover-empty ntz-copertina-vuota"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={busy}
+              >
+                <FaUpload aria-hidden="true" />
+                <strong>Carica una foto</strong>
+                <span>Senza, sul sito compare il logo della Polisportiva.</span>
+              </button>
             )}
 
             <input
@@ -598,64 +640,69 @@ export default function PostEditorPage() {
               onChange={handleImagePick}
               hidden
             />
-            <button
-              type="button"
-              className="adm-btn adm-btn-secondary adm-btn-block"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={busy}
-            >
-              <FaUpload /> {uploading ? "Caricamento…" : form.image ? "Sostituisci dal computer" : "Carica dal computer"}
-            </button>
+            <div className="ntz-copertina-azioni">
+              {form.image && (
+                <button
+                  type="button"
+                  className="adm-btn adm-btn-secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={busy}
+                >
+                  <FaUpload /> {uploading ? "Caricamento…" : "Sostituisci"}
+                </button>
+              )}
 
-            {/* La libreria per seconda ma ben visibile: chi ha la foto in
-                mano carica, chi la sta cercando la trova già lì. */}
-            <button
-              type="button"
-              className="adm-btn adm-btn-ghost adm-btn-block"
-              onClick={() => setLibreriaAperta(true)}
-              disabled={busy}
-            >
-              <FaImages /> Scegli dalla libreria
-            </button>
+              {/* La libreria per seconda ma ben visibile: chi ha la foto in
+                  mano carica, chi la sta cercando la trova già lì. */}
+              <button
+                type="button"
+                className="adm-btn adm-btn-ghost"
+                onClick={() => setLibreriaAperta(true)}
+                disabled={busy}
+              >
+                <FaImages /> Scegli dalla libreria
+              </button>
+            </div>
 
             <p className="adm-hint">
-              Le foto vengono ridotte e raddrizzate in automatico prima del caricamento.
+              {uploading
+                ? "Caricamento della foto…"
+                : "Le foto vengono ridotte e raddrizzate in automatico prima del caricamento."}
             </p>
           </section>
 
+          {/* ---------- Riassunto ---------- */}
           <section className="adm-panel">
             <h2 className="adm-panel-title">Riassunto</h2>
             <textarea
               className="adm-input adm-textarea"
               value={form.excerpt}
               onChange={(e) => update({ excerpt: e.target.value })}
-              rows={5}
+              rows={4}
               maxLength={300}
               placeholder="Poche righe che compaiono nell'elenco delle notizie."
               disabled={busy}
+              aria-label="Riassunto"
             />
             <p className="adm-hint">
-              {form.excerpt.length}/300 · Se lo lasci vuoto viene ricavato dall&apos;inizio del testo.
+              {form.excerpt.length}/300 · Facoltativo: se lo lasci vuoto viene ricavato dall&apos;inizio del testo.
             </p>
           </section>
-
-          {!isNew && isPublished && !programmata && (
-            <Link to={`/news/${id}`} target="_blank" className="adm-btn adm-btn-ghost adm-btn-block">
-              Vedi sul sito <FaExternalLinkAlt />
-            </Link>
-          )}
-
-          {!canPublish && (
-            <div className="adm-alert adm-alert-info">
-              <FaInfoCircle />
-              <span>
-                Il tuo account può scrivere notizie ma non pubblicarle: verranno inviate
-                in revisione a un amministratore.
-              </span>
-            </div>
-          )}
         </aside>
       </div>
+
+      {/* Sul telefono i pulsanti restano attaccati in basso mentre si
+          scrive: il riquadro "Pubblicazione" lì sta sotto al testo, e per
+          salvare bisognerebbe scorrere fino in fondo. */}
+      <div className="adm-barra-azioni-fissa ntz-barra-telefono">{pulsanti}</div>
+
+      {gestioneAperta && (
+        <GestioneEtichette
+          puoModificare={puoPubblicare}
+          onChiudi={() => { setGestioneAperta(false); caricaEtichette(); }}
+        />
+      )}
+
       {libreriaAperta && (
         <SceltaDallaLibreria
           onScegli={scegliDallaLibreria}

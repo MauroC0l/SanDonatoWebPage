@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaPlus, FaPencilAlt, FaSave, FaTimes, FaUsers, FaRunning,
-  FaExclamationCircle, FaSitemap, FaThLarge, FaBars, FaLink, FaCalendarCheck
+  FaExclamationCircle, FaExclamationTriangle, FaSitemap, FaThLarge, FaBars, FaLink,
+  FaCalendarCheck, FaTrashAlt
 } from "react-icons/fa";
 import {
   listSquadreConGestori, creaSquadra, aggiornaSquadra, eliminaSquadra,
@@ -17,6 +18,7 @@ import ScambiaVista from "./ScambiaVista";
 import { useVista } from "../../hooks/useVista";
 import { indirizziCalendario } from "../../utils/calendarioSquadra";
 import "../../css/Admin.css";
+import "../../css/admin/Partite.css";
 
 /*
  * Due modi di guardare le squadre.
@@ -379,26 +381,28 @@ export default function SquadrePage() {
 
   return (
     <div className="adm-page">
-      <div className="adm-page-head">
-        <div className="adm-head-left">
+      <header className="ev-testa">
+        <div className="ev-testa-testo">
+          <p className="adm-occhiello">La società</p>
           <h1 className="adm-page-title">Squadre</h1>
-          <p className="adm-page-sub">
-            {squadre.length} squadre · chi le allena, quanti ne fanno parte e da quale
+          <p className="ev-testa-sotto">
+            {squadre.length} squadre: chi le allena, quanti iscritti hanno e da quale
             calendario ufficiale arrivano le partite. Si cancella solo una squadra vuota:
             le altre si disattivano, e la loro storia resta.
           </p>
         </div>
 
-        <div className="adm-head-actions">
+        <div className="ev-testa-azioni">
           <button
             type="button"
-            className="adm-btn adm-btn-primary"
+            className="adm-btn adm-btn-primary ev-btn-grande"
             onClick={() => setNuova({ nome: "", sport: "Calcio", colore: COLORE_PREDEFINITO.Calcio })}
+            disabled={Boolean(nuova)}
           >
-            <FaPlus /> Nuova squadra
+            <FaPlus aria-hidden="true" /> Nuova squadra
           </button>
         </div>
-      </div>
+      </header>
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">
@@ -459,12 +463,12 @@ export default function SquadrePage() {
             </label>
           </div>
 
-          <div className="adm-head-actions">
+          <div className="adm-barra-azioni-fissa">
             <button type="button" className="adm-btn adm-btn-ghost" onClick={() => setNuova(null)}>
               Annulla
             </button>
             <button type="submit" className="adm-btn adm-btn-primary" disabled={salvataggio}>
-              <FaPlus /> {salvataggio ? "Creazione…" : "Crea"}
+              <FaPlus /> {salvataggio ? "Creazione…" : "Crea la squadra"}
             </button>
           </div>
         </form>
@@ -473,13 +477,21 @@ export default function SquadrePage() {
       {/* I gironi trovati nei calendari ufficiali che aspettano una squadra:
           l'iscrizione si fa qui, dalla riga "Calendario ufficiale". */}
       {senzaSquadra.length > 0 && (
-        <p className="adm-cal-didascalia adm-cal-avviso">
-          {senzaSquadra.length === 1
-            ? "C'è un girone ufficiale in cui risulta iscritta una squadra della Polisportiva, ancora senza squadra del sito"
-            : `Ci sono ${senzaSquadra.length} gironi ufficiali in cui risulta iscritta una squadra della Polisportiva, ancora senza squadra del sito`}
-          {" "}({senzaSquadra.map((g) => g.nome).join("; ")}). Assegnali dalla riga
-          &quot;Calendario ufficiale&quot; della squadra giusta: da lì in poi le partite si aggiornano da sole.
-        </p>
+        <div className="adm-alert adm-alert-warn sq-avviso">
+          <FaExclamationTriangle aria-hidden="true" />
+          <div>
+            <strong>
+              {senzaSquadra.length === 1
+                ? "Un girone ufficiale aspetta la sua squadra"
+                : `${senzaSquadra.length} gironi ufficiali aspettano la loro squadra`}
+            </strong>
+            <p>
+              La federazione ci elenca in {senzaSquadra.map((g) => g.nome).join("; ")}.
+              Collegali dalla riga &quot;Calendario ufficiale&quot; della squadra giusta, qui
+              sotto: da lì in poi le partite si aggiornano da sole.
+            </p>
+          </div>
+        </div>
       )}
 
       <div className="adm-toolbar">
@@ -520,10 +532,26 @@ export default function SquadrePage() {
         <ScambiaVista vista={vista} onCambia={setVista} opzioni={VISTE} />
       </div>
 
+      {perSport.length === 0 && (
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaSitemap aria-hidden="true" /></span>
+          <h2>Nessuna squadra da mostrare</h2>
+          <p>Con questo filtro non c&apos;è niente. Prova &quot;Tutti gli sport&quot;, oppure crea la prima squadra.</p>
+          <button
+            type="button"
+            className="adm-btn adm-btn-primary"
+            onClick={() => setNuova({ nome: "", sport: "Calcio", colore: COLORE_PREDEFINITO.Calcio })}
+          >
+            <FaPlus aria-hidden="true" /> Nuova squadra
+          </button>
+        </div>
+      )}
+
       {perSport.map(([sport, elenco]) => (
         <section key={sport} className="adm-gruppo-squadre">
-          <h2 className="adm-gruppo-titolo">
+          <h2 className="adm-gruppo-titolo sq-gruppo-titolo">
             <FaSitemap aria-hidden="true" /> {sportLeggibile(sport)}
+            <span className="adm-badge-conta is-neutro">{elenco.length}</span>
           </h2>
 
           <ul className={vista === "griglia" ? "adm-schede adm-schede-griglia" : "adm-schede"}>
@@ -531,7 +559,12 @@ export default function SquadrePage() {
               const inModifica = modifica?.id === s.id;
 
               return (
-                <li key={s.id} className={`adm-scheda ${s.attiva ? "" : "is-disattivato"}`}>
+                <li
+                  key={s.id}
+                  className={`adm-scheda sq-scheda ${s.attiva ? "" : "is-disattivato"}`}
+                  // Il colore della squadra, lo stesso del calendario del sito, sul bordo
+                  style={{ "--sq-colore": s.colore || "#999" }}
+                >
                   {inModifica ? (
                     <form onSubmit={salvaModifica}>
                       <div className="adm-campi">
@@ -582,7 +615,7 @@ export default function SquadrePage() {
                         </label>
                       </div>
 
-                      <div className="adm-scheda-azioni">
+                      <div className="adm-barra-azioni-fissa">
                         <button
                           type="button"
                           className="adm-btn adm-btn-ghost"
@@ -606,8 +639,8 @@ export default function SquadrePage() {
                         />
                         <h3 className="adm-scheda-nome">{s.nome}</h3>
 
-                        <span className="adm-sport-tag">
-                          <FaRunning aria-hidden="true" /> {s.atleti} iscritti
+                        <span className="adm-sport-tag sq-conta">
+                          <FaRunning aria-hidden="true" /> {s.atleti === 1 ? "1 iscritto" : `${s.atleti} iscritti`}
                         </span>
 
                         {!s.attiva && (
@@ -703,7 +736,7 @@ export default function SquadrePage() {
                         </div>
                       )}
 
-                      <footer className="adm-scheda-azioni">
+                      <footer className="adm-scheda-azioni sq-azioni">
                         <button
                           type="button"
                           className="adm-btn adm-btn-ghost"
@@ -736,7 +769,7 @@ export default function SquadrePage() {
                             onClick={() => cancella(s)}
                             title="Si cancella solo una squadra senza partite, iscritti né calendari"
                           >
-                            Cancella
+                            <FaTrashAlt aria-hidden="true" /> Cancella
                           </button>
                         )}
                       </footer>

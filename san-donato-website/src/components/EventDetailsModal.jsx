@@ -1,30 +1,64 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
+import {
+  FiX, FiCalendar, FiClock, FiMapPin, FiVideo, FiRotateCcw, FiList, FiArrowUpRight, FiAward
+} from "react-icons/fi";
+import { FaFutbol } from "react-icons/fa";
 import { linkMappa } from "../utils/linkMappa";
 import "../css/EventDetailsModal.css";
 
-// --- UTILITIES INTERNE ---
+/*
+ * La scheda di un evento: la apre il calendario e la apre la home.
+ *
+ * Sta in un portale sul <body> e non dentro alla pagina: la pagina entra
+ * con un'animazione, e un elemento "fixed" dentro a un genitore
+ * trasformato si posiziona rispetto a lui invece che allo schermo.
+ *
+ * Classi con il prefisso cpm-: tutto il suo aspetto sta in
+ * EventDetailsModal.css, così nella home non dipende dal foglio del
+ * calendario.
+ */
+
 const formatDate = (date) => new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(date));
 const formatTime = (date) => new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' }).format(new Date(date));
 
-// --- ICONE SVG ---
-const IconX = () => <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
-const IconCalendar = () => <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
-const IconClock = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const IconMap = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
-const IconVideo = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>;
-const IconReplay = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
-const IconTrophy = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
-const IconBall = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-const IconList = () => <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>;
+const NOME_TIPO = { partita: "Partita", torneo: "Torneo", allenamento: "Allenamento", evento: "Evento" };
+
+const FOCALIZZABILI = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export default function EventDetailsModal({ event, onClose }) {
-  // Esc chiude la scheda, come ci si aspetta da una finestra modale
+  const scheda = useRef(null);
+  const chiudi = useRef(null);
+  const idTitolo = useId();
+
+  // L'ultima onClose, letta dagli effetti senza doverli rifare quando cambia
+  const suChiudi = useRef(onClose);
+  useEffect(() => { suChiudi.current = onClose; }, [onClose]);
+
+  /* Esc chiude, Tab gira dentro alla scheda, e chiusa la scheda il fuoco
+     torna dov'era (la pillola o la riga da cui si è aperta): chi usa la
+     tastiera non si ritrova in cima alla pagina. */
   useEffect(() => {
-    if (!event) return;
-    const handleEsc = (e) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [event, onClose]);
+    if (!event) return undefined;
+    const prima = document.activeElement;
+    chiudi.current?.focus();
+
+    const tasti = (e) => {
+      if (e.key === "Escape") { suChiudi.current(); return; }
+      if (e.key !== "Tab" || !scheda.current) return;
+      const voci = [...scheda.current.querySelectorAll(FOCALIZZABILI)];
+      if (!voci.length) return;
+      const primo = voci[0];
+      const ultimo = voci[voci.length - 1];
+      if (e.shiftKey && document.activeElement === primo) { e.preventDefault(); ultimo.focus(); }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primo.focus(); }
+    };
+    window.addEventListener("keydown", tasti);
+    return () => {
+      window.removeEventListener("keydown", tasti);
+      if (prima && typeof prima.focus === "function" && prima.isConnected) prima.focus();
+    };
+  }, [event]);
 
   if (!event) return null;
 
@@ -35,158 +69,152 @@ export default function EventDetailsModal({ event, onClose }) {
 
   // Controllo fine evento per decidere tra Live o Replay
   const isEventEnded = (() => {
-      const now = new Date();
-      const end = event.end ? new Date(event.end) : new Date(event.start);
-      return now > end;
+    const now = new Date();
+    const end = event.end ? new Date(event.end) : new Date(event.start);
+    return now > end;
   })();
 
-  return (
-    <div className="cp-modal-overlay" onClick={onClose}>
-      <div className="cp-modal-card" onClick={e => e.stopPropagation()}>
+  // "3 - 1" diventa un tabellone; un testo ("Rinviata") resta un testo
+  const punti = event.result ? event.result.split('-').map(s => s.trim()) : [];
+  const tabellone = punti.length === 2 && punti.every(p => p !== "" && !isNaN(p));
 
-        <div className="cp-modal-header" style={{ backgroundColor: event.color }}>
-          <div className="cp-modal-header-top">
-            <span className="cp-category-badge cp-badge-large" style={{ color: '#fff' }}>
+  const data = formatDate(event.start);
+  const orario = event.hasTime
+    ? `${formatTime(event.start)}${event.end && +new Date(event.end) > +new Date(event.start) ? ` – ${formatTime(event.end)}` : ""}`
+    : "Orario da definire";
+
+  return createPortal(
+    <div className="cpm-velo" onClick={onClose}>
+      <div
+        className="cpm-scheda"
+        ref={scheda}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={idTitolo}
+        onClick={e => e.stopPropagation()}
+        style={{ "--cpm-c": event.color || "#ff6600" }}
+      >
+        <header className="cpm-testa">
+          <div className="cpm-testa-luce" aria-hidden="true" />
+          <div className="cpm-testa-riga">
+            <span className="cpm-squadra">
+              <span className="cpm-pallino" aria-hidden="true" />
               {event.category}
             </span>
-            <button className="cp-btn-close" onClick={onClose}><IconX /></button>
+            {NOME_TIPO[event.tipo] && <span className="cpm-tipo">{NOME_TIPO[event.tipo]}</span>}
+            <button type="button" className="cpm-chiudi" onClick={onClose} ref={chiudi} aria-label="Chiudi">
+              <FiX size={20} />
+            </button>
           </div>
-          <h2 className="cp-modal-title" style={{ color: '#fff' }}>{event.title}</h2>
-        </div>
+          <h2 className="cpm-titolo" id={idTitolo}>{event.title}</h2>
+          <p className="cpm-quando">
+            <span>{data}</span>
+            <span className="cpm-quando-ora">{orario}</span>
+          </p>
+        </header>
 
-        <div className="cp-modal-body">
-          <div className="cp-detail-grid">
-            
-            {/* DATA */}
-            <div className="cp-detail-row">
-              <div className="cp-icon-box"><IconCalendar /></div>
-              <div className="cp-detail-content">
-                <label>Data</label>
-                <p>{formatDate(event.start)}</p>
+        <div className="cpm-corpo">
+          {event.result && (
+            <div className="cpm-risultato">
+              <span className="cpm-etichetta"><FiAward aria-hidden="true" /> Risultato</span>
+              {tabellone ? (
+                <span className="cpm-tabellone">
+                  <strong>{punti[0]}</strong><i aria-hidden="true">:</i><strong>{punti[1]}</strong>
+                </span>
+              ) : (
+                <span className="cpm-risultato-testo">{event.result}</span>
+              )}
+            </div>
+          )}
+
+          <div className="cpm-griglia">
+            <div className="cpm-tessera">
+              <span className="cpm-icona"><FiCalendar /></span>
+              <div>
+                <span className="cpm-etichetta">Data</span>
+                <p className="cpm-valore cpm-maiuscola">{data}</p>
               </div>
             </div>
 
-            {/* ORARIO */}
-            <div className="cp-detail-row">
-              <div className="cp-icon-box"><IconClock /></div>
-              <div className="cp-detail-content">
-                <label>Orario</label>
-                <p>
-                  {event.hasTime
-                    ? `${formatTime(event.start)} - ${formatTime(event.end)}`
-                    : "Orario da definire"
-                  }
-                </p>
+            <div className="cpm-tessera">
+              <span className="cpm-icona"><FiClock /></span>
+              <div>
+                <span className="cpm-etichetta">Orario</span>
+                <p className="cpm-valore">{orario}</p>
               </div>
             </div>
 
-            {/* LUOGO — cliccabile quando c'è qualcosa da aprire */}
-            <div className="cp-detail-row">
-              <div className="cp-icon-box"><IconMap /></div>
-              <div className="cp-detail-content">
-                <label>Luogo</label>
+            {/* Luogo: cliccabile quando c'è qualcosa da aprire */}
+            <div className="cpm-tessera cpm-larga">
+              <span className="cpm-icona"><FiMapPin /></span>
+              <div>
+                <span className="cpm-etichetta">Luogo</span>
                 {mappa ? (
-                  <p>
-                    <a href={mappa} target="_blank" rel="noreferrer" className="cp-luogo-link">
+                  <p className="cpm-valore">
+                    <a href={mappa} target="_blank" rel="noreferrer" className="cpm-luogo-link">
                       {event.location}
                     </a>
                   </p>
                 ) : (
-                  <p>{event.location !== "" ? event.location : "Luogo da definire"}</p>
+                  <p className="cpm-valore">{event.location !== "" ? event.location : "Luogo da definire"}</p>
                 )}
               </div>
             </div>
 
-            {/* --- DATI PARSATI DALL'API --- */}
-            
-            {event.result && (
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box" >
-                        <IconTrophy />
-                    </div>
-                    <div className="cp-detail-content">
-                        <label>Risultato</label>
-                        <p className="cp-result-text">{event.result}</p>
-                    </div>
-                </div>
-            )}
-
             {event.partials && (
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box"><IconList /></div>
-                    <div className="cp-detail-content">
-                        <label>Parziali Set</label>
-                        <p className="cp-mono-text">{event.partials}</p>
-                    </div>
-                </div>
-            )}
-
-            {event.scorers && event.scorers.length > 0 && (
-                <div className="cp-detail-row">
-                    <div className="cp-icon-box"><IconBall /></div>
-                    <div className="cp-detail-content">
-                        <label>Marcatori</label>
-                        <ul className="cp-scorers-list">
-                            {event.scorers.map((scorer, idx) => (
-                                <li key={idx}>{scorer}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            )}
-
-            {/* STREAMING */}
-            {event.diretta && (
-              <div className="cp-detail-row">
-                <div className="cp-icon-box">
-                    {isEventEnded ? <IconReplay /> : <IconVideo />}
-                </div>
-                <div className="cp-detail-content">
-                  <label>{isEventEnded ? "Streaming On-Demand" : "Diretta Streaming"}</label>
-                  <p>
-                    <a
-                      href={event.diretta}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="cp-link-diretta"
-                      style={{ color: event.color }}
-                    >
-                      {isEventEnded ? "Rivedi partita" : "Guarda Live"}
-                    </a>
-                  </p>
+              <div className="cpm-tessera cpm-larga">
+                <span className="cpm-icona"><FiList /></span>
+                <div>
+                  <span className="cpm-etichetta">Parziali set</span>
+                  <p className="cpm-valore cpm-mono">{event.partials}</p>
                 </div>
               </div>
             )}
 
-            {/* DESCRIZIONE PULITA */}
-            {event.description && (
-              <div className="cp-detail-row cp-desc-row">
-                <div className="cp-detail-content">
-                  <label>Dettagli</label>
-                  <p style={{ whiteSpace: 'pre-wrap' }}>{event.description}</p>
+            {event.scorers && event.scorers.length > 0 && (
+              <div className="cpm-tessera cpm-larga">
+                <span className="cpm-icona"><FaFutbol /></span>
+                <div>
+                  <span className="cpm-etichetta">Marcatori</span>
+                  <ul className="cpm-marcatori">
+                    {event.scorers.map((scorer, idx) => (
+                      <li key={idx}>{scorer}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             )}
           </div>
 
-          {/* FOOTER ACTIONS */}
-          {mappa && (
-            <div className="cp-modal-footer">
-              {/* Un collegamento vero e non una finestra aperta da JavaScript:
-                  si può tenere premuto per condividerlo, e i blocchi delle
-                  finestre a comparsa non lo fermano. */}
-              <a
-                className="cp-btn-primary"
-                href={mappa}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Apri su Maps
-              </a>
+          {/* Descrizione */}
+          {event.description && (
+            <div className="cpm-descrizione">
+              <span className="cpm-etichetta">Dettagli</span>
+              <p>{event.description}</p>
+            </div>
+          )}
+
+          {(event.diretta || mappa) && (
+            <div className="cpm-azioni">
+              {/* Collegamenti veri e non finestre aperte da JavaScript: si
+                  possono tenere premuti per condividerli, e i blocchi delle
+                  finestre a comparsa non li fermano. */}
+              {event.diretta && (
+                <a className="cpm-bottone cpm-bottone-diretta" href={event.diretta} target="_blank" rel="noopener noreferrer">
+                  {isEventEnded ? <FiRotateCcw aria-hidden="true" /> : <FiVideo aria-hidden="true" />}
+                  {isEventEnded ? "Rivedi la partita" : "Guarda in diretta"}
+                </a>
+              )}
+              {mappa && (
+                <a className="cpm-bottone cpm-bottone-pieno" href={mappa} target="_blank" rel="noreferrer">
+                  <FiMapPin aria-hidden="true" /> Apri su Maps <FiArrowUpRight aria-hidden="true" />
+                </a>
+              )}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

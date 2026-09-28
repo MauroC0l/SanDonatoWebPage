@@ -6,6 +6,7 @@ import {
 import { useAuth } from "../../context/auth";
 import { areaDi, AREA_ATLETA } from "../../utils/percorsi";
 import NavigazioneMobile from "../Admin/NavigazioneMobile";
+import { MARCHIO } from "../AllPages/marchio";
 
 import "../../css/Admin.css";
 
@@ -93,8 +94,14 @@ export default function AreaAtletaLayout() {
           {/* Porta all ingresso dell area riservata, non al sito pubblico:
               per uscire sul sito c e il pulsante apposta qui a destra. */}
           <Link to={AREA_ATLETA} className="adm-brand" title="Torna all ingresso della tua area">
-            <span className="adm-brand-mark">PSD</span>
-            <span className="adm-brand-text">Area riservata</span>
+            {/* Il logo nella tessera bianca, come nell'intestazione del sito */}
+            <span className="adm-brand-mark" aria-hidden="true">
+              <img src={MARCHIO.logo} alt="" width="500" height="500" decoding="async" />
+            </span>
+            <span className="adm-brand-text">
+              <span className="adm-brand-sopra">Area riservata</span>
+              <span className="adm-brand-sotto">San Donato</span>
+            </span>
           </Link>
 
           <div className="adm-user">

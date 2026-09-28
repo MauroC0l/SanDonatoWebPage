@@ -1,6 +1,8 @@
 /* =========================================
    Selettore di data (scope: cda-)
    Scritto da zero: nessuna libreria da rivestire.
+   Le variabili del nuovo disegno hanno un valore di riserva: il
+   calendario si usa anche nella pagina pubblica delle notizie.
    ========================================= */
 
 .cda { position: relative; display: block; }
@@ -62,8 +64,8 @@
 
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-radius: 14px;
-  box-shadow: 0 6px 12px rgba(16, 32, 56, .07), 0 24px 48px -20px rgba(16, 32, 56, .45);
+  border-radius: var(--adm-r-l, 18px);
+  box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -24px rgba(0, 26, 56, .5);
   overflow: hidden;
 
   animation: cda-apre .16s cubic-bezier(.2, .9, .3, 1.1);
@@ -74,7 +76,7 @@
   to   { opacity: 1; transform: none; }
 }
 
-.cda-calendario { padding: 0.75rem; width: 19rem; }
+.cda-calendario { padding: 0.85rem; width: 20rem; }
 
 /* ---------- Intestazione ---------- */
 
@@ -89,11 +91,11 @@
 
 .cda-select {
   font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.25rem 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.3rem 0.45rem;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 9px;
   background: transparent;
   color: var(--adm-ink);
   text-transform: capitalize;
@@ -105,13 +107,13 @@
 .cda-freccia {
   display: grid;
   place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.1rem;
+  height: 2.1rem;
   flex-shrink: 0;
 
   background: transparent;
   border: 1px solid var(--adm-line);
-  border-radius: 8px;
+  border-radius: 50%;
   color: var(--adm-muted);
   font-size: 0.7rem;
   cursor: pointer;
@@ -143,11 +145,11 @@
   /* Quadrati: una griglia di caselle rettangolari si legge peggio, e
      l'altezza fissa tiene il pannello sempre della stessa dimensione. */
   aspect-ratio: 1;
-  min-height: 2.05rem;
+  min-height: 2.2rem;
 
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 50%;
 
   font: inherit;
   font-size: 0.82rem;
@@ -162,15 +164,15 @@
 
 /* Oggi si riconosce dal contorno, il giorno scelto dal pieno: due segnali
    diversi, così non si confondono quando cadono sulla stessa casella. */
-.cda-giorno.is-oggi { border-color: var(--adm-blue); font-weight: 700; }
+.cda-giorno.is-oggi { border-color: var(--adm-arancio, var(--adm-blue)); color: var(--adm-arancio-testo, var(--adm-ink)); font-weight: 800; }
 
 .cda-giorno.is-scelto {
-  background: var(--adm-blue);
-  border-color: var(--adm-blue);
+  background: var(--adm-navy, var(--adm-blue));
+  border-color: var(--adm-navy, var(--adm-blue));
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
 }
-.cda-giorno.is-scelto:hover { background: var(--adm-blue-dark); }
+.cda-giorno.is-scelto:hover { background: var(--adm-navy-deep, var(--adm-blue-dark)); }
 
 /* ---------- Scorciatoie ---------- */
 
@@ -184,15 +186,16 @@
 }
 
 .cda-scorciatoia {
-  padding: 0.3rem 0.55rem;
+  min-height: 32px;
+  padding: 0.3rem 0.7rem;
   background: var(--adm-line-soft);
   border: 0;
   border-radius: 999px;
 
   font: inherit;
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--adm-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--adm-ink-2, var(--adm-muted));
   cursor: pointer;
   white-space: nowrap;
 }
@@ -200,10 +203,10 @@
 
 .cda-fatto {
   margin-left: auto;
-  background: var(--adm-blue);
+  background: var(--adm-navy, var(--adm-blue));
   color: #fff;
 }
-.cda-fatto:hover { background: var(--adm-blue-dark); color: #fff; }
+.cda-fatto:hover { background: var(--adm-navy-deep, var(--adm-blue-dark)); color: #fff; }
 
 /* ---------- Colonna dell'ora ---------- */
 
@@ -212,7 +215,7 @@
   flex-direction: column;
   width: 6.5rem;
   border-left: 1px solid var(--adm-line);
-  background: #fbfcfe;
+  background: var(--adm-surface-2, #fbfcfe);
 }
 
 .cda-ore-titolo {
@@ -240,10 +243,11 @@
 }
 
 .cda-ora {
-  padding: 0.28rem 0.4rem;
+  min-height: 32px;
+  padding: 0.3rem 0.4rem;
   background: transparent;
   border: 0;
-  border-radius: 7px;
+  border-radius: 999px;
 
   font: inherit;
   font-size: 0.78rem;
@@ -253,7 +257,7 @@
   text-align: center;
 }
 .cda-ora:hover { background: var(--adm-line-soft); }
-.cda-ora.is-scelta { background: var(--adm-blue); color: #fff; font-weight: 700; }
+.cda-ora.is-scelta { background: var(--adm-navy, var(--adm-blue)); color: #fff; font-weight: 800; }
 
 /* ---------- Schermi stretti ---------- */
 

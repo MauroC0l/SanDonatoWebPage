@@ -1,326 +1,143 @@
-/* =========================================
-   TUTELA MINORI SYSTEM (Scoped: tml-)
-   ========================================= */
+/* =====================================================
+   Tutela dei minori — prefisso tml-
 
-:root {
-  --tml-bg: #f8fafc;
-  --tml-card-bg: #ffffff;
-  --tml-primary: #0f172a;    
-  --tml-accent: #0ea5e9;     
-  --tml-text-main: #334155;
-  --tml-text-light: #64748b;
-  --tml-border: #e2e8f0;
-  --tml-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --tml-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-}
+   I pezzi comuni ai documenti stanno in Documenti.css. Qui: la scheda di
+   vetro della responsabile nell'apertura, e il blocco scuro con l'aurora
+   che dice a chi scrivere per una segnalazione.
+   ===================================================== */
 
-/* Animazione Ingresso */
-@keyframes tmlFadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* ---------- La responsabile, nell'apertura ---------- */
 
-.tml-fade-in {
-  animation: tmlFadeUp 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-/* LAYOUT PAGE */
-.tml-page-wrapper {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--tml-bg);
-  min-height: 100vh;
-
-  min-height: 100svh;
-  /* Padding fluido */
-  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 1.5rem) clamp(3rem, 8vw, 5rem); 
-  color: var(--tml-text-main);
-  overflow-x: hidden;
-}
-
-.tml-container {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-/* HEADER HERO */
-.tml-header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.tml-icon-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-  color: #0284c7;
-  border-radius: 50%;
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
-}
-
-.tml-title {
-  /* Titolo fluido */
-  font-size: clamp(2rem, 5vw, 3rem); 
-  font-weight: 800;
-  color: var(--tml-primary);
-  margin-bottom: 0.8rem;
-  line-height: 1.1;
-}
-
-.tml-subtitle {
-  font-size: 1.15rem;
-  color: var(--tml-text-light);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* INTRO CARD */
-.tml-intro-card {
-  background: var(--tml-card-bg);
-  padding: 2.5rem;
-  border-radius: 20px;
-  border-left: 5px solid var(--tml-accent);
-  box-shadow: var(--tml-shadow);
-  margin-bottom: 3rem;
-}
-
-.tml-intro-card h2 {
-  font-size: 1.5rem;
-  color: var(--tml-primary);
-  margin-bottom: 1rem;
-}
-
-.tml-intro-card p {
-  line-height: 1.7;
-  font-size: 1.05rem;
-}
-
-/* DOCUMENTI SECTION */
-.tml-docs-section {
-  margin-bottom: 4rem;
-}
-
-.tml-section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--tml-primary);
-  margin-bottom: 1.5rem;
-  padding-left: 0.5rem;
-}
-
-.tml-docs-grid {
-  display: grid;
-  /* Griglia fluida: min 280px */
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: 1.5rem;
-}
-
-.tml-doc-card {
-  background: var(--tml-card-bg);
-  border: 1px solid var(--tml-border);
-  border-radius: 16px;
-  padding: 2rem;
+.tml-referente {
+  position: relative;
   display: flex;
   flex-direction: column;
-  transition: translate .3s ease, box-shadow .3s ease, border-color .3s ease;
+  align-items: flex-start;
+  gap: 6px;
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 28px;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
 }
-
-/* La scheda si solleva e si accende d'arancio: dice che contiene qualcosa
-   da scaricare. translate e non transform, perché la comparsa in fila allo
-   scorrimento usa già transform. */
-.tml-doc-card:hover {
-  translate: 0 -4px;
-  border-color: var(--tml-accent);
-  box-shadow: var(--tml-shadow-hover);
+.tml-referente-icona {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--doc-arancio), #ff3d00);
+  color: #fff;
+  font-size: 1.25rem;
+  box-shadow: 0 10px 24px -10px rgba(255, 102, 0, .8);
 }
-
-.mv-attivo .tml-doc-card[data-rivela] {
-  transition:
-    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    translate .3s ease 0s,
-    box-shadow .3s ease 0s,
-    border-color .3s ease 0s;
+.tml-referente-ruolo {
+  margin: 0;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .6);
 }
-
-.tml-doc-icon {
-  font-size: 2rem;
-  color: var(--tml-text-light);
-  margin-bottom: 1rem;
-}
-
-.tml-doc-content h4 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--tml-primary);
-  margin-bottom: 0.8rem;
-}
-
-.tml-doc-content p {
-  font-size: 0.95rem;
-  color: var(--tml-text-light);
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-  flex-grow: 1;
-}
-
-.tml-download-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--tml-accent);
-  border: 1px solid var(--tml-accent);
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  transition: all 0.2s;
-  width: fit-content;
-  flex-shrink: 0;
-}
-
-.tml-download-btn:hover {
-  background: var(--tml-accent);
+.tml-referente-nome {
+  margin: 0 0 16px;
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1.05;
   color: #fff;
 }
+.tml-referente-btn { max-width: 100%; white-space: normal; text-align: center; }
 
-@media (prefers-reduced-motion: reduce) {
-  .tml-doc-card,
-  .tml-download-btn { transition: none; }
-}
+/* ---------- L'impegno ---------- */
 
-/* SAFEGUARDING BLOCK (Fluidità e Anti-Overflow) */
-.tml-safeguarding-block {
-  background: #0f172a;
-  color: white;
-  border-radius: 24px;
-  /* Padding fluido */
-  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2rem); 
-  display: flex;
-  align-items: flex-start;
-  gap: 2rem;
+.tml .tml-attacco { max-width: 36ch; }
+
+/* ---------- Il blocco della responsabile ---------- */
+
+.tml-blocco-cornice { position: relative; }
+.tml-blocco {
   position: relative;
   overflow: hidden;
-  max-width: 100%; 
-  box-sizing: border-box;
+  isolation: isolate;
+  border-radius: 32px;
+  color: #fff;
+  background: linear-gradient(160deg, var(--doc-blu), var(--doc-notte));
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .8);
 }
-
-.tml-safeguarding-block::before {
-  content: '';
+.tml-blocco-aurora { opacity: .8; }
+.tml-blocco-dentro {
+  position: relative;
+  z-index: 1;
+  padding: clamp(26px, 5vw, 56px);
+}
+.tml-blocco-icona {
   position: absolute;
-  top: -50px; right: -50px;
-  width: 200px; height: 200px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 50%;
+  right: clamp(18px, 4vw, 44px);
+  top: clamp(18px, 4vw, 40px);
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  color: rgba(255, 255, 255, .07);
   pointer-events: none;
 }
-
-.tml-sg-icon {
-  font-size: 3rem;
-  color: var(--tml-accent);
-  background: rgba(255,255,255,0.1);
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.tml-sg-content {
-  flex: 1; 
-  min-width: 0; 
-}
-
-.tml-sg-content h3 {
-  /* Titolo fluido */
-  font-size: clamp(1.4rem, 4vw, 1.6rem); 
-  margin-bottom: 1rem;
-  line-height: 1.2;
-}
-
-.tml-sg-content p {
-  color: rgba(255,255,255,0.8);
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  font-size: 1rem;
-}
-
-.tml-officer-box {
-  background: rgba(255,255,255,0.1);
-  padding: 1.2rem;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.tml-officer-role {
-  font-size: 0.8rem;
+.tml-blocco-occhiello {
+  margin: 0 0 14px;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: rgba(255,255,255,0.6);
+  color: #ffb27a;
+}
+.tml-blocco-titolo {
+  margin: 0 0 16px;
+  font-size: clamp(1.9rem, 5vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.045em;
+  color: #fff;
+}
+.tml-blocco-testo {
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(1.02rem, 1.4vw, 1.12rem);
+  line-height: 1.75;
+  color: rgba(255, 255, 255, .82);
 }
 
-.tml-officer-email {
-  color: white;
-  text-decoration: none;
-  font-weight: 700;
-  /* Email fluida */
-  font-size: clamp(0.9rem, 4vw, 1.1rem); 
+.tml-contatto {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  transition: color 0.2s;
-  
-  word-break: break-word; 
-  overflow-wrap: break-word;
+  gap: 14px 22px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, .14);
 }
-
-.tml-officer-email:hover {
-  color: var(--tml-accent);
+.tml-contatto-ruolo { color: rgba(255, 255, 255, .75); }
+.tml-contatto-ruolo strong { color: #fff; }
+.tml-contatto-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  max-width: 100%;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--doc-blu);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .5);
+  transition: translate .5s var(--doc-curva), background-color .3s ease, color .3s ease;
 }
+.tml-contatto-mail span { overflow-wrap: anywhere; }
+.tml-contatto-mail svg { flex: none; color: var(--doc-arancio); transition: color .3s ease; }
+.tml-contatto-mail:hover {
+  translate: 0 -3px;
+  background: var(--doc-arancio);
+  color: #fff;
+}
+.tml-contatto-mail:hover svg { color: #fff; }
+.tml-contatto-mail:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .tml-page-wrapper {
-    padding: 2rem 1rem 4rem;
-  }
-
-  .tml-safeguarding-block {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 2rem 1.5rem;
-    gap: 1.5rem;
-  }
-  
-  .tml-sg-icon {
-    margin: 0;
-    width: 70px;
-    height: 70px;
-    font-size: 2.5rem;
-  }
-  
-  .tml-officer-box {
-    align-items: center;
-  }
-  
-  .tml-officer-email {
-    justify-content: center;
-    flex-wrap: wrap; 
-  }
-
-  .tml-header { margin-bottom: 2.5rem; }
-  /* Titolo fisso su mobile stretto */
-  .tml-title { font-size: 1.8rem; } 
+@media (prefers-reduced-motion: reduce) {
+  .tml-contatto-mail:hover { translate: none; }
 }

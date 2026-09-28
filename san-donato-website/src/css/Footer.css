@@ -1,16 +1,145 @@
-/* Il fondo di ogni pagina. Vedi Footer.jsx */
+/* =====================================================
+   Il fondo di ogni pagina (prefisso ft-). Vedi Footer.jsx
+
+   Tre piani: la fascia d'invito con l'aurora e il titolo enorme, le
+   colonne (vestite come l'intestazione: tessera bianca del logo e nome in
+   due righe), e la riga finale con il nome gigante solo disegnato sotto.
+   ===================================================== */
 
 .ft {
-  background: linear-gradient(180deg, #00224a 0%, #001835 100%);
+  --ft-notte: #001631;
+  --ft-arancio: var(--psd-arancio, #ff6600);
+  --ft-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(180deg, #00224a 0%, var(--ft-notte) 100%);
   color: #c9d6ea;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: .88rem;
 }
 
-.ft-contenitore {
+/* ---------- Fascia d'invito ---------- */
+
+.ft-invito {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 90% 0%, #0a4a93 0%, transparent 55%),
+    var(--psd-blu, #002b5c);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.ft-invito-aurora { opacity: .75; }
+/* Le linee del campo, come nelle aperture delle pagine */
+.ft-invito::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 90% at 50% 50%, #000 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(80% 90% at 50% 50%, #000 20%, transparent 80%);
+}
+.ft-invito-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 22px;
   max-width: 1320px;
   margin: 0 auto;
-  padding: clamp(2.2rem, 5vw, 3.4rem) clamp(1rem, 4vw, 2rem) 1.4rem;
+  padding: clamp(56px, 8vw, 104px) clamp(1rem, 4vw, 2rem);
+}
+.ft-invito-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ffb27a;
+}
+.ft-punto {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ft-arancio);
+}
+.ft-punto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--ft-arancio);
+  animation: ft-respiro 2.2s var(--ft-curva) infinite;
+}
+@keyframes ft-respiro {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+.ft-invito-titolo {
+  margin: 0;
+  max-width: 12ch;
+  font-size: clamp(2.8rem, 10vw, 7rem);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.055em;
+  color: #fff;
+}
+.ft-invito-titolo .mv-testo-vivo { display: inline-block; padding-bottom: .08em; }
+.ft-invito-azioni { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.ft-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1.02rem;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.ft-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.ft-btn--pieno {
+  color: #fff;
+  background: linear-gradient(135deg, var(--ft-arancio), #ff3d00);
+  box-shadow: 0 10px 30px -8px rgba(255, 102, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.ft-btn--pieno:hover { color: #fff; box-shadow: 0 16px 40px -8px rgba(255, 102, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.ft-btn--pieno svg { transition: transform .35s var(--ft-curva); }
+.ft-btn--pieno:hover svg { transform: translateX(3px); }
+.ft-btn--vetro { color: #fff; }
+.ft-btn--vetro:hover { color: #fff; background: rgba(255, 255, 255, .2); }
+
+@media (min-width: 900px) {
+  .ft-invito-dentro {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: 48px;
+  }
+  .ft-invito-occhiello { grid-column: 1 / -1; }
+  .ft-invito-azioni { padding-bottom: 10px; }
+}
+
+/* ---------- Le colonne ---------- */
+
+.ft-contenitore {
+  position: relative;
+  z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(2.6rem, 6vw, 4.2rem) clamp(1rem, 4vw, 2rem) 1.4rem;
 }
 
 /*
@@ -24,76 +153,108 @@
 .ft-alto {
   display: grid;
   grid-template-columns: minmax(240px, 1.6fr) repeat(auto-fit, minmax(170px, 1fr));
-  gap: clamp(1.5rem, 4vw, 2.5rem);
-  padding-bottom: 2rem;
+  gap: clamp(1.8rem, 4vw, 2.5rem);
+  padding-bottom: 2.4rem;
   border-bottom: 1px solid rgba(255, 255, 255, .1);
 }
 
 /* ---------- La società ---------- */
 
+/* Il marchio come nell'intestazione: tessera bianca e nome in due righe */
 .ft-marchio {
-  display: block;
-  margin-bottom: .6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
   color: #fff;
-  font-size: 1.02rem;
+  text-decoration: none;
+}
+.ft-marchio:focus-visible { outline: 2px solid var(--ft-arancio); outline-offset: 4px; border-radius: 14px; }
+.ft-tessera {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 10px 24px -10px rgba(255, 102, 0, .55);
+  transition: rotate .5s var(--ft-curva), scale .5s var(--ft-curva);
+}
+.ft-tessera img { width: 88%; height: 88%; object-fit: contain; }
+.ft-marchio:hover .ft-tessera { rotate: -6deg; scale: 1.06; }
+.ft-nome { display: flex; flex-direction: column; line-height: 1; }
+.ft-nome-sopra {
+  margin-bottom: .3rem;
+  color: #ff8a3d;
+  font-size: .62rem;
   font-weight: 800;
-  letter-spacing: -.01em;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.ft-nome-sotto {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
 }
 
 .ft-frase {
-  max-width: 42ch;
-  margin: 0 0 1.1rem;
-  font-size: .84rem;
-  line-height: 1.55;
-  opacity: .8;
+  max-width: 40ch;
+  margin: 0 0 1.3rem;
+  font-size: .9rem;
+  line-height: 1.6;
+  color: rgba(201, 214, 234, .85);
 }
 
-.ft-social {
-  display: flex;
-  gap: .5rem;
-}
-
+.ft-social { display: flex; gap: .55rem; }
 .ft-social a {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .08);
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .1);
   color: #fff;
-  font-size: .9rem;
+  font-size: .95rem;
   text-decoration: none;
-
-  transition: background-color .25s ease, transform .25s ease;
+  transition: background-color .3s ease, border-color .3s ease, translate .4s var(--ft-curva), rotate .4s var(--ft-curva);
 }
-
 .ft-social a:hover {
-  background: #ff6600;
-  transform: translateY(-2px);
+  background: var(--ft-arancio);
+  border-color: transparent;
+  translate: 0 -3px;
+  rotate: -6deg;
 }
-
-.ft-social a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
+.ft-social a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* ---------- Colonne di collegamenti ---------- */
 
 .ft-colonna-titolo {
-  margin: 0 0 .7rem;
+  margin: 0 0 1rem;
   color: #fff;
-  font-size: .76rem;
-  font-weight: 700;
-  letter-spacing: .09em;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
   text-transform: uppercase;
+}
+.ft-colonna-titolo::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin: 0 8px 3px 0;
+  border-radius: 2px;
+  background: var(--ft-arancio);
+  vertical-align: middle;
 }
 
 .ft-colonna ul {
   list-style: none;
   display: grid;
-  gap: .45rem;
+  gap: .6rem;
   margin: 0;
   padding: 0;
 }
@@ -102,61 +263,37 @@
    sfondo alto un pixel, così segue anche le voci che vanno a capo. */
 .ft-colonna a {
   color: #c9d6ea;
-  font-size: .85rem;
+  font-size: .92rem;
   text-decoration: none;
   background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
   padding-bottom: 1px;
-  transition: color .2s ease, background-size .35s cubic-bezier(.16, 1, .3, 1);
+  transition: color .2s ease, background-size .35s var(--ft-curva);
 }
-
-.ft-colonna a:hover { background-size: 100% 1px; }
-
-.ft-colonna a:hover { color: #ff8534; }
-
-.ft-colonna a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 3px;
-}
+.ft-colonna a:hover { color: #ff8534; background-size: 100% 1px; }
+.ft-colonna a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 3px; }
 
 /* ---------- Dove siamo ---------- */
 
-.ft-dove {
-  display: grid;
-  align-content: start;
-  gap: .55rem;
-}
+.ft-dove { display: grid; align-content: start; gap: .7rem; }
+.ft-dove .ft-colonna-titolo { margin-bottom: .3rem; }
 
 .ft-contatto {
   display: flex;
   align-items: flex-start;
-  gap: .45rem;
-
+  gap: .55rem;
   color: #c9d6ea;
-  font-size: .85rem;
-  line-height: 1.4;
+  font-size: .9rem;
+  line-height: 1.45;
   text-decoration: none;
+  background: none;
   transition: color .2s ease;
 }
-
-.ft-contatto svg {
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: #ff6600;
-}
-
+.ft-contatto span { min-width: 0; overflow-wrap: anywhere; }
+.ft-contatto svg { flex: 0 0 auto; margin-top: 3px; color: var(--ft-arancio); }
 .ft-contatto:hover { color: #fff; }
-
-/* L'icona del contatto fa un piccolo passo verso il testo: dice che la
-   riga si apre, senza bisogno di sottolinearla tutta. */
+/* L'icona fa un piccolo passo verso il testo: dice che la riga si apre */
 .ft-contatto svg:first-child { transition: transform .25s ease; }
 .ft-contatto:hover svg:first-child { transform: translateX(2px); }
-
-@media (prefers-reduced-motion: reduce) {
-  .ft-colonna a,
-  .ft-contatto svg:first-child,
-  .ft-social a { transition: none; }
-}
 .ft-fuori { opacity: .5; font-size: .8rem; }
 
 /* ---------- Riga finale ---------- */
@@ -165,26 +302,53 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: .4rem 1.2rem;
-
-  padding-top: 1.2rem;
-  font-size: .76rem;
-  opacity: .65;
+  gap: .6rem 1.4rem;
+  padding-top: 1.3rem;
+  font-size: .78rem;
+  color: rgba(201, 214, 234, .7);
 }
+/* I dati fiscali non vanno mai a capo in mezzo a una partita IVA */
+.ft-fiscali { white-space: nowrap; }
 
-.ft-fiscali {
-  /* I dati fiscali non vanno mai a capo in mezzo a una partita IVA */
+.ft-su {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-left: auto;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .05);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .3s ease, border-color .3s ease;
+}
+.ft-su svg { transition: transform .4s var(--ft-curva); }
+.ft-su:hover { background: var(--ft-arancio); border-color: transparent; }
+.ft-su:hover svg { transform: translateY(-3px); }
+.ft-su:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Il nome gigante, solo disegnato, che si taglia sul bordo in basso */
+.ft-firma {
+  position: relative;
+  z-index: 0;
+  margin: 1rem 0 -0.18em;
+  font-size: clamp(4.2rem, 17vw, 16rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  text-align: center;
   white-space: nowrap;
-}
-
-@media (max-width: 520px) {
-  .ft-basso {
-    justify-content: flex-start;
-    text-align: left;
-  }
-
-  .ft-fiscali { white-space: normal; }
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .09);
+  background: linear-gradient(180deg, rgba(255, 102, 0, .16), transparent 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  pointer-events: none;
+  user-select: none;
 }
 
 /*
@@ -192,13 +356,24 @@
  *
  * La griglia di sopra chiede almeno 240px per la società e 170px per ogni
  * colonna: su 358px non ci stavano nemmeno due colonne, la griglia
- * sbordava di 60px e la pagina intera scorreva di lato — con il nome della
- * società tagliato ("LA POLISPORTIV") e tutto il resto un po' fuori.
+ * sbordava e la pagina intera scorreva di lato.
  */
 @media (max-width: 600px) {
   .ft-alto { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ft-alto > .ft-chi,
   .ft-alto > .ft-dove { grid-column: 1 / -1; }
-  .ft-marchio { overflow-wrap: anywhere; }
   .ft-colonna a { overflow-wrap: anywhere; }
+  .ft-fiscali { white-space: normal; }
+  .ft-su { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-punto::after { animation: none; opacity: 0; }
+  .ft-colonna a,
+  .ft-contatto svg:first-child,
+  .ft-social a,
+  .ft-tessera,
+  .ft-su svg { transition: none; }
+  .ft-social a:hover { translate: none; rotate: none; }
+  .ft-marchio:hover .ft-tessera { rotate: none; scale: none; }
 }

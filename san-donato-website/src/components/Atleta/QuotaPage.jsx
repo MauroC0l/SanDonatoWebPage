@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaExclamationCircle, FaReceipt, FaInfoCircle } from "react-icons/fa";
 import { getIscrizione, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -8,6 +8,7 @@ import { euro } from "../../utils/soldi";
 import RiquadroQuota, { ElencoVersamenti } from "./RiquadroQuota";
 import "../../css/Admin.css";
 import "../../css/Quota.css";
+import "../../css/AreaAtleta.css";
 
 /**
  * Quota e versamenti: quanto si deve, quanto si è versato, quando.
@@ -28,6 +29,15 @@ export default function QuotaPage() {
   const [iscrizione, setIscrizione] = useState(null);
   const [caricamento, setCaricamento] = useState(true);
   const [errore, setErrore] = useState("");
+
+  /* "?paga=1" arriva dal pulsante "Paga" della home: la finestra di
+     pagamento si apre da sola. Letto una volta e poi tolto dall'indirizzo,
+     così ricaricare la pagina o tornarci con "indietro" non la riapre. */
+  const [parametri, setParametri] = useSearchParams();
+  const [apriSubito] = useState(() => parametri.get("paga") === "1");
+  useEffect(() => {
+    if (parametri.has("paga")) setParametri({}, { replace: true });
+  }, [parametri, setParametri]);
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -59,9 +69,10 @@ export default function QuotaPage() {
 
   if (caricamento) {
     return (
-      <div className="adm-loading">
-        <div className="adm-spinner" />
-        <p>Carico la tua quota…</p>
+      <div className="adm-page aa-pagina" aria-busy="true">
+        <span className="adm-sagoma adm-sagoma-titolo" />
+        <span className="adm-sagoma adm-sagoma-scheda" style={{ height: "12rem" }} />
+        <span className="adm-sagoma adm-sagoma-scheda" />
       </div>
     );
   }
@@ -69,12 +80,12 @@ export default function QuotaPage() {
   const versamenti = iscrizione?.pagamenti ?? [];
 
   return (
-    <div className="adm-page">
+    <div className="adm-page aa-pagina">
       <div className="adm-page-head">
         <div className="adm-head-left">
-          <h1 className="adm-page-title">Quota e versamenti</h1>
+          <h1 className="adm-page-title">La tua quota</h1>
           <p className="adm-page-sub">
-            A che punto sei con la quota di quest&apos;anno.
+            Quanto resta da pagare quest&apos;anno, e quello che hai già versato.
           </p>
         </div>
       </div>
@@ -88,11 +99,11 @@ export default function QuotaPage() {
       {/* La fascia senza il pulsante "tutti i versamenti": l'elenco è
           qui sotto, e una finestra che lo ripete coprirebbe la pagina per
           mostrare quello che c'era già. */}
-      <RiquadroQuota iscrizione={iscrizione} conStorico={false} />
+      <RiquadroQuota iscrizione={iscrizione} conStorico={false} apriSubito={apriSubito} />
 
       <section className="adm-panel">
         <h2 className="adm-panel-title">
-          <FaReceipt aria-hidden="true" /> I tuoi versamenti
+          <FaReceipt aria-hidden="true" /> Quello che hai già versato
         </h2>
 
         {versamenti.length === 0 ? (

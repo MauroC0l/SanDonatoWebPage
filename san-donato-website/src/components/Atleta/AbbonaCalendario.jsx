@@ -28,7 +28,7 @@ export default function AbbonaCalendario({ squadraId, nome }) {
 
   return (
     <section className="adm-panel atl-abbona">
-      <h2 className="adm-panel-title">Sul tuo telefono</h2>
+      <h2 className="adm-panel-title">Il calendario sul tuo telefono</h2>
       <p className="adm-hint atl-abbona-testo">
         Aggiungi il calendario di {nome} a quello del telefono: partite spostate e
         risultati si aggiornano da soli.

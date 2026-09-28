@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   FaArrowLeft, FaSave, FaExclamationCircle,
-  FaImage, FaTrashAlt, FaInfoCircle, FaTrophy, FaEye
+  FaImage, FaTrashAlt, FaInfoCircle, FaTrophy, FaEye, FaUsers, FaClock,
+  FaMapMarkerAlt, FaStickyNote, FaChevronDown
 } from "react-icons/fa";
 import {
-  getEvento, createEvento, updateEvento, listSquadre, listEventi,
+  getEvento, createEvento, updateEvento, deleteEvento, listSquadre, listEventi,
   collegaMediaEvento, scollegaMediaEvento,
   uploadMedia, AuthError
 } from "../../api/adminApi";
@@ -16,7 +17,9 @@ import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import SceltaLuogo from "./SceltaLuogo";
 import CampoData from "./CampoData";
+import { esitoDi } from "./esitoPerSport";
 import "../../css/Admin.css";
+import "../../css/admin/Partite.css";
 
 /* Quello che di una partita ufficiale si può scrivere dal pannello: la
    federazione non lo conosce, quindi non lo riscrive. Il resto è suo. */
@@ -57,43 +60,6 @@ const TIPI_EVENTI_ADMIN = [
 ];
 
 const SPORT_SQUADRA = ["Calcio", "Pallavolo", "Basket", "Societa"];
-
-/**
- * Come si racconta l'esito di una partita, sport per sport.
- *
- * Prima il modulo era uno solo per tutti: chi inseriva una partita di volley
- * si trovava davanti il campo "Marcatori", che nella pallavolo non esiste, e
- * chi inseriva una di calcio il campo "Parziali", che nel calcio non c'è. I
- * campi che non servono non sono neutri: fanno dubitare di stare compilando
- * la cosa giusta, e ogni tanto qualcuno li riempie lo stesso.
- *
- * Un campo assente da questa tabella non viene mostrato NÉ inviato: il dato
- * eventualmente già in archivio resta dov'è, e il modulo lo segnala invece di
- * cancellarlo di nascosto.
- */
-const ESITO_PER_SPORT = {
-  Calcio: {
-    risultato: { etichetta: "Risultato", segnaposto: "Es. 3 - 1" },
-    marcatori: { etichetta: "Marcatori", segnaposto: "Es. Rossi, Bianchi, Verdi" }
-  },
-  Pallavolo: {
-    risultato: { etichetta: "Set vinti", segnaposto: "Es. 3 - 1" },
-    parziali: { etichetta: "Parziali dei set", segnaposto: "Es. 25-20, 25-18, 23-25" }
-  },
-  Basket: {
-    risultato: { etichetta: "Punteggio", segnaposto: "Es. 74 - 68" },
-    parziali: { etichetta: "Parziali dei quarti", segnaposto: "Es. 18-15, 22-20, 14-19, 20-17" }
-  }
-};
-
-/* Per gli eventi di società, e per tutto ciò che non è uno dei tre sport,
-   si mostra il modulo completo: non sapendo che partita sia, togliere un
-   campo rischia di togliere proprio quello che serviva. */
-const ESITO_GENERICO = {
-  risultato: { etichetta: "Risultato", segnaposto: "Es. 3 - 1" },
-  parziali: { etichetta: "Parziali", segnaposto: "Es. 25-20, 25-18, 23-25" },
-  marcatori: { etichetta: "Marcatori", segnaposto: "Es. Rossi, Bianchi, Verdi" }
-};
 
 const VUOTO = {
   squadraId: "",
@@ -139,9 +105,26 @@ export default function EventoEditorPage({ genere = "partite" }) {
   const navigate = useNavigate();
   const { sessionExpired } = useAuth();
   const area = useArea();
-  const { avvisa } = useDialoghi();
+  const { avvisa, conferma } = useDialoghi();
+  const [parametri] = useSearchParams();
 
-  const [form, setForm] = useState(() => ({ ...VUOTO, tipo: ePartita ? "partita" : "evento" }));
+  /* Dall'elenco si arriva anche con il tipo già scelto ("+ Allenamento")
+     o chiedendo il risultato ("?esito=1"): due gesti in meno per le due
+     cose che un allenatore fa ogni settimana. */
+  const tipiProponibili = ePartita ? TIPI_PARTITA : TIPI_EVENTI_ADMIN;
+  const chiedeEsito = parametri.get("esito") === "1";
+
+  const [form, setForm] = useState(() => {
+    const richiesto = parametri.get("tipo");
+    const tipo = tipiProponibili.some((t) => t.valore === richiesto)
+      ? richiesto
+      : (ePartita ? "partita" : "evento");
+    return { ...VUOTO, tipo };
+  });
+  // Fissato all'apertura, come nell'elenco: serve a dire "già giocata"
+  const [adesso] = useState(() => new Date());
+  const campoRisultato = useRef(null);
+  const riquadroEsito = useRef(null);
   const [squadre, setSquadre] = useState([]);
   const [squadreAmmesse, setSquadreAmmesse] = useState(null);
   const [media, setMedia] = useState([]);
@@ -175,11 +158,20 @@ export default function EventoEditorPage({ genere = "partite" }) {
         if (!attivo) return;
         setSquadre(elenco);
         setSquadreAmmesse(ammesse);
+
+        /* Chi allena una squadra sola non deve sceglierla ogni volta: in
+           una partita nuova è già messa. Solo se il campo è ancora vuoto. */
+        const proponibili = Array.isArray(ammesse)
+          ? elenco.filter((s) => ammesse.includes(s.id))
+          : elenco;
+        if (nuovo && proponibili.length === 1) {
+          setForm((prima) => (prima.squadraId ? prima : { ...prima, squadraId: String(proponibili[0].id) }));
+        }
       })
       .catch(gestisciErrore);
 
     return () => { attivo = false; };
-  }, [gestisciErrore]);
+  }, [gestisciErrore, nuovo]);
 
   /* ---------- Caricamento di un evento esistente ---------- */
 
@@ -258,9 +250,20 @@ export default function EventoEditorPage({ genere = "partite" }) {
   // Senza squadra scelta vale quello di chi compila, se ne ha uno solo.
   const sportInVigore = form.sport || squadraScelta?.sport || sportUnico || null;
 
-  const esito = sportInVigore
-    ? (ESITO_PER_SPORT[sportInVigore] ?? ESITO_GENERICO)
-    : ESITO_GENERICO;
+  const esito = esitoDi(sportInVigore);
+
+  /* Il titolo che si scriverebbe comunque: "Allievi - Rivoli". Lasciato
+     vuoto, si usa questo — chi aggiunge un'amichevole dal telefono ha già
+     scelto squadra e avversario, e riscriverli tutti e due in un terzo
+     campo era una fatica senza motivo. */
+  const titoloProposto = useMemo(() => {
+    if (!squadraScelta) return "";
+    if (form.tipo === "allenamento") return `Allenamento ${squadraScelta.nome}`;
+    const avversario = form.avversario.trim();
+    return avversario ? `${squadraScelta.nome} - ${avversario}` : "";
+  }, [squadraScelta, form.tipo, form.avversario]);
+
+  const titoloFinale = form.titolo.trim() || titoloProposto;
 
   /* ---------- Salvataggio ---------- */
 
@@ -269,7 +272,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
     setErrore("");
 
     if (!form.squadraId) return setErrore("Scegli la squadra.");
-    if (!form.titolo.trim()) return setErrore("Il titolo è obbligatorio.");
+    if (!titoloFinale) return setErrore("Scrivi l'avversario o un titolo: serve a riconoscerla nel calendario.");
     if (!form.inizio) return setErrore("Indica quando comincia.");
 
     setSalvataggio(true);
@@ -278,7 +281,7 @@ export default function EventoEditorPage({ genere = "partite" }) {
       squadraId: Number(form.squadraId),
       tipo: form.tipo,
       sport: form.sport || null,
-      titolo: form.titolo.trim(),
+      titolo: titoloFinale,
       avversario: form.avversario.trim() || null,
       inizio: form.inizio,
       fine: form.fine || null,
@@ -317,12 +320,12 @@ export default function EventoEditorPage({ genere = "partite" }) {
     try {
       if (nuovo) {
         const creato = await createEvento(dati);
-        avvisa("Evento creato: è nel calendario del sito.");
+        avvisa(ePartita ? "Partita aggiunta: è nel calendario del sito." : "Evento creato: è nel calendario del sito.");
         navigate(`${area}/${sezione}/${creato.id}`, { replace: true });
         return;
       }
       await updateEvento(id, dati);
-      avvisa("Evento salvato: è nel calendario del sito.");
+      avvisa("Salvato: il calendario del sito è già aggiornato.");
     } catch (err) {
       gestisciErrore(err);
     } finally {
@@ -364,6 +367,29 @@ export default function EventoEditorPage({ genere = "partite" }) {
     }
   };
 
+  /* ---------- Eliminazione ----------
+     C'era solo nell'elenco, con il cestino accanto a ogni riga. Sul
+     telefono quel cestino stava a un centimetro da "Apri": qui, dentro
+     alla partita, lo si preme solo volendo. Stessa regola dell'elenco: una
+     partita ufficiale si toglie solo quando la federazione l'ha tolta. */
+  const elimina = async () => {
+    const ok = await conferma({
+      titolo: ePartita ? "Eliminare questa partita?" : "Eliminare questo evento?",
+      testo: `"${form.titolo}" sparisce dal calendario del sito. Questa non si annulla.`,
+      conferma: "Elimina",
+      pericolo: true
+    });
+    if (!ok) return;
+
+    try {
+      await deleteEvento(id);
+      avvisa(ePartita ? "Partita eliminata." : "Evento eliminato.");
+      navigate(`${area}/${sezione}`, { replace: true });
+    } catch (err) {
+      gestisciErrore(err);
+    }
+  };
+
   const togliFile = async (mediaId) => {
     try {
       setMedia(await scollegaMediaEvento(id, mediaId));
@@ -400,13 +426,35 @@ export default function EventoEditorPage({ genere = "partite" }) {
     }))
   ], [squadraScelta]);
 
+  /* ---------- Il risultato in primo piano ----------
+
+     Di una partita già giocata, la domanda è una sola: com'è finita. Il
+     riquadro dell'esito sale in cima al modulo e, se si è arrivati da
+     "Risultato" nell'elenco, il cursore è già nel campo: si scrive e si
+     salva, senza scorrere oltre la mappa. */
+  const eUnaPartita = form.tipo === "partita" || form.tipo === "torneo";
+  const giaGiocata = !nuovo && Boolean(form.inizio) && new Date(form.fine || form.inizio) <= adesso;
+  const esitoInCima = eUnaPartita && (chiedeEsito || giaGiocata);
+
+  useEffect(() => {
+    if (caricamento || !chiedeEsito) return;
+    const campo = campoRisultato.current;
+    // In una partita ufficiale il risultato è bloccato: si porta lì la
+    // vista, e basta
+    if (campo && !campo.disabled) {
+      campo.focus({ preventScroll: true });
+    }
+    riquadroEsito.current?.scrollIntoView({ block: "center" });
+  }, [caricamento, chiedeEsito]);
+
   /* ---------- Render ---------- */
 
   if (caricamento) {
     return (
-      <div className="adm-loading">
-        <div className="adm-spinner" />
-        <p>Caricamento dell&apos;evento…</p>
+      <div className="adm-page ev-attesa-editor" aria-busy="true">
+        <span className="adm-sagoma adm-sagoma-titolo" />
+        <span className="adm-sagoma adm-sagoma-scheda" />
+        <span className="adm-sagoma adm-sagoma-scheda" />
       </div>
     );
   }
@@ -414,7 +462,6 @@ export default function EventoEditorPage({ genere = "partite" }) {
   const occupato = salvataggio || caricandoFile;
   // I campi che in una partita ufficiale scrive la federazione
   const bloccato = occupato || Boolean(ufficiale);
-  const eUnaPartita = form.tipo === "partita" || form.tipo === "torneo";
 
   /* Campi che questo sport non prevede ma che hanno già qualcosa scritto:
      vanno detti, non nascosti in silenzio. */
@@ -423,26 +470,136 @@ export default function EventoEditorPage({ genere = "partite" }) {
     !esito.marcatori && form.marcatori ? "i marcatori" : null
   ].filter(Boolean);
 
+  const nomeCosa = ePartita ? "partita" : "evento";
+  const titoloPagina = nuovo
+    ? (form.tipo === "allenamento" ? "Nuovo allenamento" : ePartita ? "Nuova partita" : "Nuovo evento")
+    : (form.titolo || (ePartita ? "Partita" : "Evento"));
+
+  const esci = () => navigate(`${area}/${sezione}`);
+
+  /* Il riquadro dell'esito, disegnato una volta sola e messo dove serve:
+     in cima per una partita giocata, di lato per una ancora da giocare. */
+  const pannelloEsito = (
+    <section
+      ref={riquadroEsito}
+      className={`adm-panel ev-esito ${esitoInCima ? "is-in-cima" : ""}`}
+      aria-labelledby="ev-esito-titolo"
+    >
+      <h2 className="adm-panel-title" id="ev-esito-titolo">
+        <FaTrophy aria-hidden="true" /> {!eUnaPartita ? "Diretta" : esitoInCima ? "Com'è finita?" : "Risultato e diretta"}
+        {sportInVigore && eUnaPartita && <span className="adm-sport-tag">{sportInVigore}</span>}
+      </h2>
+
+      {/* Un allenamento non ha un risultato: i campi restano in archivio
+          (e il modulo li rimanda uguali), ma non li si propone. */}
+      {eUnaPartita && (
+        <>
+          {!giaGiocata && !ufficiale && (
+            <p className="adm-hint ev-esito-nota">
+              {nuovo
+                ? "Solo se la partita è già stata giocata: altrimenti lo scrivi dopo."
+                : "Si compila dopo il fischio finale."}
+            </p>
+          )}
+
+          {esito.risultato && (
+            <label className="adm-field">
+              <span className="adm-label">{esito.risultato.etichetta}</span>
+              <input
+                ref={campoRisultato}
+                type="text"
+                className="adm-input ev-esito-punteggio"
+                value={form.risultato}
+                onChange={(e) => aggiorna({ risultato: e.target.value })}
+                placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.risultato.segnaposto}
+                autoComplete="off"
+                disabled={bloccato}
+              />
+            </label>
+          )}
+
+          {esito.parziali && (
+            <label className="adm-field">
+              <span className="adm-label">{esito.parziali.etichetta}</span>
+              <input
+                type="text"
+                className="adm-input"
+                value={form.parziali}
+                onChange={(e) => aggiorna({ parziali: e.target.value })}
+                placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.parziali.segnaposto}
+                autoComplete="off"
+                disabled={bloccato}
+              />
+              {!ufficiale && (
+                <span className="adm-hint">Separati da virgola, nell&apos;ordine in cui si sono giocati.</span>
+              )}
+            </label>
+          )}
+
+          {esito.marcatori && (
+            <label className="adm-field">
+              <span className="adm-label">{esito.marcatori.etichetta} <em>(facoltativi)</em></span>
+              <input
+                type="text"
+                className="adm-input"
+                value={form.marcatori}
+                onChange={(e) => aggiorna({ marcatori: e.target.value })}
+                placeholder={esito.marcatori.segnaposto}
+                autoComplete="off"
+                disabled={occupato}
+              />
+              <span className="adm-hint">Separati da virgola.</span>
+            </label>
+          )}
+
+          {fuoriPosto.length > 0 && (
+            <div className="adm-alert adm-alert-info">
+              <FaInfoCircle />
+              <span>
+                Questo evento ha ancora {fuoriPosto.join(" e ")} scritti da prima,
+                ma nel {sportInVigore?.toLowerCase()} non si usano: restano in
+                archivio e non li tocca nessuno.
+              </span>
+            </div>
+          )}
+        </>
+      )}
+
+      <label className="adm-field">
+        <span className="adm-label">Link della diretta <em>(facoltativo)</em></span>
+        <input
+          type="url"
+          className="adm-input"
+          value={form.diretta}
+          onChange={(e) => aggiorna({ diretta: e.target.value })}
+          placeholder="https://…"
+          disabled={occupato}
+        />
+        <span className="adm-hint">YouTube, Facebook o altro: sul sito compare il pulsante per guardarla.</span>
+      </label>
+    </section>
+  );
+
   return (
-    <form className="adm-page adm-editor-page" onSubmit={salva}>
-      <div className="adm-page-head">
-        <div className="adm-head-left">
-          <button
-            type="button"
-            className="adm-btn adm-btn-ghost"
-            onClick={() => navigate(`${area}/${sezione}`)}
-          >
-            <FaArrowLeft /> Eventi
-          </button>
-          <h1 className="adm-page-title">{nuovo ? "Nuovo evento" : "Modifica evento"}</h1>
+    <form className="adm-page adm-editor-page ev-editor" onSubmit={salva} noValidate>
+      <header className="ev-editor-testa">
+        <button type="button" className="adm-btn adm-btn-ghost ev-indietro" onClick={esci}>
+          <FaArrowLeft aria-hidden="true" /> {ePartita ? "Partite" : "Eventi"}
+        </button>
+
+        <div className="ev-editor-titoli">
+          <p className="adm-occhiello">
+            {nuovo ? (ePartita ? "Aggiungi al calendario" : "Nuovo nel calendario") : (ufficiale ? "Partita ufficiale" : `Modifica ${nomeCosa}`)}
+          </p>
+          <h1 className="adm-page-title">{titoloPagina}</h1>
         </div>
 
-        <div className="adm-head-actions">
-          <button type="submit" className="adm-btn adm-btn-primary" disabled={occupato}>
-            <FaSave /> {salvataggio ? "Salvataggio…" : "Salva"}
-          </button>
-        </div>
-      </div>
+        {/* Sul computer il Salva sta anche qui in alto; sul telefono c'è la
+            barra in fondo, sempre a portata di pollice */}
+        <button type="submit" className="adm-btn adm-btn-primary ev-salva-alto" disabled={occupato}>
+          <FaSave aria-hidden="true" /> {salvataggio ? "Salvataggio…" : "Salva"}
+        </button>
+      </header>
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">
@@ -465,127 +622,178 @@ export default function EventoEditorPage({ genere = "partite" }) {
       )}
 
       <div className="adm-editor-grid">
-        <div className="adm-editor-col">
+        <div className="adm-editor-col ev-editor-col">
 
-          <div className="adm-due-colonne">
+          {esitoInCima && pannelloEsito}
+
+          {/* ---------- Chi gioca ---------- */}
+          <section className="adm-panel ev-blocco" aria-labelledby="ev-chi">
+            <h2 className="adm-panel-title" id="ev-chi">
+              <FaUsers aria-hidden="true" /> {ePartita ? "Chi gioca" : "Cosa e per chi"}
+            </h2>
+
+            {/* Il tipo con dei pulsanti e non una tendina: le scelte sono
+                poche, e si vedono tutte senza aprire niente */}
+            <div className="adm-field">
+              <span className="adm-label" id="ev-tipo-etichetta">Che cos&apos;è</span>
+              <div className="ev-tipi" role="radiogroup" aria-labelledby="ev-tipo-etichetta">
+                {tipiProponibili.map((t) => (
+                  <button
+                    key={t.valore}
+                    type="button"
+                    role="radio"
+                    aria-checked={form.tipo === t.valore}
+                    className={`ev-tipo ${form.tipo === t.valore ? "is-scelto" : ""}`}
+                    onClick={() => aggiorna({ tipo: t.valore })}
+                    disabled={bloccato}
+                  >
+                    {t.etichetta}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="adm-field">
               <span className="adm-label">Squadra</span>
               <Tendina
                 valore={form.squadraId}
                 onChange={(v) => aggiorna({ squadraId: v })}
                 opzioni={opzioniSquadra}
-                segnaposto="Scegli…"
+                segnaposto="Scegli la squadra…"
                 disabilitato={bloccato}
                 etichettaAria="Squadra"
                 vuoto="Nessuna squadra fra quelle che gestisci."
               />
             </div>
 
-            <div className="adm-field">
-              <span className="adm-label">Tipo</span>
-              <Tendina
-                valore={form.tipo}
-                onChange={(v) => aggiorna({ tipo: v })}
-                opzioni={ePartita ? TIPI_PARTITA : TIPI_EVENTI_ADMIN}
-                disabilitato={bloccato}
-                etichettaAria="Tipo di evento"
-              />
-            </div>
-          </div>
+            {form.tipo !== "allenamento" && (
+              <label className="adm-field">
+                <span className="adm-label">Contro chi <em>(facoltativo)</em></span>
+                <input
+                  type="text"
+                  className="adm-input"
+                  value={form.avversario}
+                  onChange={(e) => aggiorna({ avversario: e.target.value })}
+                  placeholder="Es. Rivoli"
+                  autoComplete="off"
+                  disabled={bloccato}
+                />
+              </label>
+            )}
 
-          {/* Lo sport di norma viene dalla squadra. Questo campo serve solo
-              quando non basta: un evento del calendario di società che
-              riguarda una disciplina precisa. */}
-          <div className="adm-field">
-            <span className="adm-label">
-              Sport <em>(solo se diverso da quello della squadra)</em>
-            </span>
-            <Tendina
-              valore={form.sport}
-              onChange={(v) => aggiorna({ sport: v })}
-              opzioni={opzioniSport}
+            <label className="adm-field">
+              <span className="adm-label">
+                Titolo nel calendario {titoloProposto && <em>(facoltativo)</em>}
+              </span>
+              <input
+                type="text"
+                className="adm-input"
+                value={form.titolo}
+                onChange={(e) => aggiorna({ titolo: e.target.value })}
+                placeholder={titoloProposto || (ePartita ? "Es. Allievi - Rivoli" : "Es. Assemblea dei soci")}
+                disabled={bloccato}
+              />
+              {titoloProposto && !form.titolo && !ufficiale && (
+                <span className="adm-hint">Se lo lasci vuoto si usa quello scritto in grigio.</span>
+              )}
+            </label>
+
+            {/* Lo sport di norma viene dalla squadra: questo serve di rado
+                (un evento di società che riguarda una disciplina precisa),
+                e sta chiuso finché non lo si cerca. Aperto da solo quando
+                è già scelto, per non nascondere un valore diverso. */}
+            <details className="ev-altro" open={Boolean(form.sport) || undefined}>
+              <summary>
+                <FaChevronDown aria-hidden="true" className="ev-altro-freccia" />
+                Sport diverso da quello della squadra?
+              </summary>
+              <div className="adm-field">
+                <span className="adm-label">Sport</span>
+                <Tendina
+                  valore={form.sport}
+                  onChange={(v) => aggiorna({ sport: v })}
+                  opzioni={opzioniSport}
+                  disabilitato={bloccato}
+                  etichettaAria="Sport dell'evento"
+                />
+              </div>
+            </details>
+          </section>
+
+          {/* ---------- Quando ---------- */}
+          <section className="adm-panel ev-blocco" aria-labelledby="ev-quando">
+            <h2 className="adm-panel-title" id="ev-quando">
+              <FaClock aria-hidden="true" /> Quando
+            </h2>
+
+            <div className="adm-due-colonne">
+              <div className="adm-field">
+                <span className="adm-label">Inizio</span>
+                <CampoData
+                  valore={form.inizio}
+                  onChange={(v) => aggiorna({ inizio: v })}
+                  conOra={!form.tuttoIlGiorno}
+                  disabilitato={bloccato}
+                  etichettaAria="Inizio"
+                />
+              </div>
+
+              <div className="adm-field">
+                <span className="adm-label">Fine <em>(facoltativa)</em></span>
+                <CampoData
+                  valore={form.fine}
+                  onChange={(v) => aggiorna({ fine: v })}
+                  conOra={!form.tuttoIlGiorno}
+                  minimo={form.inizio || null}
+                  disabilitato={bloccato}
+                  etichettaAria="Fine"
+                />
+              </div>
+            </div>
+
+            <label className="adm-check">
+              <input
+                type="checkbox"
+                checked={form.tuttoIlGiorno}
+                onChange={(e) => aggiorna({ tuttoIlGiorno: e.target.checked })}
+                disabled={bloccato}
+              />
+              <span className="adm-check-box" aria-hidden="true" />
+              <span>Dura tutto il giorno (senza orario)</span>
+            </label>
+          </section>
+
+          {/* ---------- Dove ---------- */}
+          <section className="adm-panel ev-blocco" aria-labelledby="ev-dove">
+            <h2 className="adm-panel-title" id="ev-dove">
+              <FaMapMarkerAlt aria-hidden="true" /> Dove
+            </h2>
+            <SceltaLuogo
+              luogo={form.luogo}
+              latitudine={form.latitudine}
+              longitudine={form.longitudine}
+              onChange={aggiorna}
               disabilitato={bloccato}
-              etichettaAria="Sport dell'evento"
             />
-          </div>
+          </section>
 
-          <label className="adm-field">
-            <span className="adm-label">Titolo</span>
-            <input
-              type="text"
-              className="adm-input"
-              value={form.titolo}
-              onChange={(e) => aggiorna({ titolo: e.target.value })}
-              placeholder="Es. Allievi - Rivoli"
-              disabled={bloccato}
-            />
-          </label>
-
-          <label className="adm-field">
-            <span className="adm-label">Avversario <em>(facoltativo)</em></span>
-            <input
-              type="text"
-              className="adm-input"
-              value={form.avversario}
-              onChange={(e) => aggiorna({ avversario: e.target.value })}
-              disabled={bloccato}
-            />
-          </label>
-
-          <label className="adm-check">
-            <input
-              type="checkbox"
-              checked={form.tuttoIlGiorno}
-              onChange={(e) => aggiorna({ tuttoIlGiorno: e.target.checked })}
-              disabled={bloccato}
-            />
-            <span className="adm-check-box" aria-hidden="true" />
-            <span>Dura tutto il giorno (senza orario)</span>
-          </label>
-
-          <div className="adm-due-colonne">
-            <div className="adm-field">
-              <span className="adm-label">Inizio</span>
-              <CampoData
-                valore={form.inizio}
-                onChange={(v) => aggiorna({ inizio: v })}
-                conOra={!form.tuttoIlGiorno}
-                disabilitato={bloccato}
-                etichettaAria="Inizio dell'evento"
+          {/* ---------- Note ---------- */}
+          <section className="adm-panel ev-blocco" aria-labelledby="ev-note">
+            <h2 className="adm-panel-title" id="ev-note">
+              <FaStickyNote aria-hidden="true" /> Note <span className="adm-panel-sotto">(facoltative)</span>
+            </h2>
+            <label className="adm-field ev-note">
+              <textarea
+                aria-labelledby="ev-note"
+                className="adm-input adm-textarea"
+                rows={3}
+                value={form.descrizione}
+                onChange={(e) => aggiorna({ descrizione: e.target.value })}
+                placeholder={ePartita ? "Es. ritrovo alle 14:30 davanti alla palestra, divisa blu" : ""}
+                disabled={occupato}
               />
-            </div>
-
-            <div className="adm-field">
-              <span className="adm-label">Fine <em>(facoltativa)</em></span>
-              <CampoData
-                valore={form.fine}
-                onChange={(v) => aggiorna({ fine: v })}
-                conOra={!form.tuttoIlGiorno}
-                minimo={form.inizio || null}
-                disabilitato={bloccato}
-                etichettaAria="Fine dell'evento"
-              />
-            </div>
-          </div>
-
-          <SceltaLuogo
-            luogo={form.luogo}
-            latitudine={form.latitudine}
-            longitudine={form.longitudine}
-            onChange={aggiorna}
-            disabilitato={bloccato}
-          />
-
-          <label className="adm-field">
-            <span className="adm-label">Note</span>
-            <textarea
-              className="adm-input adm-textarea"
-              rows={3}
-              value={form.descrizione}
-              onChange={(e) => aggiorna({ descrizione: e.target.value })}
-              disabled={occupato}
-            />
-          </label>
+            </label>
+          </section>
         </div>
 
         <aside className="adm-editor-side">
@@ -649,97 +857,17 @@ export default function EventoEditorPage({ genere = "partite" }) {
             )}
           </div>}
 
-          <div className="adm-panel">
-            <h2 className="adm-panel-title">
-              <FaTrophy aria-hidden="true" /> Esito
-              {sportInVigore && <span className="adm-sport-tag">{sportInVigore}</span>}
-            </h2>
-
-            {!eUnaPartita && (
-              <div className="adm-hint">
-                <FaInfoCircle /> Si compila per partite e tornei.
-              </div>
-            )}
-
-            {esito.risultato && (
-              <label className="adm-field">
-                <span className="adm-label">{esito.risultato.etichetta}</span>
-                <input
-                  type="text"
-                  className="adm-input"
-                  value={form.risultato}
-                  onChange={(e) => aggiorna({ risultato: e.target.value })}
-                  placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.risultato.segnaposto}
-                  disabled={bloccato}
-                />
-              </label>
-            )}
-
-            {esito.parziali && (
-              <label className="adm-field">
-                <span className="adm-label">{esito.parziali.etichetta}</span>
-                <input
-                  type="text"
-                  className="adm-input"
-                  value={form.parziali}
-                  onChange={(e) => aggiorna({ parziali: e.target.value })}
-                  placeholder={ufficiale ? DALLA_FEDERAZIONE : esito.parziali.segnaposto}
-                  disabled={bloccato}
-                />
-                {!ufficiale && (
-                  <span className="adm-hint">Separati da virgola, nell&apos;ordine in cui si sono giocati.</span>
-                )}
-              </label>
-            )}
-
-            {esito.marcatori && (
-              <label className="adm-field">
-                <span className="adm-label">{esito.marcatori.etichetta}</span>
-                <input
-                  type="text"
-                  className="adm-input"
-                  value={form.marcatori}
-                  onChange={(e) => aggiorna({ marcatori: e.target.value })}
-                  placeholder={esito.marcatori.segnaposto}
-                  disabled={occupato}
-                />
-                <span className="adm-hint">Separati da virgola.</span>
-              </label>
-            )}
-
-            {fuoriPosto.length > 0 && (
-              <div className="adm-alert adm-alert-info">
-                <FaInfoCircle />
-                <span>
-                  Questo evento ha ancora {fuoriPosto.join(" e ")} scritti da prima,
-                  ma nel {sportInVigore?.toLowerCase()} non si usano: restano in
-                  archivio e non li tocca nessuno.
-                </span>
-              </div>
-            )}
-
-            <label className="adm-field">
-              <span className="adm-label">Diretta</span>
-              <input
-                type="url"
-                className="adm-input"
-                value={form.diretta}
-                onChange={(e) => aggiorna({ diretta: e.target.value })}
-                placeholder="https://…"
-                disabled={occupato}
-              />
-            </label>
-          </div>
+          {!esitoInCima && pannelloEsito}
 
           {/* I file si collegano a un evento che esiste già: prima di
               salvarlo non c'è nulla a cui attaccarli. */}
           <div className="adm-panel">
-            <h2 className="adm-panel-title">Foto e video</h2>
+            <h2 className="adm-panel-title"><FaImage aria-hidden="true" /> Foto e video</h2>
 
             {nuovo ? (
-              <div className="adm-hint">
-                <FaInfoCircle /> Salva l&apos;evento per poter aggiungere file.
-              </div>
+              <p className="adm-hint ev-esito-nota">
+                Dopo aver salvato potrai aggiungere le foto della {nomeCosa}.
+              </p>
             ) : (
               <>
                 {media.length === 0 && (
@@ -779,12 +907,36 @@ export default function EventoEditorPage({ genere = "partite" }) {
                   onClick={() => inputFile.current?.click()}
                   disabled={occupato}
                 >
-                  <FaImage /> {caricandoFile ? "Caricamento…" : "Aggiungi un file"}
+                  <FaImage /> {caricandoFile ? "Caricamento…" : "Aggiungi una foto o un video"}
                 </button>
               </>
             )}
           </div>
         </aside>
+      </div>
+
+      {/* In fondo al modulo sul computer, attaccata sopra alla barra delle
+          sezioni sul telefono: Salva sempre a un pollice */}
+      <div className="adm-barra-azioni-fissa">
+        {!nuovo && (!ufficiale || ufficiale.sparitaIl) && (
+          <button
+            type="button"
+            className="adm-btn adm-btn-ghost ev-elimina-editor"
+            onClick={elimina}
+            disabled={occupato}
+            aria-label={ePartita ? "Elimina la partita" : "Elimina l'evento"}
+            title={ePartita ? "Elimina la partita" : "Elimina l'evento"}
+          >
+            <FaTrashAlt aria-hidden="true" /> <span className="ev-elimina-testo">Elimina</span>
+          </button>
+        )}
+        <button type="button" className="adm-btn adm-btn-ghost" onClick={esci} disabled={salvataggio}>
+          Annulla
+        </button>
+        <button type="submit" className={`adm-btn ${esitoInCima ? "adm-btn-arancio" : "adm-btn-primary"}`} disabled={occupato}>
+          <FaSave aria-hidden="true" />{" "}
+          {salvataggio ? "Salvataggio…" : (esitoInCima && !ufficiale ? "Salva il risultato" : "Salva")}
+        </button>
       </div>
     </form>
   );

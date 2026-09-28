@@ -10,7 +10,7 @@ const ResultCard = ({ event }) => {
     const isStandardScore = scoreParts.length === 2 && !isNaN(scoreParts[0]) && !isNaN(scoreParts[1]);
 
     return (
-        <div className="rm-card" style={{ borderTop: `4px solid ${event.color}` }}>
+        <div className="rm-card" style={{ boxShadow: `inset 0 4px 0 ${event.color}` }}>
             
             {/* CARD HEADER: Data e Categoria */}
             <div className="rm-card-header">
@@ -60,7 +60,7 @@ const ResultCard = ({ event }) => {
                         </div>
                         <div className="rm-detail-content">
                             <span className="rm-label">Parziali</span>
-                            <span className="rm-value font-mono">{event.partials}</span>
+                            <span className="rm-value rm-mono">{event.partials}</span>
                         </div>
                     </div>
                 )}
@@ -101,14 +101,14 @@ export default function ResultsModal({ onClose }) {
 
     return (
         <div className="rm-overlay" onClick={onClose}>
-            <div className="rm-container" onClick={e => e.stopPropagation()}>
+            <div className="rm-container" role="dialog" aria-modal="true" aria-label="Risultati della settimana" onClick={e => e.stopPropagation()}>
                 
                 <div className="rm-header">
                     <div className="rm-header-title">
-                        <FaTrophy className="rm-trophy-icon" />
+                        <FaTrophy className="rm-trophy-icon" aria-hidden="true" />
                         <h2>Risultati Settimana</h2>
                     </div>
-                    <button className="rm-close-btn" onClick={onClose}>
+                    <button type="button" className="rm-close-btn" onClick={onClose} aria-label="Chiudi" autoFocus>
                         <FaTimes />
                     </button>
                 </div>
@@ -116,7 +116,7 @@ export default function ResultsModal({ onClose }) {
                 <div className="rm-content">
                     {loading ? (
                         <div className="rm-loader">
-                            <div className="spinner"></div>
+                            <div className="rm-spinner"></div>
                             <p>Recupero risultati...</p>
                         </div>
                     ) : (

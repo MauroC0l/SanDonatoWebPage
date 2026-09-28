@@ -1,0 +1,225 @@
+/* =========================================
+   La home dello staff (scope: cru-)
+
+   Costruita quasi tutta con i pezzi pronti di Admin.css (.adm-benvenuto,
+   .adm-sezione, .adm-tessera-azione, .adm-vuoto-amico): qui sta solo quello
+   che è di questa pagina — l'elenco degli appuntamenti con la data grande e
+   la fila dei numeri da leggere in fondo.
+   ========================================= */
+
+/* ---------- Da fare adesso ----------
+   Le tessere entrano una dopo l'altra, di poco: l'occhio segue l'ordine, che
+   qui è l'ordine di urgenza. Solo all'apertura, e mai per chi chiede meno
+   movimento. */
+.cru-tessera {
+  animation: cru-entra .45s var(--adm-curva) backwards; /* backwards e non both: finita, non deve bloccare il sollevarsi al passaggio */
+  animation-delay: var(--cru-ritardo, 0ms);
+}
+
+/* Il numerino accanto al titolo: un po' più grande, perché è la risposta a
+   "quanti sono?" e si deve leggere da lontano. */
+.cru-tessera .adm-badge-conta {
+  min-width: 1.75rem;
+  height: 1.75rem;
+  font-size: .85rem;
+}
+
+/* Sul computer le tessere stanno a tre per riga al massimo: più strette,
+   le spiegazioni andrebbero a capo ogni due parole. */
+@media (min-width: 1100px) {
+  .cru-dafare { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@keyframes cru-entra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* "Tutto in ordine": verde invece dell'arancio, perché è una buona notizia */
+.cru-in-ordine {
+  background:
+    radial-gradient(60% 80% at 50% 0%, var(--adm-ok-soft), transparent 70%),
+    var(--adm-surface);
+}
+.cru-in-ordine .adm-vuoto-icona {
+  color: var(--adm-ok);
+  box-shadow: 0 0 0 1px var(--adm-ok-line), 0 16px 32px -18px rgba(4, 120, 87, .6);
+}
+
+/* ---------- Prossimi appuntamenti ---------- */
+
+.cru-eventi {
+  list-style: none;
+  display: grid;
+  gap: .6rem;
+  margin: 0;
+  padding: 0;
+}
+
+.cru-evento {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: var(--adm-tocco);
+  padding: .75rem 1rem .75rem .75rem;
+
+  background: var(--adm-surface);
+  border: 1px solid rgba(0, 43, 92, .09);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow-s);
+
+  color: var(--adm-ink);
+  text-decoration: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.cru-evento:hover {
+  color: var(--adm-ink);
+  border-color: var(--adm-line-strong);
+  box-shadow: var(--adm-shadow);
+}
+.cru-evento:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+
+/* La data come un foglio di calendario: il colore della squadra in cima */
+.cru-evento-data {
+  flex-shrink: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  width: 3.6rem;
+  padding: .35rem 0 .4rem;
+  border-radius: var(--adm-r-m);
+  border-top: 4px solid var(--cru-colore);
+  background: var(--adm-surface-2);
+  line-height: 1;
+}
+.cru-evento-giorno,
+.cru-evento-mese {
+  color: var(--adm-muted);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.cru-evento-numero {
+  margin: .15rem 0;
+  color: var(--adm-navy);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cru-evento-corpo {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: .2rem;
+}
+.cru-evento-titolo {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
+}
+.cru-evento-righe {
+  display: grid;
+  gap: .1rem;
+  color: var(--adm-muted);
+  font-size: .85rem;
+  line-height: 1.4;
+}
+.cru-evento-luogo {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  overflow-wrap: anywhere;
+}
+.cru-evento-luogo svg { flex-shrink: 0; font-size: .75rem; translate: 0 1px; }
+.cru-evento-stato { justify-self: start; margin-top: .2rem; }
+
+.cru-evento-freccia {
+  flex-shrink: 0;
+  color: #9aa7ba;
+  font-size: .85rem;
+  transition: color .2s ease, translate .2s var(--adm-curva);
+}
+.cru-evento:hover .cru-evento-freccia { color: var(--adm-arancio-testo); translate: 3px 0; }
+
+/* ---------- In breve: i numeri da leggere ---------- */
+
+.cru-numeri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+  gap: .7rem;
+}
+
+.cru-numero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icona valore"
+    "etichetta etichetta";
+  align-items: center;
+  column-gap: .5rem;
+  row-gap: .15rem;
+  min-height: var(--adm-tocco);
+  padding: .85rem 1rem;
+
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-m);
+
+  color: var(--adm-ink);
+  text-decoration: none;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.cru-numero:hover { color: var(--adm-ink); border-color: var(--adm-blue-line); background: var(--adm-surface-2); }
+.cru-numero:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+
+.cru-numero-icona { grid-area: icona; color: var(--adm-muted); font-size: .9rem; }
+.cru-numero-valore {
+  grid-area: valore;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+.cru-numero-etichetta { grid-area: etichetta; color: var(--adm-muted); font-size: .82rem; line-height: 1.3; }
+
+/* ---------- Attesa ---------- */
+
+.cru-sagoma-benvenuto {
+  height: 11rem;
+  margin-bottom: 2rem;
+  border-radius: var(--adm-r-xl);
+}
+
+/* ---------- Telefono ---------- */
+
+@media (max-width: 760px) {
+  .cru-evento { gap: .75rem; padding: .65rem .8rem .65rem .65rem; }
+  .cru-evento-data { width: 3.2rem; }
+  .cru-evento-numero { font-size: 1.3rem; }
+  .cru-evento-freccia { display: none; }
+
+  /* Due numeri per riga: uno solo per riga farebbe una colonna lunghissima
+     di cose che non chiedono niente */
+  .cru-numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Le scorciatoie nella fascia blu: una sotto l'altra, larghe quanto lo
+     schermo, facili da prendere col pollice */
+  .cru .adm-benvenuto-azioni .adm-btn { flex: 1 1 12rem; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cru-tessera { animation: none; }
+  .cru-evento,
+  .cru-evento-freccia,
+  .cru-numero { transition: none; }
+}
+
+/* Il titolo della tessera: il numerino davanti, le parole che vanno a capo
+   da sole senza trascinarselo dietro */
+.cru-tessera .adm-tessera-titolo { flex-wrap: nowrap; align-items: flex-start; }
+.cru-tessera-parole { min-width: 0; padding-top: .2rem; }

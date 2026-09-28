@@ -177,3 +177,25 @@
 .adm-cal-da-assegnare-come { font-size: .88em; }
 /* Arrivando dall'avviso, il torneo non finisce sotto la barra in alto */
 .adm-cal-torneo { scroll-margin-top: 1rem; }
+
+/* ---------- Ritocchi della seconda fase ----------
+   Il riquadro dei gironi da assegnare nei toni dell'avviso (è la prima
+   cosa da fare), i tornei come schede dal titolo pieno. */
+.adm-cal-da-assegnare {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--adm-warn-line);
+  border-radius: var(--adm-r-l);
+  background: var(--adm-warn-soft);
+  color: var(--adm-ink);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.adm-cal-da-assegnare-titolo { display: flex; align-items: center; gap: .55rem; font-size: 1rem; }
+.adm-cal-da-assegnare a { color: var(--adm-blue); font-weight: 700; }
+.adm-cal-vai { color: var(--adm-blue); min-height: 32px; }
+.adm-cal-da-assegnare-come { color: var(--adm-ink-2); }
+
+.adm-cal-fonte-nome { font-size: 1.15rem; font-weight: 900; letter-spacing: -.02em; }
+.adm-cal-apri { width: var(--adm-tocco); height: var(--adm-tocco); }
+.adm-cal-girone { border-radius: var(--adm-r-m); background: var(--adm-surface-2); border-color: var(--adm-line-soft); }

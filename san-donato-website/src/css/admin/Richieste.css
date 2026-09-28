@@ -1,0 +1,281 @@
+/* =========================================
+   Richieste (scope: ric-)
+
+   Una scheda per persona, con la decisione dentro: chi è, che sport, da
+   quanto aspetta, e subito sotto le squadre fra cui scegliere e il
+   pulsante grande. Niente da aprire, niente da cercare altrove.
+   ========================================= */
+
+/* La riga "come si fa", per chi arriva la prima volta */
+.ric-come {
+  margin: 0 0 1rem;
+  padding: .75rem 1rem;
+  border-radius: var(--adm-r-m);
+  background: var(--adm-blue-soft);
+  color: var(--adm-ink-2);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+.ric-come em { font-style: normal; font-weight: 700; color: var(--adm-navy); }
+
+.ric-elenco {
+  list-style: none;
+  display: grid;
+  gap: .9rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- La scheda ---------- */
+
+.ric-scheda {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+
+  background: var(--adm-surface);
+  border: 1px solid rgba(0, 43, 92, .09);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow);
+  transition: opacity .2s ease;
+}
+.ric-scheda.is-busy { opacity: .55; pointer-events: none; }
+
+.ric-chi {
+  display: flex;
+  align-items: flex-start;
+  gap: .9rem;
+  min-width: 0;
+}
+
+.ric-iniziali {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: var(--adm-navy);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+.ric-iniziali.is-spenta { background: var(--adm-line-soft); color: var(--adm-ink-2); }
+
+.ric-chi-testo { flex: 1; min-width: 0; display: grid; gap: .3rem; }
+
+.ric-nome {
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  overflow-wrap: anywhere;
+}
+
+.ric-righe {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .35rem .6rem;
+  margin: 0;
+  font-size: .85rem;
+}
+
+.ric-attesa {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--adm-muted);
+}
+.ric-attesa svg { font-size: .75rem; }
+/* Aspetta da troppo: lo si nota senza gridare */
+.ric-attesa.is-vecchia { color: var(--adm-warn); font-weight: 700; }
+
+.ric-email {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  justify-self: start;
+  max-width: 100%;
+  color: var(--adm-blue);
+  font-size: .85rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.ric-email:hover { text-decoration: underline; }
+.ric-email svg { flex-shrink: 0; font-size: .75rem; }
+
+.ric-nota {
+  display: flex;
+  gap: .55rem;
+  margin: 0;
+  padding: .7rem .9rem;
+  border-radius: var(--adm-r-m);
+  background: var(--adm-surface-2);
+  color: var(--adm-ink-2);
+  font-size: .9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.ric-nota svg { flex-shrink: 0; margin-top: .25rem; color: var(--adm-muted); }
+
+.ric-motivo {
+  margin: .1rem 0 0;
+  color: var(--adm-ink-2);
+  font-size: .86rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- La decisione ---------- */
+
+.ric-decisione {
+  display: grid;
+  gap: .65rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+
+.ric-domanda {
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.ric-nessuna { margin: 0; }
+
+/* Le squadre come pulsanti: tutte visibili, una tocca e si accende */
+.ric-squadre {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.ric-squadra {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: var(--adm-tocco);
+  padding: .5rem 1rem .5rem .7rem;
+
+  background: var(--adm-surface);
+  border: 1.5px solid var(--adm-line);
+  border-radius: var(--adm-r-pill);
+
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+}
+.ric-squadra:hover:not(:disabled) { border-color: var(--adm-blue-line); background: var(--adm-blue-soft); }
+.ric-squadra:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.ric-squadra:disabled { cursor: default; opacity: .6; }
+
+/* Il pallino che diventa una spunta */
+.ric-squadra-segno {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--adm-line-strong);
+  border-radius: 50%;
+  color: #fff;
+  font-size: .6rem;
+}
+
+.ric-squadra.is-scelta {
+  border-color: var(--adm-navy);
+  background: var(--adm-navy);
+  color: #fff;
+}
+.ric-squadra.is-scelta:hover:not(:disabled) { background: var(--adm-navy-deep); border-color: var(--adm-navy-deep); }
+.ric-squadra.is-scelta .ric-squadra-segno { border-color: #fff; background: var(--adm-arancio); }
+
+.ric-tendina { max-width: 22rem; }
+
+.ric-bottoni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  margin-top: .25rem;
+}
+
+/* Il pulsante che conta: grande, e dice in quale squadra si mette */
+.ric-metti {
+  min-height: 48px;
+  padding-inline: 1.3rem;
+  font-size: .98rem;
+}
+
+/* ---------- Già decise: più basse, in secondo piano ---------- */
+
+.ric-decisa {
+  padding: .9rem 1.1rem;
+  box-shadow: var(--adm-shadow-s);
+}
+.ric-decisa .ric-nome { font-size: 1.02rem; }
+.ric-decisa .ric-iniziali { width: 40px; height: 40px; border-radius: 12px; font-size: .85rem; }
+.ric-riapri { flex-shrink: 0; align-self: center; }
+
+/* ---------- Attesa ---------- */
+
+.ric-sagome { display: grid; gap: .9rem; margin-top: 1.5rem; }
+.ric-sagoma { height: 13rem; border-radius: var(--adm-r-l); }
+
+/* ---------- Telefono ---------- */
+
+@media (max-width: 760px) {
+  .ric-scheda { padding: 1rem; }
+  .ric-iniziali { width: 42px; height: 42px; border-radius: 13px; font-size: .9rem; }
+
+  /* Una squadra per riga se i nomi sono lunghi: il tocco resta largo */
+  .ric-squadra { flex: 1 1 auto; }
+  .ric-tendina { max-width: none; }
+
+  /* I due pulsanti a tutta larghezza, quello giusto più largo */
+  .ric-bottoni .adm-btn { flex: 1 1 0; justify-content: center; }
+  .ric-bottoni .ric-metti { flex-grow: 2; }
+
+  .ric-decisa .ric-chi { flex-wrap: wrap; }
+  .ric-riapri { width: 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ric-scheda,
+  .ric-squadra { transition: none; }
+}
+
+/* =========================================
+   Chi aspetta una squadra (AttesaSquadraPage)
+   ========================================= */
+
+.ric-attesa-pagina { border-radius: var(--adm-r-xl); }
+
+.ric-attesa-icona {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  border-radius: 20px;
+  background: var(--adm-warn-soft);
+  color: var(--adm-warn);
+  font-size: 1.5rem;
+}
+
+/* I passi si leggono da sinistra, anche se il resto della scheda è centrato */
+.ric-attesa-passi {
+  margin: 1.5rem auto 0;
+  max-width: 26rem;
+  text-align: left;
+}

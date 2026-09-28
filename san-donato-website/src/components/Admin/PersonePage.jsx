@@ -15,6 +15,7 @@ import Paginazione from "./Paginazione";
 import { usePaginazione } from "../../hooks/usePaginazione";
 import Ritratto from "./Ritratto";
 import "../../css/Admin.css";
+import "../../css/admin/Sistema.css";
 import "../../css/Ritratto.css";
 
 /**
@@ -95,6 +96,20 @@ const STATI = [
   { valore: "respinto", etichetta: "Respinti" },
   { valore: "sospeso", etichetta: "Sospesi" }
 ];
+
+/**
+ * Vero se la persona sta sotto a quel filtro di stato ("" = tutti).
+ * Una regola sola, usata sia per filtrare sia per contare: il numerino
+ * sulla pillola non può dire una cosa e l'elenco un'altra.
+ */
+function nelloStato(p, stato) {
+  if (!stato) return true;
+  if (stato === "respinto") return eRespinto(p);
+  // "In attesa" vuol dire che una risposta deve ancora arrivare: chi
+  // se l'è già sentita dire di no ha una voce sua.
+  if (stato === "in_attesa") return p.stato === "in_attesa" && !eRespinto(p);
+  return p.stato === stato;
+}
 
 /**
  * Vero se questa persona è ferma per un rifiuto.
@@ -386,16 +401,7 @@ export default function PersonePage() {
 
     return persone.filter((p) => {
       if (filtroRuolo && p.ruolo !== filtroRuolo) return false;
-
-      if (filtroStato === "respinto") {
-        if (!eRespinto(p)) return false;
-      } else if (filtroStato === "in_attesa") {
-        // "In attesa" vuol dire che una risposta deve ancora arrivare: chi
-        // se l'è già sentita dire di no ha una voce sua.
-        if (p.stato !== "in_attesa" || eRespinto(p)) return false;
-      } else if (filtroStato && p.stato !== filtroStato) {
-        return false;
-      }
+      if (!nelloStato(p, filtroStato)) return false;
       if (!cercato) return true;
 
       // Si cerca anche fra le squadre: "chi c'è negli Allievi" è una domanda
@@ -407,6 +413,13 @@ export default function PersonePage() {
       );
     });
   }, [persone, ricerca, filtroRuolo, filtroStato]);
+
+  /* Quanti sotto a ogni pillola di stato, dentro al ruolo scelto: "In
+     attesa 4" dice se c'è da fare prima ancora di toccare il filtro. */
+  const quantiPerStato = useMemo(() => {
+    const delRuolo = filtroRuolo ? persone.filter((p) => p.ruolo === filtroRuolo) : persone;
+    return Object.fromEntries(STATI.map((s) => [s.valore, delRuolo.filter((p) => nelloStato(p, s.valore)).length]));
+  }, [persone, filtroRuolo]);
 
   const opzioniSquadra = useMemo(() => [...squadre]
     .sort((a, b) => a.sport.localeCompare(b.sport) || a.nome.localeCompare(b.nome)),
@@ -426,16 +439,18 @@ export default function PersonePage() {
   const filtrato = Boolean(ricerca.trim() || filtroRuolo || filtroStato);
 
   return (
-    <div className="adm-page">
+    <div className="adm-page ute-pagina">
       <div className="adm-page-head">
-        <div className="adm-head-left">
+        <div className="ute-testa">
+          <p className="adm-occhiello">Persone</p>
           <h1 className="adm-page-title">Utenti</h1>
           <p className="adm-page-sub">
             {filtrato
               ? `${visibili.length} di ${persone.length}`
               : `${persone.length} account`}
             {" "}· chi entra nel sito, con che ruolo e su quali squadre.
-            In fondo all&apos;elenco chi non entra da tempo.
+            Con la freccia accanto a una persona le cambi ruolo, squadre o
+            password. In fondo all&apos;elenco chi non entra da tempo.
           </p>
         </div>
 
@@ -568,7 +583,7 @@ export default function PersonePage() {
           etichettaAria="Filtra per ruolo"
         />
 
-        <div className="adm-chip-group">
+        <div className="adm-chip-group ute-stati" role="group" aria-label="Filtra per stato">
           {STATI.map((s) => (
             <button
               key={s.valore}
@@ -578,18 +593,20 @@ export default function PersonePage() {
               aria-pressed={filtroStato === s.valore}
             >
               {s.etichetta}
+              <span className="ute-quanti">{quantiPerStato[s.valore]}</span>
             </button>
           ))}
         </div>
       </div>
 
       {visibili.length === 0 ? (
-        <div className="adm-empty">
-          <FaUsers className="adm-empty-icon" />
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaUsers /></span>
+          <h2>{persone.length === 0 ? "Nessun account" : "Nessuno trovato"}</h2>
           <p>
             {persone.length === 0
-              ? "Nessun account."
-              : "Nessuno corrisponde a questa ricerca."}
+              ? "Crea il primo account con il pulsante in alto."
+              : "Nessuno corrisponde a questa ricerca: prova con un'altra parola o togli un filtro."}
           </p>
         </div>
       ) : (

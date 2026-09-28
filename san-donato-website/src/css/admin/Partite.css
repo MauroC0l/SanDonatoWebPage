@@ -1,0 +1,522 @@
+/* =====================================================
+   Partite ed eventi, Squadre, Calendari ufficiali
+   (EventiListPage, EventoEditorPage, RisultatoVeloce, SquadrePage,
+   CalendariUfficialiPage)
+
+   Solo quello che serve a queste pagine: colori, misure e pezzi comuni
+   vengono dalla Guida rapida in cima ad Admin.css. Prefissi: ev- per
+   partite ed eventi, sq- per le squadre.
+
+   Il filo: chi apre "Partite" è quasi sempre un allenatore dal telefono,
+   a bordo campo o la sera. Le due cose che fa — aggiungere una partita,
+   scrivere com'è finita — sono le più grandi e le prime che vede.
+   ===================================================== */
+
+/* ---------- La testata delle pagine ----------
+   Titolo, una riga di spiegazione e, a destra (sotto sul telefono), le
+   azioni. Non usa .adm-page-head perché lì, in colonna, la parte di
+   sinistra prende come altezza la larghezza di base del flex. */
+.ev-testa {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin-bottom: clamp(1.25rem, 3vw, 1.9rem);
+}
+
+.ev-testa-testo { flex: 1 1 22rem; min-width: 0; }
+
+.ev-testa-sotto {
+  max-width: 62ch;
+  margin: .45rem 0 0;
+  color: var(--adm-muted);
+  font-size: .98rem;
+  line-height: 1.5;
+}
+
+.ev-testa-azioni { display: flex; flex-wrap: wrap; gap: .6rem; }
+
+/* L'azione principale un po' più alta del solito: è quella per cui si è
+   aperta la pagina */
+.ev-btn-grande { min-height: 50px; padding-inline: 1.35rem; font-size: 1rem; }
+
+/* ---------- Com'è finita? ---------- */
+.ev-veloci {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: .85rem;
+  margin: 0;
+  padding: 0;
+}
+
+.ev-veloce {
+  position: relative;
+  display: grid;
+  gap: .85rem;
+  padding: 1.05rem 1.1rem 1.1rem 1.35rem;
+  border: 1px solid var(--adm-warn-line);
+  border-radius: var(--adm-r-l);
+  background:
+    linear-gradient(180deg, var(--adm-arancio-soft), transparent 3.5rem),
+    var(--adm-surface);
+  box-shadow: var(--adm-shadow);
+  overflow: hidden;
+}
+
+/* Il colore della squadra, come una costina sul lato */
+.ev-veloce-colore {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+}
+
+.ev-veloce-testa { display: grid; gap: .15rem; min-width: 0; }
+.ev-veloce-titolo {
+  color: var(--adm-ink);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  overflow-wrap: anywhere;
+}
+.ev-veloce-quando { color: var(--adm-muted); font-size: .86rem; }
+.ev-veloce-quando::first-letter { text-transform: uppercase; }
+
+.ev-veloce-modulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: .6rem .75rem;
+}
+
+.ev-veloce-campo { display: grid; gap: .3rem; flex: 0 1 9rem; min-width: 0; }
+.ev-veloce-campo > span { color: var(--adm-ink-2); font-size: .82rem; font-weight: 700; }
+.ev-veloce-campo em { color: var(--adm-muted); font-style: normal; font-weight: 500; }
+.ev-veloce-campo-largo { flex: 1 1 100%; order: 1; }
+
+/* Il punteggio si legge da lontano: grande e centrato, come sul tabellone */
+.ev-veloce-punteggio,
+.ev-esito-punteggio {
+  font-size: 1.35rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
+.ev-veloce-punteggio { min-height: 50px; }
+.ev-veloce-punteggio::placeholder,
+.ev-esito-punteggio::placeholder { font-weight: 500; font-size: 1rem; letter-spacing: 0; }
+
+.ev-veloce-azioni {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem .9rem;
+}
+.ev-veloce-azioni .adm-btn { min-height: 50px; flex: 1 1 auto; }
+
+.ev-veloce-apri {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: var(--adm-tocco);
+  color: var(--adm-blue);
+  font-size: .88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.ev-veloce-apri:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ev-veloce-apri svg { font-size: .75em; }
+
+.ev-veloce-avviso { flex-basis: 100%; order: 2; margin: 0; color: var(--adm-danger); font-size: .86rem; font-weight: 600; }
+
+.ev-veloci-altre { margin: .85rem 0 0; }
+
+/* Un collegamento che è un pulsante (cambia filtro, non pagina) */
+.ev-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--adm-blue);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---------- Filtri ---------- */
+.ev-filtri-destra {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-left: auto;
+}
+.ev-filtri-destra .tnd.adm-filter-select { width: 15rem; }
+
+@media (max-width: 760px) {
+  .ev-filtri-destra { flex: 1 1 100%; margin-left: 0; }
+  .ev-filtri-destra .tnd.adm-filter-select { flex: 1 1 auto; width: auto; min-width: 0; }
+}
+
+.ev-attesa { display: grid; gap: .6rem; }
+.ev-attesa .adm-sagoma + .adm-sagoma-scheda { margin-top: 0; }
+
+/* ---------- L'elenco ---------- */
+.ev-elenco {
+  list-style: none;
+  display: grid;
+  gap: .65rem;
+  margin: 0;
+  padding: 0;
+}
+
+.ev-griglia { grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
+
+.ev-riga {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .9rem 1rem;
+  padding: .85rem 1rem .85rem .85rem;
+  border: 1px solid rgba(0, 43, 92, .08);
+  border-radius: var(--adm-r-l);
+  background: var(--adm-surface);
+  box-shadow: var(--adm-shadow-s);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.ev-riga:hover { border-color: var(--adm-line-strong); box-shadow: var(--adm-shadow); }
+
+/* Il giorno come su un calendario da muro */
+.ev-data {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  width: 3.9rem;
+  min-height: 4.1rem;
+  padding: .35rem 0;
+  border-radius: var(--adm-r-m);
+  background: var(--adm-surface-2);
+  border: 1px solid var(--adm-line-soft);
+  color: var(--adm-ink);
+  text-decoration: none;
+  line-height: 1;
+}
+.ev-data:hover { color: var(--adm-ink); }
+.ev-data-sett,
+.ev-data-mese {
+  color: var(--adm-muted);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.ev-data-num {
+  margin: .2rem 0 .15rem;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ev-corpo { display: grid; gap: .3rem; min-width: 0; }
+
+.ev-titolo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--adm-ink);
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.ev-titolo:hover { color: var(--adm-blue); }
+/* Il collegamento si allarga su tutta la scheda: si apre toccando dove
+   capita, non solo sulle parole. I pulsanti stanno sopra (z-index). */
+.ev-titolo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.ev-riga { cursor: pointer; }
+.ev-titolo:focus-visible { outline: none; }
+.ev-riga:has(.ev-titolo:focus-visible) { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.ev-colore { flex-shrink: 0; width: .65rem; height: .65rem; border-radius: 50%; }
+
+.ev-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .25rem .8rem;
+  color: var(--adm-ink-2);
+  font-size: .86rem;
+}
+.ev-meta svg { flex-shrink: 0; color: var(--adm-muted); font-size: .85em; }
+.ev-ora { display: inline-flex; align-items: center; gap: .3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ev-fra { color: var(--adm-arancio-testo); font-weight: 800; }
+.ev-squadra { font-weight: 600; }
+.ev-luogo { display: inline-flex; align-items: center; gap: .3rem; min-width: 0; color: var(--adm-muted); }
+
+.ev-stati { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem .5rem; }
+.ev-stati:empty { display: none; }
+.ev-risultato {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .15rem .6rem;
+  border-radius: var(--adm-r-pill);
+  background: var(--adm-navy);
+  color: #fff;
+  font-size: .86rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.ev-risultato svg { color: var(--adm-arancio-chiaro); font-size: .85em; }
+
+.ev-azioni { position: relative; z-index: 1; display: flex; align-items: center; gap: .45rem; }
+.ev-azioni .adm-icon-btn { width: var(--adm-tocco); height: var(--adm-tocco); }
+
+/* La prossima partita: la prima cosa che l'occhio trova */
+.ev-riga.is-prossima {
+  border-color: rgba(255, 102, 0, .35);
+  box-shadow: 0 0 0 1px rgba(255, 102, 0, .12), var(--adm-shadow);
+}
+.ev-riga.is-prossima .ev-data {
+  border-color: transparent;
+  background: var(--adm-pillola);
+  color: #fff;
+  box-shadow: 0 10px 20px -12px rgba(255, 102, 0, .9);
+}
+.ev-riga.is-prossima .ev-data-sett,
+.ev-riga.is-prossima .ev-data-mese { color: rgba(255, 255, 255, .9); }
+
+.ev-prossima-etichetta {
+  color: var(--adm-arancio-testo);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.ev-riga.is-manca { border-color: var(--adm-warn-line); }
+
+/* In griglia la riga si fa scheda: data e azioni sopra e sotto */
+.ev-griglia .ev-riga { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+.ev-griglia .ev-azioni { grid-column: 1 / -1; justify-content: flex-end; padding-top: .6rem; border-top: 1px solid var(--adm-line-soft); }
+
+@media (max-width: 640px) {
+  .ev-testa-azioni { flex: 1 1 100%; }
+  .ev-testa-azioni .adm-btn { flex: 1 1 auto; }
+  /* La prima azione prende più posto della seconda */
+  .ev-testa-azioni .adm-btn-arancio { flex-grow: 2; }
+
+  .ev-riga {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: .75rem;
+    padding: .8rem;
+  }
+  .ev-data { width: 3.4rem; min-height: 3.7rem; }
+  .ev-data-num { font-size: 1.35rem; }
+  .ev-azioni {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    padding-top: .6rem;
+    border-top: 1px solid var(--adm-line-soft);
+  }
+  .ev-azioni .adm-btn { flex: 1 1 auto; }
+  /* Sul telefono si apre toccando la scheda, e si elimina da dentro la
+     partita: qui resta solo "Risultato", quando manca. Il cestino a un
+     centimetro da "Apri" era un incidente che aspettava di succedere. */
+  .ev-apri,
+  .ev-elimina,
+  .ev-riga:not(.is-manca) .ev-azioni { display: none; }
+
+  .ev-veloce { padding: 1rem 1rem 1rem 1.2rem; }
+  .ev-veloce-campo { flex: 1 1 100%; }
+  .ev-veloce-azioni { flex: 1 1 100%; }
+  .ev-veloce-azioni .adm-btn { flex: 1 1 100%; }
+  .ev-veloce-apri { margin-inline: auto; }
+}
+
+/* =====================================================
+   Il modulo di una partita o di un evento
+   ===================================================== */
+
+.ev-attesa-editor { display: grid; gap: .8rem; }
+.ev-attesa-editor .adm-sagoma-scheda { height: 12rem; }
+
+.ev-editor-testa {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem 1.1rem;
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+.ev-editor-titoli { min-width: 0; }
+.ev-editor-titoli .adm-occhiello { margin-bottom: .35rem; }
+.ev-editor-titoli .adm-page-title { font-size: clamp(1.45rem, 3vw, 2rem); }
+
+.ev-editor-col { display: grid; gap: 1rem; }
+.ev-blocco .adm-field:last-child,
+.ev-blocco .adm-check:last-child,
+.ev-blocco .slg { margin-bottom: 0; }
+
+/* Che cos'è: pulsanti grandi, uno acceso */
+.ev-tipi { display: flex; flex-wrap: wrap; gap: .45rem; }
+.ev-tipo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--adm-tocco);
+  padding: .5rem 1.05rem;
+  border: 1.5px solid var(--adm-line);
+  border-radius: var(--adm-r-pill);
+  background: var(--adm-surface);
+  color: var(--adm-ink-2);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.ev-tipo:hover:not(:disabled) { border-color: var(--adm-line-strong); color: var(--adm-ink); }
+.ev-tipo:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.ev-tipo.is-scelto {
+  border-color: var(--adm-navy);
+  background: var(--adm-navy);
+  color: #fff;
+}
+.ev-tipo:disabled { cursor: not-allowed; opacity: .6; }
+.ev-tipo.is-scelto:disabled { opacity: .75; }
+
+/* Le opzioni che servono di rado, chiuse */
+.ev-altro { margin-top: .25rem; }
+.ev-altro > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: var(--adm-tocco);
+  color: var(--adm-blue);
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.ev-altro > summary::-webkit-details-marker { display: none; }
+.ev-altro-freccia { font-size: .75em; transition: transform .2s ease; transform: rotate(-90deg); }
+.ev-altro[open] .ev-altro-freccia { transform: none; }
+.ev-altro[open] > summary { margin-bottom: .5rem; }
+
+/* L'esito: in cima, con un filo d'arancio, quando è la cosa da fare */
+.ev-esito.is-in-cima {
+  border-color: rgba(255, 102, 0, .3);
+  background:
+    linear-gradient(180deg, var(--adm-arancio-soft), transparent 5rem),
+    var(--adm-surface);
+  box-shadow: 0 0 0 1px rgba(255, 102, 0, .1), var(--adm-shadow);
+  scroll-margin-top: calc(var(--adm-testata-h) + 1rem);
+}
+.ev-esito .adm-field:last-child { margin-bottom: 0; }
+.ev-esito-nota { margin: -.35rem 0 1rem; }
+.ev-esito-punteggio { min-height: 54px; }
+
+@media (min-width: 901px) {
+  /* Accanto agli altri campi, l'esito in cima sta su due colonne:
+     risultato e parziali affiancati */
+  .ev-esito.is-in-cima { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1rem; }
+  .ev-esito.is-in-cima > .adm-panel-title,
+  .ev-esito.is-in-cima > .adm-alert,
+  .ev-esito.is-in-cima > .ev-esito-nota { grid-column: 1 / -1; }
+  .ev-esito.is-in-cima .adm-field { margin-bottom: 1rem; }
+}
+
+@media (max-width: 760px) {
+  .ev-editor-testa { grid-template-columns: minmax(0, 1fr); gap: .6rem; }
+  .ev-indietro { justify-self: start; min-height: 40px; padding: .4rem .9rem; }
+  /* Sul telefono Salva sta nella barra in fondo */
+  .ev-salva-alto { display: none; }
+  /* Nella barra in fondo "Elimina" è solo il cestino: il posto va a Salva */
+  .adm-barra-azioni-fissa .ev-elimina-editor { flex: 0 0 var(--adm-tocco); padding: 0; }
+  .ev-elimina-testo { display: none; }
+}
+
+/* Elimina a sinistra, lontano da Salva */
+.ev-elimina-editor { margin-right: auto; color: var(--adm-danger); }
+.ev-elimina-editor:hover:not(:disabled) { background: var(--adm-danger-soft); border-color: var(--adm-danger-line); color: var(--adm-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ev-riga,
+  .ev-tipo,
+  .ev-altro-freccia { transition: none; }
+}
+
+/* =====================================================
+   Squadre
+   ===================================================== */
+
+.ev-testa-sotto a { color: var(--adm-blue); font-weight: 700; }
+
+.sq-avviso { align-items: flex-start; margin-bottom: 1.25rem; }
+.sq-avviso p { margin: .25rem 0 0; }
+
+.sq-nuova { margin-bottom: 1.25rem; }
+
+.sq-gruppo-titolo { gap: .5rem; }
+.sq-gruppo-titolo .adm-badge-conta { height: 1.3rem; min-width: 1.3rem; font-size: .7rem; }
+
+/* Il colore della squadra sul bordo sinistro, come nel calendario */
+.sq-scheda {
+  position: relative;
+  overflow: hidden;
+  padding-left: 1.45rem;
+  border-color: rgba(0, 43, 92, .08);
+  box-shadow: var(--adm-shadow);
+}
+.sq-scheda::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: var(--sq-colore);
+}
+/* Il pallino del colore è già il bordo: in testa sarebbe un doppione */
+.sq-scheda .adm-squadra-colore { display: none; }
+.sq-scheda .adm-scheda-testa { margin-bottom: .35rem; }
+.sq-scheda .adm-scheda-nome { margin: 0; font-size: 1.12rem; font-weight: 900; letter-spacing: -.02em; }
+.sq-conta { display: inline-flex; align-items: center; gap: .35rem; }
+
+/* Sul computer, in lista, i comandi salgono accanto al nome: venti
+   squadre, venti righe di pulsanti in meno da scorrere */
+@media (min-width: 1000px) {
+  .adm-schede:not(.adm-schede-griglia) > .sq-scheda:not(:has(form)) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1.25rem;
+    align-items: center;
+  }
+  .adm-schede:not(.adm-schede-griglia) > .sq-scheda:not(:has(form)) > .adm-scheda-testa { grid-row: 1; grid-column: 1; }
+  .adm-schede:not(.adm-schede-griglia) > .sq-scheda:not(:has(form)) > .adm-squadre-riga { grid-column: 1 / -1; }
+  .adm-schede:not(.adm-schede-griglia) > .sq-scheda:not(:has(form)) > .sq-azioni {
+    grid-row: 1;
+    grid-column: 2;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+}
+.sq-azioni .adm-btn { min-height: 40px; padding: .45rem .95rem; }

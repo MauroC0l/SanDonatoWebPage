@@ -282,7 +282,8 @@ export default function ProfiloPage() {
   return (
     <div className="adm-page adm-profilo">
       <div className="adm-page-head">
-        <div className="adm-head-left">
+        <div className="prf-testa">
+          <p className="adm-occhiello">Il tuo account</p>
           <h1 className="adm-page-title">Il tuo profilo</h1>
           <p className="adm-page-sub">
             I tuoi dati sul sito. Quelli sportivi li gestisce la segreteria.

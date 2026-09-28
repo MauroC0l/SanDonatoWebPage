@@ -33,3 +33,54 @@
 }
 
 .prf-stagione .adm-status { white-space: normal; }
+
+/* ---------- Testata ----------
+   Un <div> semplice e non .adm-head-left: sul telefono la testata va in
+   colonna, e la base di 20rem di quella classe diventava un'altezza, con
+   un buco bianco sotto al titolo. */
+.prf-testa { flex: 1 1 18rem; min-width: 0; }
+@media (max-width: 760px) {
+  .prf-testa { flex-basis: auto; }
+}
+
+/* ---------- Le due colonne ----------
+   I riquadri della colonna larga si toccavano: stessa aria di quelli
+   della colonna accanto. */
+.adm-profilo .adm-editor-col { display: grid; gap: 1rem; align-content: start; min-width: 0; }
+.adm-profilo .adm-panel-title svg { color: var(--adm-arancio-testo); }
+
+/* Il riquadro del tuo account: etichetta e valore sulla stessa riga dove
+   c'è posto, come una tessera, invece di una colonna di maiuscoletti */
+.adm-profilo .adm-dati { display: grid; gap: 0; margin: 0; }
+.adm-profilo .adm-dato {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .25rem .75rem;
+  padding: .65rem 0;
+  border-top: 1px solid var(--adm-line-soft);
+}
+.adm-profilo .adm-dato:first-child { border-top: 0; padding-top: 0; }
+.adm-profilo .adm-dato:last-child { padding-bottom: 0; }
+.adm-profilo .adm-dato-etichetta { margin: 0; }
+.adm-profilo .adm-dato-valore { margin: 0; justify-content: flex-end; text-align: right; }
+.adm-profilo .adm-dato-valore svg { margin-right: .3rem; color: var(--adm-muted); vertical-align: -1px; }
+.adm-profilo .adm-dato-valore { align-items: center; }
+/* La stagione ha due righe (nome e periodo): sotto all etichetta, a
+   sinistra, invece che spinte a destra e spezzate a metà */
+.adm-profilo .adm-dato:has(.prf-stagione) { flex-direction: column; align-items: flex-start; }
+.adm-profilo .adm-dato:has(.prf-stagione) .adm-dato-valore { justify-content: flex-start; text-align: left; }
+
+/* La foto: sul telefono in colonna e al centro, come una tessera */
+@media (max-width: 560px) {
+  .adm-profilo .adm-ritratto-scelta { flex-direction: column; align-items: center; text-align: center; }
+  .adm-profilo .adm-ritratto-azioni .adm-head-actions { justify-content: center; }
+}
+
+/* Il pulsante per salvare: largo sul telefono, a portata di pollice */
+@media (max-width: 760px) {
+  .adm-profilo form .adm-head-actions .adm-btn,
+  .adm-profilo .adm-panel > .adm-btn { width: 100%; }
+}
+.adm-profilo .adm-due-colonne { row-gap: 0; }

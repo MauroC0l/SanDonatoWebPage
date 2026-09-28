@@ -9,6 +9,7 @@ import Tendina from "./Tendina";
 import CampoData from "./CampoData";
 import Paginazione from "./Paginazione";
 import "../../css/Admin.css";
+import "../../css/admin/Sistema.css";
 
 /** Gli oggetti su cui si può filtrare, con il nome che usa la gente. */
 const TIPI = [
@@ -42,6 +43,49 @@ function quando(iso) {
   if (stessoGiorno) return `oggi, ${ora}`;
 
   return `${d.toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}, ${ora}`;
+}
+
+/** Solo l'ora: il giorno lo dice già il titolo del gruppo. */
+function ora(iso) {
+  return new Date(iso).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+}
+
+/**
+ * Il nome del giorno come lo si dice: "Oggi", "Ieri", "lunedì 22
+ * settembre", con l'anno solo quando non è quello in corso.
+ */
+function nomeGiorno(iso) {
+  const d = new Date(iso);
+  const oggi = new Date();
+  const ieri = new Date(oggi);
+  ieri.setDate(oggi.getDate() - 1);
+
+  if (d.toDateString() === oggi.toDateString()) return "Oggi";
+  if (d.toDateString() === ieri.toDateString()) return "Ieri";
+
+  const testo = d.toLocaleDateString("it-IT", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    ...(d.getFullYear() !== oggi.getFullYear() ? { year: "numeric" } : {})
+  });
+  return testo.charAt(0).toUpperCase() + testo.slice(1);
+}
+
+/**
+ * Le righe raggruppate per giorno, nell'ordine in cui arrivano (dal più
+ * recente). Una pagina può cominciare a metà di un giorno: il titolo si
+ * ripete in cima alla pagina dopo, che è quello che ci si aspetta.
+ */
+function perGiorno(righe) {
+  const gruppi = [];
+  for (const r of righe) {
+    const chiave = new Date(r.quando).toDateString();
+    const ultimo = gruppi[gruppi.length - 1];
+    if (ultimo?.chiave === chiave) ultimo.righe.push(r);
+    else gruppi.push({ chiave, titolo: nomeGiorno(r.quando), righe: [r] });
+  }
+  return gruppi;
 }
 
 /**
@@ -139,13 +183,14 @@ export default function RegistroPage() {
   };
 
   return (
-    <div className="adm-page">
+    <div className="adm-page reg-pagina">
       <div className="adm-page-head">
-        <div className="adm-head-left">
+        <div className="reg-testa">
+          <p className="adm-occhiello">Sistema</p>
           <h1 className="adm-page-title">Registro</h1>
           <p className="adm-page-sub">
-            Ogni operazione che cambia qualcosa lascia una riga qui. Non si
-            modifica e non si cancella, nemmeno da qui.
+            Chi ha fatto cosa, e quando: ogni operazione che cambia qualcosa
+            lascia una riga qui. Non si modifica e non si cancella.
           </p>
         </div>
       </div>
@@ -230,37 +275,57 @@ export default function RegistroPage() {
       </div>
 
       {caricamento ? (
-        <div className="adm-loading">
-          <div className="adm-spinner" />
-          <p>Caricamento del registro…</p>
+        <div aria-hidden="true">
+          <span className="adm-sagoma adm-sagoma-titolo" />
+          {[0, 1, 2, 3, 4].map((i) => <span key={i} className="adm-sagoma reg-sagoma" />)}
         </div>
       ) : dati.attivita.length === 0 ? (
-        <div className="adm-empty">
-          <FaHistory className="adm-empty-icon" />
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaHistory /></span>
+          <h2>{cerca || tipo || utenteId || da || a ? "Nessuna operazione trovata" : "Il registro è vuoto"}</h2>
           <p>
             {cerca || tipo || utenteId || da || a
-              ? "Nessuna operazione corrisponde a questi filtri."
-              : "Il registro è vuoto: non è ancora stata fatta nessuna operazione."}
+              ? "Nessuna operazione corrisponde a questi filtri: prova ad allargare il periodo o a togliere un filtro."
+              : "Non è ancora stata fatta nessuna operazione. La prima modifica al sito comparirà qui."}
           </p>
         </div>
       ) : (
-        <ul className="adm-registro">
-          {dati.attivita.map((r) => (
-            <li key={r.id} className={`adm-riga-registro ${tono(r.azione)}`}>
-              <span className="adm-registro-quando">{quando(r.quando)}</span>
+        <>
+          {/* Cosa vogliono dire i colori, detto una volta sola sopra
+              all'elenco: il colore da solo non basta a chi non lo distingue */}
+          <p className="reg-legenda">
+            <span className="reg-segno is-aggiunge" aria-hidden="true" /> aggiunto o pubblicato
+            <span className="reg-segno is-toglie" aria-hidden="true" /> tolto o cancellato
+          </p>
 
-              <span className="adm-registro-chi">
-                <FaUserCircle aria-hidden="true" />
-                <span>{r.autore ?? "account cancellato"}</span>
-              </span>
+          {/* Divise per giorno, con il giorno scritto una volta sola in
+              testa: la domanda è quasi sempre "cosa è successo martedì",
+              e la data ripetuta su ogni riga si leggeva come rumore. */}
+          {perGiorno(dati.attivita).map((giorno) => (
+            <section key={giorno.chiave} className="reg-giorno">
+              <h2 className="reg-giorno-titolo">{giorno.titolo}</h2>
+              <ul className="adm-registro">
+                {giorno.righe.map((r) => (
+                  <li key={r.id} className={`adm-riga-registro reg-riga ${tono(r.azione)}`}>
+                    <time className="adm-registro-quando" dateTime={r.quando} title={quando(r.quando)}>
+                      {ora(r.quando)}
+                    </time>
 
-              <span className="adm-registro-cosa">
-                {r.descrizione ?? r.azione}
-                <span className="adm-registro-azione">{r.azione}</span>
-              </span>
-            </li>
+                    <span className="adm-registro-chi">
+                      <FaUserCircle aria-hidden="true" />
+                      <span>{r.autore ?? "account cancellato"}</span>
+                    </span>
+
+                    <span className="adm-registro-cosa">
+                      {r.descrizione ?? r.azione}
+                      <span className="adm-registro-azione">{r.azione}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </>
       )}
 
       {!caricamento && (

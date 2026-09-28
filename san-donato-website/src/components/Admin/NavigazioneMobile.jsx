@@ -15,15 +15,19 @@ import { FaBars, FaTimes, FaExternalLinkAlt, FaSignOutAlt } from "react-icons/fa
  * chi chiama, perché dipende dal ruolo: a un allenatore servono le partite,
  * alla segreteria le quote.
  *
- * Si vede solo sotto i 760px: sopra, questo componente c'è ma il CSS lo
- * nasconde, e la riga del computer resta com'era.
+ * Si vede solo sotto i 760px (sotto i 1100 per chi ha la colonna delle
+ * sezioni a sinistra, che su un tablet non ci sta): sopra, questo
+ * componente c'è ma il CSS lo nasconde, e resta la navigazione del computer.
  *
  * @param sezioni     [{ a, etichetta, Icona, esatta }] già filtrate per ruolo
  * @param principali  quante mostrare nella barra; le altre vanno nel menu
  * @param extra       voci in più del menu, dopo le sezioni (es. il profilo)
+ * @param gruppi      [nomi] facoltativo: se c'è, il menu divide le voci per
+ *                    gruppo (la voce dice il suo in "gruppo"), in quest'ordine;
+ *                    le voci senza gruppo vanno in fondo, senza titolo
  * @param onEsci      uscita dall'account
  */
-export default function NavigazioneMobile({ sezioni, principali = 4, extra = [], onEsci }) {
+export default function NavigazioneMobile({ sezioni, principali = 4, extra = [], gruppi = null, onEsci }) {
   const [aperto, setAperto] = useState(false);
   const location = useLocation();
   const idPannello = useId();
@@ -31,6 +35,33 @@ export default function NavigazioneMobile({ sezioni, principali = 4, extra = [],
 
   const inBarra = sezioni.slice(0, principali);
   const nelMenu = [...sezioni.slice(principali), ...extra];
+
+  /* Con molte voci il menu è una griglia di dodici tessere tutte uguali, e
+     si legge a caso. Divise per argomento, con il nome sopra, si trovano:
+     è lo stesso ordine della colonna del computer. */
+  const blocchi = gruppi
+    ? [
+        ...gruppi.map((nome) => ({ nome, voci: nelMenu.filter((s) => s.gruppo === nome) })),
+        { nome: null, voci: nelMenu.filter((s) => !s.gruppo || !gruppi.includes(s.gruppo)) }
+      ].filter((b) => b.voci.length > 0)
+    : [{ nome: null, voci: nelMenu }];
+
+  const griglia = (voci) => (
+    <ul className="adm-menu-griglia">
+      {voci.map(({ a, etichetta, Icona, esatta }) => (
+        <li key={a}>
+          <NavLink
+            to={a}
+            end={esatta}
+            className={({ isActive }) => `adm-menu-voce ${isActive ? "is-active" : ""}`}
+          >
+            <Icona aria-hidden="true" />
+            <span>{etichetta}</span>
+          </NavLink>
+        </li>
+      ))}
+    </ul>
+  );
 
   // Si chiude da solo quando si cambia pagina: la voce toccata ha già fatto
   // il suo lavoro, e un menu che resta aperto sopra la pagina nuova la copre.
@@ -105,21 +136,14 @@ export default function NavigazioneMobile({ sezioni, principali = 4, extra = [],
             aria-modal="true"
             aria-label="Tutte le sezioni"
           >
-            {nelMenu.length > 0 && (
-              <ul className="adm-menu-griglia">
-                {nelMenu.map(({ a, etichetta, Icona, esatta }) => (
-                  <li key={a}>
-                    <NavLink
-                      to={a}
-                      end={esatta}
-                      className={({ isActive }) => `adm-menu-voce ${isActive ? "is-active" : ""}`}
-                    >
-                      <Icona aria-hidden="true" />
-                      <span>{etichetta}</span>
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
+            {nelMenu.length > 0 && (gruppi
+              ? blocchi.map(({ nome, voci }) => (
+                  <section key={nome || "altro"} className="adm-menu-gruppo" aria-label={nome || undefined}>
+                    {nome && <p className="adm-menu-gruppo-titolo" aria-hidden="true">{nome}</p>}
+                    {griglia(voci)}
+                  </section>
+                ))
+              : griglia(nelMenu)
             )}
 
             <div className="adm-menu-fondo">

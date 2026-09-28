@@ -1,0 +1,711 @@
+/* =====================================================
+   Pagine dei documenti — i pezzi comuni (prefisso doc-)
+
+   Privacy, Tutela minori, Contributi pubblici e 5x1000 si vestono tutte
+   così: l'apertura scura con il titolo enorme (AperturaDocumento.jsx), il
+   nastro arancione inclinato, un corpo chiaro e riposante per leggere, le
+   schede dei file disegnate come fogli (SchedaFile.jsx), l'indice che
+   resta di lato (IndiceDocumento.jsx) e gli altri documenti in fondo
+   (AltriDocumenti.jsx). Ogni pagina aggiunge nel suo foglio solo quello
+   che ha di proprio.
+
+   Sono pagine da LEGGERE: i testi lunghi non entrano mai con una
+   comparsa (un paragrafo più alto dello schermo aspetterebbe troppo), si
+   animano solo titoli, schede e numeri.
+   ===================================================== */
+
+.doc {
+  --doc-notte: #001a38;
+  --doc-blu: var(--psd-blu, #002b5c);
+  --doc-arancio: var(--psd-arancio, #ff6600);
+  /* L'arancio puro su fondo chiaro non basta per le scritte piccole */
+  --doc-arancio-testo: #c24a00;
+  --doc-carta: #f4f6fb;
+  --doc-inchiostro: #0b1526;
+  --doc-testo: #2a3548;
+  --doc-grigio: #56627a;
+  --doc-filo: rgba(11, 21, 38, .08);
+  --doc-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  width: 100%;
+  overflow-x: clip;             /* niente scorrimento laterale su telefono */
+  background: var(--doc-carta);
+  color: var(--doc-inchiostro);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.doc-solo-lettori {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Pezzi di testo ---------- */
+
+.doc-etichetta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--doc-arancio-testo);
+}
+.doc-etichetta::before {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--doc-arancio);
+}
+
+.doc-h2 {
+  margin: 0 0 18px;
+  font-size: clamp(2rem, 5.5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.045em;
+  color: var(--doc-inchiostro);
+  text-wrap: balance;
+}
+.doc-h2 em { font-style: normal; color: var(--doc-arancio); }
+
+/* La prosa: righe di 65-70 caratteri, interlinea ampia, un grigio
+   bluastro scuro invece del nero pieno. È il punto di tutte queste pagine. */
+.doc-prosa {
+  max-width: 68ch;
+  font-size: clamp(1.02rem, 1.4vw, 1.12rem);
+  line-height: 1.75;
+  color: var(--doc-testo);
+}
+.doc-prosa p { margin: 0 0 1.1em; }
+.doc-prosa p:last-child { margin-bottom: 0; }
+.doc-prosa strong { color: var(--doc-inchiostro); font-weight: 750; }
+
+/* L'attacco di una sezione, più grande del resto: la frase da ricordare */
+.doc-attacco {
+  margin: 0;
+  max-width: 30ch;
+  font-size: clamp(1.45rem, 3.4vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+  color: var(--doc-inchiostro);
+  text-wrap: pretty;
+}
+
+/* ---------- Pulsanti ---------- */
+
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.doc-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.doc-btn--pieno {
+  color: #fff;
+  background: linear-gradient(135deg, var(--doc-arancio), #ff3d00);
+  box-shadow: 0 10px 30px -8px rgba(255, 102, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.doc-btn--pieno:hover { color: #fff; box-shadow: 0 16px 40px -8px rgba(255, 102, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.doc-btn--vetro { color: #fff; }
+.doc-btn--vetro:hover { color: #fff; background: rgba(255, 255, 255, .2); }
+.doc-btn svg { transition: transform .35s var(--doc-curva); }
+.doc-btn:hover svg { transform: translateY(2px); }
+
+/* ---------- Apertura ---------- */
+
+.doc-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
+    linear-gradient(180deg, var(--doc-blu) 0%, var(--doc-notte) 100%);
+  padding: clamp(52px, 8vw, 112px) 0 clamp(76px, 9vw, 124px);
+}
+.doc-eroe-aurora { opacity: .85; }
+
+/* Le linee di un campo, che sfumano verso il basso */
+.doc-eroe-griglia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(90% 70% at 50% 20%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(90% 70% at 50% 20%, #000 20%, transparent 75%);
+}
+
+/* La parola gigante solo disegnata, che scorre più lenta della pagina */
+.doc-eroe-fantasma {
+  position: absolute;
+  z-index: 0;
+  right: -2vw;
+  bottom: 4%;
+  font-size: clamp(6rem, 22vw, 20rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.doc-eroe-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(28px, 4vw, 48px);
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.doc-eroe-testo { min-width: 0; }
+
+.doc-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ffb27a;
+}
+
+/* Il puntino che "respira", come una diretta accesa */
+.doc-punto {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--doc-arancio);
+}
+.doc-punto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--doc-arancio);
+  animation: doc-respiro 2.2s var(--doc-curva) infinite;
+}
+@keyframes doc-respiro {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+
+.doc-titolo {
+  margin: 0 0 clamp(20px, 3vw, 32px);
+  font-size: clamp(2.9rem, 11.5vw, 7.6rem);
+  font-weight: 900;
+  line-height: .9;
+  letter-spacing: -.055em;
+  color: #fff;
+  overflow-wrap: break-word;
+}
+.doc-titolo-riga { display: block; }
+/* Il gradiente animato taglia le lettere col bordo del riquadro: un filo
+   di spazio sotto salva le gambe delle lettere */
+.doc-titolo .mv-testo-vivo { padding-bottom: .08em; margin-left: -.02em; }
+
+.doc-sottotitolo {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .8);
+}
+.doc-eroe-nota { margin-top: 18px; }
+.doc-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.doc-eroe-laterale { min-width: 0; }
+
+.doc-numeri {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: clamp(8px, 2vw, 16px) 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+}
+.doc-numeri > div { padding: 18px 10px 0 0; min-width: 0; }
+.doc-numeri > div + div {
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, .14);
+}
+.doc-numeri dt {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .55);
+}
+.doc-numeri dd {
+  margin: 6px 0 0;
+  font-size: clamp(1.05rem, 3.2vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Nastro arancione ---------- */
+
+.doc-fascia {
+  position: relative;
+  z-index: 2;
+  margin: -26px -4% 0;          /* sborda: ruotata, non deve mostrare gli angoli */
+  padding: 14px 0;
+  transform: rotate(-2deg);
+  background: linear-gradient(90deg, var(--doc-arancio), #ff3d00);
+  box-shadow: 0 18px 40px -18px rgba(255, 61, 0, .7);
+}
+.doc-fascia .mv-nastro { mask-image: none; }
+.doc-fascia-giro {
+  display: flex;
+  flex: none;
+  gap: 28px;
+  padding-right: 28px;
+  font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+}
+.doc-stella { margin-left: 24px; color: var(--doc-blu); }
+
+/* ---------- Corpo con l'indice di lato ---------- */
+
+.doc-corpo {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 104px) 16px clamp(56px, 8vw, 96px);
+}
+.doc-corpo--indice { display: grid; gap: 28px; }
+.doc-corpo-colonna { min-width: 0; display: grid; gap: clamp(64px, 9vw, 112px); }
+
+.doc-sezione {
+  min-width: 0;
+  scroll-margin-top: 96px;
+}
+
+/* L'indice: sul telefono una fila di pillole da scorrere */
+.doc-indice { min-width: 0; }
+.doc-indice-titolo {
+  margin: 0 0 10px;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--doc-grigio);
+}
+.doc-indice-voci {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 2px 16px 10px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+.doc-indice-voci::-webkit-scrollbar { display: none; }
+.doc-indice-voci li { flex: none; scroll-snap-align: start; }
+.doc-indice-voci a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--doc-filo);
+  color: var(--doc-testo);
+  font-size: .9rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+.doc-indice-numero {
+  font-size: .72rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--doc-arancio-testo);
+}
+.doc-indice-voci a:hover { color: var(--doc-inchiostro); border-color: rgba(0, 43, 92, .25); }
+.doc-indice-voci a.attiva {
+  background: var(--doc-blu);
+  border-color: var(--doc-blu);
+  color: #fff;
+}
+.doc-indice-voci a.attiva .doc-indice-numero { color: #ffb27a; }
+.doc-indice-voci a:focus-visible { outline: 3px solid var(--doc-arancio); outline-offset: 2px; }
+
+/* ---------- La scheda di un file ---------- */
+
+.doc-file {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  padding: 22px;
+  border-radius: 26px;
+  background: #fff;
+  border: 1px solid var(--doc-filo);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 14px 34px -22px rgba(11, 21, 38, .3);
+  color: var(--doc-inchiostro);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Movimento.css dà a [data-inclina] una transizione sola, su transform:
+   qui la si riscrive con un selettore più forte, se no il sollevamento
+   (translate) e l'ombra scatterebbero di colpo. */
+.doc-file,
+.mv-attivo .doc-file[data-inclina] {
+  transition:
+    transform .5s var(--doc-curva),
+    translate .5s var(--doc-curva),
+    box-shadow .5s var(--doc-curva),
+    border-color .4s ease;
+}
+.mv-attivo .doc-file[data-inclina]:hover { transition-duration: .12s, .5s, .5s, .4s; }
+.doc-file:hover {
+  color: var(--doc-inchiostro);
+  translate: 0 -4px;
+  border-color: transparent;
+  box-shadow: 0 30px 60px -26px rgba(0, 43, 92, .4);
+}
+.doc-file:focus-visible { outline: 3px solid var(--doc-arancio); outline-offset: 3px; }
+
+/* L'anello arancio-blu che si accende al passaggio: solo il bordo, grazie
+   alla maschera (::after è già la lucentezza di data-inclina) */
+.doc-file-alone {
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--doc-arancio), #ffb36b 40%, #0a4a93);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.doc-file:hover .doc-file-alone,
+.doc-file:focus-visible .doc-file-alone { opacity: 1; }
+
+.doc-file-testa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Il foglio con l'angolo piegato */
+.doc-file-foglio {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 48px;
+  height: 60px;
+  padding: 0 0 8px;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #0a4a93, var(--doc-blu));
+  clip-path: polygon(0 0, 66% 0, 100% 26%, 100% 100%, 0 100%);
+  box-shadow: 0 10px 20px -10px rgba(0, 43, 92, .7);
+  transition: rotate .5s var(--doc-curva);
+}
+.doc-file-foglio::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34%;
+  height: 26%;
+  background: linear-gradient(225deg, transparent 50%, #6f9bd1 50%);
+}
+.doc-file-formato {
+  margin-left: -6px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--doc-arancio);
+  color: #fff;
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+.doc-file:hover .doc-file-foglio { rotate: -6deg; }
+
+.doc-file-numero {
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.06em;
+  color: rgba(0, 43, 92, .09);
+}
+
+.doc-file-titolo {
+  display: block;
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  overflow-wrap: break-word;
+}
+.doc-file-testo {
+  display: block;
+  margin-top: 8px;
+  font-size: .95rem;
+  line-height: 1.55;
+  color: var(--doc-grigio);
+}
+.doc-file-azione {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 20px;
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--doc-blu);
+}
+.doc-file-freccia {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--doc-carta);
+  font-size: .85rem;
+  transition: background-color .3s ease, color .3s ease, transform .5s var(--doc-curva);
+}
+.doc-file:hover .doc-file-freccia {
+  background: var(--doc-arancio);
+  color: #fff;
+  transform: translateY(2px) scale(1.08);
+}
+
+/* Una griglia di schede: una colonna sul telefono, poi due e tre */
+.doc-file-griglia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.doc-file-griglia > li { min-width: 0; }
+
+/* ---------- Gli altri documenti ---------- */
+
+.doc-altri {
+  position: relative;
+  padding: clamp(56px, 8vw, 96px) 0 clamp(64px, 9vw, 112px);
+  background:
+    radial-gradient(60% 60% at 100% 0%, rgba(255, 102, 0, .07), transparent 70%),
+    linear-gradient(180deg, var(--doc-carta), #e9eef7);
+  border-top: 1px solid var(--doc-filo);
+}
+.doc-altri-dentro { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+.doc-altri-testa { margin-bottom: clamp(24px, 4vw, 40px); }
+.doc-altri-griglia {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.doc-altri-griglia > li { display: flex; min-width: 0; }
+/* Il primo è largo il doppio: la griglia prende un ritmo */
+.doc-altri-griglia > li:first-child { grid-column: span 2; }
+.doc-altri-voce {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 132px;
+  padding: 16px;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid var(--doc-filo);
+  color: var(--doc-inchiostro);
+  text-decoration: none;
+  transition: translate .5s var(--doc-curva), box-shadow .5s var(--doc-curva), background-color .4s ease, color .4s ease;
+}
+.doc-altri-voce:hover {
+  translate: 0 -4px;
+  color: #fff;
+  background: var(--doc-blu);
+  box-shadow: 0 24px 48px -24px rgba(0, 43, 92, .55);
+}
+.doc-altri-voce:focus-visible { outline: 3px solid var(--doc-arancio); outline-offset: 3px; }
+.doc-altri-icona {
+  display: grid;
+  margin-bottom: auto;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(255, 102, 0, .1);
+  color: var(--doc-arancio);
+  font-size: 1.05rem;
+  transition: background-color .4s ease, color .4s ease;
+}
+.doc-altri-voce:hover .doc-altri-icona { background: var(--doc-arancio); color: #fff; }
+.doc-altri-nome { margin-top: 14px; font-weight: 800; font-size: 1.02rem; letter-spacing: -.01em; }
+.doc-altri-tipo {
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--doc-grigio);
+  transition: color .4s ease;
+}
+.doc-altri-voce:hover .doc-altri-tipo { color: rgba(255, 255, 255, .7); }
+.doc-altri-freccia {
+  position: absolute;
+  right: 12px;
+  top: 16px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-size: .8rem;
+  color: var(--doc-grigio);
+  transition: transform .5s var(--doc-curva), color .3s ease;
+}
+.doc-altri-voce:hover .doc-altri-freccia { color: #ffb27a; transform: translateX(3px); }
+
+/* ---------- Schermi più larghi ---------- */
+
+@media (min-width: 640px) {
+  .doc-eroe-dentro,
+  .doc-corpo,
+  .doc-altri-dentro { padding-left: 24px; padding-right: 24px; }
+  .doc-indice-voci { margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
+  .doc-file { padding: 26px; }
+  .doc-file-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .doc-altri-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .doc-altri-griglia > li:first-child { grid-column: span 1; }
+}
+
+@media (min-width: 1000px) {
+  .doc-eroe--laterale .doc-eroe-dentro {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: end;
+  }
+  .doc-eroe--laterale .doc-numeri { grid-column: 1 / -1; }
+
+  .doc-corpo--indice {
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 80px);
+    align-items: start;
+  }
+  /* L'indice resta a vista mentre si legge, sotto all'intestazione quando
+     c'è (vedi --testata-visibile in MyNavbar) */
+  .doc-indice {
+    position: sticky;
+    top: calc(var(--testata-visibile, 0px) + 1.5rem);
+    transition: top .5s var(--doc-curva);
+  }
+  .doc-indice-voci {
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0 0 0 14px;
+    overflow: visible;
+    border-left: 2px solid var(--doc-filo);
+  }
+  .doc-indice-voci a {
+    position: relative;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    white-space: normal;
+  }
+  /* La lineetta arancione che segna la sezione in lettura, sul filo */
+  .doc-indice-voci a::before {
+    content: "";
+    position: absolute;
+    left: -16px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--doc-arancio);
+    transform: scaleY(0);
+    transition: transform .45s var(--doc-curva);
+  }
+  .doc-indice-voci a:hover { background: rgba(0, 43, 92, .05); }
+  .doc-indice-voci a.attiva {
+    background: #fff;
+    color: var(--doc-inchiostro);
+    box-shadow: 0 10px 24px -16px rgba(0, 43, 92, .45);
+  }
+  .doc-indice-voci a.attiva::before { transform: scaleY(1); }
+  .doc-indice-voci a.attiva .doc-indice-numero { color: var(--doc-arancio-testo); }
+
+  .doc-file-griglia--tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .doc-altri-griglia { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .doc-altri-voce { min-height: 168px; padding: 20px; }
+  .doc-altri-freccia { top: 20px; right: 16px; }
+}
+
+@media (min-width: 1200px) {
+  .doc-eroe-dentro,
+  .doc-corpo,
+  .doc-altri-dentro { padding-left: 32px; padding-right: 32px; }
+}
+
+/* ---------- Chi ha chiesto meno movimento ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-punto::after { animation: none; opacity: 0; }
+  .doc *,
+  .doc *::before,
+  .doc *::after { transition-duration: .01ms !important; }
+  .doc-file:hover,
+  .doc-altri-voce:hover { translate: none; }
+  .doc-file:hover .doc-file-foglio { rotate: none; }
+}

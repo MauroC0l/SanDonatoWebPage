@@ -29,6 +29,14 @@
   --adm-warn: #9a5b00;
   --adm-warn-soft: #fdf3e4;
   --adm-radius: 12px;
+  /* Il blu e l'arancio della società: "Paga" è il pulsante arancio, e
+     senza queste due righe resterebbe una scritta bianca sul nulla. */
+  --adm-navy: #002b5c;
+  --adm-arancio: #ff6600;
+  --adm-arancio-testo: #b84a00;
+  --adm-pillola: linear-gradient(135deg, #ff7a1a, #ff4d00);
+  --adm-r-pill: 999px;
+  --adm-tocco: 44px;
 
   color: var(--adm-ink);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

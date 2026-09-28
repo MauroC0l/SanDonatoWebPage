@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaExclamationCircle, FaLayerGroup, FaRunning, FaArrowUp, FaArrowDown
+  FaExclamationCircle, FaLayerGroup, FaRunning, FaArrowUp, FaArrowDown, FaArrowRight
 } from "react-icons/fa";
 import { listStagioni, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -10,6 +10,7 @@ import { useDialoghi } from "../../context/dialoghi";
 import { useStagione } from "../../context/stagione";
 import { euro } from "../../utils/soldi";
 import "../../css/Admin.css";
+import "../../css/admin/Persone.css";
 
 /**
  * Le stagioni una accanto all'altra: quanti iscritti, quanti rinnovi, quanti
@@ -100,11 +101,31 @@ function SchedaStagione({ s, prima, onApri }) {
             <span style={{ width: `${percento}%` }} />
           </div>
           <span className="adm-hint">
-            {percento}% di {euro(q.dovuto)} dovuti
+            <strong>Incassato il {percento}%</strong> di {euro(q.dovuto)} dovuti
             {s.inCorso && " (le seconde metà di chi si è ritirato prima di gennaio non contano)"}
           </span>
         </div>
       </div>
+
+      {/* Da un numero a chi c'è dietro: "5 senza quota" è una domanda, e
+          la risposta è l'elenco di quei cinque con il filtro già acceso.
+          Solo per la stagione in corso: sulle passate non c'è più niente
+          da sistemare. */}
+      {s.inCorso && (q.senzaQuota > 0 || q.residuo > 0) && (
+        <div className="prs-stg-azioni">
+          {q.senzaQuota > 0 && (
+            <button type="button" className="adm-btn adm-btn-primary" onClick={() => onApri(s, "?quota=mancante")}>
+              {q.senzaQuota === 1 ? "1 atleta senza quota" : `${q.senzaQuota} atleti senza quota`}: scegli la tariffa
+              <FaArrowRight aria-hidden="true" />
+            </button>
+          )}
+          {q.residuo > 0 && (
+            <button type="button" className="adm-btn adm-btn-ghost" onClick={() => onApri(s, "?quota=aperta")}>
+              Chi deve ancora versare <FaArrowRight aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -146,10 +167,11 @@ export default function StagioniPage() {
     return () => { attivo = false; };
   }, [gestisciErrore]);
 
-  // Aprire gli atleti di una stagione vuol dire sceglierla in alto
-  const apri = (s) => {
+  // Aprire gli atleti di una stagione vuol dire sceglierla in alto; il
+  // filtro, quando c'è, viaggia nell'indirizzo (lo legge AtletiPage)
+  const apri = (s, filtro = "") => {
     scegli(s.id);
-    navigate(`${area}/atleti`);
+    navigate(`${area}/atleti${filtro}`);
   };
 
   if (caricamento) {
@@ -162,9 +184,10 @@ export default function StagioniPage() {
   }
 
   return (
-    <div className="adm-page">
+    <div className="adm-page prs-pagina">
       <div className="adm-page-head">
         <div className="adm-head-left">
+          <p className="adm-occhiello">Numeri</p>
           <h1 className="adm-page-title">Stagioni</h1>
           <p className="adm-page-sub">
             Dal 1° luglio al 30 giugno. Iscritti e quote di ogni stagione, com&apos;erano allora.
@@ -179,9 +202,10 @@ export default function StagioniPage() {
       )}
 
       {stagioni.length === 0 ? (
-        <div className="adm-empty">
-          <FaLayerGroup className="adm-empty-icon" />
-          <p>Nessuna stagione ancora: la prima nasce con il primo iscritto.</p>
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaLayerGroup aria-hidden="true" /></span>
+          <h2>Ancora nessuna stagione</h2>
+          <p>La prima nasce da sola con il primo iscritto: non c&apos;è niente da creare a mano.</p>
         </div>
       ) : (
         <div className="adm-stg-elenco">

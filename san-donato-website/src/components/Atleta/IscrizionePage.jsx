@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaSave, FaExclamationCircle, FaCheckCircle, FaFileMedical, FaUpload,
-  FaExternalLinkAlt, FaHourglassHalf, FaClipboardCheck, FaInfoCircle,
-  FaTimesCircle, FaLock
+  FaExternalLinkAlt, FaHourglassHalf, FaInfoCircle, FaTimesCircle, FaLock,
+  FaArrowRight, FaArrowDown
 } from "react-icons/fa";
 import { getIscrizione, salvaIscrizione, uploadMedia, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -19,6 +19,24 @@ import { TAGLIE } from "../../data/luoghi";
 import { NOMI_PROVINCE, comuniDi } from "../../utils/luoghi";
 import "../../css/Admin.css";
 import "../../css/Iscrizione.css";
+import "../../css/AreaAtleta.css";
+
+/* Le voci di "cosa manca" (le scrive il server) che non si compilano nel
+   modulo: i recapiti hanno la loro pagina, il certificato il suo riquadro. */
+const DAI_CONTATTI = ["un numero di telefono", "il contatto di un genitore"];
+const DEL_CERTIFICATO = ["la scadenza del certificato medico", "la copia del certificato medico"];
+
+/* La pastiglia accanto al titolo del certificato, detta in parole di chi
+   lo deve portare e non con l'etichetta della segreteria. */
+const STATO_CERTIFICATO = {
+  mancante: { testo: "Da caricare", tono: "is-manca" },
+  senza_file: { testo: "Manca la copia", tono: "is-manca" },
+  da_controllare: { testo: "In controllo", tono: "is-attesa" },
+  respinto: { testo: "Da rifare", tono: "is-allarme" },
+  scaduto: { testo: "Scaduto", tono: "is-allarme" },
+  in_scadenza: { testo: "Scade presto", tono: "is-manca" },
+  valido: { testo: "A posto", tono: "is-ok" }
+};
 
 const TIPI_CERTIFICATO = [
   { valore: "", etichetta: "Non lo so" },
@@ -43,7 +61,7 @@ const TIPI_CERTIFICATO = [
  */
 const GRUPPI = [
   {
-    titolo: "I tuoi dati",
+    titolo: "Chi sei",
     campi: [
       { chiave: "dataNascita", etichetta: "Data di nascita", tipo: "date", obbligatorio: true },
 
@@ -65,7 +83,7 @@ const GRUPPI = [
       { chiave: "citta", etichetta: "Comune", tipo: "suggerito", elenco: "comuni", dipendeDa: "provincia" },
       { chiave: "indirizzo", etichetta: "Via o piazza", max: 200, largo: true },
       { chiave: "civico", etichetta: "Numero civico", max: 20, stretto: true },
-      { chiave: "cap", etichetta: "CAP", max: 5, stretto: true }
+      { chiave: "cap", etichetta: "CAP", max: 5, stretto: true, numerico: true }
     ]
   }
 ];
@@ -149,6 +167,29 @@ export default function IscrizionePage() {
   const [oggi] = useState(() => new Date());
 
   const inAttesa = user?.stato === "in_attesa";
+  const location = useLocation();
+
+  /* Porta a un riquadro del modulo e lo accende un attimo: sul telefono si
+     arriva a metà di una pagina lunga, e bisogna capire dove guardare. */
+  const vaiA = useCallback((id) => {
+    const riquadro = document.getElementById(id);
+    if (!riquadro) return;
+    const piano = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    riquadro.scrollIntoView({ behavior: piano ? "auto" : "smooth", block: "start" });
+    riquadro.classList.remove("aa-evidenzia");
+    // Rilegge lo stile, così l'animazione riparte anche al secondo tocco
+    void riquadro.offsetWidth;
+    riquadro.classList.add("aa-evidenzia");
+  }, []);
+
+  /* Dalla home si arriva con "#certificato" o "#dati": appena il modulo
+     c'è, si scende lì invece di lasciare la pagina in cima. */
+  useEffect(() => {
+    if (caricamento || !location.hash) return;
+    const id = location.hash.slice(1);
+    const tempo = setTimeout(() => vaiA(id), 60);
+    return () => clearTimeout(tempo);
+  }, [caricamento, location.hash, vaiA]);
 
   const gestisciErrore = useCallback((err) => {
     if (err instanceof AuthError) {
@@ -313,9 +354,107 @@ export default function IscrizionePage() {
   const manca = iscrizione?.manca ?? [];
   const completa = manca.length === 0;
 
+  /* Contatti e certificato hanno un posto loro: l'avviso in cima porta lì.
+     La pagina dei contatti c'è solo nell'area dell'atleta: a chi allena
+     la voce resta scritta, senza collegamento. */
+  const conContatti = user?.role === "atleta";
+  const dovePorta = (voce) => {
+    if (DAI_CONTATTI.includes(voce)) return conContatti ? "contatti" : null;
+    if (DEL_CERTIFICATO.includes(voce)) return certificatoRichiesto ? "certificato" : null;
+    return "dati";
+  };
+
+  /* Lo stato di ogni sezione, accanto al titolo: si vede dall'alto quale
+     è a posto e quale no, senza leggere le caselle una per una. Si guarda
+     il modulo com'è adesso, non com'era salvato: la pastiglia diventa
+     verde mentre si scrive, e la barra in fondo ricorda di salvare. */
+  const [gruppoDati, gruppoCasa] = GRUPPI;
+  const datiCompleti = gruppoDati.campi.every((c) => !c.obbligatorio || form[c.chiave]);
+
+  const statoCert = STATO_CERTIFICATO[cert.chiave] ?? STATO_CERTIFICATO.mancante;
+  const certDaCaricare = !iscrizione?.certificatoUrl
+    || cert.chiave === "respinto" || cert.chiave === "scaduto";
+
+  /* Una casella del modulo, come la chiede la sua riga in GRUPPI */
+  const casella = (c) => (
+    <label
+      className={`adm-field ${c.largo ? "adm-campo-largo" : ""} ${c.stretto ? "adm-campo-stretto" : ""}`}
+      key={c.chiave}
+    >
+      <span className="adm-label">
+        {c.etichetta}
+
+        {/* L'asterisco su quello che serve per completare l'iscrizione:
+            senza, l'unico modo di scoprire cosa manca era l'avviso in
+            cima, che lo dice però a cose fatte. */}
+        {c.obbligatorio && (
+          <span className="adm-obbligatorio" title="Serve per completare l'iscrizione">*</span>
+        )}
+
+        {/* L'età non è un campo: si ricava dalla data, e chiederla a parte
+            vorrebbe dire due dati che si contraddicono il giorno del
+            compleanno. */}
+        {c.chiave === "dataNascita" && anni(form.dataNascita) != null && (
+          <span className="adm-eta">{anni(form.dataNascita)} anni</span>
+        )}
+      </span>
+
+      {/* Il calendario è quello del sito e non quello del browser: quello
+          cambia forma su ogni sistema, non si può vestire, e su Firefox
+          per Windows è una cosa che nessuno trova. */}
+      {c.tipo === "date" ? (
+        <CampoData
+          valore={form[c.chiave] ? `${form[c.chiave]}T00:00:00` : ""}
+          onChange={(v) => setForm({
+            ...form,
+            [c.chiave]: v ? giornoLocale(v) : ""
+          })}
+          disabilitato={salvataggio}
+          etichettaAria={c.etichetta}
+        />
+      ) : c.tipo === "suggerito" ? (
+        <CampoSuggerito
+          valore={form[c.chiave]}
+          onChange={(v) => setForm({ ...form, [c.chiave]: v })}
+          opzioni={c.elenco === "province"
+            ? NOMI_PROVINCE
+            : comuniDi(form[c.dipendeDa])}
+          obbligaScelta={Boolean(c.obbliga)}
+          disabilitato={salvataggio}
+          etichettaAria={c.etichetta}
+          segnaposto={c.dipendeDa && !form[c.dipendeDa]
+            ? "Scegli prima la provincia"
+            : "Scrivi e scegli…"}
+        />
+      ) : c.tipo === "scelta" ? (
+        <Tendina
+          valore={form[c.chiave]}
+          onChange={(v) => setForm({ ...form, [c.chiave]: v })}
+          opzioni={OPZIONI_TAGLIA}
+          disabilitato={salvataggio}
+          etichettaAria={c.etichetta}
+          segnaposto="Scegli…"
+        />
+      ) : (
+        <input
+          type={c.tipo ?? "text"}
+          className="adm-input"
+          value={form[c.chiave]}
+          maxLength={c.max}
+          inputMode={c.numerico ? "numeric" : undefined}
+          autoCapitalize={c.maiuscolo ? "characters" : undefined}
+          onChange={(e) => setForm({
+            ...form,
+            [c.chiave]: c.maiuscolo ? e.target.value.toUpperCase() : e.target.value
+          })}
+          disabled={salvataggio}
+        />
+      )}
+    </label>
+  );
 
   return (
-    <div className="adm-page adm-editor-page">
+    <div className="adm-page adm-editor-page aa-pagina">
       <div className="adm-page-head">
         <div className="adm-head-left">
           <h1 className="adm-page-title">La tua iscrizione</h1>
@@ -324,8 +463,11 @@ export default function IscrizionePage() {
           </p>
         </div>
 
+        {/* Sul computer il pulsante sta anche qui in alto; sul telefono
+            solo nella barra attaccata in fondo, che si raggiunge col
+            pollice (vedi AreaAtleta.css). */}
         {(sporco || salvataggio) && (
-          <div className="adm-head-actions">
+          <div className="adm-head-actions aa-solo-grande">
             <button
               type="submit"
               form="modulo-iscrizione"
@@ -359,8 +501,9 @@ export default function IscrizionePage() {
         </div>
       )}
 
-      {/* Cosa manca, detto in una riga sola e senza rimproveri: è una lista
-          di cose da fare, non un elenco di mancanze. */}
+      {/* Cosa manca: una voce per cosa, e ognuna porta dove la si compila.
+          Prima era una frase sola con cinque cose separate da virgole, e
+          sul telefono restava da cercare dove fosse ciascuna. */}
       {completa ? (
         <div className="adm-alert adm-alert-success">
           <FaCheckCircle />
@@ -369,128 +512,97 @@ export default function IscrizionePage() {
           </span>
         </div>
       ) : (
-        <div className="adm-alert adm-alert-info">
-          <FaInfoCircle />
-          <span>
-            Per completare l&apos;iscrizione manca ancora{" "}
-            <strong>{manca.join(", ")}</strong>.
-          </span>
+        <div className="aa-manca" role="status">
+          <p className="aa-manca-titolo">
+            <FaInfoCircle aria-hidden="true" />
+            {manca.length === 1
+              ? "Per completare l'iscrizione manca una cosa"
+              : `Per completare l'iscrizione mancano ${manca.length} cose`}
+          </p>
+          <ul className="aa-manca-voci">
+            {manca.map((voce) => {
+              const dove = dovePorta(voce);
+              const testo = voce.charAt(0).toUpperCase() + voce.slice(1);
+
+              return (
+                <li key={voce}>
+                  {dove === "contatti" ? (
+                    <Link to="/area-riservata/contatti" className="aa-manca-voce">
+                      {testo} <FaArrowRight aria-hidden="true" />
+                    </Link>
+                  ) : dove ? (
+                    <button type="button" className="aa-manca-voce" onClick={() => vaiA(dove)}>
+                      {testo} <FaArrowDown aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <span className="aa-manca-voce">{testo}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
-
 
       {/* La quota in cima e a tutta larghezza, come nella pagina che gli
           atleti hanno a parte: è la prima cosa che si viene a controllare,
           più dell'indirizzo che si è già scritto tre mesi fa. */}
       {quotaQui && <RiquadroQuota iscrizione={iscrizione} />}
 
+      <p className="aa-legenda">
+        <span className="adm-obbligatorio" aria-hidden="true">*</span>
+        {" "}= serve per completare l&apos;iscrizione. Il resto è facoltativo, ma aiuta.
+      </p>
+
       <form id="modulo-iscrizione" onSubmit={salva}>
         <div className={`isc-griglia ${conLato ? "" : "isc-griglia-sola"}`}>
           <div className="isc-colonna">
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaClipboardCheck aria-hidden="true" /> Modulo
+
+            {/* Tre riquadri numerati invece di un "Modulo" solo: una
+                domanda per volta — chi sei, dove abiti, cosa dobbiamo
+                sapere — si compila anche a pezzi, fra una cosa e l'altra. */}
+            <section className="adm-panel" id="dati" aria-labelledby="isc-titolo-dati">
+              <h2 className="adm-panel-title aa-sezione-titolo" id="isc-titolo-dati">
+                <span className={`aa-numero ${datiCompleti ? "is-fatto" : ""}`} aria-hidden="true">1</span>
+                {gruppoDati.titolo}
+                <span className={`aa-stato ${datiCompleti ? "is-ok" : "is-manca"}`}>
+                  {datiCompleti ? <><FaCheckCircle aria-hidden="true" /> Completo</> : "Manca qualcosa"}
+                </span>
               </h2>
+              <p className="aa-sezione-sotto">Come sui documenti.</p>
 
-              {GRUPPI.map((gruppo) => (
-                <fieldset className="adm-gruppo" key={gruppo.titolo}>
-                  <legend className="adm-gruppo-titolo">{gruppo.titolo}</legend>
-                  {gruppo.sottotitolo && (
-                    <p className="adm-hint" style={{ marginTop: 0 }}>{gruppo.sottotitolo}</p>
-                  )}
+              <div className="adm-campi">{gruppoDati.campi.map(casella)}</div>
+            </section>
 
-                  <div className="adm-campi">
-                    {gruppo.campi.map((c) => (
-                      <label
-                        className={`adm-field ${c.largo ? "adm-campo-largo" : ""} ${c.stretto ? "adm-campo-stretto" : ""}`}
-                        key={c.chiave}
-                      >
-                        <span className="adm-label">
-                          {c.etichetta}
+            <section className="adm-panel" aria-labelledby="isc-titolo-casa">
+              <h2 className="adm-panel-title aa-sezione-titolo" id="isc-titolo-casa">
+                <span className="aa-numero" aria-hidden="true">2</span>
+                {gruppoCasa.titolo}
+              </h2>
+              {gruppoCasa.sottotitolo && (
+                <p className="aa-sezione-sotto">{gruppoCasa.sottotitolo}</p>
+              )}
 
-                          {/* L'asterisco su quello che serve per completare
-                              l'iscrizione: senza, l'unico modo di scoprire
-                              cosa manca era l'avviso in cima, che lo dice
-                              pero a cose fatte. */}
-                          {c.obbligatorio && (
-                            <span className="adm-obbligatorio" title="Serve per completare l'iscrizione">*</span>
-                          )}
+              <div className="adm-campi">{gruppoCasa.campi.map(casella)}</div>
+            </section>
 
-                          {/* L'età non è un campo: si ricava dalla data, e
-                              chiederla a parte vorrebbe dire due dati che
-                              si contraddicono il giorno del compleanno. */}
-                          {c.chiave === "dataNascita" && anni(form.dataNascita) != null && (
-                            <span className="adm-eta">{anni(form.dataNascita)} anni</span>
-                          )}
-                        </span>
-
-                        {/* Il calendario è quello del sito e non quello del
-                            browser: quello cambia forma su ogni sistema, non
-                            si può vestire, e su Firefox per Windows è una
-                            cosa che nessuno trova. */}
-                        {c.tipo === "date" ? (
-                          <CampoData
-                            valore={form[c.chiave] ? `${form[c.chiave]}T00:00:00` : ""}
-                            onChange={(v) => setForm({
-                              ...form,
-                              [c.chiave]: v ? giornoLocale(v) : ""
-                            })}
-                            disabilitato={salvataggio}
-                            etichettaAria={c.etichetta}
-                          />
-                        ) : c.tipo === "suggerito" ? (
-                          <CampoSuggerito
-                            valore={form[c.chiave]}
-                            onChange={(v) => setForm({ ...form, [c.chiave]: v })}
-                            opzioni={c.elenco === "province"
-                              ? NOMI_PROVINCE
-                              : comuniDi(form[c.dipendeDa])}
-                            obbligaScelta={Boolean(c.obbliga)}
-                            disabilitato={salvataggio}
-                            etichettaAria={c.etichetta}
-                            segnaposto={c.dipendeDa && !form[c.dipendeDa]
-                              ? "Scegli prima la provincia"
-                              : "Scrivi e scegli…"}
-                          />
-                        ) : c.tipo === "scelta" ? (
-                          <Tendina
-                            valore={form[c.chiave]}
-                            onChange={(v) => setForm({ ...form, [c.chiave]: v })}
-                            opzioni={OPZIONI_TAGLIA}
-                            disabilitato={salvataggio}
-                            etichettaAria={c.etichetta}
-                            segnaposto="Scegli…"
-                          />
-                        ) : (
-                          <input
-                            type={c.tipo ?? "text"}
-                            className="adm-input"
-                            value={form[c.chiave]}
-                            maxLength={c.max}
-                            onChange={(e) => setForm({
-                              ...form,
-                              [c.chiave]: c.maiuscolo ? e.target.value.toUpperCase() : e.target.value
-                            })}
-                            disabled={salvataggio}
-                          />
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              ))}
+            <section className="adm-panel" aria-labelledby="isc-titolo-note">
+              <h2 className="adm-panel-title aa-sezione-titolo" id="isc-titolo-note">
+                <span className="aa-numero" aria-hidden="true">3</span>
+                C&apos;è qualcosa che dovremmo sapere?
+              </h2>
 
               <label className="adm-field">
                 <span className="adm-label">
-                  C&apos;è qualcosa che dovremmo sapere? <em>(facoltativo)</em>
+                  Allergie, terapie, infortuni <em>(facoltativo)</em>
                 </span>
                 <textarea
                   className="adm-input adm-textarea"
-                  rows={2}
+                  rows={3}
                   value={form.note}
                   maxLength={2000}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
-                  placeholder="Allergie, terapie in corso, infortuni recenti…"
+                  placeholder="Per esempio: allergia alle api, porta sempre lo spray per l'asma…"
                   disabled={salvataggio}
                 />
                 <span className="adm-hint">
@@ -499,15 +611,16 @@ export default function IscrizionePage() {
                 </span>
               </label>
             </section>
-
           </div>
 
           {conLato && (
           <aside className="isc-lato">
             {certificatoRichiesto && (
-            <section className="adm-panel">
-              <h2 className="adm-panel-title">
-                <FaFileMedical aria-hidden="true" /> Certificato medico
+            <section className="adm-panel" id="certificato" aria-labelledby="isc-titolo-cert">
+              <h2 className="adm-panel-title aa-sezione-titolo" id="isc-titolo-cert">
+                <span className={`aa-numero ${cert.chiave === "valido" ? "is-fatto" : ""}`} aria-hidden="true">4</span>
+                Certificato medico
+                <span className={`aa-stato ${statoCert.tono}`}>{statoCert.testo}</span>
               </h2>
 
               {iscrizione?.certificatoScadenza && (
@@ -547,30 +660,9 @@ export default function IscrizionePage() {
                 </p>
               )}
 
-              <div className="adm-field">
-                <span className="adm-label">Che tipo è</span>
-                <Tendina
-                  valore={form.tipoCertificato}
-                  onChange={(v) => setForm({ ...form, tipoCertificato: v })}
-                  opzioni={TIPI_CERTIFICATO}
-                  disabilitato={salvataggio || bloccato}
-                  etichettaAria="Tipo di certificato"
-                />
-              </div>
-
-              <div className="adm-field">
-                <span className="adm-label">Quando scade</span>
-                <CampoData
-                  valore={form.certificatoScadenza ? `${form.certificatoScadenza}T00:00:00` : ""}
-                  onChange={(v) => setForm({
-                    ...form,
-                    certificatoScadenza: v ? giornoLocale(v) : ""
-                  })}
-                  disabilitato={salvataggio || bloccato}
-                  etichettaAria="Scadenza del certificato"
-                />
-              </div>
-
+              {/* Il file prima di tipo e scadenza: è la cosa che conta, ed
+                  è quella che una famiglia ha in mano — la foto del foglio
+                  del medico. Il pulsante è arancione finché manca. */}
               <div className="adm-cert-file">
                 {iscrizione?.certificatoUrl ? (
                   <a
@@ -583,8 +675,8 @@ export default function IscrizionePage() {
                   </a>
                 ) : (
                   <p className="adm-hint" style={{ marginTop: 0 }}>
-                    Non hai ancora caricato la copia. Va bene una foto ben
-                    leggibile o il PDF che ti ha dato il medico.
+                    Va bene una foto ben leggibile o il PDF che ti ha dato il
+                    medico.
                   </p>
                 )}
 
@@ -597,7 +689,7 @@ export default function IscrizionePage() {
                 />
                 <button
                   type="button"
-                  className="adm-btn adm-btn-secondary adm-btn-block"
+                  className={`adm-btn adm-btn-block ${certDaCaricare && !bloccato ? "adm-btn-arancio" : "adm-btn-secondary"}`}
                   onClick={() => inputFile.current?.click()}
                   disabled={caricandoFile || salvataggio || bloccato}
                 >
@@ -609,6 +701,33 @@ export default function IscrizionePage() {
                 <p className="adm-hint">
                   Il file parte appena lo scegli, non serve premere Salva.
                 </p>
+              </div>
+
+              <div className="adm-field">
+                <span className="adm-label">
+                  Quando scade
+                  <span className="adm-obbligatorio" title="Serve per completare l'iscrizione">*</span>
+                </span>
+                <CampoData
+                  valore={form.certificatoScadenza ? `${form.certificatoScadenza}T00:00:00` : ""}
+                  onChange={(v) => setForm({
+                    ...form,
+                    certificatoScadenza: v ? giornoLocale(v) : ""
+                  })}
+                  disabilitato={salvataggio || bloccato}
+                  etichettaAria="Scadenza del certificato"
+                />
+              </div>
+
+              <div className="adm-field">
+                <span className="adm-label">Che tipo è</span>
+                <Tendina
+                  valore={form.tipoCertificato}
+                  onChange={(v) => setForm({ ...form, tipoCertificato: v })}
+                  opzioni={TIPI_CERTIFICATO}
+                  disabilitato={salvataggio || bloccato}
+                  etichettaAria="Tipo di certificato"
+                />
               </div>
             </section>
             )}
@@ -624,13 +743,33 @@ export default function IscrizionePage() {
                 onErrore={(err) => { if (err instanceof AuthError) gestisciErrore(err); }}
               />
             )}
-
-
           </aside>
           )}
         </div>
-      </form>
 
+        {/* Salva sempre a portata: sul telefono la barra resta attaccata
+            in fondo mentre si scorre il modulo, sul computer chiude la
+            pagina. Compare solo quando c'è qualcosa da salvare — la sua
+            presenza è già l'avviso — e "Annulla" rimette com'era. */}
+        {(sporco || salvataggio) && (
+          <div className="adm-barra-azioni-fissa">
+            <span className="aa-barra-nota">
+              <FaInfoCircle aria-hidden="true" /> Hai modifiche non salvate
+            </span>
+            <button
+              type="button"
+              className="adm-btn adm-btn-ghost"
+              onClick={() => setForm(originale)}
+              disabled={salvataggio}
+            >
+              Annulla
+            </button>
+            <button type="submit" className="adm-btn adm-btn-primary" disabled={salvataggio}>
+              <FaSave /> {salvataggio ? "Salvataggio…" : "Salva"}
+            </button>
+          </div>
+        )}
+      </form>
     </div>
   );
 }

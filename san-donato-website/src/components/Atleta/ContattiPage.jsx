@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaSave, FaExclamationCircle, FaPhoneAlt, FaPlus, FaTimes, FaInfoCircle
+  FaSave, FaExclamationCircle, FaPlus, FaTimes, FaInfoCircle
 } from "react-icons/fa";
 import { getIscrizione, salvaIscrizione, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
@@ -10,6 +10,7 @@ import { minorenne } from "../../utils/eta";
 import Tendina from "../Admin/Tendina";
 import "../../css/Admin.css";
 import "../../css/Iscrizione.css";
+import "../../css/AreaAtleta.css";
 
 /*
  * Chi chiamare, e come.
@@ -190,7 +191,7 @@ export default function ContattiPage() {
   const mancaTutore = minore && (!form.tutoreNome || !form.tutoreTelefono);
 
   return (
-    <div className="adm-page adm-editor-page">
+    <div className="adm-page adm-editor-page aa-pagina">
       <div className="adm-page-head">
         <div className="adm-head-left">
           <h1 className="adm-page-title">I tuoi contatti</h1>
@@ -200,8 +201,9 @@ export default function ContattiPage() {
           </p>
         </div>
 
+        {/* Sul telefono il pulsante sta solo nella barra in fondo */}
         {(sporco || salvataggio) && (
-          <div className="adm-head-actions">
+          <div className="adm-head-actions aa-solo-grande">
             <button
               type="submit"
               form="modulo-contatti"
@@ -221,29 +223,30 @@ export default function ContattiPage() {
       )}
 
       {(mancaTelefono || mancaTutore) && (
-        <div className="adm-alert adm-alert-info">
-          <FaInfoCircle />
-          <span>
-            Per completare l&apos;iscrizione manca ancora{" "}
-            <strong>
+        <div className="aa-manca" role="status">
+          <p className="aa-manca-titolo" style={{ marginBottom: 0 }}>
+            <FaInfoCircle aria-hidden="true" />
+            <span>
+              Per completare l&apos;iscrizione manca{" "}
               {[
-                mancaTelefono && "un numero di telefono",
+                mancaTelefono && "il tuo numero di telefono",
                 mancaTutore && "il contatto di un genitore"
-              ].filter(Boolean).join(" e ")}
-            </strong>.
-          </span>
+              ].filter(Boolean).join(" e ")}.
+            </span>
+          </p>
         </div>
       )}
 
       <form id="modulo-contatti" onSubmit={salva}>
         <div className="isc-colonna">
           <section className="adm-panel">
-            <h2 className="adm-panel-title">
-              <FaPhoneAlt aria-hidden="true" /> Contatti
+            <h2 className="adm-panel-title aa-sezione-titolo">
+              <span className={`aa-numero ${mancaTelefono ? "" : "is-fatto"}`} aria-hidden="true">1</span>
+              Il tuo numero
             </h2>
 
             <fieldset className="adm-gruppo">
-              <legend className="adm-gruppo-titolo">I tuoi recapiti</legend>
+              <legend className="aa-nascosto">I tuoi recapiti</legend>
 
               <div className="adm-campi">
                 <label className="adm-field">
@@ -278,8 +281,16 @@ export default function ContattiPage() {
               </div>
             </fieldset>
 
+          </section>
+
+          <section className="adm-panel">
+            <h2 className="adm-panel-title aa-sezione-titolo">
+              <span className={`aa-numero ${mancaTutore ? "" : "is-fatto"}`} aria-hidden="true">2</span>
+              Chi chiamare se serve
+            </h2>
+
             <fieldset className="adm-gruppo">
-              <legend className="adm-gruppo-titolo">Chi chiamare se serve</legend>
+              <legend className="aa-nascosto">Chi chiamare se serve</legend>
               <p className="adm-hint" style={{ marginTop: 0 }}>
                 {minore
                   ? "Hai meno di diciotto anni: nome e telefono di un adulto servono per completare l'iscrizione."
@@ -372,6 +383,27 @@ export default function ContattiPage() {
             </fieldset>
           </section>
         </div>
+
+        {/* Salva sempre a portata di pollice: sul telefono la barra resta
+            attaccata in fondo. Compare solo se c'è qualcosa da salvare. */}
+        {(sporco || salvataggio) && (
+          <div className="adm-barra-azioni-fissa">
+            <span className="aa-barra-nota">
+              <FaInfoCircle aria-hidden="true" /> Hai modifiche non salvate
+            </span>
+            <button
+              type="button"
+              className="adm-btn adm-btn-ghost"
+              onClick={() => { setForm(originale); setSecondoChiesto(false); }}
+              disabled={salvataggio}
+            >
+              Annulla
+            </button>
+            <button type="submit" className="adm-btn adm-btn-primary" disabled={salvataggio}>
+              <FaSave /> {salvataggio ? "Salvataggio…" : "Salva"}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

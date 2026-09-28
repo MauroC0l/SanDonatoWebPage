@@ -17,6 +17,7 @@ import Ritratto from "./Ritratto";
 import NavigazioneMobile from "./NavigazioneMobile";
 import SelettoreStagione from "./SelettoreStagione";
 import StagioneProvider from "../../context/StagioneProvider";
+import { MARCHIO } from "../AllPages/marchio";
 
 import "../../css/Admin.css";
 import "../../css/Ritratto.css";
@@ -36,33 +37,48 @@ const SEZIONI = [
   // "esatta" perché è l'area stessa e non una sottosezione: senza, sarebbe
   // accesa anche stando su Notizie o su Eventi.
   { a: "", etichetta: "Home", Icona: FaHome, capacita: null, esatta: true },
-  { a: "notizie", etichetta: "Notizie", Icona: FaNewspaper, capacita: ["notizie.leggi_bozze"] },
+  { a: "notizie", etichetta: "Notizie", gruppo: "Comunicazione", Icona: FaNewspaper, capacita: ["notizie.leggi_bozze"] },
   // Partite ed eventi sono due voci perché sono due moduli diversi: una
   // partita ha avversario, risultato e parziali; un'assemblea dei soci no.
   // Finiscono sullo stesso calendario del sito.
-  { a: "partite", etichetta: "Partite", Icona: FaFutbol, capacita: ["eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
-  { a: "eventi", etichetta: "Eventi", Icona: FaCalendarAlt, capacita: ["eventi.gestisci_tutte"] },
+  { a: "partite", etichetta: "Partite", gruppo: "Attività", Icona: FaFutbol, capacita: ["eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
+  { a: "eventi", etichetta: "Eventi", gruppo: "Attività", Icona: FaCalendarAlt, capacita: ["eventi.gestisci_tutte"] },
   // I tornei delle federazioni e i loro gironi. Quale squadra gioca in quale
   // girone si decide invece da Squadre.
-  { a: "calendari", etichetta: "Calendari ufficiali", Icona: FaCalendarCheck, capacita: ["calendari.gestisci"] },
-  { a: "richieste", etichetta: "Richieste", Icona: FaUserCheck, capacita: ["iscrizioni.decidi_tutte", "iscrizioni.decidi_proprie"] },
-  { a: "atleti", etichetta: "Atleti", Icona: FaRunning, capacita: ["atleti.leggi"] },
-  { a: "squadre", etichetta: "Squadre", Icona: FaSitemap, capacita: ["squadre.gestisci"] },
-  { a: "quote", etichetta: "Quote", Icona: FaEuroSign, capacita: ["quote.gestisci"] },
+  { a: "calendari", etichetta: "Calendari ufficiali", gruppo: "Attività", Icona: FaCalendarCheck, capacita: ["calendari.gestisci"] },
+  { a: "richieste", etichetta: "Richieste", gruppo: "Persone", Icona: FaUserCheck, capacita: ["iscrizioni.decidi_tutte", "iscrizioni.decidi_proprie"] },
+  { a: "atleti", etichetta: "Atleti", gruppo: "Persone", Icona: FaRunning, capacita: ["atleti.leggi"] },
+  { a: "squadre", etichetta: "Squadre", gruppo: "Attività", Icona: FaSitemap, capacita: ["squadre.gestisci"] },
+  { a: "quote", etichetta: "Quote", gruppo: "Quote e stagioni", Icona: FaEuroSign, capacita: ["quote.gestisci"] },
   // Chi allena e la sua quota: nell'elenco Atleti non compare, qui sì
-  { a: "allenatori", etichetta: "Allenatori", Icona: FaChalkboardTeacher, capacita: ["quote.gestisci"] },
+  { a: "allenatori", etichetta: "Allenatori", gruppo: "Persone", Icona: FaChalkboardTeacher, capacita: ["quote.gestisci"] },
   // I numeri di ogni stagione, quella in corso e le passate
-  { a: "stagioni", etichetta: "Stagioni", Icona: FaLayerGroup, capacita: ["quote.gestisci"] },
-  { a: "utenti", etichetta: "Utenti", Icona: FaUsers, capacita: ["utenti.gestisci"] },
-  { a: "libreria", etichetta: "Libreria", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
-  { a: "registro", etichetta: "Registro", Icona: FaHistory, capacita: ["registro.leggi"] },
+  { a: "stagioni", etichetta: "Stagioni", gruppo: "Quote e stagioni", Icona: FaLayerGroup, capacita: ["quote.gestisci"] },
+  { a: "utenti", etichetta: "Utenti", gruppo: "Persone", Icona: FaUsers, capacita: ["utenti.gestisci"] },
+  { a: "libreria", etichetta: "Libreria", gruppo: "Comunicazione", Icona: FaImages, capacita: ["notizie.scrivi", "eventi.gestisci_tutte", "eventi.gestisci_proprie"] },
+  { a: "registro", etichetta: "Registro", gruppo: "Sistema", Icona: FaHistory, capacita: ["registro.leggi"] },
 
   /* In fondo, dopo tutto quello che si amministra, perché è l'unica voce
      che non riguarda gli altri: è la propria iscrizione alla società e la
      propria quota. Oggi la vede chi allena — anche un allenatore è un
      iscritto che versa la sua quota — e chiunque altro la capacità dica. */
-  { a: "iscrizione", etichetta: "Iscrizione", Icona: FaClipboardCheck, capacita: ["iscrizione.propria"] }
+  { a: "iscrizione", etichetta: "Iscrizione", gruppo: "Per te", Icona: FaClipboardCheck, capacita: ["iscrizione.propria"] }
 ];
+
+/**
+ * I gruppi, nell'ordine in cui compaiono.
+ *
+ * Servono solo a chi vede molte sezioni (oggi l'amministratore): quattordici
+ * voci in fila non si leggono, divise per argomento sì — "dove sono le
+ * quote?" ha una risposta sola. Chi ne vede poche le ha in fila e basta,
+ * perché un titolo sopra a due voci è rumore. Il gruppo di ciascuna sezione
+ * sta nella sezione stessa, qui sopra; la Home non ne ha e sta sempre prima.
+ */
+const GRUPPI = ["Comunicazione", "Attività", "Persone", "Quote e stagioni", "Sistema", "Per te"];
+
+/* Da quante sezioni in su si passa alla colonna a sinistra con i gruppi.
+   Otto ci stanno ancora in una riga a 1280 pixel; di più no. */
+const SOGLIA_GRUPPI = 8;
 
 /**
  * Quali sezioni vanno nella barra in basso sul telefono, in ordine.
@@ -159,14 +175,37 @@ export default function AdminLayout() {
 
   const perMobile = [...visibili]
     .sort((x, y) => PRIORITA_MOBILE.indexOf(x.a) - PRIORITA_MOBILE.indexOf(y.a))
-    .map(({ a, etichetta, Icona, esatta }) => ({ a: a ? `${area}/${a}` : area, etichetta, Icona, esatta }));
+    .map(({ a, etichetta, Icona, esatta, gruppo }) => ({ a: a ? `${area}/${a}` : area, etichetta, Icona, esatta, gruppo }));
+
+  // Molte sezioni: colonna a sinistra, divise per gruppo (vedi GRUPPI)
+  const conGruppi = visibili.length > SOGLIA_GRUPPI;
+  const gruppi = conGruppi
+    ? [
+        { nome: null, sezioni: visibili.filter((s) => !s.gruppo) },
+        ...GRUPPI.map((nome) => ({ nome, sezioni: visibili.filter((s) => s.gruppo === nome) }))
+      ].filter((g) => g.sezioni.length > 0)
+    : [{ nome: null, sezioni: visibili }];
+
+  const voce = ({ a, etichetta, Icona, esatta }) => (
+    <NavLink
+      key={a || "home"}
+      // La Home è l'area stessa, non una sua sottosezione: con
+      // "/admin/" finale sarebbe il prefisso di tutte le altre
+      // rotte, e risulterebbe accesa ovunque.
+      to={a ? `${area}/${a}` : area}
+      end={esatta}
+      className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}
+    >
+      <Icona aria-hidden="true" /> <span>{etichetta}</span>
+    </NavLink>
+  );
 
   // Il selettore della stagione serve a chi vede atleti o quote
   const conStagioni = !inAttesa && ["atleti.leggi", "quote.gestisci"].some((c) => capacita.includes(c));
 
   return (
     <StagioneProvider attivo={conStagioni}>
-    <div className="adm-shell">
+    <div className={`adm-shell ${conGruppi ? "is-laterale" : ""}`}>
       {/**
         * Due righe e non una.
         *
@@ -176,6 +215,10 @@ export default function AdminLayout() {
         * la prima riga è fissa — identità a sinistra, i tre pulsanti contro
         * il bordo destro, sempre — e le sezioni stanno sulla seconda, dove
         * possono essere quante servono.
+        *
+        * Chi ne ha più di SOGLIA_GRUPPI le trova invece in una colonna a
+        * sinistra, divise per gruppo: è la stessa <nav>, che il CSS
+        * (.is-laterale) sposta di lato sugli schermi larghi.
         */}
       <header className="adm-topbar">
         <div className="adm-topbar-alta">
@@ -183,8 +226,15 @@ export default function AdminLayout() {
               è il gesto con cui si torna al punto di partenza del pannello,
               e per uscire sul sito c'è il pulsante apposta qui a destra. */}
           <Link to={area} className="adm-brand" title="Torna all'ingresso dell'area riservata">
-            <span className="adm-brand-mark">PSD</span>
-            <span className="adm-brand-text">Area riservata</span>
+            {/* Il logo nella tessera bianca, come nell'intestazione del
+                sito: chi arriva dal sito si ritrova a casa. */}
+            <span className="adm-brand-mark" aria-hidden="true">
+              <img src={MARCHIO.logo} alt="" width="500" height="500" decoding="async" />
+            </span>
+            <span className="adm-brand-text">
+              <span className="adm-brand-sopra">Area riservata</span>
+              <span className="adm-brand-sotto">San Donato</span>
+            </span>
           </Link>
 
           {/* Quale stagione si guarda: vale per atleti, schede e allenatori */}
@@ -220,19 +270,18 @@ export default function AdminLayout() {
         {visibili.length > 0 && (
           <nav className="adm-topbar-nav" aria-label="Sezioni">
             <div className="adm-nav">
-              {visibili.map(({ a, etichetta, Icona, esatta }) => (
-                <NavLink
-                  key={a || "home"}
-                  // La Home è l'area stessa, non una sua sottosezione: con
-                  // "/admin/" finale sarebbe il prefisso di tutte le altre
-                  // rotte, e risulterebbe accesa ovunque.
-                  to={a ? `${area}/${a}` : area}
-                  end={esatta}
-                  className={({ isActive }) => `adm-nav-link ${isActive ? "is-active" : ""}`}
-                >
-                  <Icona aria-hidden="true" /> <span>{etichetta}</span>
-                </NavLink>
-              ))}
+              {conGruppi ? (
+                <div className="adm-nav-gruppi">
+                  {gruppi.map(({ nome, sezioni }) => (
+                    <div key={nome || "home"} className="adm-nav-gruppo" role={nome ? "group" : undefined} aria-label={nome || undefined}>
+                      {nome && <p className="adm-nav-gruppo-titolo" aria-hidden="true">{nome}</p>}
+                      {sezioni.map(voce)}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                visibili.map(voce)
+              )}
             </div>
           </nav>
         )}
@@ -245,6 +294,7 @@ export default function AdminLayout() {
       <NavigazioneMobile
         sezioni={perMobile}
         extra={[{ a: `${area}/profilo`, etichetta: "Profilo", Icona: FaUserCircle }]}
+        gruppi={conGruppi ? GRUPPI : null}
         onEsci={handleLogout}
       />
     </div>

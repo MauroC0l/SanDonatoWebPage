@@ -1,29 +1,511 @@
+/* =====================================================
+   Iscrizione — prefisso isc-
 
-.iframe-wrapper {
-    /* Imposta un'altezza predefinita grande (es. 90% dell'altezza della finestra) */
-    height: 90vh; 
-    width: 100%;
-    /* Stili visivi */
-    border: 1px solid #ddd; 
-    border-radius: 8px; 
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    /* Assicura che l'iframe interno riempia lo spazio */
-    display: flex;
+   L'apertura scura con il titolo enorme, il nastro arancione, una griglia
+   "bento" con le strade possibili e il portale esterno dentro a una
+   cornice da finestra. Stessa famiglia di Sponsor e Chi siamo.
+   ===================================================== */
+
+.isc {
+  --isc-notte: #001a38;
+  --isc-blu: var(--psd-blu, #002b5c);
+  --isc-arancio: var(--psd-arancio, #ff6600);
+  --isc-arancio-testo: #c24a00;
+  --isc-carta: #f4f6fb;
+  --isc-inchiostro: #0b1526;
+  --isc-grigio: #56627a;
+  --isc-filo: rgba(11, 21, 38, .08);
+  --isc-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  width: 100%;
+  overflow-x: clip;
+  background: var(--isc-carta);
+  color: var(--isc-inchiostro);
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-.iframe-wrapper iframe {
-    /* L'iframe occupa il 100% dello spazio del wrapper */
-    width: 100%;
-    height: 100%;
-    display: block;
+/* ---------- Pezzi comuni ---------- */
+
+.isc-etichetta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--isc-arancio-testo);
+}
+.isc-etichetta::before {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--isc-arancio);
+}
+.isc-h2 {
+  margin: 0;
+  font-size: clamp(2.1rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: .98;
+  letter-spacing: -.045em;
+  color: var(--isc-inchiostro);
+}
+.isc-h2 em { font-style: normal; color: var(--isc-arancio); }
+
+.isc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1.02rem;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.isc-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.isc-btn--pieno {
+  color: #fff;
+  background: linear-gradient(135deg, var(--isc-arancio), #ff3d00);
+  box-shadow: 0 10px 30px -8px rgba(255, 102, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.isc-btn--pieno:hover { color: #fff; box-shadow: 0 16px 40px -8px rgba(255, 102, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+.isc-btn--pieno svg { transition: transform .35s var(--isc-curva); }
+.isc-btn--pieno:hover svg { transform: translateY(3px); }
+.isc-btn--vetro { color: #fff; }
+.isc-btn--vetro:hover { color: #fff; background: rgba(255, 255, 255, .2); }
+
+/* ---------- Apertura ---------- */
+
+.isc-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
+    linear-gradient(180deg, var(--isc-blu) 0%, var(--isc-notte) 100%);
+  padding: clamp(56px, 9vw, 120px) 0 clamp(80px, 10vw, 128px);
+}
+.isc-aurora { opacity: .9; }
+.isc-griglia-campo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(90% 70% at 50% 20%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(90% 70% at 50% 20%, #000 20%, transparent 75%);
+}
+.isc-fantasma {
+  position: absolute;
+  z-index: 0;
+  right: -2vw;
+  bottom: 6%;
+  font-size: clamp(7rem, 26vw, 24rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.isc-dentro {
+  position: relative;
+  z-index: 1;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.isc-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ffb27a;
+}
+.isc-punto {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--isc-arancio);
+}
+.isc-punto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--isc-arancio);
+  animation: isc-respiro 2.2s var(--isc-curva) infinite;
+}
+@keyframes isc-respiro {
+  from { transform: scale(1); opacity: .7; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+.isc-titolo {
+  margin: 0 0 clamp(24px, 4vw, 40px);
+  font-size: clamp(3rem, 12.5vw, 8.6rem);
+  font-weight: 900;
+  line-height: .88;
+  letter-spacing: -.055em;
+  color: #fff;
+}
+.isc-titolo-riga { display: block; }
+.isc-titolo .mv-testo-vivo { padding-bottom: .08em; margin-left: -.02em; }
+.isc-eroe-basso { display: flex; flex-direction: column; gap: 24px; }
+.isc-sottotitolo {
+  margin: 0;
+  max-width: 460px;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, .8);
+}
+.isc-azioni { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* ---------- Nastro ---------- */
+
+.isc-fascia {
+  position: relative;
+  z-index: 2;
+  margin: -26px -4% 0;
+  padding: 14px 0;
+  transform: rotate(-2deg);
+  background: linear-gradient(90deg, var(--isc-arancio), #ff3d00);
+  box-shadow: 0 18px 40px -18px rgba(255, 61, 0, .7);
+}
+.isc-fascia .mv-nastro { mask-image: none; }
+.isc-fascia-giro {
+  display: flex;
+  flex: none;
+  gap: 28px;
+  padding-right: 28px;
+  font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+}
+.isc-stella { margin-left: 24px; color: var(--isc-blu); }
+
+/* ---------- Le strade (bento) ---------- */
+
+.isc-strade,
+.isc-portale {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.isc-strade { padding-top: clamp(64px, 9vw, 112px); }
+.isc-testa { margin-bottom: clamp(24px, 4vw, 40px); }
+
+.isc-bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.isc-bento-cella { display: flex; min-width: 0; }
+
+.isc-scheda {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 210px;
+  overflow: hidden;
+  padding: 24px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid var(--isc-filo);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 14px 34px -22px rgba(11, 21, 38, .3);
+  color: var(--isc-inchiostro);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Movimento.css dà a [data-inclina] una transizione sola, su transform:
+   qui la si riscrive più forte, se no il sollevamento scatterebbe */
+.isc-scheda,
+.mv-attivo .isc-scheda[data-inclina] {
+  transition: transform .5s var(--isc-curva), translate .5s var(--isc-curva), box-shadow .5s var(--isc-curva);
+}
+.mv-attivo .isc-scheda[data-inclina]:hover { transition-duration: .12s, .5s, .5s; }
+a.isc-scheda:hover {
+  color: var(--isc-inchiostro);
+  translate: 0 -4px;
+  box-shadow: 0 30px 60px -26px rgba(0, 43, 92, .45);
+}
+a.isc-scheda:focus-visible { outline: 3px solid var(--isc-arancio); outline-offset: 3px; }
+
+.isc-scheda-icona {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: auto;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--isc-blu), #0a4a93);
+  color: #fff;
+  font-size: 1.15rem;
+  box-shadow: 0 10px 22px -10px rgba(0, 43, 92, .7);
+  transition: rotate .5s var(--isc-curva), scale .5s var(--isc-curva);
+}
+a.isc-scheda:hover .isc-scheda-icona { rotate: -8deg; scale: 1.08; }
+.isc-scheda-titolo {
+  margin-top: 26px;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+}
+.isc-scheda-testo {
+  max-width: 44ch;
+  font-size: .98rem;
+  line-height: 1.55;
+  color: var(--isc-grigio);
+}
+.isc-scheda-azione {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-weight: 800;
+  font-size: .92rem;
+  color: var(--isc-blu);
+}
+.isc-scheda-azione svg { transition: transform .45s var(--isc-curva); }
+a.isc-scheda:hover .isc-scheda-azione svg { transform: translateX(4px); }
+
+/* La scheda grande, scura, con l'aurora */
+.isc-scheda--scura {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(160deg, var(--isc-blu), var(--isc-notte));
+}
+a.isc-scheda--scura:hover { color: #fff; }
+.isc-scheda-aurora { opacity: .8; }
+.isc-scheda--scura > :not(.mv-aurora) { position: relative; z-index: 1; }
+.isc-scheda--scura .isc-scheda-icona { background: linear-gradient(135deg, var(--isc-arancio), #ff3d00); box-shadow: 0 10px 24px -10px rgba(255, 102, 0, .8); }
+.isc-scheda--scura .isc-scheda-titolo { font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -.045em; }
+.isc-scheda--scura .isc-scheda-testo { color: rgba(255, 255, 255, .78); font-size: 1.05rem; }
+.isc-scheda--scura .isc-scheda-azione {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--isc-blu);
+}
+.isc-scheda--scura:hover .isc-scheda-azione svg { transform: translateY(3px); }
+
+/* La segreteria: arancione, con i recapiti veri e propri come link */
+.isc-scheda--arancio {
+  color: #fff;
+  border-color: transparent;
+  background:
+    radial-gradient(80% 90% at 100% 0%, rgba(255, 255, 255, .22), transparent 60%),
+    linear-gradient(135deg, var(--isc-arancio), #ff3d00);
+}
+.isc-scheda--arancio .isc-scheda-icona { background: rgba(255, 255, 255, .2); box-shadow: none; }
+.isc-segreteria {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 6px;
+}
+.isc-segreteria a,
+.isc-segreteria-orari {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+}
+.isc-segreteria-tel {
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--isc-arancio-testo) !important;
+  font-weight: 800 !important;
+  transition: translate .4s var(--isc-curva);
+}
+.isc-segreteria-tel:hover { translate: 0 -2px; }
+.isc-segreteria-orari { color: rgba(255, 255, 255, .92); }
+.isc-segreteria-link { border-bottom: 2px solid rgba(255, 255, 255, .5); min-height: 0 !important; }
+.isc-segreteria-link:hover { border-color: #fff; }
+.isc-segreteria a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 999px; }
+
+@media (min-width: 720px) {
+  .isc-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .isc-bento-cella--grande,
+  .isc-bento-cella--larga { grid-column: 1 / -1; }
+}
+@media (min-width: 1000px) {
+  .isc-bento { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .isc-scheda { min-height: 230px; }
+  .isc-bento-cella--grande { grid-column: span 2; grid-row: span 2; }
+  .isc-bento-cella--larga { grid-column: 1 / -1; }
+  .isc-scheda { padding: 30px; }
+  .isc-scheda--scura { padding: 40px; }
+  .isc-bento-cella--larga .isc-scheda {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    min-height: 0;
+  }
+  .isc-bento-cella--larga .isc-scheda-icona { margin-bottom: 0; }
+  .isc-bento-cella--larga .isc-scheda-titolo { margin-top: 0; }
+  .isc-bento-cella--larga .isc-segreteria { margin: 0 0 0 auto; }
 }
 
-/* Media Query per schermi molto piccoli (es. smartphone in modalità verticale) */
+/* ---------- Il portale ---------- */
+
+.isc-portale {
+  padding-top: clamp(64px, 9vw, 112px);
+  padding-bottom: clamp(64px, 9vw, 112px);
+  scroll-margin-top: 80px;
+}
+.isc-portale-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+.isc-apri {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--isc-filo);
+  color: var(--isc-blu);
+  font-weight: 800;
+  text-decoration: none;
+  transition: background-color .3s ease, color .3s ease;
+}
+.isc-apri:hover { background: var(--isc-blu); color: #fff; }
+.isc-apri:focus-visible { outline: 3px solid var(--isc-arancio); outline-offset: 3px; }
+
+/* La finestra: barra scura con i tre puntini e l'indirizzo, poi il sito */
+.isc-finestra {
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff;
+  border: 1px solid rgba(0, 43, 92, .15);
+  box-shadow: 0 50px 100px -50px rgba(0, 26, 56, .55), 0 2px 6px rgba(11, 21, 38, .06);
+}
+.isc-finestra-barra {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, var(--isc-blu), var(--isc-notte));
+}
+.isc-finestra-puntini { display: flex; gap: 6px; }
+.isc-finestra-puntini span { width: 11px; height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+.isc-finestra-puntini span:first-child { background: var(--isc-arancio); }
+.isc-finestra-indirizzo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: rgba(255, 255, 255, .8);
+  font-size: .82rem;
+  font-weight: 600;
+  text-align: center;
+}
+.isc-finestra-apri {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: .85rem;
+  transition: background-color .3s ease;
+}
+.isc-finestra-apri:hover { color: #fff; background: rgba(255, 255, 255, .15); }
+.isc-finestra-apri:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Alto quasi quanto lo schermo sul computer; sul telefono un'altezza fissa
+   grande, dove lo scorrimento dentro al riquadro è normale */
+.isc-finestra-corpo { display: flex; height: 90vh; min-height: 640px; }
+.isc-finestra-corpo iframe { display: block; width: 100%; height: 100%; }
+
 @media (max-width: 600px) {
-    .iframe-wrapper {
-        /* Aumenta l'altezza su schermi piccoli dove lo scrolling è atteso */
-        height: 1000px; /* Altezza fissa o maggiore vh per evitare un iframe troppo piccolo */
-        box-shadow: none; /* Rimuovi l'ombra per un aspetto più nativo su mobile */
-    }
+  .isc-finestra { border-radius: 18px; }
+  .isc-finestra-corpo { height: 1000px; }
 }
+
+/* ---------- Schermi più larghi ---------- */
+
+@media (min-width: 640px) {
+  .isc-dentro,
+  .isc-strade,
+  .isc-portale { padding-left: 24px; padding-right: 24px; }
+}
+@media (min-width: 900px) {
+  .isc-eroe-basso { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 40px; }
+}
+@media (min-width: 1200px) {
+  .isc-dentro,
+  .isc-strade,
+  .isc-portale { padding-left: 32px; padding-right: 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .isc-punto::after { animation: none; opacity: 0; }
+  .isc *,
+  .isc *::before,
+  .isc *::after { transition-duration: .01ms !important; }
+  a.isc-scheda:hover,
+  .isc-segreteria-tel:hover { translate: none; }
+  a.isc-scheda:hover .isc-scheda-icona { rotate: none; scale: none; }
+}
+
+/* Il disegno enorme e sbiadito del modulo, nell'angolo della scheda
+   scura: riempie lo spazio vuoto senza aggiungere parole */
+.isc-scheda-filigrana {
+  position: absolute !important;
+  right: -4%;
+  top: -6%;
+  z-index: 0 !important;
+  font-size: clamp(9rem, 22vw, 17rem);
+  line-height: 1;
+  color: rgba(255, 255, 255, .06);
+  rotate: -12deg;
+  pointer-events: none;
+  transition: rotate .8s var(--isc-curva), color .5s ease;
+}
+a.isc-scheda--scura:hover .isc-scheda-filigrana { rotate: -4deg; color: rgba(255, 140, 60, .12); }

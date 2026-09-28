@@ -1,6 +1,9 @@
 /* =========================================
    Menu a tendina disegnato da noi (scope: tnd-)
    Vive dentro .adm-shell, quindi eredita le variabili di colore da Admin.css.
+   Le variabili arrivate con il nuovo disegno hanno un valore di riserva:
+   la tendina si usa anche nella pagina pubblica delle notizie, che porta
+   solo la tavolozza di prima.
    ========================================= */
 
 .tnd { position: relative; }
@@ -15,7 +18,7 @@
   /* .adm-input porta già bordo, raggio e spaziatura: qui si aggiusta solo
      ciò che cambia fra un <input> e un <button>. */
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
 .tnd-bottone:disabled { cursor: not-allowed; }
@@ -39,14 +42,14 @@
 
 .tnd.is-aperta .tnd-bottone {
   border-color: var(--adm-blue);
-  box-shadow: 0 0 0 3px var(--adm-blue-soft);
+  box-shadow: var(--adm-anello, 0 0 0 3px var(--adm-blue-soft));
 }
 
 /* ---------- Pannello ---------- */
 
 .tnd-pannello {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
   /* Sopra la barra in alto (50), sotto gli avvisi (200) */
@@ -54,11 +57,11 @@
 
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
-  box-shadow: 0 4px 8px rgba(16, 32, 56, .06), 0 18px 40px -18px rgba(16, 32, 56, .4);
+  border-radius: var(--adm-r-m, 14px);
+  box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -24px rgba(0, 26, 56, .5);
   overflow: hidden;
 
-  animation: tnd-apre .14s ease-out;
+  animation: tnd-apre .16s ease-out;
 }
 
 @keyframes tnd-apre {
@@ -69,8 +72,9 @@
 .tnd-ricerca {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.75rem;
+  gap: 0.55rem;
+  min-height: 46px;
+  padding: 0.55rem 0.9rem;
   border-bottom: 1px solid var(--adm-line-soft);
   color: var(--adm-muted);
   font-size: 0.8rem;
@@ -82,7 +86,7 @@
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.92rem;
   color: var(--adm-ink);
   outline: none;
 }
@@ -90,7 +94,7 @@
 .tnd-lista {
   list-style: none;
   margin: 0;
-  padding: 0.3rem;
+  padding: 0.35rem;
   /* Oltre questa altezza si scorre: un elenco che arriva a fondo schermo
      nasconde il resto del modulo e non si capisce più dove si era. */
   max-height: 17rem;
@@ -120,11 +124,11 @@
 }
 
 .tnd-gruppo {
-  padding: 0.55rem 0.6rem 0.25rem;
+  padding: 0.6rem 0.65rem 0.25rem;
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   color: var(--adm-muted);
 }
 
@@ -134,14 +138,15 @@
   gap: 0.55rem;
 
   width: 100%;
-  padding: 0.5rem 0.6rem;
+  min-height: 40px;
+  padding: 0.45rem 0.65rem;
 
   background: transparent;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
 
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.92rem;
   color: var(--adm-ink);
   text-align: left;
   cursor: pointer;
@@ -152,7 +157,7 @@
 /* Evidenziata e non :hover, così il mouse e le frecce puntano allo stesso
    posto: con entrambi attivi si vedrebbero due voci accese insieme. */
 .tnd-voce.is-evidenziata:not(:disabled) { background: var(--adm-line-soft); }
-.tnd-voce.is-scelta { color: var(--adm-blue); font-weight: 600; }
+.tnd-voce.is-scelta { color: var(--adm-navy, var(--adm-blue)); font-weight: 700; }
 .tnd-voce.is-scelta.is-evidenziata { background: var(--adm-blue-soft); }
 
 .tnd-voce-testo {
@@ -178,7 +183,7 @@
   border-radius: 50%;
 }
 
-.tnd-spunta { flex-shrink: 0; font-size: 0.75rem; color: var(--adm-blue); }
+.tnd-spunta { flex-shrink: 0; font-size: 0.8rem; color: var(--adm-arancio-testo, var(--adm-blue)); }
 
 /* ---------- Scelta multipla ---------- */
 
@@ -186,10 +191,10 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--adm-line);
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--adm-line-strong, var(--adm-line));
+  border-radius: 5px;
   background: var(--adm-surface);
   color: #fff;
   font-size: 0.6rem;
@@ -197,8 +202,8 @@
 }
 
 .tnd-voce.is-scelta .tnd-casella {
-  background: var(--adm-blue);
-  border-color: var(--adm-blue);
+  background: var(--adm-navy, var(--adm-blue));
+  border-color: var(--adm-navy, var(--adm-blue));
 }
 
 /* Nella multipla più voci sono accese insieme: tutte in blu e in grassetto
@@ -209,7 +214,8 @@
 /* ---------- Piede del pannello ---------- */
 
 .tnd-piede {
-  padding: 0.45rem 0.75rem;
+  padding: 0.55rem 0.9rem;
+  background: var(--adm-surface-2, transparent);
   border-top: 1px solid var(--adm-line-soft);
   font-size: 0.8rem;
 }
@@ -219,7 +225,7 @@
 .tnd.adm-filter-select { flex: 0 1 16rem; width: 16rem; }
 
 /* Versione compatta, per le tendine che stanno dentro a una riga d'elenco */
-.tnd-mini .tnd-bottone { padding: 0.4rem 0.6rem; font-size: 0.82rem; }
+.tnd-mini .tnd-bottone { min-height: 36px; padding: 0.35rem 0.7rem; font-size: 0.84rem; }
 .tnd-mini .tnd-pannello { min-width: 15rem; left: auto; right: 0; }
 
 /* Il ruolo nell'elenco delle persone: largo abbastanza da leggere

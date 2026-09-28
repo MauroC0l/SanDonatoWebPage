@@ -1,275 +1,288 @@
-/* =========================================
-   CONTRIBUTI PUBBLICI STYLE (Scoped: cpub-)
-   Homogeneous with Modern System 2.0
-   ========================================= */
+/* =====================================================
+   Contributi pubblici — prefisso cpub-
 
-.cpub-wrapper {
-  --c-bg: #ffffff;
-  --c-surface: #f8fafc;
-  --c-dark: #0f172a;       
-  --c-accent: #ff6600;     
-  --c-blue: #0056d6;       
-  --c-text-main: #1e293b;
-  --c-text-muted: #64748b;
-  --c-border: #e2e8f0;
-  
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--c-text-main);
-  background: var(--c-bg);
-  width: 100%;
-  min-height: 100vh;
+   I pezzi comuni ai documenti stanno in Documenti.css. Qui: la tabella
+   (che sul telefono diventa una pila di schede), la fascia scura del
+   rendiconto e la nota finale.
+   ===================================================== */
 
-  min-height: 100svh;
-  overflow-x: hidden;
-}
+.cpub-corpo { display: grid; gap: clamp(48px, 7vw, 88px); }
 
-/* --- ANIMAZIONI --- */
-@keyframes cpubFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.cpub-animate {
-  animation: cpubFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  opacity: 0;
-}
-
-/* --- HERO SECTION --- */
-.cpub-hero {
-  /* Padding fluido */
-  padding: clamp(3rem, 10vw, 5rem) 1.5rem 3rem; 
-  text-align: center;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.cpub-badge {
+/* Il riferimento di legge, come una targhetta */
+.cpub-rif {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(15, 23, 42, 0.05);
-  color: var(--c-dark);
-  padding: 6px 16px;
-  border-radius: 50px;
-  font-size: 0.85rem;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .18);
+  font-size: .82rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 1.5rem;
+  letter-spacing: .02em;
+  color: rgba(255, 255, 255, .85);
 }
+.cpub-rif svg { color: #ffb27a; }
 
-.cpub-icon-badge { color: var(--c-accent); }
+/* ---------- La tabella ---------- */
 
-.cpub-title {
-  /* Titolo fluido */
-  font-size: clamp(2rem, 5vw, 3.5rem); 
-  font-weight: 900;
-  line-height: 1.1;
-  color: var(--c-dark);
-  margin-bottom: 1.5rem;
-}
-
-.cpub-subtitle {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--c-text-muted);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.cpub-legal-ref {
-  display: inline-block;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--c-blue);
-  background: rgba(0, 86, 214, 0.1);
-  padding: 4px 12px;
-  border-radius: 6px;
-}
-
-/* --- TABLE SECTION --- */
-.cpub-table-section {
-  padding: 2rem 1.5rem 4rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.cpub-section-header {
-  margin-bottom: 1.5rem;
-  padding-left: 0.5rem;
-  border-left: 4px solid var(--c-accent);
-}
-.cpub-section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--c-dark);
-  margin: 0;
-}
-
-/* Container con card effect per la tabella */
-.cpub-table-card {
+.cpub-tabella-scheda {
+  margin-top: clamp(20px, 3vw, 32px);
+  border-radius: 28px;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  border: 1px solid var(--c-border);
-  /* Rimosso overflow: hidden per permettere lo scroll del wrapper */
+  border: 1px solid var(--doc-filo);
+  box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 24px 50px -32px rgba(11, 21, 38, .35);
+  overflow: hidden;
 }
-
-/* Wrapper per scroll orizzontale su mobile */
-.cpub-table-scroll {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  /* Padding interno per scrollare la tabella all'interno della card */
-  padding: 1px; 
-}
-
-.cpub-table {
+.cpub-tabella {
   width: 100%;
   border-collapse: collapse;
-  /* Forza scroll su schermi piccoli */
-  min-width: 700px; 
+  font-variant-numeric: tabular-nums;
 }
+.cpub-tabella thead { display: none; }
 
-.cpub-table th {
-  background: var(--c-surface);
-  text-align: left;
-  padding: 1.2rem 1.5rem;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--c-text-muted);
+/* Sul telefono: ogni riga è una scheda a due righe, data e importo in
+   alto, ente e causale sotto */
+.cpub-tabella tbody tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "data importo"
+    "ente ente";
+  gap: 8px 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--doc-filo);
+}
+.cpub-tabella td { display: block; padding: 0; min-width: 0; }
+.cpub-data {
+  grid-area: data;
+  align-self: center;
+  font-size: .82rem;
   font-weight: 700;
-  border-bottom: 2px solid var(--c-border);
-  white-space: nowrap; /* Non wrappare gli header */
+  color: var(--doc-grigio);
 }
+.cpub-ente { grid-area: ente; }
+.cpub-importo { grid-area: importo; text-align: right; }
 
-.cpub-table td {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--c-border);
-  vertical-align: middle;
-  font-size: 0.95rem;
-  color: var(--c-dark);
-}
-
-.cpub-table tr:last-child td { border-bottom: none; }
-.cpub-table tr:hover { background-color: rgba(241, 245, 249, 0.5); }
-
-/* Stili specifici celle */
-.cpub-cell-date {
-  font-family: monospace;
-  font-weight: 600;
-  color: var(--c-text-muted);
-  white-space: nowrap;
-}
-
-.cpub-entity-name {
+.cpub-ente-nome {
   display: block;
-  font-weight: 700;
-  color: var(--c-dark);
-  margin-bottom: 2px;
-  word-break: break-word; /* Permette il wrap del nome lungo */
-}
-.cpub-entity-detail {
-  font-size: 0.85rem;
-  color: var(--c-text-muted);
-}
-
-.cpub-cell-amount {
   font-weight: 800;
-  color: var(--c-blue);
-  font-size: 1.1rem;
-  text-align: right;
+  font-size: .98rem;
+  letter-spacing: -.01em;
+  color: var(--doc-inchiostro);
+}
+.cpub-ente-causale {
+  display: block;
+  margin-top: 2px;
+  font-size: .9rem;
+  color: var(--doc-grigio);
+}
+.cpub-importo-cifra {
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
   white-space: nowrap;
+  color: var(--doc-blu);
 }
 
-/* --- DOWNLOAD BLOCK (Single File) --- */
-.cpub-download-section {
-  padding: 0 1.5rem 6rem;
-  max-width: 1000px;
-  margin: 0 auto;
+/* La barra del peso di ogni contributo: una larghezza in proporzione al
+   più grande. Scala e non width: si anima senza ricalcolare la tabella. */
+.cpub-barra {
+  display: block;
+  width: 100%;
+  min-width: 90px;
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: rgba(0, 43, 92, .07);
+  overflow: hidden;
 }
+.cpub-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--doc-arancio), #ffb36b);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--cpub-quota, 0));
+  transition: transform 1.2s var(--doc-curva);
+}
+.cpub-tabella tbody tr:hover .cpub-barra > span { background: linear-gradient(90deg, #ff3d00, var(--doc-arancio)); }
 
-.cpub-download-card {
-  background: var(--c-dark);
-  color: #fff;
-  border-radius: 20px;
-  /* Padding fluido */
-  padding: clamp(2rem, 5vw, 3rem); 
+.cpub-tabella tfoot tr {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--doc-blu), var(--doc-notte));
+  color: #fff;
+}
+.cpub-tabella tfoot th {
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-align: left;
+  color: rgba(255, 255, 255, .7);
+}
+.cpub-tabella tfoot td { padding: 0; }
+.cpub-tabella tfoot .cpub-importo-cifra { color: #fff; font-size: 1.5rem; }
+
+@media (min-width: 720px) {
+  .cpub-tabella thead { display: table-header-group; }
+  .cpub-tabella tbody tr,
+  .cpub-tabella tfoot tr { display: table-row; }
+  .cpub-tabella td,
+  .cpub-tabella th { display: table-cell; }
+
+  .cpub-tabella thead th {
+    padding: 18px 24px;
+    background: var(--doc-carta);
+    border-bottom: 1px solid var(--doc-filo);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--doc-grigio);
+  }
+  .cpub-tabella thead th:last-child { text-align: right; }
+  .cpub-tabella tbody td {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--doc-filo);
+    vertical-align: middle;
+  }
+  .cpub-tabella tbody tr { transition: background-color .3s ease; }
+  .cpub-tabella tbody tr:hover { background: #fafbfe; }
+  .cpub-data { width: 150px; font-size: .92rem; }
+  .cpub-importo { width: 240px; }
+  .cpub-importo .cpub-barra { margin-left: auto; max-width: 180px; }
+  .cpub-tabella tfoot th,
+  .cpub-tabella tfoot td { padding: 22px 24px; }
+  .cpub-tabella tfoot .cpub-importo-cifra { font-size: 1.7rem; }
+}
+
+/* ---------- Il rendiconto ---------- */
+
+.cpub-scarica-cornice { position: relative; }
+.cpub-scarica {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
-}
-
-/* Decorazione background */
-.cpub-download-card::before {
-  content: '';
-  position: absolute;
-  top: -50px; right: -50px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-.cpub-dl-content {
-  flex: 1;
-  min-width: 0;
-}
-.cpub-dl-content h3 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-.cpub-dl-content p {
-  color: rgba(255,255,255,0.7);
-  line-height: 1.5;
-  margin-bottom: 0;
-  max-width: 500px;
-}
-
-.cpub-dl-btn {
-  background: var(--c-accent);
+  isolation: isolate;
+  border-radius: 32px;
   color: #fff;
-  text-decoration: none;
-  padding: 1rem 2rem;
-  border-radius: 50px;
-  font-weight: 700;
-  white-space: nowrap;
-  transition: transform 0.2s, background 0.2s;
+  background: linear-gradient(160deg, var(--doc-blu), var(--doc-notte));
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .8);
+}
+.cpub-scarica-aurora { opacity: .85; }
+.cpub-scarica-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 22px;
+  justify-items: start;
+  padding: clamp(26px, 5vw, 52px);
+}
+/* Il foglio grande, con l'angolo piegato, come nelle schede dei file */
+.cpub-scarica-foglio {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  z-index: 2;
-  flex-shrink: 0;
+  align-items: flex-end;
+  width: 72px;
+  height: 92px;
+  padding-bottom: 12px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #fff, #dfe7f3);
+  clip-path: polygon(0 0, 66% 0, 100% 26%, 100% 100%, 0 100%);
+  rotate: -6deg;
 }
-/* Hover mantenuto */
-
-/* --- FOOTER --- */
-.cpub-info-section {
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-  padding: 3rem 1.5rem;
-  text-align: center;
+.cpub-scarica-foglio::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34%;
+  height: 26%;
+  background: linear-gradient(225deg, transparent 50%, #9fb6d6 50%);
 }
-.cpub-info-container { max-width: 700px; margin: 0 auto; }
-.cpub-info-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--c-dark); }
-.cpub-info-text { font-size: 0.9rem; color: var(--c-text-muted); line-height: 1.6; }
+.cpub-scarica-foglio span {
+  margin-left: -6px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--doc-arancio);
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+.cpub-scarica-occhiello {
+  margin: 0 0 10px;
+  font-size: .76rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ffb27a;
+}
+.cpub-scarica-testo h2 {
+  margin: 0 0 12px;
+  font-size: clamp(1.7rem, 4.4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -.04em;
+  color: #fff;
+}
+.cpub-scarica-testo p:last-child {
+  margin: 0;
+  max-width: 56ch;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .8);
+}
+.cpub-scarica-btn { min-height: 58px; padding: 0 30px; font-size: 1.08rem; }
 
-/* --- MOBILE RESPONSIVE --- */
-@media (max-width: 768px) {
-  .cpub-download-card {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem;
+@media (min-width: 900px) {
+  .cpub-scarica-dentro {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 36px;
   }
-  .cpub-dl-btn { width: 100%; justify-content: center; }
-  .cpub-table th, .cpub-table td { 
-    /* Padding ridotto per guadagnare spazio orizzontale */
-    padding: 1rem; 
-  }
+}
+
+/* ---------- Nota ---------- */
+
+.cpub-nota {
+  display: flex;
+  gap: 18px;
+  max-width: 820px;
+  padding: 24px;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid var(--doc-filo);
+  border-left: 4px solid var(--doc-arancio);
+}
+.cpub-nota-icona {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 102, 0, .1);
+  color: var(--doc-arancio);
+  font-size: 1.1rem;
+}
+.cpub-nota-titolo {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--doc-inchiostro);
+}
+.cpub-nota-testo {
+  margin: 0;
+  font-size: .98rem;
+  line-height: 1.7;
+  color: var(--doc-testo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpub-barra > span { transition: none; }
 }

@@ -1,93 +1,154 @@
-import '../css/ContributiPage.css'; 
-import pageData from '../data/Contributi.json'; // Percorso al file JSON
+import { FaArrowDown, FaCircleInfo, FaScaleBalanced } from "react-icons/fa6";
+import "../css/ContributiPage.css";
+import pageData from "../data/Contributi.json";
+import AperturaDocumento, { FasciaParole } from "./Documenti/AperturaDocumento";
+import { spezzaTitolo } from "./Documenti/spezzaTitolo";
+import AltriDocumenti from "./Documenti/AltriDocumenti";
 
-const ContributiPage = () => {
-  
-  // Destrutturazione dati
-  const { hero, covidTable, singleDocument, footer } = pageData;
+const { hero, covidTable, singleDocument, footer } = pageData;
+
+/* Gli importi nel JSON sono scritti all'italiana ("3.549"): per il totale
+   e per le barre servono numeri. Il totale non è un dato nuovo, è la somma
+   delle righe pubblicate qui sotto. */
+const cifra = (s) => Number(String(s).replace(/\./g, "").replace(",", ".")) || 0;
+const euro = (n) => n.toLocaleString("it-IT", { maximumFractionDigits: 2 });
+const IMPORTI = covidTable.rows.map((r) => cifra(r.amount));
+const TOTALE = IMPORTI.reduce((a, b) => a + b, 0);
+const MASSIMO = Math.max(1, ...IMPORTI);
+const ANNI = covidTable.rows.map((r) => r.date.split(".").at(-1)).filter(Boolean);
+const PERIODO = ANNI.length
+  ? (ANNI[0] === ANNI.at(-1) ? ANNI[0] : `${ANNI[0]}–${ANNI.at(-1)}`)
+  : "";
+
+const PAROLE = ["Trasparenza", hero.legalRef, "Contributi pubblici", "Rendiconto"];
+
+/**
+ * Contributi pubblici: l'elenco che la legge chiede di pubblicare. Sul
+ * computer è una tabella vera, con una barra che fa vedere a colpo d'occhio
+ * il peso di ogni contributo; sul telefono ogni riga diventa una scheda
+ * (le intestazioni viaggiano con data-label), invece di una tabella da
+ * scorrere di lato.
+ */
+export default function ContributiPage() {
+  const { prima, accesa } = spezzaTitolo(hero.title);
 
   return (
-    <div className="cpub-wrapper">
-      
-      {/* HEADER SECTION */}
-      <header className="cpub-hero">
-        <div className="cpub-animate">
-          <div className="cpub-badge">
-            <svg className="cpub-icon-badge" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            {hero.badge}
-          </div>
-          
-          <h1 className="cpub-title">{hero.title}</h1>
-          <p className="cpub-subtitle">{hero.subtitle}</p>
-          <span className="cpub-legal-ref">{hero.legalRef}</span>
-        </div>
-      </header>
+    <div className="doc cpub">
+      <AperturaDocumento
+        id="cpub-titolo"
+        occhiello={hero.badge}
+        prima={prima}
+        accesa={accesa}
+        sottotitolo={hero.subtitle}
+        fantasma="TRASPARENZA"
+        nota={(
+          <span className="cpub-rif">
+            <FaScaleBalanced aria-hidden="true" /> {hero.legalRef}
+          </span>
+        )}
+        azioni={(
+          <a
+            href={singleDocument.link}
+            className="doc-btn doc-btn--pieno"
+            data-magnete
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            <FaArrowDown aria-hidden="true" /> Scarica il rendiconto
+          </a>
+        )}
+        numeri={[
+          { dt: "Totale ricevuto", dd: `€ ${euro(TOTALE)}` },
+          { dt: "Contributi", dd: covidTable.rows.length },
+          { dt: "Periodo", dd: PERIODO },
+        ]}
+      />
+      <FasciaParole parole={PAROLE} />
 
-      {/* DATA TABLE SECTION */}
-      <section className="cpub-table-section cpub-animate" style={{animationDelay: '0.2s'}}>
-        
-        <div className="cpub-section-header">
-          <h2>{covidTable.title}</h2>
-        </div>
+      <div className="doc-corpo cpub-corpo">
+        {/* ---------- L'elenco ---------- */}
+        <section className="cpub-elenco" aria-labelledby="cpub-elenco-titolo">
+          <p className="doc-etichetta" data-rivela>01 · Elenco</p>
+          <h2 id="cpub-elenco-titolo" className="doc-h2" data-rivela>{covidTable.title}</h2>
 
-        <div className="cpub-table-card">
-          <div className="cpub-table-scroll">
-            <table className="cpub-table">
+          {/* La tabella entra intera, senza comparsa riga per riga: sono
+              dati da confrontare, devono esserci tutti insieme */}
+          <div className="cpub-tabella-scheda">
+            <table className="cpub-tabella">
+              <caption className="doc-solo-lettori">{covidTable.title}</caption>
               <thead>
                 <tr>
-                  {covidTable.headers.map((head, i) => (
-                    <th key={i}>{head}</th>
-                  ))}
+                  {covidTable.headers.map((h) => <th key={h} scope="col">{h}</th>)}
                 </tr>
               </thead>
               <tbody>
-                {covidTable.rows.map((row) => (
+                {covidTable.rows.map((row, i) => (
                   <tr key={row.id}>
-                    <td className="cpub-cell-date">{row.date}</td>
-                    <td>
-                      <span className="cpub-entity-name">{row.entity}</span>
-                      <span className="cpub-entity-detail">{row.details}</span>
+                    <td className="cpub-data" data-label={covidTable.headers[0]}>{row.date}</td>
+                    <td className="cpub-ente" data-label={covidTable.headers[1]}>
+                      <span className="cpub-ente-nome">{row.entity}</span>
+                      <span className="cpub-ente-causale">{row.details}</span>
                     </td>
-                    <td className="cpub-cell-amount">€ {row.amount}</td>
+                    <td className="cpub-importo" data-label={covidTable.headers[2]}>
+                      <span className="cpub-importo-cifra">€ {row.amount}</span>
+                      <span className="cpub-barra" aria-hidden="true">
+                        <span style={{ "--cpub-quota": IMPORTI[i] / MASSIMO }} />
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colSpan={2}>Totale</th>
+                  <td className="cpub-importo" data-label="Totale">
+                    <span className="cpub-importo-cifra">€ {euro(TOTALE)}</span>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SINGLE DOWNLOAD SECTION */}
-      <section className="cpub-download-section cpub-animate" style={{animationDelay: '0.4s'}}>
-        <div className="cpub-download-card">
-          <div className="cpub-dl-content">
-            <h3>{singleDocument.title}</h3>
-            <p>{singleDocument.description}</p>
+        {/* ---------- Il rendiconto ---------- */}
+        <section className="cpub-scarica-cornice" aria-labelledby="cpub-scarica-titolo" data-rivela="zoom">
+          <div className="cpub-scarica">
+            <div className="mv-aurora cpub-scarica-aurora" aria-hidden="true" />
+            <div className="cpub-scarica-dentro">
+              <div className="cpub-scarica-foglio" aria-hidden="true">
+                <span>{singleDocument.fileSize}</span>
+              </div>
+              <div className="cpub-scarica-testo">
+                <p className="cpub-scarica-occhiello">02 · Documento ufficiale</p>
+                <h2 id="cpub-scarica-titolo">{singleDocument.title}</h2>
+                <p>{singleDocument.description}</p>
+              </div>
+              <a
+                href={singleDocument.link}
+                className="doc-btn doc-btn--pieno cpub-scarica-btn"
+                data-magnete
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+              >
+                <FaArrowDown aria-hidden="true" /> Scarica {singleDocument.fileSize}
+              </a>
+            </div>
           </div>
-          <a 
-            href={singleDocument.link} 
-            className="cpub-dl-btn"
-            data-magnete 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            download
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Scarica {singleDocument.fileSize}
-          </a>
-        </div>
-      </section>
+        </section>
 
-      {/* FOOTER NOTE */}
-      <footer className="cpub-info-section">
-        <div className="cpub-info-container" data-rivela>
-          <h4 className="cpub-info-title">{footer.title}</h4>
-          <p className="cpub-info-text">{footer.text}</p>
-        </div>
-      </footer>
+        {/* ---------- Nota ---------- */}
+        <aside className="cpub-nota" aria-labelledby="cpub-nota-titolo">
+          <span className="cpub-nota-icona" aria-hidden="true"><FaCircleInfo /></span>
+          <div>
+            <h2 id="cpub-nota-titolo" className="cpub-nota-titolo">{footer.title}</h2>
+            <p className="cpub-nota-testo">{footer.text}</p>
+          </div>
+        </aside>
+      </div>
 
+      <AltriDocumenti />
     </div>
   );
-};
-
-export default ContributiPage;
+}

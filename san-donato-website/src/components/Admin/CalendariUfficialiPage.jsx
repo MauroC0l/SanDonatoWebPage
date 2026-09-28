@@ -13,6 +13,7 @@ import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import Tendina from "./Tendina";
 import "../../css/Admin.css";
+import "../../css/admin/Partite.css";
 import "../../css/CalendariUfficiali.css";
 
 /*
@@ -168,7 +169,7 @@ function ModuloFonte({ iniziale, formati, onSalva, onAnnulla, salvataggio, titol
         <span>Leggi questo torneo ogni notte</span>
       </label>
 
-      <div className="adm-scheda-azioni adm-cal-azioni-modulo">
+      <div className="adm-barra-azioni-fissa adm-cal-azioni-modulo">
         <button type="button" className="adm-btn adm-btn-ghost" onClick={onAnnulla} disabled={salvataggio}>
           Annulla
         </button>
@@ -478,17 +479,18 @@ export default function CalendariUfficialiPage() {
 
   return (
     <div className="adm-page">
-      <div className="adm-page-head">
-        <div className="adm-head-left">
+      <header className="ev-testa">
+        <div className="ev-testa-testo">
+          <p className="adm-occhiello">Dalle federazioni</p>
           <h1 className="adm-page-title">Calendari ufficiali</h1>
-          <p className="adm-page-sub">
+          <p className="ev-testa-sotto">
             I tornei delle federazioni, con i gironi in cui gioca una nostra squadra. Orari e
-            risultati si aggiornano da soli ogni notte. Le squadre si iscrivono ai gironi dalla
-            pagina Squadre.
+            risultati si aggiornano da soli ogni notte. Le squadre si collegano ai gironi dalla
+            pagina <Link to={`${area}/squadre`}>Squadre</Link>.
           </p>
         </div>
 
-        <div className="adm-head-actions">
+        <div className="ev-testa-azioni">
           <button
             type="button" className="adm-btn adm-btn-ghost"
             onClick={() => leggi(null)} disabled={letturaInCorso || !dati.fonti.some((f) => f.attiva)}
@@ -500,7 +502,7 @@ export default function CalendariUfficialiPage() {
             <FaPlus /> Nuovo torneo
           </button>
         </div>
-      </div>
+      </header>
 
       {errore && (
         <div className="adm-alert adm-alert-error" role="alert">
@@ -522,12 +524,13 @@ export default function CalendariUfficialiPage() {
           generica costringeva ad aprire ogni torneo per trovarli. Ogni voce
           apre il suo torneo e ci porta sopra. */}
       {senzaSquadra.length > 0 && (
-        <div className="adm-cal-didascalia adm-cal-avviso adm-cal-da-assegnare">
+        <div className="adm-cal-da-assegnare" role="status">
           <p className="adm-cal-da-assegnare-titolo">
+            <span className="adm-badge-conta is-attenzione">{senzaSquadra.length}</span>
             <strong>
               {senzaSquadra.length === 1
-                ? "1 girone da assegnare a una squadra"
-                : `${senzaSquadra.length} gironi da assegnare a una squadra`}
+                ? "girone da assegnare a una squadra"
+                : "gironi da assegnare a una squadra"}
             </strong>
           </p>
           <ul className="adm-cal-da-assegnare-elenco">
@@ -565,10 +568,13 @@ export default function CalendariUfficialiPage() {
       )}
 
       {dati.fonti.length === 0 && !nuova && (
-        <div className="adm-empty">
-          <FaFolderOpen className="adm-empty-icon" aria-hidden="true" />
-          <h2>Nessun torneo</h2>
-          <p>Aggiungi la cartella in cui la federazione pubblica i calendari dei gironi.</p>
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaFolderOpen aria-hidden="true" /></span>
+          <h2>Nessun torneo, per ora</h2>
+          <p>
+            Aggiungi la cartella in cui la federazione pubblica i calendari dei gironi: da lì
+            partite, orari e risultati arrivano da soli, ogni notte.
+          </p>
           <button type="button" className="adm-btn adm-btn-primary" onClick={() => setNuova(true)}>
             <FaPlus /> Nuovo torneo
           </button>

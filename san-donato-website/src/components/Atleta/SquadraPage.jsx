@@ -9,6 +9,7 @@ import { useAuth } from "../../context/auth";
 import { linkMappa } from "../../utils/linkMappa";
 import AbbonaCalendario from "./AbbonaCalendario";
 import "../../css/Admin.css";
+import "../../css/AreaAtleta.css";
 
 /** Quanto avanti si guarda, e quanto indietro. */
 const GIORNI_AVANTI = 120;
@@ -31,6 +32,49 @@ function giorno(iso) {
 
 function ora(iso) {
   return new Date(iso).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+}
+
+/**
+ * Il prossimo appuntamento, in grande.
+ *
+ * È la domanda per cui si apre questa pagina il venerdì sera — "domani a
+ * che ora, e dove?" — e in un elenco di righe tutte uguali andava cercato.
+ */
+function Prossimo({ evento }) {
+  const mappa = linkMappa({
+    luogo: evento.luogo,
+    latitudine: evento.latitudine,
+    longitudine: evento.longitudine
+  });
+
+  return (
+    <article className="aa-prossimo">
+      <span className="aa-prossimo-occhiello">Il prossimo</span>
+      <span className="aa-prossimo-quando">
+        {giorno(evento.inizio)}
+        {!evento.tuttoIlGiorno && `, ore ${ora(evento.inizio)}`}
+      </span>
+      <span className="aa-prossimo-titolo">{evento.titolo}</span>
+      <div className="aa-prossimo-meta">
+        {NOME_TIPO[evento.tipo] && <span className="adm-sport-tag">{NOME_TIPO[evento.tipo]}</span>}
+        {evento.luogo && (
+          mappa ? (
+            <a href={mappa} target="_blank" rel="noreferrer" className="adm-inline-link">
+              <FaMapMarkerAlt aria-hidden="true" /> {evento.luogo}
+            </a>
+          ) : (
+            <span><FaMapMarkerAlt aria-hidden="true" /> {evento.luogo}</span>
+          )
+        )}
+        {evento.diretta && (
+          <a href={evento.diretta} target="_blank" rel="noreferrer" className="adm-inline-link">
+            <FaVideo aria-hidden="true" /> Diretta
+          </a>
+        )}
+      </div>
+      {evento.descrizione && <span className="aa-prossimo-meta">{evento.descrizione}</span>}
+    </article>
+  );
 }
 
 /**
@@ -197,9 +241,11 @@ export default function SquadraPage() {
 
   if (caricamento) {
     return (
-      <div className="adm-loading">
-        <div className="adm-spinner" />
-        <p>Caricamento del calendario…</p>
+      <div className="adm-page aa-pagina" aria-busy="true">
+        <span className="adm-sagoma adm-sagoma-titolo" />
+        <span className="adm-sagoma adm-sagoma-scheda" style={{ height: "8rem" }} />
+        <span className="adm-sagoma adm-sagoma-scheda" />
+        <span className="adm-sagoma adm-sagoma-scheda" />
       </div>
     );
   }
@@ -208,11 +254,11 @@ export default function SquadraPage() {
 
   if (squadre.length === 0) {
     return (
-      <div className="adm-page">
-        <div className="adm-attesa">
-          <FaHourglassHalf className="adm-attesa-icona" aria-hidden="true" />
-          <h1 className="adm-attesa-titolo">Non hai ancora una squadra</h1>
-          <p className="adm-attesa-testo">
+      <div className="adm-page aa-pagina">
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaHourglassHalf aria-hidden="true" /></span>
+          <h1>Non hai ancora una squadra</h1>
+          <p>
             Appena l&apos;allenatore o la segreteria ti assegnano a una squadra,
             qui troverai allenamenti e partite.
           </p>
@@ -222,9 +268,10 @@ export default function SquadraPage() {
   }
 
   return (
-    <div className="adm-page">
+    <div className="adm-page aa-pagina">
       <div className="adm-page-head">
         <div className="adm-head-left">
+          <p className="adm-occhiello">La tua squadra</p>
           <h1 className="adm-page-title">{scelta?.squadra ?? "La tua squadra"}</h1>
           <p className="adm-page-sub">
             {scelta?.sport
@@ -274,19 +321,22 @@ export default function SquadraPage() {
       )}
 
       {eventi.length === 0 ? (
-        <div className="adm-empty">
-          <FaCalendarAlt className="adm-empty-icon" />
+        <div className="adm-vuoto-amico">
+          <span className="adm-vuoto-icona"><FaCalendarAlt aria-hidden="true" /></span>
+          <h2>Nessun appuntamento in calendario</h2>
           <p>
-            Nessun appuntamento in calendario. Li inserisce l&apos;allenatore:
-            appena lo fa, compaiono qui.
+            Allenamenti e partite li inserisce l&apos;allenatore: appena lo
+            fa, compaiono qui. Intanto puoi già aggiungere il calendario al
+            telefono, qui sotto.
           </p>
         </div>
       ) : (
         <>
+          {prossimi[0] && <Prossimo evento={prossimi[0]} />}
           <Elenco
-            titolo="In programma"
-            voci={prossimi}
-            vuoto="Niente in programma nei prossimi mesi."
+            titolo={prossimi.length > 1 ? "Poi" : "In programma"}
+            voci={prossimi.slice(1)}
+            vuoto={prossimi.length ? "Nient'altro in programma nei prossimi mesi." : "Niente in programma nei prossimi mesi."}
           />
           {/* I già svolti scorrono dentro al riquadro dopo i primi cinque:
               sono la parte che interessa meno — "com'è andata" contro

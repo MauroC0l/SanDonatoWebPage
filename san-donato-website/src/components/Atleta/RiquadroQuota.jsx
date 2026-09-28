@@ -5,6 +5,7 @@ import { euro } from "../../utils/soldi";
 import { raggruppaPerAnno } from "../../utils/versamenti";
 import SchermataPagamento from "./SchermataPagamento";
 import "../../css/Quota.css";
+import "../../css/AreaAtleta.css";
 
 /**
  * La propria quota: quanto si deve, quanto si è versato, quanto manca.
@@ -44,8 +45,12 @@ function giorno(iso) {
  * per rimostrarli sarebbe solo un modo di coprire quello che si sta
  * guardando.
  */
-export default function RiquadroQuota({ iscrizione, conStorico = true }) {
-  const [pagamentoAperto, setPagamentoAperto] = useState(false);
+/*
+ * "apriSubito" lo passa la pagina della quota quando ci si arriva dal
+ * pulsante "Paga" della home: chi l'ha premuto vuole pagare, non rileggere
+ * la cifra e cercare un secondo pulsante.
+ */
+export default function RiquadroQuota({ iscrizione, conStorico = true, apriSubito = false }) {
   const [storicoAperto, setStoricoAperto] = useState(false);
 
   const quota = iscrizione?.quotaStagionaleCentesimi ?? null;
@@ -66,6 +71,21 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
   const manca = dovuto == null ? null : dovuto - versato;
   const saldata = manca != null && manca <= 0;
   const percentuale = dovuto ? Math.min(100, Math.round((versato / dovuto) * 100)) : 0;
+
+  /* Quanto proporre nella finestra di pagamento: null è "tutto quello che
+     resta". Null anche lo stato chiuso, quindi la finestra è un oggetto. */
+  const pagabile = manca != null && manca > 0;
+  const [pagamento, setPagamento] = useState(() => (apriSubito && pagabile ? { importo: null } : null));
+
+  /* Le due strade — tutto subito, o metà adesso e metà da gennaio — come
+     due pulsanti con la cifra scritta sopra, invece di una frase da
+     leggere e di un campo da riempire: chi paga sceglie con un tocco, e
+     sa già quanto gli verrà chiesto. La metà si propone solo finché la
+     prima non è coperta. */
+  const restoPrimaMeta = conto?.primaMeta != null && conto.secondaDovuta && pagabile
+    ? Math.max(0, conto.primaMeta - versato)
+    : 0;
+  const conMeta = restoPrimaMeta > 0 && restoPrimaMeta < manca;
 
   // I versamenti arrivano dal più vecchio: l'ultimo è in fondo.
   const ultimo = versamenti.length ? versamenti[versamenti.length - 1] : null;
@@ -113,7 +133,11 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
                     ? <>Hai smesso prima di gennaio: la seconda metà ({euro(conto.secondaMeta)}) non è dovuta.</>
                     : versato >= conto.primaMeta
                       ? <>La prima metà è a posto: la seconda ({euro(conto.secondaMeta)}) si versa da gennaio{annoSecondaMeta}.</>
-                      : <>Puoi versarla tutta subito oppure in due metà: {euro(conto.primaMeta)} il prima possibile e {euro(conto.secondaMeta)} da gennaio{annoSecondaMeta}.</>}
+                      : versato > 0
+                        /* Dopo un acconto "175 € il prima possibile" non è
+                           più vero: resta quello che manca alla prima metà */
+                        ? <>Alla prima metà mancano {euro(conto.primaMeta - versato)}; la seconda ({euro(conto.secondaMeta)}) si versa da gennaio{annoSecondaMeta}. Oppure tutto subito.</>
+                        : <>Puoi versarla tutta subito oppure in due metà: {euro(conto.primaMeta)} il prima possibile e {euro(conto.secondaMeta)} da gennaio{annoSecondaMeta}.</>}
                 </span>
               )}
             </>
@@ -150,17 +174,33 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
 
         {/* Cosa si può fare */}
         <div className="qta-azioni">
-          <button
-            type="button"
-            className="adm-btn adm-btn-primary"
-            onClick={() => setPagamentoAperto(true)}
-            disabled={quota == null || saldata}
-            title={quota == null
-              ? "La quota non è ancora stata decisa"
-              : saldata ? "Hai già versato tutto" : "Paga la quota"}
-          >
-            <FaCreditCard /> Paga la quota
-          </button>
+          {/* Senza quota decisa, o a quota saldata, non c'è niente da
+              pagare: niente pulsante, invece di uno spento che chiede
+              "perché non funziona?". La cifra qui accanto dice già tutto. */}
+          {pagabile && (
+            <div className="aa-scelte-quota">
+              <button
+                type="button"
+                className="adm-btn adm-btn-arancio"
+                onClick={() => setPagamento({ importo: null })}
+              >
+                <FaCreditCard aria-hidden="true" />
+                {conMeta ? "Paga tutto" : "Paga"}{" "}
+                <span className="aa-cifra-btn">{euro(manca)}</span>
+              </button>
+
+              {conMeta && (
+                <button
+                  type="button"
+                  className="adm-btn adm-btn-ghost"
+                  onClick={() => setPagamento({ importo: restoPrimaMeta })}
+                >
+                  {versato > 0 ? "Completa la prima metà" : "Paga metà adesso"}{" "}
+                  <span className="aa-cifra-btn">{euro(restoPrimaMeta)}</span>
+                </button>
+              )}
+            </div>
+          )}
 
           {/*
             * L'ultimo versamento in chiaro, il resto dietro a un pulsante.
@@ -198,12 +238,13 @@ export default function RiquadroQuota({ iscrizione, conStorico = true }) {
         />
       )}
 
-      {pagamentoAperto && (
+      {pagamento && (
         <SchermataPagamento
           quota={dovuto}
           versato={versato}
           conto={conto}
-          onChiudi={() => setPagamentoAperto(false)}
+          importoIniziale={pagamento.importo}
+          onChiudi={() => setPagamento(null)}
         />
       )}
     </section>

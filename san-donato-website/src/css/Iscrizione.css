@@ -1,14 +1,15 @@
 /* La scheda "iscrizione" dell'atleta. Vedi IscrizionePage.jsx */
 
 /*
- * L'obiettivo di questo foglio è uno solo: su un computer la pagina deve
- * stare in una schermata, senza barra di scorrimento.
+ * Due colonne basse sul computer, una sola sul telefono.
  *
  * Prima era una colonna larga con dentro tre gruppi di campi uno sotto
  * l'altro, più una spalla altrettanto lunga: fra le due si arrivava
- * tranquillamente al doppio dello schermo, e la quota — la cosa che si
- * veniva a guardare — stava in fondo. Adesso i campi sono in griglia, i
- * gruppi affiancati, e quello che resta sono due colonne basse.
+ * tranquillamente al doppio dello schermo. Adesso i campi sono in griglia
+ * e ogni domanda — chi sei, dove abiti, cosa dobbiamo sapere, il
+ * certificato — è un riquadro numerato suo (i numeri e le pastiglie di
+ * stato stanno in AreaAtleta.css): sul telefono si compila un pezzo per
+ * volta, e si vede subito quale pezzo manca.
  */
 
 .isc-griglia {
@@ -28,7 +29,7 @@
 /* I riquadri si stringono: gli stessi margini di una pagina lunga, su una
    che deve stare in una schermata, sono spazio buttato. */
 .isc-griglia .adm-panel { padding: .9rem 1rem 1rem; }
-.isc-griglia .adm-panel-title { margin-bottom: .7rem; }
+.isc-griglia .adm-panel-title { margin-bottom: .8rem; }
 
 /* I due gruppi di campi affiancati invece che in fila: "i tuoi dati" e
    "chi chiamare se serve" sono sei campi in tutto, e in colonna occupavano

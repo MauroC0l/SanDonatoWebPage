@@ -1,11 +1,14 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaSearch, FaTimes, FaNewspaper, FaSlidersH, FaArrowRight, FaCalendarAlt
+  FaSearch, FaTimes, FaNewspaper, FaSlidersH, FaArrowRight, FaArrowLeft
 } from "react-icons/fa";
 import { getAllPosts } from "../../api/API.mjs";
 import Tendina from "../Admin/Tendina";
 import CampoData from "../Admin/CampoData";
+import Contatore from "../Sport/Contatore";
+import SchedaNotizia from "./SchedaNotizia";
+import { daQuanto, dataBreve, etichetteDi, quando, sportVisibile } from "./notizieUtili";
 import "../../css/Admin.css";
 import "../../css/Tendina.css";
 import "../../css/CampoData.css";
@@ -14,21 +17,21 @@ import "../../css/NewsPage.css";
 /**
  * L'archivio delle notizie.
  *
- * Rifatta con la stessa lingua visiva della home: fondo chiaro, schede
- * bianche, una notizia in evidenza e le altre in griglia. Prima era una
- * colonna di filtri a sinistra e una lista di schede tutte uguali a destra —
- * novantotto articoli senza niente che li distinguesse.
+ * Rifatta con la lingua delle pagine Sport, Chi siamo e Contatti: una
+ * testata blu attaccata al menu con la copertina dell'ultima uscita, il
+ * nastro arancione con le etichette, una barra dei filtri di vetro che
+ * resta in alto scorrendo, e le notizie in un mosaico da rivista invece di
+ * una griglia di schede tutte uguali.
  *
- * Sono sparite due librerie da questa pagina: react-bootstrap, di cui si
- * usavano tre componenti, e react-datepicker, che pesava 176 KB per un
- * calendario che il sito ha già suo (CampoData). Quei due controlli vivono
- * dentro al pannello e portano la tavolozza --adm-*: la si dichiara sulla
- * radice di questa pagina, come si fa per le finestre di dialogo.
+ * Il comportamento è quello di prima: si scaricano tutte le notizie una
+ * volta (getAllPosts, con la sua cache) e filtri, ordine e pagine si fanno
+ * qui. I due controlli del pannello (Tendina e CampoData) vivono con la
+ * tavolozza --adm-*: la si dichiara sulla radice di questa pagina, come si
+ * fa per le finestre di dialogo.
  *
- * IL FILTRO PER ETICHETTA è la novità che conta: lo sport divideva male un
- * archivio in cui otto articoli su dieci non parlano di sport ma di
- * assemblee, feste e iscrizioni. Le etichette le decide lo staff, quindi
- * l'elenco del filtro non è scritto qui: nasce dalle notizie caricate.
+ * IL FILTRO PER ETICHETTA è quello che conta: otto articoli su dieci non
+ * parlano di sport ma di assemblee, feste e iscrizioni. Le etichette le
+ * decide lo staff, quindi l'elenco nasce dalle notizie caricate.
  */
 
 const ORDINI = [
@@ -38,27 +41,14 @@ const ORDINI = [
 
 const PER_PAGINA = 12;
 
-/* Quante etichette mostra una scheda. Oltre, un "+2": cinque pastiglie in
-   fila su un telefono prenderebbero il posto del titolo. */
-const ETICHETTE_IN_SCHEDA = 2;
+/* Le etichette offerte come scorciatoia nella testata: le più usate. Più
+   di sei diventano un muro di pastiglie che nessuno legge. */
+const SCORCIATOIE = 6;
 
-const etichetteDi = (post) => (Array.isArray(post?.etichette) ? post.etichette : []);
+/* Le parole del nastro quando lo staff non ha ancora messo etichette */
+const NASTRO_RIPIEGO = ["Notizie", "Risultati", "Eventi", "Comunicazioni", "Assemblee", "Feste"];
 
-/* Minivolley è pallavolo per chi legge: come filtro a sé faceva una voce in
-   più che quasi nessuno avrebbe premuto. */
-const sportVisibile = (sport) => (sport === "Minivolley" ? "Pallavolo" : sport);
-
-/**
- * La data di una notizia, dal campo ISO.
- *
- * Mai da `date`: quello è già formattato all'italiana ("07/09/2026"), e
- * new Date() lo legge come mese/giorno — o non lo legge affatto sopra il
- * dodici.
- */
-function quando(post) {
-  const d = new Date(post?.dateISO ?? "");
-  return isNaN(d.getTime()) ? new Date(0) : d;
-}
+const RIDOTTO = "(prefers-reduced-motion: reduce)";
 
 function fineGiornata(iso) {
   const d = new Date(iso);
@@ -66,49 +56,18 @@ function fineGiornata(iso) {
   return d;
 }
 
-/** Una scheda della griglia. Grande per la prima, normale per le altre. */
-function Scheda({ post, grande = false }) {
-  const sfondo = post.image || "/logo-poli-sfondo.jpg";
-  const etichette = etichetteDi(post);
-  const inVista = etichette.slice(0, ETICHETTE_IN_SCHEDA);
-  const altre = etichette.length - inVista.length;
-
-  return (
-    <Link
-      to={`/news/${post.id}`}
-      state={{ post }}
-      className={`nws-scheda ${grande ? "nws-scheda-grande" : ""}`}
-    >
-      <span className="nws-foto" style={{ backgroundImage: `url(${sfondo})` }} aria-hidden="true" />
-      {grande && <span className="nws-velo" aria-hidden="true" />}
-
-      <span className="nws-testi">
-        <span className="nws-etichette">
-          {inVista.map((e) => (
-            <span key={e.id} className="nws-etichetta" title={e.nome}>{e.nome}</span>
-          ))}
-          {altre > 0 && (
-            <span
-              className="nws-etichetta nws-etichetta-altre"
-              title={etichette.slice(ETICHETTE_IN_SCHEDA).map((e) => e.nome).join(", ")}
-            >
-              +{altre}
-            </span>
-          )}
-          {post.sport && post.sport !== "Altro" && (
-            <span className="nws-sport">{sportVisibile(post.sport)}</span>
-          )}
-          <span className="nws-data">{post.date}</span>
-        </span>
-
-        <span className="nws-titolo">{post.title}</span>
-
-        {post.preview && <span className="nws-sommario">{post.preview}</span>}
-
-        <span className="nws-leggi">Leggi <FaArrowRight aria-hidden="true" /></span>
-      </span>
-    </Link>
-  );
+/* Le pagine da mostrare nella numerazione: la prima, l'ultima e le vicine
+   a quella corrente. Con cento pagine una fila di cento pulsanti sarebbe
+   inutilizzabile; i buchi diventano "…". */
+function numeriPagine(corrente, totale) {
+  const tenute = new Set([1, totale, corrente - 1, corrente, corrente + 1]);
+  const elenco = [...tenute].filter((n) => n >= 1 && n <= totale).sort((x, y) => x - y);
+  const conBuchi = [];
+  elenco.forEach((n, i) => {
+    if (i > 0 && n - elenco[i - 1] > 1) conBuchi.push(`buco-${n}`);
+    conBuchi.push(n);
+  });
+  return conBuchi;
 }
 
 export default function NewsPage() {
@@ -126,6 +85,9 @@ export default function NewsPage() {
 
   const [pagina, setPagina] = useState(1);
   const [filtriAperti, setFiltriAperti] = useState(false);
+
+  // Dove riportare chi cambia pagina o sceglie un'etichetta dalla testata
+  const risultatiRef = useRef(null);
 
   useEffect(() => {
     let attivo = true;
@@ -146,32 +108,49 @@ export default function NewsPage() {
     return () => { attivo = false; };
   }, []);
 
+  /* Le etichette in uso, con quante notizie ciascuna: servono al filtro,
+     alle scorciatoie della testata e al nastro. Per id, così due notizie
+     con la stessa etichetta non la fanno comparire due volte. */
+  const etichetteInUso = useMemo(() => {
+    const conti = new Map();
+    for (const n of notizie) {
+      for (const e of etichetteDi(n)) {
+        const chiave = String(e.id);
+        const c = conti.get(chiave);
+        conti.set(chiave, { id: chiave, nome: e.nome, quante: (c?.quante ?? 0) + 1 });
+      }
+    }
+    return [...conti.values()];
+  }, [notizie]);
+
+  const opzioniEtichetta = useMemo(() => [
+    { valore: "", etichetta: "Tutte le etichette" },
+    // Solo le etichette che hanno davvero qualcosa dentro: una voce che
+    // torna sempre vuota è una promessa non mantenuta.
+    ...[...etichetteInUso]
+      .sort((x, y) => x.nome.localeCompare(y.nome, "it", { sensitivity: "base" }))
+      .map((e) => ({ valore: e.id, etichetta: e.nome }))
+  ], [etichetteInUso]);
+
+  const piuUsate = useMemo(
+    () => [...etichetteInUso].sort((x, y) => y.quante - x.quante).slice(0, SCORCIATOIE),
+    [etichetteInUso]
+  );
+
   const opzioniSport = useMemo(() => {
     const presenti = [...new Set(notizie.map((n) => sportVisibile(n.sport)).filter(Boolean))];
     presenti.sort();
-
     return [
       { valore: "", etichetta: "Tutti gli sport" },
       ...presenti.map((s) => ({ valore: s, etichetta: s }))
     ];
   }, [notizie]);
 
-  const opzioniEtichetta = useMemo(() => {
-    // Solo le etichette che hanno davvero qualcosa dentro: una voce che
-    // torna sempre vuota è una promessa non mantenuta. Per id, così due
-    // notizie con la stessa etichetta non la fanno comparire due volte.
-    const presenti = new Map();
-    for (const n of notizie) {
-      for (const e of etichetteDi(n)) presenti.set(String(e.id), e.nome);
-    }
-
-    return [
-      { valore: "", etichetta: "Tutte le etichette" },
-      ...[...presenti]
-        .sort(([, x], [, y]) => x.localeCompare(y, "it", { sensitivity: "base" }))
-        .map(([id, nome]) => ({ valore: id, etichetta: nome }))
-    ];
-  }, [notizie]);
+  // Le ultime tre uscite, a prescindere dai filtri: la "copertina" della testata
+  const ultime = useMemo(
+    () => [...notizie].sort((x, y) => quando(y) - quando(x)).slice(0, 3),
+    [notizie]
+  );
 
   const filtrate = useMemo(() => {
     const cercato = cerca.trim().toLowerCase();
@@ -196,14 +175,50 @@ export default function NewsPage() {
   const paginaValida = Math.min(pagina, pagine);
   const dellaPagina = filtrate.slice((paginaValida - 1) * PER_PAGINA, paginaValida * PER_PAGINA);
 
-  /* In evidenza solo sulla prima pagina e solo senza filtri: una scheda
+  /* In evidenza solo sulla prima pagina e dalla più recente: una scheda
      grande in cima alla pagina quattro non è "in evidenza", è disordine. */
   const conEvidenza = paginaValida === 1 && ordine === "desc";
-  const [primo, ...altre] = dellaPagina;
+
+  /* Il mosaico: la prima grande (due colonne per due righe) e, quando i
+     conti tornano, una scheda larga più giù che rompe il ritmo. "Quando i
+     conti tornano" vuol dire che con quattro colonne le celle riempiono le
+     righe senza buchi: grande (4) + larga (2) + le altre fa n + 4. */
+  const variante = (i) => {
+    if (!conEvidenza) return "normale";
+    if (i === 0) return "grande";
+    if (i === 7 && dellaPagina.length % 4 === 0) return "larga";
+    return "normale";
+  };
+
+  const liscio = () => !window.matchMedia(RIDOTTO).matches;
+
+  const vaiAiRisultati = () => {
+    const el = risultatiRef.current;
+    if (!el) return;
+    /* Sopra ai risultati restano l'intestazione (che torna visibile
+       salendo) e la barra dei filtri attaccata: si lascia il posto a
+       tutte e due, o il conto delle notizie finirebbe dietro al vetro. */
+    const testata = parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue("--site-header-h")) || 80;
+    const barra = document.querySelector(".nz-barra")?.offsetHeight ?? 60;
+    const alto = el.getBoundingClientRect().top + window.scrollY - testata - barra - 28;
+    window.scrollTo({ top: Math.max(0, alto), behavior: liscio() ? "smooth" : "auto" });
+  };
 
   const cambia = (azione) => (valore) => {
     setPagina(1);
     azione(valore);
+  };
+
+  const vaiAPagina = (n) => {
+    setPagina(n);
+    vaiAiRisultati();
+  };
+
+  const scegliEtichetta = (id) => {
+    setPagina(1);
+    setEtichetta((prima) => (prima === id ? "" : id));
+    vaiAiRisultati();
   };
 
   const azzera = () => {
@@ -219,165 +234,365 @@ export default function NewsPage() {
 
   const conFiltri = Boolean(sport || etichetta || da || a || cerca);
 
+  /* I filtri accesi, uno per pastiglia, ognuno con la sua crocetta: chi ne
+     ha messi tre vuole toglierne uno, non ricominciare da capo. */
+  const nomeEtichetta = etichetteInUso.find((e) => e.id === etichetta)?.nome;
+  const accesi = [
+    etichetta && { chiave: "etichetta", testo: nomeEtichetta || "Etichetta", togli: () => cambia(setEtichetta)("") },
+    sport && { chiave: "sport", testo: sport, togli: () => cambia(setSport)("") },
+    da && { chiave: "da", testo: `Dal ${dataBreve({ dateISO: da })}`, togli: () => cambia(setDa)("") },
+    a && { chiave: "a", testo: `Al ${dataBreve({ dateISO: a })}`, togli: () => cambia(setA)("") },
+    cerca && { chiave: "cerca", testo: `“${cerca}”`, togli: () => { setScritto(""); cambia(setCerca)(""); } }
+  ].filter(Boolean);
+
+  const quanteSport = opzioniSport.length - 1;
+  const parole = etichetteInUso.length
+    ? [...etichetteInUso].sort((x, y) => y.quante - x.quante).slice(0, 12).map((e) => e.nome)
+    : NASTRO_RIPIEGO;
+
   return (
-    <div className="nws">
-      <header className="nws-intestazione" data-rivela>
-        <span className="nws-occhiello">Archivio</span>
-        <h1 className="nws-titolo-pagina">Le notizie della Polisportiva</h1>
-        <p className="nws-sottotitolo">
-          Assemblee, feste, risultati e comunicazioni: tutto quello che è stato
-          pubblicato, dal più recente.
-        </p>
+    <div className="nz">
+
+      {/* ---------- TESTATA ---------- */}
+      <header className="nz-eroe">
+        <div className="mv-aurora" aria-hidden="true" />
+        <div className="nz-eroe-griglia" aria-hidden="true" />
+        <span className="nz-eroe-fantasma" data-parallasse="0.12" aria-hidden="true">NEWS</span>
+
+        <div className="nz-eroe-dentro">
+          <div className="nz-eroe-testo">
+            <p className="nz-occhiello" data-rivela="sfuma">
+              <span className="nz-punto" aria-hidden="true" /> Archivio · Polisportiva San Donato
+            </p>
+            <h1 className="nz-titolo">
+              <span className="nz-titolo-riga" data-rivela>Le notizie</span>
+              <span className="nz-titolo-riga" data-rivela>
+                <span className="mv-testo-vivo">dal campo.</span>
+              </span>
+            </h1>
+            <p className="nz-sottotitolo" data-rivela>
+              Assemblee, feste, risultati e comunicazioni: tutto quello che è
+              stato pubblicato, dal più recente.
+            </p>
+
+            {/* Le etichette più usate come scorciatoia: un tocco filtra e
+                porta giù ai risultati. La chiave cambia all'arrivo dei
+                dati, così le pastiglie vere compaiono anche loro. */}
+            {piuUsate.length > 0 && (
+              <div className="nz-scorciatoie" data-rivela-gruppo key="scorciatoie">
+                {piuUsate.map((e) => (
+                  <button
+                    key={e.id}
+                    type="button"
+                    // La scelta si legge da aria-pressed e non da una classe:
+                    // riscrivendo className React toglierebbe le classi della
+                    // comparsa, e la pastiglia tornerebbe invisibile.
+                    className="nz-scorciatoia"
+                    aria-pressed={etichetta === e.id}
+                    onClick={() => scegliEtichetta(e.id)}
+                  >
+                    {e.nome} <small>{e.quante}</small>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* La copertina dell'ultima uscita, con le due precedenti sotto
+              a ventaglio. Sugli schermi stretti non c'è: la prima scheda
+              del mosaico dice la stessa cosa poco più giù. Comparsa sulla
+              cornice, parallasse dentro, inclinazione sulla scheda: tre
+              transform, tre elementi. */}
+          {ultime.length > 0 && (
+            <div className="nz-mazzo" data-rivela="zoom" key={`mazzo-${ultime[0].id}`}>
+              <div className="nz-mazzo-dentro" data-parallasse="0.06">
+                {ultime.slice(1).map((n, i) => (
+                  <span
+                    key={n.id}
+                    className={`nz-mazzo-foglio nz-mazzo-foglio-${i + 1}`}
+                    aria-hidden="true"
+                  >
+                    <img src={n.image || "/logo-poli-sfondo.jpg"} alt="" loading="lazy" />
+                  </span>
+                ))}
+                <Link
+                  to={`/news/${ultime[0].id}`}
+                  state={{ post: ultime[0] }}
+                  className="nz-mazzo-cima"
+                  data-inclina="6"
+                >
+                  <img src={ultime[0].image || "/logo-poli-sfondo.jpg"} alt="" />
+                  <span className="nz-mazzo-velo" aria-hidden="true" />
+                  <span className="nz-mazzo-testi">
+                    <span className="nz-mazzo-bollo">
+                      <span className="nz-punto" aria-hidden="true" /> Ultima uscita · {daQuanto(ultime[0])}
+                    </span>
+                    <span className="nz-mazzo-titolo">{ultime[0].title}</span>
+                    <span className="nz-mazzo-leggi">Leggi <FaArrowRight aria-hidden="true" /></span>
+                  </span>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* I numeri contano da zero la prima volta che si vedono. Finché
+            le notizie non arrivano restano dei trattini: un "0" farebbe
+            credere a un archivio vuoto. */}
+        <dl
+          className="nz-numeri"
+          data-rivela-gruppo
+          key={caricamento ? "numeri-attesa" : "numeri-pronti"}
+        >
+          <div>
+            <dt>Notizie</dt>
+            <dd>{caricamento ? "—" : <Contatore valore={notizie.length} />}</dd>
+          </div>
+          <div>
+            <dt>Etichette</dt>
+            <dd>{caricamento ? "—" : <Contatore valore={etichetteInUso.length} />}</dd>
+          </div>
+          <div>
+            <dt>Sport</dt>
+            <dd>{caricamento ? "—" : <Contatore valore={quanteSport} />}</dd>
+          </div>
+          <div>
+            <dt>Ultimo aggiornamento</dt>
+            <dd className="nz-numero-testo">{caricamento || !ultime[0] ? "—" : daQuanto(ultime[0])}</dd>
+          </div>
+        </dl>
       </header>
 
-      <div className="nws-contenitore">
+      {/* ---------- NASTRO ----------
+          Ripetuto due volte: la seconda metà prende il posto della prima e
+          il giro non si vede. Per i lettori di schermo è decorazione. */}
+      <div className="nz-fascia-cornice" aria-hidden="true">
+        <div className="nz-fascia mv-nastro">
+          <div className="mv-nastro-traccia" key={parole.join("|")}>
+            {[0, 1].map((copia) => (
+              <span className="nz-fascia-giro" key={copia}>
+                {parole.map((p, i) => (
+                  <span className="nz-fascia-voce" key={i}>
+                    {p}<span className="nz-fascia-stella">✦</span>
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        {/* ---------- Filtri ---------- */}
-        <div className={`nws-filtri ${filtriAperti ? "is-aperti" : ""}`}>
-          <form
-            className="nws-cerca"
-            role="search"
-            onSubmit={(e) => { e.preventDefault(); setPagina(1); setCerca(scritto.trim()); }}
-          >
-            <FaSearch aria-hidden="true" />
-            <input
-              type="search"
-              value={scritto}
-              onChange={(e) => setScritto(e.target.value)}
-              placeholder="Cerca fra le notizie…"
-              aria-label="Cerca fra le notizie"
-            />
-          </form>
+      <div className="nz-contenitore">
 
-          <div className="nws-filtri-campi">
-            <Tendina
-              valore={etichetta}
-              onChange={cambia(setEtichetta)}
-              opzioni={opzioniEtichetta}
-              segnaposto="Tutte le etichette"
-              etichettaAria="Filtra per etichetta"
-              vuoto="Nessuna etichetta trovata."
-            />
+        {/* ---------- FILTRI ----------
+            Una barra di vetro che resta in alto scorrendo, sotto
+            all'intestazione quando c'è (--testata-visibile la pubblica
+            MyNavbar). Niente overflow nascosto: il calendario del filtro
+            per data si apre sotto la barra e non deve essere tagliato. */}
+        <div className={`nz-barra${filtriAperti ? " is-aperta" : ""}`}>
+          <div className="nz-barra-vetro">
+            <div className="nz-barra-riga">
+              <form
+                className="nz-cerca"
+                role="search"
+                onSubmit={(e) => { e.preventDefault(); setPagina(1); setCerca(scritto.trim()); }}
+              >
+                <FaSearch aria-hidden="true" />
+                <input
+                  type="search"
+                  value={scritto}
+                  onChange={(e) => setScritto(e.target.value)}
+                  placeholder="Cerca fra le notizie…"
+                  aria-label="Cerca fra le notizie"
+                />
+                {scritto && (
+                  <button
+                    type="button"
+                    className="nz-cerca-svuota"
+                    aria-label="Svuota la ricerca"
+                    onClick={() => { setScritto(""); if (cerca) cambia(setCerca)(""); }}
+                  >
+                    <FaTimes aria-hidden="true" />
+                  </button>
+                )}
+              </form>
 
-            <Tendina
-              valore={sport}
-              onChange={cambia(setSport)}
-              opzioni={opzioniSport}
-              segnaposto="Tutti gli sport"
-              etichettaAria="Filtra per sport"
-            />
-
-            <CampoData
-              valore={da}
-              onChange={cambia(setDa)}
-              etichettaAria="Dal giorno"
-              segnaposto="Dal…"
-            />
-
-            <CampoData
-              valore={a}
-              onChange={cambia(setA)}
-              minimo={da || null}
-              etichettaAria="Al giorno"
-              segnaposto="Al…"
-            />
-
-            <Tendina
-              valore={ordine}
-              onChange={cambia(setOrdine)}
-              opzioni={ORDINI}
-              etichettaAria="Ordine"
-            />
-
-            {conFiltri && (
-              <button type="button" className="nws-azzera" onClick={azzera}>
-                <FaTimes aria-hidden="true" /> Togli i filtri
+              {/* Su un telefono i filtri stanno dietro a un pulsante: cinque
+                  controlli in cima spingerebbero le notizie sotto la piega,
+                  e le notizie sono quello che si è venuti a leggere. */}
+              <button
+                type="button"
+                className="nz-apri-filtri"
+                onClick={() => setFiltriAperti((v) => !v)}
+                aria-expanded={filtriAperti}
+                aria-controls="nz-campi"
+              >
+                <FaSlidersH aria-hidden="true" />
+                <span>{filtriAperti ? "Chiudi" : "Filtri"}</span>
+                {conFiltri && <span className="nz-pallino" aria-hidden="true">{accesi.length}</span>}
               </button>
-            )}
+            </div>
+
+            <div className="nz-campi" id="nz-campi">
+              <Tendina
+                valore={etichetta}
+                onChange={cambia(setEtichetta)}
+                opzioni={opzioniEtichetta}
+                segnaposto="Tutte le etichette"
+                etichettaAria="Filtra per etichetta"
+                vuoto="Nessuna etichetta trovata."
+              />
+
+              <Tendina
+                valore={sport}
+                onChange={cambia(setSport)}
+                opzioni={opzioniSport}
+                segnaposto="Tutti gli sport"
+                etichettaAria="Filtra per sport"
+              />
+
+              <CampoData
+                valore={da}
+                onChange={cambia(setDa)}
+                etichettaAria="Dal giorno"
+                segnaposto="Dal…"
+              />
+
+              <CampoData
+                valore={a}
+                onChange={cambia(setA)}
+                minimo={da || null}
+                etichettaAria="Al giorno"
+                segnaposto="Al…"
+              />
+
+              <Tendina
+                valore={ordine}
+                onChange={cambia(setOrdine)}
+                opzioni={ORDINI}
+                etichettaAria="Ordine"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Su un telefono i filtri stanno dietro a un pulsante: cinque
-            controlli in cima alla pagina spingerebbero le notizie sotto la
-            piega, e le notizie sono quello che si è venuti a leggere. */}
-        <button
-          type="button"
-          className="nws-apri-filtri"
-          onClick={() => setFiltriAperti((v) => !v)}
-          aria-expanded={filtriAperti}
-        >
-          <FaSlidersH aria-hidden="true" />
-          {filtriAperti ? "Nascondi i filtri" : "Filtra e cerca"}
-          {conFiltri && <span className="nws-pallino" aria-hidden="true" />}
-        </button>
-
-        {/* ---------- Le notizie ---------- */}
-        {caricamento ? (
-          <div className="nws-griglia">
-            {Array.from({ length: 6 }, (_, i) => (
-              <span key={i} className="nws-sagoma" />
-            ))}
-          </div>
-        ) : errore ? (
-          <p className="nws-vuoto">
-            {errore}<br />Riprova fra qualche minuto o ricarica la pagina.
-          </p>
-        ) : filtrate.length === 0 ? (
-          <p className="nws-vuoto">
-            <FaNewspaper aria-hidden="true" />
-            {conFiltri
-              ? "Nessuna notizia corrisponde a questi filtri."
-              : "Non c'è ancora nessuna notizia pubblicata."}
-          </p>
-        ) : (
-          <>
-            <p className="nws-conto">
-              {filtrate.length === 1 ? "Una notizia" : `${filtrate.length} notizie`}
-              {conFiltri && " con questi filtri"}
-            </p>
-
-            {/* La chiave cambia con pagina e filtri: la griglia rinasce e
-                le schede ricompaiono in fila, invece di cambiare sotto gli
-                occhi senza segno. Serve anche a non riusare schede già
-                comparse, a cui React riscriverebbe le classi del movimento. */}
-            <div
-              className="nws-griglia"
-              data-rivela-gruppo
-              key={[paginaValida, ordine, sport, etichetta, da, a, cerca].join("|")}
-            >
-              {conEvidenza
-                ? <>
-                  <Scheda post={primo} grande />
-                  {altre.map((n) => <Scheda key={n.id} post={n} />)}
-                </>
-                : dellaPagina.map((n) => <Scheda key={n.id} post={n} />)}
+        {/* ---------- LE NOTIZIE ---------- */}
+        <section className="nz-risultati" ref={risultatiRef} aria-label="Notizie">
+          {caricamento ? (
+            <div className="nz-mosaico" aria-hidden="true">
+              {Array.from({ length: 7 }, (_, i) => (
+                <span key={i} className={`nz-sagoma${i === 0 ? " nz-sagoma-grande" : ""}`} />
+              ))}
             </div>
-
-            {pagine > 1 && (
-              <nav className="nws-pagine" aria-label="Pagine">
-                <button
-                  type="button"
-                  onClick={() => { setPagina(paginaValida - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  disabled={paginaValida === 1}
-                >
-                  Precedente
+          ) : errore ? (
+            <div className="nz-vuoto">
+              <FaNewspaper aria-hidden="true" />
+              <strong>Le notizie non sono arrivate</strong>
+              <span>{errore} Riprova fra qualche minuto o ricarica la pagina.</span>
+            </div>
+          ) : filtrate.length === 0 ? (
+            <div className="nz-vuoto">
+              <FaNewspaper aria-hidden="true" />
+              <strong>
+                {conFiltri
+                  ? "Nessuna notizia corrisponde a questi filtri."
+                  : "Non c'è ancora nessuna notizia pubblicata."}
+              </strong>
+              {conFiltri && (
+                <button type="button" className="nz-azzera" onClick={azzera}>
+                  <FaTimes aria-hidden="true" /> Togli i filtri
                 </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="nz-conto-riga">
+                <p className="nz-conto" aria-live="polite">
+                  <strong>{filtrate.length}</strong>
+                  {filtrate.length === 1 ? " notizia" : " notizie"}
+                  {conFiltri && <span> con questi filtri</span>}
+                </p>
 
-                <span>
-                  <FaCalendarAlt aria-hidden="true" /> Pagina {paginaValida} di {pagine}
-                </span>
+                {accesi.length > 0 && (
+                  <ul className="nz-accesi" aria-label="Filtri attivi">
+                    {accesi.map((f) => (
+                      <li key={f.chiave}>
+                        <button type="button" onClick={f.togli} aria-label={`Togli il filtro ${f.testo}`}>
+                          {f.testo} <FaTimes aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                    {accesi.length > 1 && (
+                      <li>
+                        <button type="button" className="nz-accesi-tutti" onClick={azzera}>
+                          Togli tutti
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
 
-                <button
-                  type="button"
-                  onClick={() => { setPagina(paginaValida + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                  disabled={paginaValida === pagine}
-                >
-                  Successiva
-                </button>
-              </nav>
-            )}
-          </>
-        )}
+              {/* La chiave cambia con pagina e filtri: il mosaico rinasce e
+                  le schede ricompaiono in fila invece di cambiare sotto gli
+                  occhi senza segno. Serve anche a non riusare schede già
+                  comparse, a cui React riscriverebbe le classi del movimento. */}
+              <div
+                className="nz-mosaico"
+                data-rivela-gruppo
+                key={[paginaValida, ordine, sport, etichetta, da, a, cerca].join("|")}
+              >
+                {dellaPagina.map((n, i) => (
+                  <SchedaNotizia key={n.id} post={n} variante={variante(i)} />
+                ))}
+              </div>
+
+              {pagine > 1 && (
+                <nav className="nz-pagine" aria-label="Pagine">
+                  <button
+                    type="button"
+                    className="nz-pagina-freccia"
+                    onClick={() => vaiAPagina(paginaValida - 1)}
+                    disabled={paginaValida === 1}
+                    aria-label="Pagina precedente"
+                  >
+                    <FaArrowLeft aria-hidden="true" />
+                  </button>
+
+                  <ol className="nz-pagine-numeri">
+                    {numeriPagine(paginaValida, pagine).map((n) => (
+                      typeof n === "string"
+                        ? <li key={n} className="nz-pagine-buco" aria-hidden="true">…</li>
+                        : (
+                          <li key={n}>
+                            <button
+                              type="button"
+                              className={n === paginaValida ? "is-corrente" : ""}
+                              aria-current={n === paginaValida ? "page" : undefined}
+                              aria-label={`Pagina ${n}`}
+                              onClick={() => vaiAPagina(n)}
+                            >
+                              {n}
+                            </button>
+                          </li>
+                        )
+                    ))}
+                  </ol>
+
+                  <button
+                    type="button"
+                    className="nz-pagina-freccia"
+                    onClick={() => vaiAPagina(paginaValida + 1)}
+                    disabled={paginaValida === pagine}
+                    aria-label="Pagina successiva"
+                  >
+                    <FaArrowRight aria-hidden="true" />
+                  </button>
+                </nav>
+              )}
+            </>
+          )}
+        </section>
       </div>
     </div>
   );

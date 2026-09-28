@@ -1,0 +1,351 @@
+/* =========================================
+   AREA DELL'ATLETA (scope: aa-)
+
+   I pezzi delle pagine di /area-riservata che non servono a nessun altro:
+   la lista "cosa ti manca" della home, le sezioni numerate del modulo
+   d'iscrizione, il prossimo appuntamento in evidenza. Tutto il resto —
+   colori, misure, passi, fascia blu — viene da Admin.css e si legge da lì
+   (vedi la Guida rapida in cima a quel file).
+
+   Chi apre queste pagine è quasi sempre un genitore, sul telefono, fra
+   una cosa e l'altra: ogni regola qui sotto è pensata prima per 390 pixel
+   e un pollice, poi per il computer.
+   ========================================= */
+
+/*
+ * La testata delle pagine, sul telefono.
+ *
+ * In Admin.css la testata diventa una colonna sotto i 700 pixel, ma la
+ * parte sinistra conserva "flex: 1 1 20rem": in colonna quei 20rem
+ * diventano ALTEZZA, e fra il titolo e il sottotitolo si apriva un vuoto
+ * di mezzo schermo. Qui la si rimette alta quanto il suo contenuto.
+ */
+@media (max-width: 700px) {
+  .aa-pagina .adm-page-head .adm-head-left { flex: 0 0 auto; }
+
+  /* Il pulsante "Salva" della testata sul telefono non serve: c'è la
+     barra attaccata in fondo, che si raggiunge col pollice. */
+  .aa-pagina .adm-page-head .aa-solo-grande { display: none; }
+}
+
+/* ---------- Home: la fascia blu ---------- */
+
+.aa-benvenuto-conta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .6rem .9rem;
+  margin-top: 1.1rem;
+}
+
+/* "2 su 4 a posto": la barra dice la stessa cosa dei numeri, per chi
+   guarda e non legge */
+.aa-benvenuto-barra {
+  flex: 1 1 10rem;
+  max-width: 16rem;
+  height: 8px;
+  border-radius: var(--adm-r-pill);
+  background: rgba(255, 255, 255, .16);
+  overflow: hidden;
+}
+.aa-benvenuto-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--adm-pillola);
+}
+.aa-benvenuto-barra.is-completa > span { background: #34d399; }
+
+.aa-benvenuto-numeri {
+  color: rgba(232, 238, 252, .9);
+  font-size: .9rem;
+  font-weight: 700;
+}
+
+.aa-benvenuto-squadra {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: .8rem 0 0;
+  padding: .3rem .75rem;
+  border-radius: var(--adm-r-pill);
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  font-size: .86rem;
+  font-weight: 700;
+}
+.aa-benvenuto-squadra svg { color: var(--adm-arancio-chiaro); }
+
+/* ---------- Home: la lista di cosa manca ---------- */
+
+.aa-lista {
+  padding: clamp(1.1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 1.5rem) .4rem;
+}
+
+/* Il pulsante di ogni passo: grande, sotto alla spiegazione. Sul
+   telefono prende tutta la riga, così lo si prende col pollice senza
+   mirare. */
+.aa-passo-azione {
+  justify-self: start;
+  margin-top: .55rem;
+  min-height: var(--adm-tocco);
+  font-size: 1rem;
+}
+
+@media (max-width: 560px) {
+  .aa-passo-azione { justify-self: stretch; }
+}
+
+/* In attesa di qualcun altro: né fatto né da fare. Una clessidra al posto
+   del numero, e nessun pulsante — non c'è niente da premere. */
+.adm-passi > li.aa-in-attesa::before {
+  content: "…";
+  border-color: var(--adm-warn-line);
+  background: var(--adm-warn-soft);
+  color: var(--adm-warn);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding-bottom: .35em;
+}
+
+/* Le note sotto ai passi possono essere due righe: il conto delle metà
+   della quota sta sotto alla cifra, non accodato. */
+.aa-passo-nota {
+  display: block;
+  margin-top: .15rem;
+}
+
+/* ---------- Appuntamenti: il prossimo in evidenza ---------- */
+
+.aa-prossimo {
+  position: relative;
+  display: grid;
+  gap: .35rem;
+  margin-bottom: .85rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: var(--adm-r-l);
+  background:
+    radial-gradient(70% 120% at 100% 0%, rgba(255, 102, 0, .22), transparent 70%),
+    linear-gradient(160deg, var(--adm-navy) 0%, var(--adm-navy-deep) 100%);
+  color: #fff;
+  box-shadow: var(--adm-shadow);
+}
+
+.aa-prossimo-occhiello {
+  color: var(--adm-arancio-chiaro);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.aa-prossimo-quando {
+  font-size: clamp(1.2rem, 3.6vw, 1.5rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+.aa-prossimo-quando::first-letter { text-transform: uppercase; }
+
+.aa-prossimo-titolo { font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+
+.aa-prossimo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem .9rem;
+  color: rgba(232, 238, 252, .88);
+  font-size: .88rem;
+}
+.aa-prossimo-meta > * { min-width: 0; overflow-wrap: anywhere; }
+.aa-prossimo-meta a { color: #fff; }
+.aa-prossimo-meta .adm-sport-tag {
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+}
+
+/* ---------- Pagine: pastiglia di stato accanto a un titolo ---------- */
+
+.aa-stato {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-left: auto;
+  padding: .2rem .6rem;
+  border-radius: var(--adm-r-pill);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.aa-stato.is-ok { background: var(--adm-ok-soft); color: var(--adm-ok); }
+.aa-stato.is-manca { background: var(--adm-warn-soft); color: var(--adm-warn); }
+.aa-stato.is-attesa { background: var(--adm-blue-soft); color: var(--adm-blue-dark); }
+.aa-stato.is-allarme { background: var(--adm-danger-soft); color: var(--adm-danger); }
+
+/* ---------- Iscrizione: cosa manca, con un collegamento per voce ---------- */
+
+.aa-manca {
+  margin: 0 0 1.15rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--adm-warn-line);
+  border-radius: var(--adm-r-l);
+  background: var(--adm-warn-soft);
+}
+
+.aa-manca-titolo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 .65rem;
+  color: var(--adm-warn);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.aa-manca-voci {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ogni voce porta dove la si compila: sul telefono il modulo è lungo, e
+   "manca il codice fiscale" senza un modo di arrivarci vuol dire cercarlo
+   scorrendo. */
+.aa-manca-voce {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 40px;
+  padding: .35rem .85rem;
+  border: 1px solid var(--adm-warn-line);
+  border-radius: var(--adm-r-pill);
+  background: var(--adm-surface);
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.aa-manca-voce:hover { border-color: var(--adm-warn); color: var(--adm-ink); }
+.aa-manca-voce svg { color: var(--adm-arancio-testo); font-size: .8rem; }
+
+.aa-legenda {
+  margin: 0 0 1rem;
+  color: var(--adm-muted);
+  font-size: .86rem;
+}
+.aa-legenda .adm-obbligatorio { margin: 0 .15rem 0 0; }
+
+/* ---------- Iscrizione: le sezioni numerate ---------- */
+
+/* Il titolo di una sezione del modulo, col suo numero: "1 Chi sei",
+   "2 Dove abiti". Il numero dice quante sono e a che punto si è. */
+/* Su una riga sola: andando a capo, un titolo lungo lasciava il numero
+   da solo sopra al testo. Il testo va a capo dentro al suo spazio. */
+.aa-sezione-titolo {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: .6rem;
+}
+
+.aa-numero {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--adm-navy);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 800;
+}
+.aa-numero.is-fatto { background: var(--adm-ok); }
+
+.aa-sezione-sotto {
+  margin: -.35rem 0 .9rem;
+  color: var(--adm-muted);
+  font-size: .88rem;
+  line-height: 1.45;
+}
+
+/* Il riquadro raggiunto da un collegamento ("vai al certificato") si
+   accende un attimo: sul telefono si arriva a metà pagina, e bisogna
+   capire subito dove guardare. */
+.aa-evidenzia {
+  animation: aa-lampo 1.6s ease-out 1;
+}
+@keyframes aa-lampo {
+  0%, 30% { box-shadow: 0 0 0 4px rgba(255, 102, 0, .45), var(--adm-shadow); }
+  100% { box-shadow: var(--adm-shadow); }
+}
+
+/* Chi arriva con un'ancora non deve finire sotto alla testata ferma */
+.aa-pagina [id] { scroll-margin-top: calc(var(--adm-testata-h) + 1rem); }
+
+/* Nel riquadro del certificato, dopo il pulsante del file vengono le
+   caselle: un po' d'aria perché non sembrino la nota del pulsante. */
+.aa-pagina .adm-cert-file { margin-bottom: 1rem; }
+
+/* ---------- La barra "Salva" ---------- */
+
+.aa-barra-nota {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-right: auto;
+  color: var(--adm-warn);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  /* Sul telefono la barra ha spazio solo per i pulsanti */
+  .aa-barra-nota { display: none; }
+}
+
+/* ---------- Quota: le due scelte ---------- */
+
+.aa-scelte-quota {
+  display: grid;
+  gap: .5rem;
+}
+
+.aa-scelte-quota .adm-btn {
+  justify-content: center;
+  min-height: var(--adm-tocco);
+  font-size: 1rem;
+}
+
+.aa-scelte-quota .aa-cifra-btn {
+  font-variant-numeric: tabular-nums;
+  opacity: .92;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aa-evidenzia { animation: none; }
+}
+
+/* Un titolo che serve a chi legge con la sintesi vocale, ma che a video
+   ripeterebbe quello scritto subito sopra */
+.aa-nascosto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* L'occhiello sopra al titolo di una pagina ("La tua squadra"), su una
+   riga sua dentro alla testata */
+.aa-pagina .adm-head-left > .adm-occhiello { flex-basis: 100%; margin-bottom: 0; }

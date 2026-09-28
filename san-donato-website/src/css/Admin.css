@@ -1,35 +1,182 @@
 /* =========================================
    AREA RISERVATA (scope: adm-)
-   Volutamente diversa dal sito pubblico: chi ci entra
-   deve capire a colpo d'occhio di essere "dietro le quinte".
+
+   Lo stesso vestito del sito pubblico — il blu della società, l'arancio,
+   i titoli grandi e pieni, le schede tonde — ma cucito per chi ci lavora
+   tutti i giorni: niente che si muova per farsi guardare, contrasti alti,
+   pulsanti grandi abbastanza per un pollice. La segreteria ci passa le
+   serate, i genitori ci entrano una volta al mese: devono capire tutto
+   al primo sguardo, e nessuno dei due deve aspettare un'animazione.
+
+   ─────────────────────────────────────────
+   GUIDA RAPIDA (per chi disegna una pagina)
+   ─────────────────────────────────────────
+
+   Colori, misure e ombre sono variabili: si usano quelle, mai un
+   esadecimale scritto a mano, così un ritocco alla tavolozza arriva
+   ovunque in un colpo solo.
+
+   Colori
+     --adm-navy / --adm-navy-deep / --adm-notte   il blu della società, dal
+                                                  più chiaro al più scuro
+     --adm-arancio        l'arancio pieno: fondi, segni, pillole
+     --adm-arancio-testo  l'arancio per le SCRITTE su bianco (quello
+                          pieno non ha contrasto a sufficienza)
+     --adm-arancio-soft   fondo arancio tenue
+     --adm-blue / -dark / -soft   azioni, collegamenti, selezioni
+     --adm-ink / --adm-ink-2 / --adm-muted   testo: principale, secondario,
+                                             note (tutti leggibili su bianco)
+     --adm-bg / --adm-surface / --adm-surface-2   fondo pagina, schede,
+                                                  zone rientrate
+     --adm-line / --adm-line-soft / --adm-line-strong   bordi
+     --adm-ok / --adm-warn / --adm-danger (+ -soft)   gli stati
+
+   Misure
+     --adm-r-s 10px · --adm-r-m 14px · --adm-r-l 20px · --adm-r-xl 28px
+     --adm-r-pill (pillole) · --adm-radius = le schede comuni (16px)
+     --adm-sp-1 … --adm-sp-7   spaziature: .25 .5 .75 1 1.5 2 3 rem
+     --adm-fs-xs … --adm-fs-titolo   corpi del testo
+     --adm-tocco   altezza minima di ciò che si tocca (44px, 48 sul telefono)
+     --adm-shadow-s / --adm-shadow / --adm-shadow-alta   ombre
+     --adm-testata-h   quanto è alta la barra in alto che resta ferma
+                       (per "position: sticky" sotto di lei)
+
+   Pezzi già pronti (oltre a pulsanti, campi, avvisi, schede e pastiglie
+   che le pagine usano da sempre):
+     .adm-occhiello            parolina arancio sopra a un titolo
+     .adm-sezione              blocco con titolo e sottotitolo
+       .adm-sezione-testa / -titolo / -sotto / -azioni
+     .adm-azioni-rapide        griglia di tessere grandi
+     .adm-tessera-azione       tessera cliccabile: icona, titolo, conteggio,
+                               una riga di spiegazione (toni .is-attenzione,
+                               .is-allarme, .is-ok)
+       .adm-tessera-icona / -titolo / -testo / -freccia
+     .adm-badge-conta          il numerino tondo (toni .is-allarme,
+                               .is-attenzione, .is-ok, .is-neutro)
+     .adm-passi                elenco numerato di passi (<ol>), con
+                               .is-fatto e .is-adesso sui singoli <li>
+     .adm-vuoto-amico          "qui non c'è ancora niente" con un invito
+                               a fare la prima cosa
+     .adm-barra-azioni-fissa   i pulsanti di un modulo attaccati in basso
+                               sul telefono (Salva sempre a portata)
+     .adm-benvenuto            la fascia blu in cima a una home
+     .adm-sagoma               un rettangolo grigio che respira, per le
+                               attese (varianti -riga, -titolo, -scheda)
+   Gli esempi di markup stanno accanto a ciascuna regola, in fondo al file.
    ========================================= */
 
 .adm-shell,
 .alg-page,
 .adm-boot {
-  --adm-bg: #f1f4f9;
-  --adm-surface: #ffffff;
-  --adm-line: #dde3ec;
-  --adm-line-soft: #eef1f6;
-  --adm-ink: #16202e;
-  --adm-muted: #5b6a80;
-  --adm-blue: #0b4fd1;
-  --adm-blue-dark: #0940a8;
-  --adm-blue-soft: #e7eefc;
-  --adm-danger: #b42318;
-  --adm-danger-soft: #fdecea;
-  --adm-ok: #056b45;
-  --adm-ok-soft: #e3f4ec;
-  --adm-warn: #9a5b00;
-  --adm-warn-soft: #fdf3e4;
-  --adm-radius: 12px;
-  --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
+  /* ---------- La società ---------- */
+  --adm-navy: #002b5c;
+  --adm-navy-deep: #001a38;
+  --adm-notte: #00132b;
+  --adm-arancio: #ff6600;
+  --adm-arancio-chiaro: #ff8a3d;
+  --adm-arancio-testo: #b84a00;
+  --adm-arancio-soft: #fff1e6;
+  --adm-pillola: linear-gradient(135deg, #ff7a1a, #ff4d00);
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* ---------- Fondi e testo ---------- */
+  --adm-bg: #f4f6fa;
+  --adm-surface: #ffffff;
+  --adm-surface-2: #f7f9fc;
+  --adm-line: #d9e0ea;
+  --adm-line-soft: #edf1f6;
+  --adm-line-strong: #b4c0d0;
+  --adm-ink: #0b1526;
+  --adm-ink-2: #33415a;
+  --adm-muted: #56647b;
+
+  /* Azioni e collegamenti. "blue" per ragioni storiche: tutte le pagine lo
+     leggono con questo nome. È un blu più acceso del marchio, perché un
+     collegamento color inchiostro non si distinguerebbe dal testo. */
+  --adm-blue: #0b4ea2;
+  --adm-blue-dark: #002b5c;
+  --adm-blue-soft: #e8f0fb;
+  --adm-blue-line: #bcd0ec;
+
+  /* ---------- Stati ---------- */
+  --adm-danger: #b91c1c;
+  --adm-danger-soft: #fdeeee;
+  --adm-danger-line: #f3c3c0;
+  --adm-ok: #047857;
+  --adm-ok-soft: #e7f6ef;
+  --adm-ok-line: #b5e0cc;
+  --adm-warn: #9a5300;
+  --adm-warn-soft: #fff4e5;
+  --adm-warn-line: #f5d6a8;
+
+  /* ---------- Forme ---------- */
+  --adm-r-s: 10px;
+  --adm-r-m: 14px;
+  --adm-r-l: 20px;
+  --adm-r-xl: 28px;
+  --adm-r-pill: 999px;
+  --adm-radius: 16px;
+
+  --adm-shadow-s: 0 1px 2px rgba(11, 21, 38, .05);
+  --adm-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -22px rgba(0, 26, 56, .35);
+  --adm-shadow-alta: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -28px rgba(0, 26, 56, .5);
+  --adm-anello: 0 0 0 4px rgba(11, 78, 162, .16);
+
+  /* ---------- Spazi e corpi ---------- */
+  --adm-sp-1: .25rem;
+  --adm-sp-2: .5rem;
+  --adm-sp-3: .75rem;
+  --adm-sp-4: 1rem;
+  --adm-sp-5: 1.5rem;
+  --adm-sp-6: 2rem;
+  --adm-sp-7: 3rem;
+
+  --adm-fs-xs: .75rem;
+  --adm-fs-s: .85rem;
+  --adm-fs-m: .95rem;
+  --adm-fs-l: 1.1rem;
+  --adm-fs-xl: 1.4rem;
+  --adm-fs-titolo: clamp(1.65rem, 3.2vw, 2.25rem);
+
+  --adm-tocco: 44px;
+  --adm-curva: cubic-bezier(.16, 1, .3, 1);
+  --adm-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+
+  /* La prima riga dell'intestazione (marchio, profilo), che scorre via, e
+     la riga delle sezioni, che resta ferma in alto (vedi .adm-topbar).
+     --adm-testata-h è quanto resta fermo: ci si appoggia chi è "sticky". */
+  --adm-riga-alta-h: 64px;
+  --adm-testata-h: 56px;
+
+  font-family: var(--adm-font);
   color: var(--adm-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- Guscio ---------- */
+@media (max-width: 760px) {
+  .adm-shell,
+  .alg-page,
+  .adm-boot {
+    --adm-tocco: 48px;
+    --adm-riga-alta-h: 58px;
+    /* Sul telefono le sezioni stanno nella barra in basso, e in alto non
+       resta fermo niente */
+    --adm-testata-h: 0px;
+  }
+}
+
+/* Con la colonna a sinistra resta ferma la riga del marchio; sotto i 1100
+   pixel la colonna diventa la barra in basso, e in alto non resta niente */
+@media (min-width: 1100px) {
+  .adm-shell.is-laterale { --adm-testata-h: var(--adm-riga-alta-h); }
+}
+@media (max-width: 1099px) {
+  .adm-shell.is-laterale { --adm-testata-h: 0px; }
+}
+
+/* =========================================
+   Guscio: intestazione blu, navigazione, colonna delle pagine
+   Vedi AdminLayout.jsx e AreaAtletaLayout.jsx.
+   ========================================= */
 
 .adm-shell {
   min-height: 100vh;
@@ -37,22 +184,35 @@
   background: var(--adm-bg);
 }
 
+/*
+ * L'intestazione: due righe dello stesso blu del sito pubblico.
+ *
+ * La prima (marchio, stagione, profilo, uscita) se ne va scorrendo; la
+ * seconda, con le sezioni, resta attaccata in alto — è quella che serve
+ * mentre si lavora. È lo stesso gesto dell'intestazione pubblica, dove la
+ * barra sottile scorre via e il menu resta: il "top" negativo vale quanto
+ * la prima riga.
+ *
+ * Niente backdrop-filter qui: creerebbe un contenitore per gli elementi
+ * "fixed" al suo interno, e il menu laterale (sotto) ne ha bisogno.
+ */
 .adm-topbar {
   position: sticky;
-  top: 0;
+  top: calc(-1 * var(--adm-riga-alta-h, 64px));
   z-index: 50;
-  background: var(--adm-surface);
-  border-bottom: 1px solid var(--adm-line);
+  background: var(--adm-navy);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06), 0 16px 32px -24px rgba(0, 10, 30, .7);
 }
 
-/* Prima riga: identità a sinistra, i tre pulsanti contro il bordo destro.
+/* Prima riga: identità a sinistra, i pulsanti contro il bordo destro.
    Non va MAI a capo — se lo spazio manca si stringono le etichette, non si
    sposta la riga: è il punto fisso a cui si torna da qualunque schermata. */
 .adm-topbar-alta {
-  /* Allineata alla riga delle sezioni, che è più larga delle pagine */
   max-width: 1520px;
+  height: var(--adm-riga-alta-h, 64px);
   margin: 0 auto;
-  padding: 0.55rem 1.25rem;
+  padding: 0 clamp(1rem, 2.5vw, 1.75rem);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,108 +220,331 @@
   flex-wrap: nowrap;
 }
 
-/* Seconda riga: le sezioni. Qui possono essere quante servono, e su schermo
-   stretto si scorrono di lato invece di impilarsi in tre righe. */
+/* Seconda riga: le sezioni, pillole bianche su blu con quella aperta in
+   arancio, come nel menu del sito. */
 .adm-topbar-nav {
-  border-top: 1px solid var(--adm-line-soft);
-  background: #fbfcfe;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  background: var(--adm-navy);
 }
 
-/* Più larga del contenuto delle pagine, e senza barra di scorrimento: con
-   tredici sezioni la riga a 1180px scorreva, e una voce del menu che si
-   raggiunge solo scorrendo è una voce che non si trova. A 1520px ci stanno
-   tutte; sotto, le voci vanno a capo invece di nascondersi. */
+/* A 1520px ci stanno tutte; sotto, le voci vanno a capo invece di
+   nascondersi: una voce che si raggiunge solo scorrendo non si trova. */
 .adm-topbar-nav .adm-nav {
   max-width: 1520px;
+  min-height: var(--adm-testata-h);
   margin: 0 auto;
-  padding: 0.3rem 1.25rem;
+  padding: .45rem clamp(1rem, 2.5vw, 1.75rem);
+  align-items: center;
   flex-wrap: wrap;
 }
 
+/* ---------- Il marchio ---------- */
+
 .adm-brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  color: inherit;
-  text-decoration: none;
-  border-radius: 9px;
-  padding: 0.2rem 0.3rem;
-  margin-left: -0.3rem;
-}
-.adm-brand:hover { background: var(--adm-line-soft); color: inherit; }
-
-.adm-brand-mark {
-  background: var(--adm-blue);
+  gap: .7rem;
+  min-width: 0;
+  padding: .25rem .4rem .25rem .25rem;
+  margin-left: -.25rem;
+  border-radius: var(--adm-r-m);
   color: #fff;
-  font-weight: 800;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  padding: 0.3rem 0.5rem;
-  border-radius: 7px;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.adm-brand:hover { color: #fff; }
+.adm-brand:focus-visible { outline: 2px solid var(--adm-arancio); outline-offset: 2px; }
+
+/*
+ * Il logo in una tessera bianca, come nell'intestazione pubblica (Hero.css):
+ * il file ha il fondo bianco, e dentro a una tessera arrotondata il bianco
+ * è voluto invece di sembrare un rettangolo appoggiato sul blu.
+ */
+.adm-brand-mark {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 10px 24px -10px rgba(255, 102, 0, .55);
+  color: var(--adm-navy);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+.adm-brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Il disegno occupa i tre quarti del file: ingrandito, lo stemma si
+     legge anche a 40 pixel (lo stesso ritocco di Hero.css) */
+  scale: 1.22;
 }
 
-.adm-brand-text { font-weight: 700; font-size: 0.95rem; }
+.adm-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  white-space: nowrap;
+}
+.adm-brand-sopra {
+  margin-bottom: .26rem;
+  color: var(--adm-arancio-chiaro);
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.adm-brand-sotto {
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
 
-.adm-nav { display: flex; gap: 0.25rem; }
+/* ---------- Le voci ---------- */
+
+.adm-nav { display: flex; gap: .2rem; }
 .adm-nav-link { white-space: nowrap; flex-shrink: 0; }
 
 .adm-nav-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.5rem 0.85rem;
-  border-radius: 9px;
-  font-size: 0.9rem;
+  gap: .5rem;
+  min-height: 40px;
+  padding: .5rem .9rem;
+  border-radius: var(--adm-r-pill);
+  color: rgba(255, 255, 255, .78);
+  font-size: .9rem;
   font-weight: 600;
-  color: var(--adm-muted);
+  letter-spacing: -.005em;
   text-decoration: none;
+  transition: color .2s ease, background-color .2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.adm-nav-link:hover { background: var(--adm-line-soft); color: var(--adm-ink); }
-.adm-nav-link.is-active { background: var(--adm-blue-soft); color: var(--adm-blue); }
+.adm-nav-link svg { flex-shrink: 0; font-size: .95em; opacity: .85; }
+.adm-nav-link:hover { color: #fff; background: rgba(255, 255, 255, .09); }
+.adm-nav-link:focus-visible { outline: 2px solid var(--adm-arancio); outline-offset: 2px; }
 
-.adm-user { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+/* La sezione aperta: la pillola arancione del menu del sito */
+.adm-nav-link.is-active,
+.adm-nav-link.is-active:hover {
+  color: #fff;
+  background:
+    radial-gradient(120% 140% at 30% 0%, rgba(255, 255, 255, .3), transparent 55%),
+    var(--adm-pillola);
+  box-shadow: 0 10px 22px -12px rgba(255, 102, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.adm-nav-link.is-active svg { opacity: 1; }
+
+/* Il numerino di una voce (es. richieste da decidere), se una pagina lo
+   mette dentro alla voce. */
+.adm-nav-link .adm-badge-conta { margin-left: .1rem; }
+
+/* ---------- Le sezioni divise in gruppi (amministratore) ----------
+
+   Chi vede quattordici sezioni le trova divise per argomento: sul computer
+   largo in una colonna a sinistra, con il nome del gruppo sopra; nella riga
+   in alto (schermi medi) come gruppi separati da una lineetta. Chi ne vede
+   poche non ha gruppi: le voci stanno in fila e basta. */
+
+.adm-nav-gruppi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .15rem;
+}
+
+.adm-nav-gruppo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .15rem;
+}
+
+/* Nella riga il nome del gruppo non c'è: ci sarebbero cinque parole in più
+   da leggere prima delle voci. Ne resta una lineetta di separazione. */
+.adm-nav-gruppo-titolo { display: none; }
+.adm-nav-gruppo + .adm-nav-gruppo::before {
+  content: "";
+  width: 1px;
+  height: 22px;
+  margin: 0 .35rem;
+  background: rgba(255, 255, 255, .16);
+}
+
+/*
+ * La colonna a sinistra, sul computer largo, per chi ha molte sezioni.
+ *
+ * Quattordici voci in una riga andavano a capo su due righe mescolate, e
+ * "Stagioni" finiva sotto a "Notizie" per puro caso di larghezza. In
+ * colonna, divise per argomento, ciascuna ha il suo posto fisso: si impara
+ * dove sta e la si ritrova senza leggere.
+ */
+@media (min-width: 1100px) {
+  .adm-shell.is-laterale {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .adm-shell.is-laterale > .adm-topbar {
+    grid-column: 1 / -1;
+    top: 0;
+  }
+
+  .adm-shell.is-laterale .adm-topbar-alta { max-width: none; }
+
+  /* La colonna: fuori dall'intestazione nel disegno, dentro nel codice.
+     "fixed" sotto alla riga del marchio, che qui resta ferma. */
+  .adm-shell.is-laterale .adm-topbar-nav {
+    position: fixed;
+    top: var(--adm-riga-alta-h, 64px);
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    background: linear-gradient(180deg, var(--adm-navy) 0%, var(--adm-navy-deep) 100%);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .2) transparent;
+  }
+
+  .adm-shell.is-laterale .adm-topbar-nav .adm-nav {
+    max-width: none;
+    min-height: 0;
+    padding: .9rem .85rem 1.5rem;
+  }
+
+  .adm-shell.is-laterale .adm-nav-gruppi {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: .85rem;
+    width: 100%;
+  }
+
+  .adm-shell.is-laterale .adm-nav-gruppo {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: .15rem;
+  }
+  .adm-shell.is-laterale .adm-nav-gruppo + .adm-nav-gruppo::before { display: none; }
+
+  .adm-shell.is-laterale .adm-nav-gruppo-titolo {
+    display: block;
+    margin: 0 0 .3rem;
+    padding: 0 .85rem;
+    color: rgba(255, 255, 255, .55);
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .adm-shell.is-laterale .adm-nav-link {
+    min-height: 38px;
+    padding: .45rem .85rem;
+    border-radius: var(--adm-r-m);
+    font-size: .92rem;
+  }
+  .adm-shell.is-laterale .adm-nav-link svg { width: 1.1rem; }
+
+  .adm-shell.is-laterale > .adm-main {
+    grid-column: 2;
+    width: 100%;
+  }
+}
+
+/* Schermi larghi ma bassi (un portatile da 768 righe): la colonna si
+   stringe perché ci stiano tutte le voci senza scorrerla. Una voce che
+   sta sotto al bordo, in una colonna che scorre da sola, non la si trova. */
+@media (min-width: 1100px) and (max-height: 860px) {
+  .adm-shell.is-laterale .adm-topbar-nav .adm-nav { padding: .6rem .75rem 1rem; }
+  .adm-shell.is-laterale .adm-nav-gruppi { gap: .55rem; }
+  .adm-shell.is-laterale .adm-nav-gruppo { gap: 0; }
+  .adm-shell.is-laterale .adm-nav-link { min-height: 32px; padding: .3rem .8rem; font-size: .88rem; }
+  .adm-shell.is-laterale .adm-nav-gruppo-titolo { margin-bottom: .15rem; font-size: .62rem; }
+}
+
+/* Ancora più bassi: i nomi dei gruppi diventano una lineetta */
+@media (min-width: 1100px) and (max-height: 700px) {
+  .adm-shell.is-laterale .adm-nav-gruppo-titolo { display: none; }
+  .adm-shell.is-laterale .adm-nav-gruppo + .adm-nav-gruppo {
+    padding-top: .5rem;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+  }
+}
+
+/* ---------- I pulsanti della prima riga ---------- */
+
+.adm-user { display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
 
 .adm-user-name {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: .4rem;
+  font-size: .85rem;
   font-weight: 600;
   color: var(--adm-muted);
 }
 
 .adm-role-tag {
+  display: inline-block;
   background: var(--adm-blue-soft);
-  color: var(--adm-blue);
-  font-size: 0.65rem;
+  color: var(--adm-blue-dark);
+  font-size: .66rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.1rem 0.35rem;
-  border-radius: 5px;
+  letter-spacing: .05em;
+  padding: .12rem .45rem;
+  border-radius: var(--adm-r-pill);
 }
 
+/* Sul blu dell'intestazione: vetro chiaro, testo bianco. Altrove (se una
+   pagina lo usa) resta un pulsante leggero con il bordo. */
 .adm-ghost-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: .45rem;
+  min-height: 40px;
+  padding: .4rem .85rem;
   background: transparent;
   border: 1px solid var(--adm-line);
-  border-radius: 9px;
-  padding: 0.45rem 0.7rem;
+  border-radius: var(--adm-r-pill);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: .85rem;
   font-weight: 600;
-  color: var(--adm-muted);
+  color: var(--adm-ink-2);
   cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
 }
 .adm-ghost-btn:hover { background: var(--adm-line-soft); color: var(--adm-ink); }
+.adm-ghost-btn:focus-visible { outline: 2px solid var(--adm-arancio); outline-offset: 2px; }
+
+.adm-topbar .adm-ghost-btn {
+  border-color: rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .06);
+  color: rgba(255, 255, 255, .9);
+}
+.adm-topbar .adm-ghost-btn:hover {
+  border-color: rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .13);
+  color: #fff;
+}
 
 .adm-main {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 1.75rem 1.25rem 4rem;
+  padding: clamp(1.25rem, 3vw, 2.25rem) clamp(1rem, 3vw, 1.75rem) 4rem;
 
   /*
    * Un'altezza minima perché il contenuto non si accartocci mentre una
@@ -176,38 +559,63 @@
   min-height: 78svh;
 }
 
-/* ---------- Bottoni ---------- */
+/* ---------- Bottoni ----------
+
+   Pillole come quelle del sito, alte quanto un dito. Il blu pieno per
+   l'azione principale (su bianco l'arancio non ha il contrasto per una
+   scritta bianca), il bianco con il bordo per le altre. */
 
 .adm-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: .5rem;
+  min-height: var(--adm-tocco);
   border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 0.6rem 1rem;
+  border-radius: var(--adm-r-pill);
+  padding: .55rem 1.15rem;
   font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.005em;
   cursor: pointer;
   text-decoration: none;
-  transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
-.adm-btn:disabled { opacity: .55; cursor: not-allowed; }
+.adm-btn svg { flex-shrink: 0; }
+.adm-btn:disabled { opacity: .5; cursor: not-allowed; }
+.adm-btn:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
 
-.adm-btn-primary { background: var(--adm-blue); color: #fff; }
-.adm-btn-primary:hover:not(:disabled) { background: var(--adm-blue-dark); }
+.adm-btn-primary {
+  background: var(--adm-navy);
+  color: #fff;
+  box-shadow: 0 8px 18px -12px rgba(0, 43, 92, .9);
+}
+.adm-btn-primary:hover:not(:disabled) { background: #0a3d7a; color: #fff; }
 
-.adm-btn-secondary { background: var(--adm-blue-soft); color: var(--adm-blue); }
-.adm-btn-secondary:hover:not(:disabled) { background: #d9e5fb; }
+.adm-btn-secondary { background: var(--adm-blue-soft); color: var(--adm-blue-dark); }
+.adm-btn-secondary:hover:not(:disabled) { background: #d9e6f7; }
 
 .adm-btn-ghost { background: var(--adm-surface); border-color: var(--adm-line); color: var(--adm-ink); }
-.adm-btn-ghost:hover:not(:disabled) { background: var(--adm-line-soft); }
+.adm-btn-ghost:hover:not(:disabled) { background: var(--adm-surface-2); border-color: var(--adm-line-strong); }
 
 /* Per le conferme che cancellano qualcosa: il colore è l'unico segnale che
    distingue "Elimina" da "Salva" nel mezzo secondo prima del clic. */
 .adm-btn-pericolo { background: var(--adm-danger); color: #fff; }
-.adm-btn-pericolo:hover:not(:disabled) { background: #961c13; }
+.adm-btn-pericolo:hover:not(:disabled) { background: #991b1b; color: #fff; }
+
+/* L'invito più importante della schermata, quando ce n'è uno solo (es.
+   "Iscriviti" nella home dell'atleta): l'arancio del sito. Testo in
+   grassetto e grande, perché bianco su arancio ha poco contrasto. */
+.adm-btn-arancio {
+  background: var(--adm-pillola);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 10px 22px -12px rgba(255, 102, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.adm-btn-arancio:hover:not(:disabled) { color: #fff; filter: brightness(1.05); }
 
 .adm-btn-block { width: 100%; }
 
@@ -215,62 +623,77 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--adm-line);
-  border-radius: 9px;
+  border-radius: 12px;
   background: var(--adm-surface);
-  color: var(--adm-muted);
+  color: var(--adm-ink-2);
   cursor: pointer;
   text-decoration: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
 }
-.adm-icon-btn:hover:not(:disabled) { background: var(--adm-line-soft); color: var(--adm-ink); }
-.adm-icon-btn:disabled { opacity: .5; cursor: not-allowed; }
-.adm-icon-danger:hover:not(:disabled) { background: var(--adm-danger-soft); color: var(--adm-danger); border-color: #f3c9c5; }
+.adm-icon-btn:hover:not(:disabled) { background: var(--adm-surface-2); border-color: var(--adm-line-strong); color: var(--adm-ink); }
+.adm-icon-btn:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.adm-icon-btn:disabled { opacity: .45; cursor: not-allowed; }
+.adm-icon-danger:hover:not(:disabled) { background: var(--adm-danger-soft); color: var(--adm-danger); border-color: var(--adm-danger-line); }
 
 /* ---------- Campi ---------- */
 
-.adm-field { display: block; margin-bottom: 1.1rem; }
+.adm-field { display: block; margin-bottom: 1.15rem; }
 
+/* In chiaro e non in maiuscoletto: "Data di nascita" si legge meglio di
+   "DATA DI NASCITA", soprattutto a chi non è abituato ai moduli. */
 .adm-label {
   display: block;
-  font-size: 0.8rem;
+  margin-bottom: .4rem;
+  font-size: .86rem;
   font-weight: 700;
-  color: var(--adm-muted);
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--adm-ink-2);
+  letter-spacing: -.005em;
 }
 
+/* Le variabili nuove con il valore di riserva: tendina e calendario si
+   usano anche nella pagina pubblica delle notizie, che porta solo la
+   tavolozza di prima (NewsPage.css). */
 .adm-input,
 .adm-input-wrap input,
 .adm-search input {
   width: 100%;
-  border: 1px solid var(--adm-line);
-  border-radius: 10px;
-  padding: 0.65rem 0.8rem;
+  min-height: var(--adm-tocco, 44px);
+  border: 1px solid var(--adm-line-strong, #b4c0d0);
+  border-radius: 12px;
+  padding: .6rem .85rem;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: .95rem;
   color: var(--adm-ink);
   background: var(--adm-surface);
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
+.adm-input::placeholder,
+.adm-input-wrap input::placeholder,
+.adm-search input::placeholder { color: #7a879b; }
+.adm-input:hover:not(:disabled):not(:focus),
+.adm-search input:hover:not(:focus) { border-color: #93a1b5; }
 .adm-input:focus,
 .adm-input-wrap input:focus,
 .adm-search input:focus {
   outline: none;
   border-color: var(--adm-blue);
-  box-shadow: 0 0 0 3px var(--adm-blue-soft);
+  box-shadow: var(--adm-anello, 0 0 0 3px var(--adm-blue-soft));
 }
-.adm-input:disabled { background: var(--adm-line-soft); }
+.adm-input:disabled { background: var(--adm-line-soft); color: var(--adm-muted); }
+textarea.adm-input { min-height: 6rem; }
 
-.adm-input-title { font-size: 1.15rem; font-weight: 600; }
+.adm-input-title { font-size: 1.15rem; font-weight: 700; }
 .adm-textarea { resize: vertical; line-height: 1.5; }
 
 .adm-input-wrap { position: relative; display: block; }
-.adm-input-wrap input { padding-left: 2.4rem; }
+.adm-input-wrap input { padding-left: 2.5rem; }
 .adm-input-icon {
   position: absolute;
-  left: 0.85rem;
+  left: .9rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--adm-muted);
@@ -280,35 +703,36 @@
 .adm-check {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 0.9rem;
-  color: var(--adm-muted);
+  gap: .55rem;
+  font-size: .9rem;
+  color: var(--adm-ink-2);
   margin-bottom: 1.1rem;
   cursor: pointer;
 }
 .adm-check input { width: 16px; height: 16px; accent-color: var(--adm-blue); }
 
-.adm-hint { font-size: 0.78rem; color: var(--adm-muted); margin-top: 0.5rem; line-height: 1.45; }
+.adm-hint { font-size: .82rem; color: var(--adm-muted); margin-top: .45rem; line-height: 1.5; }
 
 /* ---------- Avvisi ---------- */
 
 .adm-alert {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  border-radius: 10px;
-  padding: 0.75rem 0.9rem;
-  font-size: 0.9rem;
-  margin-bottom: 1.1rem;
+  gap: .65rem;
+  border-radius: var(--adm-r-m);
+  padding: .85rem 1rem;
+  font-size: .92rem;
+  line-height: 1.45;
+  margin-bottom: 1.15rem;
   border: 1px solid transparent;
 }
-.adm-alert svg { flex-shrink: 0; }
-.adm-alert-error { background: var(--adm-danger-soft); color: var(--adm-danger); border-color: #f3c9c5; }
-.adm-alert-success { background: var(--adm-ok-soft); color: var(--adm-ok); border-color: #bfe3d3; }
-.adm-alert-info { background: var(--adm-blue-soft); color: var(--adm-blue-dark); border-color: #c9dcfa; }
+.adm-alert svg { flex-shrink: 0; font-size: 1.05em; }
+.adm-alert-error { background: var(--adm-danger-soft); color: var(--adm-danger); border-color: var(--adm-danger-line); }
+.adm-alert-success { background: var(--adm-ok-soft); color: var(--adm-ok); border-color: var(--adm-ok-line); }
+.adm-alert-info { background: var(--adm-blue-soft); color: var(--adm-blue-dark); border-color: var(--adm-blue-line); }
 /* Giallo per quello che manca: non è un errore di chi legge, è una cosa
    da sistemare. Il rosso lo si terrebbe d'occhio una volta sola. */
-.adm-alert-warn { background: var(--adm-warn-soft); color: var(--adm-warn); border-color: #f0dcbc; }
+.adm-alert-warn { background: var(--adm-warn-soft); color: var(--adm-warn); border-color: var(--adm-warn-line); }
 .adm-alert .adm-btn { margin-left: auto; }
 
 /**
@@ -325,9 +749,10 @@
 .adm-inline-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: .35rem;
   font-weight: 700;
   text-decoration: underline;
+  text-underline-offset: 2px;
   color: inherit;
 }
 
@@ -358,8 +783,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.9rem;
+  gap: .9rem;
   color: var(--adm-muted);
+  font-size: .92rem;
   background: var(--adm-bg);
 }
 
@@ -368,7 +794,7 @@
  * contenuto, non tutto lo schermo. Attorno c'è già il pannello, con la sua
  * barra in cima.
  */
-.adm-loading { min-height: 55vh; }
+.adm-loading { min-height: 55vh; background: transparent; }
 
 /*
  * L'attesa PRIMA di una pagina — accesso, registrazione, scelta della
@@ -394,7 +820,8 @@
   width: 34px;
   height: 34px;
   border: 3px solid var(--adm-line);
-  border-top-color: var(--adm-blue);
+  border-top-color: var(--adm-arancio);
+  border-right-color: var(--adm-navy);
   border-radius: 50%;
   animation: adm-spin .8s linear infinite;
 }
@@ -402,6 +829,11 @@
 
 /* =========================================
    LOGIN — pannello identità + modulo di accesso
+   (anche registrazione, recupero e scelta della password)
+
+   L'unico posto dell'area riservata con un po' di spettacolo: è la porta,
+   la si vede per pochi secondi, e deve dire "sei dalla Polisportiva" con
+   gli stessi colori della home. Dentro, il lavoro è calmo.
    ========================================= */
 
 .alg-page {
@@ -426,7 +858,7 @@
 
 .alg-page:not(:has(.alg-brand)) .alg-form-side {
   width: 100%;
-  max-width: 30rem;
+  max-width: 32rem;
 }
 
 
@@ -440,76 +872,104 @@
   justify-content: center;
   padding: clamp(2rem, 5vw, 4rem);
   color: #fff;
-  /* Blu del calcio che degrada verso il blu notte della società */
-  background: linear-gradient(150deg, #0a52c9 0%, #06326f 55%, #041c3f 100%);
+  /* Lo stesso blu della fascia "In campo" della home */
+  background:
+    radial-gradient(70% 90% at 100% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, var(--adm-navy) 0%, var(--adm-navy-deep) 70%, var(--adm-notte) 100%);
   isolation: isolate;
 }
 
-/* Aloni sfocati: danno profondità senza immagini da scaricare */
-.alg-brand-glow { position: absolute; inset: 0; z-index: -1; }
+/* Il reticolo sottile della home, che sfuma verso il centro */
+.alg-brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 75% 70% at 70% 25%, #000 15%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 70% 25%, #000 15%, transparent 75%);
+}
+
+/* Aloni sfocati — l'aurora del sito: profondità senza immagini da scaricare */
+.alg-brand-glow { position: absolute; inset: 0; z-index: -2; }
 
 .alg-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.5;
+  filter: blur(80px);
+  opacity: .5;
 }
 
 .alg-orb-1 {
-  width: 42vw; height: 42vw; max-width: 420px; max-height: 420px;
-  top: -8%; left: -10%;
-  background: #ff6600;                 /* arancio di volley e basket */
-  animation: alg-drift 22s ease-in-out infinite;
+  width: 42vw; height: 42vw; max-width: 440px; max-height: 440px;
+  top: -10%; left: -12%;
+  background: var(--adm-arancio);
+  opacity: .42;
+  animation: alg-drift 24s ease-in-out infinite;
 }
 
 .alg-orb-2 {
-  width: 38vw; height: 38vw; max-width: 380px; max-height: 380px;
-  bottom: -12%; right: -8%;
-  background: #2f8bff;
-  animation: alg-drift 28s ease-in-out infinite reverse;
+  width: 38vw; height: 38vw; max-width: 400px; max-height: 400px;
+  bottom: -14%; right: -10%;
+  background: #1f6fd1;
+  animation: alg-drift 30s ease-in-out infinite reverse;
 }
 
 .alg-orb-3 {
   width: 26vw; height: 26vw; max-width: 260px; max-height: 260px;
-  top: 45%; right: 18%;
-  background: #00d4a0;
-  opacity: 0.28;
-  animation: alg-drift 34s ease-in-out infinite;
+  top: 48%; right: 22%;
+  background: #ffaa3c;
+  opacity: .22;
+  animation: alg-drift 36s ease-in-out infinite;
 }
 
 @keyframes alg-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(6%, -8%) scale(1.12); }
-  66%      { transform: translate(-5%, 6%) scale(0.94); }
+  33%      { transform: translate(6%, -8%) scale(1.1); }
+  66%      { transform: translate(-5%, 6%) scale(.95); }
 }
 
 .alg-brand-inner {
   position: relative;
   max-width: 30rem;
   text-align: center;
-  animation: alg-rise 0.7s cubic-bezier(.2, .7, .3, 1) both;
+  animation: alg-rise .7s var(--adm-curva) both;
 }
 
+/* Il logo nella tessera bianca, come nell'intestazione del sito, in grande */
 .alg-brand-logo {
-  width: clamp(165px, 21vw, 252px);
+  display: block;
+  width: clamp(120px, 13vw, 168px);
   height: auto;
-  margin: 0 auto 1.75rem;
-  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, .45));
+  aspect-ratio: 1;
+  margin: 0 auto 2rem;
+  padding: 10px;
+  object-fit: contain;
+  border-radius: 34px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .6),
+    0 30px 60px -24px rgba(255, 102, 0, .6),
+    0 20px 40px -20px rgba(0, 0, 0, .5);
 }
 
 .alg-brand-title {
-  font-size: clamp(2rem, 3.6vw, 3rem);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
+  font-size: clamp(2.4rem, 4.6vw, 3.9rem);
+  font-weight: 900;
+  line-height: .98;
+  letter-spacing: -.045em;
   text-wrap: balance;
 }
 
 .alg-brand-text {
-  font-size: 1rem;
-  line-height: 1.65;
-  color: rgba(255, 255, 255, .78);
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: rgba(232, 238, 252, .82);
   max-width: 26rem;
   margin: 0 auto;
 }
@@ -519,25 +979,27 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 2.25rem;
+  gap: .55rem;
+  margin: 2.25rem 0 0;
+  padding: 0;
 }
 
 .alg-sports li {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .12);
-  border: 1px solid rgba(255, 255, 255, .18);
-  backdrop-filter: blur(6px);
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border-radius: var(--adm-r-pill);
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .2);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .01em;
 }
 
-.alg-sports svg { font-size: 0.9rem; opacity: .9; }
+.alg-sports svg { font-size: .95rem; color: var(--adm-arancio-chiaro); }
 
 /* ---------- Lato modulo ---------- */
 
@@ -549,38 +1011,46 @@
   padding: clamp(1.5rem, 4vw, 3rem);
 }
 
+/* La scheda bianca che porta il modulo: stacca il modulo dal fondo come
+   le schede del sito staccano le notizie. */
 .alg-card {
   width: 100%;
-  max-width: 25rem;
-  animation: alg-rise 0.7s cubic-bezier(.2, .7, .3, 1) .08s both;
+  max-width: 27rem;
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  border: 1px solid rgba(0, 43, 92, .07);
+  border-radius: var(--adm-r-xl);
+  background: var(--adm-surface);
+  box-shadow: var(--adm-shadow-alta);
+  animation: alg-rise .7s var(--adm-curva) .08s both;
 }
 
 /* Ritorno al sito pubblico: allineato al bordo sinistro della scheda,
    discreto, ma un pulsante vero e non un collegamento nascosto. */
 .alg-back-row {
   width: 100%;
-  max-width: 25rem;
+  max-width: 27rem;
   margin-bottom: 1rem;
 }
 
 .alg-back {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.9rem;
+  gap: .5rem;
+  min-height: 40px;
+  padding: .45rem 1rem;
   border: 1px solid var(--adm-line);
-  border-radius: 999px;
+  border-radius: var(--adm-r-pill);
   background: var(--adm-surface);
-  color: var(--adm-muted);
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: var(--adm-ink-2);
+  font-size: .85rem;
+  font-weight: 700;
   text-decoration: none;
   transition: color .2s ease, border-color .2s ease;
 }
 
 .alg-back:hover {
-  color: var(--adm-blue);
-  border-color: var(--adm-blue);
+  color: var(--adm-navy);
+  border-color: var(--adm-navy);
 }
 
 .alg-back-arrow {
@@ -592,33 +1062,46 @@
 }
 
 .alg-back:focus-visible {
-  outline: 2px solid var(--adm-blue);
+  outline: 2px solid var(--adm-arancio);
   outline-offset: 2px;
 }
 
 .alg-mobile-logo { display: none; }
 
+/* L'occhiello del sito: trattino e lettere spaziate, in arancio */
 .alg-eyebrow {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .7rem;
+  color: var(--adm-arancio-testo);
+  font-size: .74rem;
+  font-weight: 800;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--adm-blue);
-  margin-bottom: 0.5rem;
+}
+.alg-eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
 }
 
 .alg-title {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.025em;
+  margin-bottom: .5rem;
   color: var(--adm-ink);
-  margin-bottom: 0.4rem;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.04em;
 }
 
 .alg-lead {
-  font-size: 0.92rem;
+  margin-bottom: 1.9rem;
   color: var(--adm-muted);
-  margin-bottom: 2rem;
+  font-size: .95rem;
+  line-height: 1.55;
 }
 
 .alg-form { display: grid; gap: 1rem; }
@@ -629,11 +1112,11 @@
 
 .alg-field-icon {
   position: absolute;
-  left: 1rem;
+  left: 1.05rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9aa7ba;
-  font-size: 0.9rem;
+  color: #8795aa;
+  font-size: .9rem;
   pointer-events: none;
   transition: color .18s;
   z-index: 1;
@@ -641,22 +1124,26 @@
 
 .alg-input {
   width: 100%;
+  min-height: 58px;
   border: 1.5px solid var(--adm-line);
-  border-radius: 14px;
-  background: var(--adm-surface);
-  padding: 1.5rem 1rem 0.55rem 2.9rem;
+  border-radius: 16px;
+  background: var(--adm-surface-2);
+  padding: 1.5rem 1rem .5rem 2.95rem;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--adm-ink);
-  transition: border-color .18s, box-shadow .18s;
+  transition: border-color .18s, box-shadow .18s, background-color .18s;
 }
 
-.alg-input-pw { padding-right: 3rem; }
+.alg-input-pw { padding-right: 3.2rem; }
+
+.alg-input:hover:not(:disabled):not(:focus) { border-color: var(--adm-line-strong); }
 
 .alg-input:focus {
   outline: none;
   border-color: var(--adm-blue);
-  box-shadow: 0 0 0 4px rgba(11, 79, 209, .12);
+  background: var(--adm-surface);
+  box-shadow: var(--adm-anello);
 }
 
 /* L'icona sta prima dell'input nel DOM, quindi il combinatore di fratelli
@@ -666,10 +1153,10 @@
 
 .alg-label {
   position: absolute;
-  left: 2.9rem;
+  left: 2.95rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--adm-muted);
   pointer-events: none;
   transition: top .16s ease, font-size .16s ease, color .16s ease, transform .16s ease;
@@ -678,27 +1165,27 @@
 /* :placeholder-shown distingue il campo vuoto senza bisogno di stato React */
 .alg-input:focus + .alg-label,
 .alg-input:not(:placeholder-shown) + .alg-label {
-  top: 0.55rem;
+  top: .55rem;
   transform: none;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--adm-blue);
 }
 
 .alg-reveal {
   position: absolute;
-  right: 0.5rem;
+  right: .45rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   color: var(--adm-muted);
   cursor: pointer;
@@ -706,6 +1193,7 @@
 }
 
 .alg-reveal:hover:not(:disabled) { background: var(--adm-line-soft); color: var(--adm-ink); }
+.alg-reveal:focus-visible { outline: 2px solid var(--adm-arancio); outline-offset: 1px; }
 .alg-reveal:disabled { opacity: .4; cursor: not-allowed; }
 
 /* ---------- Casella di spunta ---------- */
@@ -713,22 +1201,23 @@
 .alg-check {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.88rem;
-  color: var(--adm-muted);
+  gap: .65rem;
+  min-height: 40px;
+  font-size: .9rem;
+  color: var(--adm-ink-2);
   cursor: pointer;
   user-select: none;
 }
 
-.alg-check em { font-style: normal; opacity: .7; }
+.alg-check em { font-style: normal; color: var(--adm-muted); }
 .alg-check input { position: absolute; opacity: 0; width: 0; height: 0; }
 
 .alg-check-box {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   border: 1.5px solid var(--adm-line-strong);
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--adm-surface);
   position: relative;
   transition: background .15s, border-color .15s;
@@ -737,8 +1226,8 @@
 .alg-check-box::after {
   content: "";
   position: absolute;
-  left: 6px;
-  top: 2px;
+  left: 7px;
+  top: 3px;
   width: 5px;
   height: 10px;
   border: solid #fff;
@@ -748,24 +1237,24 @@
 }
 
 .alg-check input:checked + .alg-check-box {
-  background: var(--adm-blue);
-  border-color: var(--adm-blue);
+  background: var(--adm-navy);
+  border-color: var(--adm-navy);
 }
 .alg-check input:checked + .alg-check-box::after { transform: rotate(45deg) scale(1); }
-.alg-check input:focus-visible + .alg-check-box { box-shadow: 0 0 0 4px rgba(11, 79, 209, .18); }
+.alg-check input:focus-visible + .alg-check-box { box-shadow: 0 0 0 4px rgba(255, 102, 0, .25); }
 
 /* ---------- Avviso di errore ---------- */
 
 .alg-alert {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.8rem 0.9rem;
-  border-radius: 12px;
-  font-size: 0.88rem;
+  gap: .6rem;
+  padding: .85rem 1rem;
+  border-radius: var(--adm-r-m);
+  font-size: .9rem;
   background: var(--adm-danger-soft);
   color: var(--adm-danger);
-  border: 1px solid #f3c9c5;
+  border: 1px solid var(--adm-danger-line);
   animation: alg-shake .4s ease;
 }
 .alg-alert svg { flex-shrink: 0; }
@@ -778,34 +1267,42 @@
 
 /* ---------- Pulsante ---------- */
 
+/* L'arancio del sito, un po' più scuro del pieno: il bianco sopra deve
+   leggersi anche al sole, dal telefono, a bordo campo. */
 .alg-submit {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: .6rem;
   width: 100%;
-  margin-top: 0.4rem;
-  padding: 0.95rem 1.25rem;
+  min-height: 56px;
+  margin-top: .4rem;
+  padding: .95rem 1.25rem;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--adm-r-pill);
   font: inherit;
-  font-size: 0.98rem;
-  font-weight: 700;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.005em;
   color: #fff;
   cursor: pointer;
-  background: linear-gradient(135deg, #0b4fd1 0%, #0940a8 100%);
-  box-shadow: 0 10px 24px -10px rgba(11, 79, 209, .7);
+  background:
+    radial-gradient(120% 140% at 30% 0%, rgba(255, 255, 255, .22), transparent 55%),
+    linear-gradient(135deg, #f26100 0%, #d94200 100%);
+  box-shadow: 0 14px 28px -14px rgba(230, 80, 0, .95), inset 0 1px 0 rgba(255, 255, 255, .25);
   transition: transform .15s, box-shadow .15s, filter .15s;
 }
 
 .alg-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px -10px rgba(11, 79, 209, .8);
+  filter: brightness(1.05);
+  box-shadow: 0 18px 34px -14px rgba(230, 80, 0, 1), inset 0 1px 0 rgba(255, 255, 255, .25);
 }
 .alg-submit:active:not(:disabled) { transform: translateY(0); }
+.alg-submit:focus-visible { outline: 3px solid var(--adm-navy); outline-offset: 3px; }
 .alg-submit:disabled { filter: grayscale(.35); opacity: .7; cursor: not-allowed; box-shadow: none; }
 
-.alg-btn-arrow { transition: transform .18s; font-size: 0.85rem; }
+.alg-btn-arrow { transition: transform .18s; font-size: .85rem; }
 .alg-submit:hover:not(:disabled) .alg-btn-arrow { transform: translateX(3px); }
 
 .alg-btn-spinner {
@@ -826,39 +1323,40 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  gap: 0.5rem;
-  padding: 0.7rem 0.9rem;
+  min-height: var(--adm-tocco);
+  gap: .5rem;
+  padding: .7rem 1rem;
   border: 1px solid var(--adm-line);
-  border-radius: 12px;
+  border-radius: var(--adm-r-m);
   background: var(--adm-surface);
   font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--adm-muted);
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--adm-ink-2);
   cursor: pointer;
   text-align: left;
   transition: background .15s, color .15s;
 }
-.alg-help-toggle:hover { background: var(--adm-line-soft); color: var(--adm-ink); }
+.alg-help-toggle:hover { background: var(--adm-surface-2); color: var(--adm-ink); }
 .alg-help-toggle.is-open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 
-.alg-help-arrow { flex-shrink: 0; font-size: 0.75rem; transition: transform .2s; }
+.alg-help-arrow { flex-shrink: 0; font-size: .75rem; transition: transform .2s; }
 .alg-help-toggle.is-open .alg-help-arrow { transform: rotate(180deg); }
 
 .alg-help {
   padding: 1rem;
   border: 1px solid var(--adm-line);
   border-top: none;
-  border-radius: 0 0 12px 12px;
-  background: var(--adm-line-soft);
-  font-size: 0.85rem;
+  border-radius: 0 0 var(--adm-r-m) var(--adm-r-m);
+  background: var(--adm-surface-2);
+  font-size: .88rem;
   line-height: 1.6;
-  color: var(--adm-muted);
+  color: var(--adm-ink-2);
   animation: alg-unfold .22s ease both;
 }
 
-.alg-help ol { margin: 0.7rem 0 0.7rem 1.1rem; display: grid; gap: 0.4rem; }
-.alg-help-note { margin-top: 0.7rem; font-style: italic; opacity: .85; }
+.alg-help ol { margin: .7rem 0 .7rem 1.1rem; display: grid; gap: .4rem; }
+.alg-help-note { margin-top: .7rem; font-style: italic; color: var(--adm-muted); }
 
 @keyframes alg-unfold {
   from { opacity: 0; transform: translateY(-6px); }
@@ -866,63 +1364,115 @@
 }
 
 .alg-footer {
-  margin-top: 2rem;
-  font-size: 0.75rem;
+  margin-top: 1.5rem;
+  font-size: .85rem;
   color: var(--adm-muted);
-  opacity: .7;
   text-align: center;
 }
+.alg-footer + .alg-footer { margin-top: .6rem; font-size: .76rem; }
+.alg-footer .adm-inline-link { color: var(--adm-blue); }
 
 @keyframes alg-rise {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- Responsive ---------- */
+/* ---------- Una colonna sola ----------
 
-/* Sotto i 900px il pannello identità sparisce e resta il solo modulo.
-   Le misure si stringono per far stare tutto in una schermata: su telefono
-   una pagina di accesso che obbliga a scorrere è solo un fastidio. */
+   Sotto i 900px il pannello identità sparisce e resta il solo modulo; le
+   pagine senza pannello sono così a ogni larghezza. In cima una fascia del
+   blu della società, e la scheda che ci sale sopra con il logo a cavallo
+   del bordo: la stessa pagina, riconoscibile anche senza il pannello. */
+
+.alg-page:not(:has(.alg-brand)) {
+  background:
+    radial-gradient(60% 120% at 100% 0%, #0a3d7a 0%, transparent 60%) top / 100% 15rem no-repeat,
+    linear-gradient(160deg, var(--adm-navy), var(--adm-navy-deep)) top / 100% 15rem no-repeat,
+    var(--adm-bg);
+  place-items: start center;
+}
+.alg-page:not(:has(.alg-brand)) .alg-form-side { padding-top: 1.5rem; }
+.alg-page:not(:has(.alg-brand)) .alg-back {
+  border-color: rgba(255, 255, 255, .22);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+.alg-page:not(:has(.alg-brand)) .alg-back:hover { border-color: rgba(255, 255, 255, .45); color: #fff; }
+.alg-page:not(:has(.alg-brand)) .alg-card { margin-top: 3.4rem; }
+.alg-page:not(:has(.alg-brand)) .alg-mobile-logo {
+  display: block;
+  width: 84px;
+  height: 84px;
+  margin: calc(-2.6rem - 42px) auto 1.1rem;
+  padding: 6px;
+  object-fit: contain;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 43, 92, .06), 0 18px 36px -18px rgba(0, 26, 56, .55);
+}
+.alg-page:not(:has(.alg-brand)) .alg-card { text-align: center; }
+.alg-page:not(:has(.alg-brand)) .alg-form,
+.alg-page:not(:has(.alg-brand)) .alg-help-block,
+.alg-page:not(:has(.alg-brand)) .alg-check { text-align: left; }
+
 @media (max-width: 900px) {
-  .alg-page { grid-template-columns: 1fr; }
+  .alg-page {
+    grid-template-columns: 1fr;
+    background:
+      radial-gradient(60% 120% at 100% 0%, #0a3d7a 0%, transparent 60%) top / 100% 15rem no-repeat,
+      linear-gradient(160deg, var(--adm-navy), var(--adm-navy-deep)) top / 100% 15rem no-repeat,
+      var(--adm-bg);
+  }
 
   .alg-brand { display: none; }
 
   /* Il contenitore ha min-height, non height: se il contenuto cresce la
      colonna cresce con lui, quindi centrare non taglia mai nulla. */
   .alg-form-side {
-    justify-content: center;
-    padding: 1.75rem 1.25rem;
+    justify-content: flex-start;
+    padding: 1.25rem 1rem 2rem;
   }
+
+  .alg-back {
+    border-color: rgba(255, 255, 255, .22);
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+  }
+  .alg-back:hover { border-color: rgba(255, 255, 255, .45); color: #fff; }
+
+  .alg-card { margin-top: 3.4rem; text-align: center; }
 
   .alg-mobile-logo {
     display: block;
-    width: 78px;
-    height: auto;
-    margin: 0 auto 1rem;
+    width: 80px;
+    height: 80px;
+    margin: calc(-2.4rem - 40px) auto 1rem;
+    padding: 6px;
+    object-fit: contain;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(0, 43, 92, .06), 0 18px 36px -18px rgba(0, 26, 56, .55);
   }
 
-  .alg-card { text-align: center; }
   .alg-form, .alg-help-block, .alg-check { text-align: left; }
 
-  .alg-title { font-size: 1.65rem; }
-  .alg-lead { margin-bottom: 1.35rem; }
+  .alg-lead { margin-bottom: 1.4rem; }
   .alg-help-block { margin-top: 1.25rem; }
-  .alg-footer { margin-top: 1.5rem; }
 }
 
 /* Telefoni piccoli: si recupera altezza togliendo il superfluo */
 @media (max-width: 400px) {
-  .alg-mobile-logo { width: 68px; margin-bottom: 0.85rem; }
-  .alg-title { font-size: 1.5rem; }
-  .alg-lead { font-size: 0.87rem; margin-bottom: 1.15rem; }
-  .alg-form { gap: 0.85rem; }
+  .alg-card { padding: 1.4rem 1.15rem; }
+  .alg-lead { font-size: .9rem; margin-bottom: 1.2rem; }
+  .alg-form { gap: .85rem; }
 }
 
 /* Telefono in orizzontale: pochissima altezza, il logo ruberebbe tutto */
 @media (max-height: 520px) and (orientation: landscape) {
   .alg-form-side { justify-content: flex-start; padding-block: 1.25rem; }
-  .alg-mobile-logo { display: none; }
+  .alg-mobile-logo,
+  .alg-page:not(:has(.alg-brand)) .alg-mobile-logo { display: none; }
+  .alg-card { margin-top: 0; }
   .alg-lead { display: none; }
 }
 
@@ -937,64 +1487,99 @@
   .alg-btn-spinner { animation-duration: 2s; }
 }
 
-/* ---------- Intestazione pagina ---------- */
+/* ---------- Intestazione pagina ----------
+
+   Il titolo grande e pieno delle pagine del sito: è la prima cosa che si
+   legge, e dice dove si è meglio di qualunque voce accesa nel menu. */
 
 .adm-page-head {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1rem 1.5rem;
   flex-wrap: wrap;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1.25rem, 3vw, 1.9rem);
 }
 
-.adm-head-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-.adm-head-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+/* Largo quanto può: il sottotitolo va a capo sotto al titolo invece di
+   accodarsi sulla stessa riga */
+.adm-head-left { display: flex; align-items: center; gap: .6rem .9rem; flex-wrap: wrap; flex: 1 1 20rem; min-width: 0; }
+.adm-head-actions { display: flex; gap: .6rem; flex-wrap: wrap; }
 
-.adm-page-title { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; }
-.adm-page-sub { font-size: 0.9rem; color: var(--adm-muted); margin-top: 0.2rem; }
+.adm-page-title {
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: var(--adm-fs-titolo);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -.04em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+/* Sotto al titolo, su una riga sua anche quando la testata la affianca */
+.adm-page-sub {
+  flex-basis: 100%;
+  /* Niente max-width: con un tetto la riga ci starebbe accanto al titolo,
+     e il flex la accoderebbe invece di mandarla a capo */
+  margin: .15rem 0 0;
+  color: var(--adm-muted);
+  font-size: .98rem;
+  line-height: 1.5;
+}
 
 /* ---------- Barra filtri ---------- */
 
 .adm-toolbar {
   display: flex;
-  gap: 0.9rem;
+  gap: .75rem;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.25rem;
 }
 
-.adm-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.adm-filters { display: flex; gap: .4rem; flex-wrap: wrap; }
 
 .adm-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
   border: 1px solid var(--adm-line);
   background: var(--adm-surface);
-  border-radius: 999px;
-  padding: 0.4rem 0.9rem;
+  border-radius: var(--adm-r-pill);
+  padding: .35rem .95rem;
   font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--adm-muted);
+  font-size: .86rem;
+  font-weight: 700;
+  color: var(--adm-ink-2);
+  white-space: nowrap;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
 }
-.adm-chip:hover { background: var(--adm-line-soft); }
-.adm-chip.is-active { background: var(--adm-blue); border-color: var(--adm-blue); color: #fff; }
+.adm-chip:hover { border-color: var(--adm-line-strong); background: var(--adm-surface-2); color: var(--adm-ink); }
+.adm-chip:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.adm-chip.is-active,
+.adm-chip.is-active:hover { background: var(--adm-navy); border-color: var(--adm-navy); color: #fff; }
 
-.adm-search { position: relative; display: flex; gap: 0.5rem; flex: 1; min-width: 260px; max-width: 460px; }
-.adm-search input { padding-left: 2.4rem; }
+.adm-search { position: relative; display: flex; gap: .5rem; flex: 1; min-width: 260px; max-width: 460px; }
+.adm-search input { padding-left: 2.6rem; border-radius: var(--adm-r-pill); }
 .adm-search-icon {
   position: absolute;
-  left: 0.85rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--adm-muted);
   pointer-events: none;
 }
 
-/* ---------- Elenco notizie ---------- */
+/* ---------- Elenco notizie ----------
 
-.adm-post-list { list-style: none; display: grid; gap: 0.65rem; }
+   Righe-scheda bianche e tonde, come le notizie del sito: il bordo si
+   scalda al passaggio del puntatore, niente che salti o si ingrandisca. */
+
+.adm-post-list { list-style: none; display: grid; gap: .6rem; margin: 0; padding: 0; }
 
 .adm-post-row {
   display: flex;
@@ -1003,14 +1588,17 @@
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
   border-radius: var(--adm-radius);
-  padding: 0.85rem 1rem;
+  box-shadow: var(--adm-shadow-s);
+  padding: .85rem 1rem;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
+.adm-post-row:hover { border-color: var(--adm-line-strong); box-shadow: var(--adm-shadow); }
 .adm-post-row.is-busy { opacity: .55; }
 
 .adm-post-thumb {
-  width: 68px;
-  height: 52px;
-  border-radius: 8px;
+  width: 72px;
+  height: 54px;
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--adm-line-soft);
@@ -1023,39 +1611,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a6b1c2;
+  color: #9aa7ba;
 }
 
 .adm-post-main { flex: 1; min-width: 0; }
 
 .adm-post-title {
   display: block;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
   color: var(--adm-ink);
   text-decoration: none;
-  margin-bottom: 0.35rem;
+  margin-bottom: .35rem;
   overflow-wrap: anywhere;
 }
-.adm-post-title:hover { color: var(--adm-blue); text-decoration: underline; }
+.adm-post-title:hover { color: var(--adm-blue); text-decoration: underline; text-underline-offset: 2px; }
 
 .adm-post-meta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: .45rem;
   flex-wrap: wrap;
-  font-size: 0.78rem;
+  font-size: .8rem;
   color: var(--adm-muted);
 }
 
+/* Le pastiglie di stato: pillole piene e tenui, sempre con una parola.
+   Il colore aiuta, ma non è mai l'unico segnale. */
 .adm-status {
-  font-size: 0.68rem;
+  display: inline-block;
+  font-size: .7rem;
   font-weight: 800;
+  line-height: 1.5;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.15rem 0.45rem;
-  border-radius: 5px;
+  letter-spacing: .05em;
+  padding: .12rem .55rem;
+  border-radius: var(--adm-r-pill);
   white-space: nowrap;
+  background: var(--adm-line-soft);
+  color: var(--adm-ink-2);
 }
 .adm-status-publish { background: var(--adm-ok-soft); color: var(--adm-ok); }
 .adm-status-draft { background: var(--adm-warn-soft); color: var(--adm-warn); }
@@ -1070,43 +1665,64 @@
 }
 
 .adm-sport-tag {
+  display: inline-block;
   background: var(--adm-line-soft);
-  border-radius: 5px;
-  padding: 0.15rem 0.45rem;
-  font-weight: 600;
+  color: var(--adm-ink-2);
+  border-radius: var(--adm-r-pill);
+  padding: .12rem .55rem;
+  font-weight: 700;
 }
 
-.adm-post-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.adm-post-actions { display: flex; gap: .4rem; flex-shrink: 0; }
 
 /* ---------- Vuoto e paginazione ---------- */
 
 .adm-empty {
   text-align: center;
-  padding: 4rem 1.5rem;
+  padding: clamp(2.5rem, 7vw, 4rem) 1.5rem;
   background: var(--adm-surface);
-  border: 1px dashed var(--adm-line);
-  border-radius: var(--adm-radius);
+  border: 1.5px dashed var(--adm-line);
+  border-radius: var(--adm-r-l);
 }
-.adm-empty-icon { font-size: 2.2rem; color: #b8c2d1; margin-bottom: 0.9rem; }
-.adm-empty h2 { font-size: 1.1rem; margin-bottom: 0.4rem; }
-.adm-empty p { color: var(--adm-muted); font-size: 0.9rem; margin-bottom: 1.25rem; }
+.adm-empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  border-radius: 20px;
+  background: var(--adm-arancio-soft);
+  color: var(--adm-arancio-testo);
+  font-size: 1.6rem;
+}
+/* L'icona è l'<svg> stesso con la classe addosso: la tessera la
+   disegnano sfondo e spaziatura interna, che un <svg> accetta come un <div> */
+svg.adm-empty-icon {
+  display: block;
+  box-sizing: border-box;
+  margin: 0 auto 1rem;
+  padding: 18px;
+  font-size: 1rem;
+}
+.adm-empty h2 { margin: 0 0 .4rem; font-size: 1.2rem; font-weight: 800; letter-spacing: -.02em; }
+.adm-empty p { max-width: 44ch; margin: 0 auto 1.25rem; color: var(--adm-muted); font-size: .95rem; line-height: 1.5; }
 
 .adm-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
 }
 .adm-page-indicator {
   display: grid;
   justify-items: center;
   gap: 1px;
-  font-size: 0.85rem;
-  color: var(--adm-muted);
-  font-weight: 600;
+  font-size: .88rem;
+  color: var(--adm-ink-2);
+  font-weight: 700;
 }
-.adm-page-totale { font-size: 0.75rem; font-weight: 400; }
+.adm-page-totale { font-size: .76rem; font-weight: 500; color: var(--adm-muted); }
 
 /* ---------- Registro delle attività ---------- */
 
@@ -1181,25 +1797,33 @@
   align-items: start;
 }
 
-.adm-editor-side { display: grid; gap: 1rem; position: sticky; top: 5rem; }
+/* Sotto alla riga del menu che resta ferma, con un po' d'aria */
+.adm-editor-side { display: grid; gap: 1rem; position: sticky; top: calc(var(--adm-testata-h) + 1rem); }
 
+/* Il riquadro bianco di base: tondo e con l'ombra lieve delle schede del
+   sito. Quasi ogni pagina è fatta di questi. */
 .adm-panel {
   background: var(--adm-surface);
-  border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
-  padding: 1.1rem;
+  border: 1px solid rgba(0, 43, 92, .08);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow);
+  padding: clamp(1rem, 2.5vw, 1.4rem);
 }
 
+/* Il titolo di un riquadro: una frase normale e in grassetto, non più il
+   maiuscoletto grigio, che si leggeva come una nota a margine. L'icona,
+   quando c'è, in arancio. */
 .adm-panel-title {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--adm-muted);
-  margin-bottom: 0.85rem;
+  gap: .55rem;
+  margin: 0 0 1rem;
+  color: var(--adm-ink);
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.015em;
+  text-transform: none;
 }
 
 .adm-cover { margin-bottom: 0.75rem; }
@@ -1331,12 +1955,17 @@
 
 @media (max-width: 700px) {
   .adm-topbar-inner { gap: 0.75rem; padding: 0.6rem 1rem; }
-  .adm-brand-text { display: none; }
+  /* Il nome accanto al logo cede il posto alla stagione, quando c'è: il
+     logo da solo dice già dove si è */
+  .adm-topbar-alta:has(.adm-selettore-stagione) .adm-brand-text { display: none; }
   .adm-user-name { display: none; }
   .adm-hide-sm { display: none; }
   .adm-main { padding: 1.25rem 1rem 3rem; }
 
   .adm-page-head { flex-direction: column; align-items: stretch; }
+  /* In colonna i 20rem di base diventerebbero altezza: un vuoto enorme fra
+     titolo e sottotitolo su ogni pagina, al telefono */
+  .adm-head-left { flex: 0 0 auto; }
   .adm-head-actions .adm-btn { flex: 1; }
 
   .adm-post-row { flex-wrap: wrap; }
@@ -1356,7 +1985,7 @@
    una freccia, così somiglia agli altri campi invece che al sistema. */
 .adm-select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235b6a80'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2356647b'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 1rem;
@@ -1382,10 +2011,10 @@
 .adm-check input { position: absolute; opacity: 0; width: 0; height: 0; }
 
 .adm-check-box {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-  border: 1.5px solid var(--adm-line);
+  border: 1.5px solid var(--adm-line-strong);
   border-radius: 5px;
   background: var(--adm-surface);
   position: relative;
@@ -1406,12 +2035,12 @@
 }
 
 .adm-check input:checked + .adm-check-box {
-  background: var(--adm-blue);
-  border-color: var(--adm-blue);
+  background: var(--adm-navy);
+  border-color: var(--adm-navy);
 }
 
 .adm-check input:checked + .adm-check-box::after { transform: rotate(45deg) scale(1); }
-.adm-check input:focus-visible + .adm-check-box { box-shadow: 0 0 0 4px rgba(11, 79, 209, .18); }
+.adm-check input:focus-visible + .adm-check-box { box-shadow: 0 0 0 4px rgba(255, 102, 0, .25); }
 
 /* Due campi affiancati, che tornano uno sotto l'altro quando non ci stanno */
 .adm-due-colonne {
@@ -1425,16 +2054,17 @@
 .adm-chip-group { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 
 .adm-chip.is-active {
-  background: var(--adm-blue);
-  border-color: var(--adm-blue);
+  background: var(--adm-navy);
+  border-color: var(--adm-navy);
   color: #fff;
 }
 
 .adm-filter-select { max-width: 16rem; }
 
 .adm-select-mini {
-  font-size: 0.8rem;
-  padding: 0.35rem 1.9rem 0.35rem 0.6rem;
+  min-height: 36px;
+  font-size: 0.82rem;
+  padding: 0.35rem 1.9rem 0.35rem 0.7rem;
   background-position: right 0.45rem center;
   background-size: 0.85rem;
   width: auto;
@@ -1557,10 +2187,18 @@
 
 .alg-card-esito { text-align: center; }
 
+/* In una tessera tonda, al centro sopra al titolo */
 .alg-esito-icona {
-  font-size: 2.5rem;
+  display: block;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  padding: 16px;
+  border-radius: 50%;
+  background: var(--adm-ok-soft);
   color: var(--adm-ok);
-  margin-bottom: 0.75rem;
+  font-size: 1rem;
 }
 
 .adm-tag-ok { background: var(--adm-ok-soft); color: var(--adm-ok); }
@@ -1635,7 +2273,7 @@
 
 /* ---------- Attesa della squadra ---------- */
 
-.alg-icona-attesa { color: var(--adm-warn); }
+.alg-icona-attesa { color: var(--adm-warn); background: var(--adm-warn-soft); }
 
 .alg-attesa-azioni {
   display: flex;
@@ -1687,10 +2325,18 @@
 
 /* ---------- Pulsante del profilo nella barra ---------- */
 
+/* La foto a filo del bordo sinistro della pillola, come un'etichetta */
+.adm-profilo-btn { padding-left: .3rem; }
 .adm-profilo-btn.is-active {
   background: var(--adm-blue-soft);
-  border-color: #c9dcfa;
+  border-color: var(--adm-blue-line);
   color: var(--adm-blue);
+}
+/* Sul blu: la propria scheda aperta si accende di bianco */
+.adm-topbar .adm-profilo-btn.is-active {
+  border-color: #fff;
+  background: #fff;
+  color: var(--adm-navy);
 }
 
 /* Il proprio nome accanto a "Profilo": è l'etichetta della scheda, non una
@@ -1703,6 +2349,7 @@
   font-weight: 700;
   color: var(--adm-ink);
 }
+.adm-topbar .adm-profilo-nome { color: inherit; }
 
 /* ---------- Schede in sola lettura ---------- */
 
@@ -1808,8 +2455,9 @@
 .adm-scheda {
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
-  padding: 1rem 1.1rem;
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow-s);
+  padding: 1.1rem 1.25rem;
 }
 .adm-scheda.is-busy { opacity: .55; pointer-events: none; }
 
@@ -1822,8 +2470,8 @@
 }
 
 .adm-scheda-nome {
-  font-size: 1.02rem;
-  font-weight: 700;
+  font-size: 1.08rem;
+  font-weight: 800;
   letter-spacing: -0.01em;
   /* I nomi lunghi vanno a capo invece di spingere fuori le pastiglie */
   overflow-wrap: anywhere;
@@ -1874,7 +2522,11 @@
 
 /* Quante ne restano da decidere, dentro alla pastiglia del filtro */
 .adm-chip-conteggio {
-  margin-left: 0.4rem;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin-left: 0.45rem;
   padding: 0 0.35rem;
   border-radius: 999px;
   background: var(--adm-danger);
@@ -1902,29 +2554,47 @@
   margin-bottom: 1.25rem;
 }
 
+/* Il tono (allarme, attenzione) è una striscia colorata sul bordo sinistro
+   disegnata con un'ombra interna: segue la curva dell'angolo, dove un
+   bordo spesso da una parte sola si deformerebbe. */
 .adm-riquadro {
+  --adm-tono: transparent;
   display: grid;
-  gap: 0.15rem;
-  padding: 0.85rem 1rem;
+  align-content: start;
+  gap: 0.2rem;
+  padding: 0.95rem 1.1rem;
 
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-left: 4px solid var(--adm-line);
-  border-radius: var(--adm-radius);
+  border-radius: var(--adm-r-m);
+  box-shadow: inset 4px 0 0 var(--adm-tono), var(--adm-shadow-s);
 
+  color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
 }
-.adm-riquadro:hover { border-color: var(--adm-blue); }
-.adm-riquadro.is-active { border-color: var(--adm-blue); background: var(--adm-blue-soft); }
-.adm-riquadro.is-allarme { border-left-color: var(--adm-danger); }
-.adm-riquadro.is-attenzione { border-left-color: var(--adm-warn); }
+.adm-riquadro:hover { border-color: var(--adm-line-strong); box-shadow: inset 4px 0 0 var(--adm-tono), var(--adm-shadow); }
+.adm-riquadro:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.adm-riquadro.is-active,
+.adm-riquadro.is-active:hover { border-color: var(--adm-navy); background: var(--adm-blue-soft); box-shadow: inset 4px 0 0 var(--adm-tono), 0 0 0 1px var(--adm-navy); }
+.adm-riquadro.is-allarme { --adm-tono: var(--adm-danger); }
+.adm-riquadro.is-attenzione { --adm-tono: var(--adm-warn); }
 .adm-riquadro-statico { cursor: default; }
-.adm-riquadro-statico:hover { border-color: var(--adm-line); }
+.adm-riquadro-statico:hover { border-color: var(--adm-line); box-shadow: inset 4px 0 0 var(--adm-tono), var(--adm-shadow-s); }
 
-.adm-riquadro-numero { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
-.adm-riquadro-testo { font-size: 0.78rem; color: var(--adm-muted); line-height: 1.3; }
+.adm-riquadro-numero {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.adm-riquadro.is-allarme .adm-riquadro-numero { color: var(--adm-danger); }
+.adm-riquadro.is-attenzione .adm-riquadro-numero { color: var(--adm-warn); }
+.adm-riquadro-testo { font-size: 0.82rem; color: var(--adm-muted); line-height: 1.35; }
 
 /* Quando al posto di un numero c'è una parola ("Scaduto", "Saldata", il nome
    di una squadra): stessa riga, ma un corpo che ci sta. */
@@ -1950,12 +2620,12 @@
 
 .adm-gruppo-titolo {
   padding: 0;
-  margin-bottom: 0.6rem;
-  font-size: 0.72rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--adm-muted);
+  letter-spacing: 0.1em;
+  color: var(--adm-ink-2);
 }
 
 /* I campi si dispongono da soli su quante colonne ci stanno, invece di
@@ -1997,18 +2667,22 @@
   align-items: center;
   gap: 0.75rem 1rem;
 
-  padding: 0.8rem 1rem;
+  padding: 0.85rem 1.1rem;
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
   border-radius: var(--adm-radius);
+  box-shadow: var(--adm-shadow-s);
 
   color: inherit;
   text-decoration: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
-.adm-atleta-riga:hover { border-color: var(--adm-blue); background: #fbfcfe; }
+.adm-atleta-riga:hover { border-color: var(--adm-line-strong); box-shadow: var(--adm-shadow); }
+.adm-atleta-riga:hover .adm-atleta-freccia { color: var(--adm-arancio-testo); }
+.adm-atleta-riga:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
 
 .adm-atleta-chi { display: grid; gap: 2px; min-width: 0; }
-.adm-atleta-nome { font-weight: 700; font-size: 0.95rem; overflow-wrap: anywhere; }
+.adm-atleta-nome { font-weight: 800; font-size: 1rem; overflow-wrap: anywhere; }
 
 .adm-atleta-sotto,
 .adm-atleta-nota {
@@ -2028,7 +2702,7 @@
 .adm-atleta-cert,
 .adm-atleta-quota { display: grid; gap: 3px; min-width: 0; justify-items: start; }
 
-.adm-atleta-freccia { color: #b8c2d1; flex-shrink: 0; }
+.adm-atleta-freccia { color: #9aa7ba; flex-shrink: 0; transition: color .18s ease; }
 
 /* ---------- Stato del certificato ---------- */
 
@@ -2036,10 +2710,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--adm-r-pill);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .adm-cert-valido { background: var(--adm-ok-soft); color: var(--adm-ok); }
@@ -2171,8 +2845,9 @@
      schiacciare le colonne fino a spezzare ogni parola. */
   overflow-x: auto;
   border: 1px solid var(--adm-line);
-  border-radius: var(--adm-radius);
+  border-radius: var(--adm-r-l);
   background: var(--adm-surface);
+  box-shadow: var(--adm-shadow-s);
 }
 
 .adm-tabella {
@@ -2187,28 +2862,28 @@
   top: 0;
   z-index: 1;
 
-  padding: 0.55rem 0.9rem;
-  background: var(--adm-line-soft);
+  padding: 0.7rem 1rem;
+  background: var(--adm-surface-2);
   border-bottom: 1px solid var(--adm-line);
 
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--adm-muted);
+  letter-spacing: 0.07em;
+  color: var(--adm-ink-2);
   text-align: left;
   white-space: nowrap;
 }
 
 .adm-tabella td {
-  padding: 0.55rem 0.9rem;
+  padding: 0.7rem 1rem;
   border-bottom: 1px solid var(--adm-line-soft);
   vertical-align: middle;
 }
 
 .adm-tabella tbody tr:last-child td { border-bottom: 0; }
 
-.adm-riga:hover td { background: #fbfcfe; }
+.adm-riga:hover td { background: var(--adm-surface-2); }
 .adm-riga.is-aperta td { background: var(--adm-blue-soft); }
 .adm-riga.is-spento td { opacity: .6; }
 
@@ -2260,8 +2935,8 @@
 /* ---------- Riga dei dettagli ---------- */
 
 .adm-riga-dettaglio > td {
-  padding: 1rem 0.9rem 1.1rem;
-  background: #fbfcfe;
+  padding: 1.1rem 1rem 1.2rem;
+  background: var(--adm-surface-2);
   border-bottom: 2px solid var(--adm-line);
 }
 
@@ -2396,7 +3071,7 @@
 }
 .adm-check input:checked + .adm-check-tondo::after { transform: scale(1); }
 
-.adm-panel-title svg { color: var(--adm-muted); font-size: 0.9em; }
+.adm-panel-title svg { flex-shrink: 0; color: var(--adm-arancio-testo); font-size: .95em; }
 
 /* ---------- Decisione su una richiesta ---------- */
 
@@ -2732,9 +3407,9 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-scambia-vista {
   display: inline-flex;
   gap: 2px;
-  padding: 2px;
+  padding: 3px;
   background: var(--adm-line-soft);
-  border-radius: 10px;
+  border-radius: var(--adm-r-pill);
 }
 
 .adm-vista-btn {
@@ -2742,11 +3417,12 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   align-items: center;
   gap: 6px;
 
-  padding: 6px 10px;
+  min-height: 34px;
+  padding: 6px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--adm-r-pill);
   background: transparent;
-  color: var(--adm-muted);
+  color: var(--adm-ink-2);
   font: inherit;
   font-size: .84rem;
   font-weight: 600;
@@ -2757,8 +3433,8 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 
 .adm-vista-btn.is-active {
   background: var(--adm-surface);
-  color: var(--adm-blue);
-  box-shadow: 0 1px 2px rgba(16, 32, 56, .12);
+  color: var(--adm-navy);
+  box-shadow: 0 1px 3px rgba(11, 21, 38, .14);
 }
 
 /* ---------- Griglia di schede ----------
@@ -3300,14 +3976,195 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
    Telefono: barra in basso e menu
    =========================================
 
-   Sul computer la navigazione è la riga sotto al marchio. Sotto i 760px
-   quella riga spariva in cinque righe e un terzo dello schermo: qui la
-   sostituisce la barra in basso di NavigazioneMobile.jsx, con quattro
-   sezioni e il menu. */
+   Sul computer la navigazione è la riga sotto al marchio (o la colonna a
+   sinistra, per chi ha molte sezioni). Sotto i 760px — e sotto i 1100 per
+   chi ha la colonna, che su un tablet toglierebbe un terzo dello schermo —
+   la sostituisce la barra in basso di NavigazioneMobile.jsx, con quattro
+   sezioni e il menu.
 
-.adm-barra-basso,
-.adm-menu-velo,
-.adm-menu-foglio { display: none; }
+   Le regole di disegno valgono sempre; cambia solo quando la barra si
+   vede. Così le due soglie non si portano dietro due copie dello stesso
+   disegno da tenere allineate. */
+
+.adm-barra-basso { display: none; }
+
+.adm-barra-basso {
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: .15rem;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Sopra al velo del menu: resta toccabile anche a menu aperto, ed è
+     da lì che il menu si richiude */
+  z-index: 60;
+  padding: .35rem .4rem calc(.35rem + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, .94);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  border-top: 1px solid var(--adm-line);
+  box-shadow: 0 -10px 30px -18px rgba(0, 26, 56, .35);
+}
+
+.adm-barra-voce {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .2rem;
+  min-width: 0;
+  min-height: 3.35rem;
+  padding: .3rem .15rem;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: var(--adm-ink-2);
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* L'icona dentro a una pillola: accesa, è la pillola arancione del menu
+   del sito in piccolo. */
+.adm-barra-voce svg {
+  box-sizing: content-box;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: .32rem 1rem;
+  border-radius: var(--adm-r-pill);
+  transition: background-color .2s ease, color .2s ease;
+}
+.adm-barra-voce span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-barra-voce:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: -2px; }
+.adm-barra-voce.is-active { color: var(--adm-navy); }
+.adm-barra-voce.is-active svg {
+  background: var(--adm-pillola);
+  color: #fff;
+  box-shadow: 0 8px 16px -10px rgba(255, 102, 0, .95);
+}
+
+.adm-menu-velo {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 19, 43, .45);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: adm-menu-velo .15s ease-out;
+}
+
+/* Il foglio che sale dal basso con tutte le altre sezioni */
+.adm-menu-foglio {
+  position: fixed;
+  left: .5rem;
+  right: .5rem;
+  bottom: calc(4.55rem + env(safe-area-inset-bottom));
+  z-index: 58;
+  max-height: calc(100svh - 8rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem;
+  border-radius: 24px;
+  background: var(--adm-surface);
+  box-shadow: 0 30px 60px -20px rgba(0, 20, 50, .55), 0 0 0 1px rgba(0, 43, 92, .06);
+  animation: adm-menu-foglio .2s var(--adm-curva);
+}
+
+/* Il nome di un gruppo di sezioni, quando il menu ne ha tante */
+.adm-menu-gruppo-titolo {
+  margin: 0 0 .45rem .15rem;
+  color: var(--adm-muted);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.adm-menu-gruppo + .adm-menu-gruppo { margin-top: .75rem; }
+
+.adm-menu-griglia {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem;
+}
+
+.adm-menu-voce {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 4.8rem;
+  padding: .7rem .3rem;
+  border: 1px solid var(--adm-line-soft);
+  border-radius: 16px;
+  background: var(--adm-surface-2);
+  color: var(--adm-ink);
+  font-size: .8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.adm-menu-voce svg { font-size: 1.25rem; color: var(--adm-arancio-testo); }
+.adm-menu-voce:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 1px; }
+.adm-menu-voce.is-active { border-color: var(--adm-navy); background: var(--adm-navy); color: #fff; }
+.adm-menu-voce.is-active svg { color: var(--adm-arancio-chiaro); }
+
+/* Divise per gruppo le voci sono tante: tessere basse, icona accanto al
+   nome, due per riga. Con le tessere alte il menu superava lo schermo e
+   "Esci" restava sotto, da scorrere. */
+.adm-menu-gruppo .adm-menu-griglia { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; }
+.adm-menu-gruppo .adm-menu-voce {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: .6rem;
+  min-height: 3rem;
+  padding: .5rem .75rem;
+  border-radius: 14px;
+  text-align: left;
+}
+.adm-menu-gruppo .adm-menu-voce svg { flex-shrink: 0; font-size: 1.05rem; }
+
+.adm-menu-fondo {
+  display: flex;
+  gap: .5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+/* Senza sezioni nel menu (chi aspetta una squadra) il separatore non serve */
+.adm-menu-foglio > .adm-menu-fondo:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+.adm-menu-azione {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 3rem;
+  padding: .6rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-pill);
+  background: var(--adm-surface);
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.adm-menu-azione:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.adm-menu-esci { color: var(--adm-danger); border-color: var(--adm-danger-line); }
+
+/* ---------- Quando la barra c'è ---------- */
 
 @media (max-width: 760px) {
   .adm-topbar-nav,
@@ -3315,146 +4172,41 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 
   /* In alto resta una riga sottile: marchio a sinistra, la propria foto
      a destra. Il nome della pagina lo dice già il titolo sotto. */
-  .adm-topbar-alta { padding: 0.45rem 1rem; }
+  .adm-topbar-alta { padding: 0 1rem; }
   .adm-profilo-nome { display: none; }
 
   /* Lo spazio per la barra, che sta sopra al fondo della pagina */
-  .adm-main { padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)); }
+  .adm-main { padding-bottom: calc(6.25rem + env(safe-area-inset-bottom)); }
 
-  .adm-barra-basso {
+  .adm-barra-basso { display: grid; }
+}
+
+/* Chi ha la colonna a sinistra: sotto ai 1100 pixel la colonna non ci
+   sta, e le sezioni passano alla barra in basso come sul telefono. */
+@media (min-width: 761px) and (max-width: 1099px) {
+  .adm-shell.is-laterale .adm-topbar-nav,
+  .adm-shell.is-laterale .adm-solo-schermo-grande { display: none !important; }
+  .adm-shell.is-laterale .adm-main { padding-bottom: calc(6.25rem + env(safe-area-inset-bottom)); }
+  .adm-shell.is-laterale .adm-barra-basso {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    gap: 0.2rem;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    /* Sopra al velo del menu: resta toccabile anche a menu aperto, ed è
-       da lì che il menu si richiude */
-    z-index: 60;
-    padding: 0.3rem 0.35rem calc(0.3rem + env(safe-area-inset-bottom));
-    background: var(--adm-surface);
-    border-top: 1px solid var(--adm-line);
-    box-shadow: 0 -6px 18px -12px rgba(16, 32, 56, .35);
+    /* Su un tablet cinque voci larghe un quinto di schermo ciascuna
+       sarebbero lontanissime fra loro: stanno al centro, vicine */
+    padding-inline: max(.4rem, calc((100% - 40rem) / 2));
   }
-
-  .adm-barra-voce {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.22rem;
-    min-width: 0;
-    min-height: 3.1rem;
-    padding: 0.35rem 0.2rem;
-    border: 0;
-    border-radius: 10px;
-    background: none;
-    color: var(--adm-muted);
-    font: inherit;
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+  .adm-shell.is-laterale .adm-menu-foglio {
+    left: 50%;
+    right: auto;
+    width: min(34rem, calc(100% - 1rem));
+    translate: -50% 0;
   }
-  .adm-barra-voce svg { font-size: 1.15rem; }
-  .adm-barra-voce span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .adm-barra-voce.is-active { background: var(--adm-blue-soft); color: var(--adm-blue); }
-
-  .adm-menu-velo {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 55;
-    background: rgba(16, 32, 56, .38);
-    animation: adm-menu-velo .15s ease-out;
-  }
-
-  .adm-menu-foglio {
-    display: block;
-    position: fixed;
-    left: 0.5rem;
-    right: 0.5rem;
-    bottom: calc(4.35rem + env(safe-area-inset-bottom));
-    z-index: 58;
-    max-height: calc(100svh - 8rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 0.85rem;
-    border-radius: 16px;
-    background: var(--adm-surface);
-    box-shadow: 0 18px 48px -12px rgba(16, 32, 56, .45);
-    animation: adm-menu-foglio .18s ease-out;
-  }
-
-  .adm-menu-griglia {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.45rem;
-  }
-
-  .adm-menu-voce {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    min-height: 4.6rem;
-    padding: 0.7rem 0.3rem;
-    border-radius: 12px;
-    background: var(--adm-line-soft);
-    color: var(--adm-ink);
-    font-size: 0.78rem;
-    font-weight: 600;
-    line-height: 1.2;
-    text-align: center;
-    text-decoration: none;
-  }
-  .adm-menu-voce svg { font-size: 1.2rem; color: var(--adm-muted); }
-  .adm-menu-voce.is-active { background: var(--adm-blue-soft); color: var(--adm-blue); }
-  .adm-menu-voce.is-active svg { color: var(--adm-blue); }
-
-  .adm-menu-fondo {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.85rem;
-    padding-top: 0.85rem;
-    border-top: 1px solid var(--adm-line-soft);
-  }
-  /* Senza sezioni nel menu (chi aspetta una squadra) il separatore non serve */
-  .adm-menu-foglio > .adm-menu-fondo:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
-
-  .adm-menu-azione {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 2.9rem;
-    padding: 0.6rem;
-    border: 1px solid var(--adm-line);
-    border-radius: 10px;
-    background: var(--adm-surface);
-    color: var(--adm-ink);
-    font: inherit;
-    font-size: 0.88rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .adm-menu-esci { color: var(--adm-danger); }
 }
 
 @keyframes adm-menu-velo { from { opacity: 0; } }
-@keyframes adm-menu-foglio { from { opacity: 0; transform: translateY(12px); } }
+@keyframes adm-menu-foglio { from { opacity: 0; transform: translateY(14px); } }
 
 @media (prefers-reduced-motion: reduce) {
   .adm-menu-velo, .adm-menu-foglio { animation: none; }
+  .adm-barra-voce svg { transition: none; }
 }
 
 /* =========================================
@@ -3592,9 +4344,30 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 /* ---------- Selettore della stagione, in alto accanto al marchio ---------- */
 .adm-topbar-alta .adm-selettore-stagione { margin-right: auto; margin-left: 1rem; width: 13rem; }
 
+/* Sul blu dell'intestazione: una pillola di vetro, come i pulsanti accanto.
+   Una stagione passata la si nota: fondo ambra, perché lì si guarda e non
+   si cambia niente. */
+.adm-topbar .adm-selettore-stagione .tnd-bottone {
+  min-height: 40px;
+  padding: .4rem .95rem;
+  border-color: rgba(255, 255, 255, .2);
+  border-radius: var(--adm-r-pill);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-weight: 700;
+}
+.adm-topbar .adm-selettore-stagione .tnd-bottone:hover { border-color: rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .13); }
+.adm-topbar .adm-selettore-stagione .tnd-bottone:focus,
+.adm-topbar .adm-selettore-stagione.is-aperta .tnd-bottone { border-color: var(--adm-arancio); box-shadow: 0 0 0 3px rgba(255, 102, 0, .3); }
+.adm-topbar .adm-selettore-stagione .tnd-freccia { color: rgba(255, 255, 255, .75); }
 .adm-selettore-stagione.is-passata .tnd-bottone { border-color: var(--adm-warn); background: var(--adm-warn-soft); }
+.adm-topbar .adm-selettore-stagione.is-passata .tnd-bottone {
+  border-color: rgba(255, 179, 107, .7);
+  background: rgba(255, 138, 61, .2);
+  color: #ffe2c7;
+}
 @media (max-width: 600px) {
-  .adm-topbar-alta .adm-selettore-stagione { margin-left: 0.5rem; width: auto; flex: 1 1 auto; max-width: 11rem; }
+  .adm-topbar-alta .adm-selettore-stagione { margin-left: 0.5rem; width: auto; flex: 1 1 auto; max-width: 14rem; }
 }
 
 /* Un pulsante che si legge come un collegamento, dentro a un avviso */
@@ -3634,3 +4407,481 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 
 /* Nel cestino: i giorni che mancano alla cancellazione, rossi negli ultimi cinque */
 .adm-cestino-mancano.is-vicino { color: var(--adm-danger); font-weight: 700; }
+
+/* =====================================================
+   PEZZI PRONTI PER LE PAGINE
+   (vedi la Guida rapida in cima al file)
+
+   Classi nuove, pensate per essere messe insieme: una home è fatta di un
+   .adm-benvenuto, una .adm-sezione con dentro .adm-azioni-rapide piene di
+   .adm-tessera-azione, e un .adm-vuoto-amico quando non c'è niente.
+   Nessuna si muove da sola: solo passaggi brevi al tocco, spenti per chi
+   chiede meno movimento.
+   ===================================================== */
+
+/* ---------- Occhiello ----------
+   <p class="adm-occhiello">Segreteria</p>
+   Trattino e lettere spaziate in arancio, come sopra ai titoli del sito. */
+.adm-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 .55rem;
+  color: var(--adm-arancio-testo);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.adm-occhiello::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* ---------- Sezione ----------
+   <section class="adm-sezione">
+     <div class="adm-sezione-testa">
+       <div>
+         <h2 class="adm-sezione-titolo">Da fare oggi</h2>
+         <p class="adm-sezione-sotto">Le cose che aspettano una tua risposta.</p>
+       </div>
+       <div class="adm-sezione-azioni"><a class="adm-btn adm-btn-ghost">Vedi tutto</a></div>
+     </div>
+     …contenuto…
+   </section> */
+.adm-sezione { margin: 0 0 clamp(1.75rem, 4vw, 2.5rem); }
+
+.adm-sezione-testa {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .6rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.adm-sezione-titolo {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -.03em;
+}
+.adm-sezione-titolo svg { flex-shrink: 0; color: var(--adm-arancio-testo); font-size: .85em; }
+
+.adm-sezione-sotto {
+  max-width: 60ch;
+  margin: .3rem 0 0;
+  color: var(--adm-muted);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+
+.adm-sezione-azioni { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* ---------- Azioni rapide: tessere grandi ----------
+   <div class="adm-azioni-rapide">
+     <a class="adm-tessera-azione is-attenzione" href="/segreteria/richieste">
+       <span class="adm-tessera-icona"><FaUserCheck /></span>
+       <span class="adm-tessera-titolo">Richieste <span class="adm-badge-conta is-allarme">4</span></span>
+       <span class="adm-tessera-testo">Nuovi atleti da mettere in squadra</span>
+       <FaArrowRight class="adm-tessera-freccia" />
+     </a>
+   </div>
+   La tessera può essere un <a>, un <Link> o un <button>. */
+.adm-azioni-rapide {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+  gap: .85rem;
+}
+
+.adm-tessera-azione {
+  --adm-tono: var(--adm-navy);
+  --adm-tono-soft: var(--adm-blue-soft);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icona titolo"
+    "icona testo";
+  align-items: center;
+  column-gap: .9rem;
+  row-gap: .15rem;
+  min-height: 5.25rem;
+  padding: 1rem 2.6rem 1rem 1rem;
+
+  background: var(--adm-surface);
+  border: 1px solid rgba(0, 43, 92, .09);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow);
+
+  color: var(--adm-ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s var(--adm-curva);
+}
+.adm-tessera-azione:hover {
+  color: var(--adm-ink);
+  border-color: var(--adm-line-strong);
+  box-shadow: var(--adm-shadow-alta);
+  transform: translateY(-2px);
+}
+.adm-tessera-azione:active { transform: none; }
+.adm-tessera-azione:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+
+.adm-tessera-icona {
+  grid-area: icona;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  background: var(--adm-tono-soft);
+  color: var(--adm-tono);
+  font-size: 1.2rem;
+  transition: background-color .2s ease, color .2s ease;
+}
+.adm-tessera-azione:hover .adm-tessera-icona { background: var(--adm-tono); color: #fff; }
+
+.adm-tessera-titolo {
+  grid-area: titolo;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem;
+  min-width: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.015em;
+  overflow-wrap: anywhere;
+}
+
+.adm-tessera-testo {
+  grid-area: testo;
+  min-width: 0;
+  color: var(--adm-muted);
+  font-size: .84rem;
+  line-height: 1.4;
+}
+
+.adm-tessera-freccia {
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: #9aa7ba;
+  font-size: .85rem;
+  transition: color .2s ease, translate .2s var(--adm-curva);
+}
+.adm-tessera-azione:hover .adm-tessera-freccia { color: var(--adm-arancio-testo); translate: 3px -50%; }
+
+/* I toni: l'icona si colora, e un anello sottile dice "guardami" */
+.adm-tessera-azione.is-attenzione { --adm-tono: var(--adm-warn); --adm-tono-soft: var(--adm-warn-soft); border-color: var(--adm-warn-line); }
+.adm-tessera-azione.is-allarme { --adm-tono: var(--adm-danger); --adm-tono-soft: var(--adm-danger-soft); border-color: var(--adm-danger-line); }
+.adm-tessera-azione.is-ok { --adm-tono: var(--adm-ok); --adm-tono-soft: var(--adm-ok-soft); }
+.adm-tessera-azione.is-arancio { --adm-tono: var(--adm-arancio-testo); --adm-tono-soft: var(--adm-arancio-soft); }
+
+/* ---------- Il numerino ----------
+   <span class="adm-badge-conta is-allarme">12</span>
+   Tondo se è una cifra, una pillola se sono di più. Senza tono è blu. */
+.adm-badge-conta {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 .45rem;
+  border-radius: var(--adm-r-pill);
+  background: var(--adm-navy);
+  color: #fff;
+  font-size: .76rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.adm-badge-conta.is-allarme { background: var(--adm-danger); }
+.adm-badge-conta.is-attenzione { background: #b86200; }
+.adm-badge-conta.is-ok { background: var(--adm-ok); }
+.adm-badge-conta.is-neutro { background: var(--adm-line-soft); color: var(--adm-ink-2); }
+.adm-nav-link .adm-badge-conta { min-width: 1.3rem; height: 1.3rem; font-size: .7rem; background: var(--adm-danger); }
+.adm-nav-link.is-active .adm-badge-conta { background: #fff; color: #c2410c; }
+
+/* ---------- Passi numerati ----------
+   <ol class="adm-passi">
+     <li class="is-fatto"><strong>Registrati</strong><span>Fatto il 3 settembre</span></li>
+     <li class="is-adesso"><strong>Carica il certificato</strong><span>Una foto va bene</span></li>
+     <li><strong>Paga la quota</strong><span>In segreteria o con bonifico</span></li>
+   </ol>
+   Il numero lo scrive il CSS. Dentro al <li> il primo elemento è il titolo
+   del passo, il secondo (facoltativo) la spiegazione. */
+.adm-passi {
+  counter-reset: adm-passo;
+  list-style: none;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.adm-passi > li {
+  counter-increment: adm-passo;
+  position: relative;
+  display: grid;
+  gap: .15rem;
+  min-height: 3.25rem;
+  padding: .35rem 0 1.1rem 3.25rem;
+  color: var(--adm-ink);
+  font-size: .95rem;
+  line-height: 1.4;
+}
+.adm-passi > li > :first-child { font-weight: 800; }
+.adm-passi > li > :nth-child(2) { color: var(--adm-muted); font-size: .86rem; }
+
+/* Il cerchio col numero */
+.adm-passi > li::before {
+  content: counter(adm-passo);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2px solid var(--adm-line-strong);
+  border-radius: 50%;
+  background: var(--adm-surface);
+  color: var(--adm-ink-2);
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+/* La linea che unisce un passo al successivo */
+.adm-passi > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(1.1rem - 1px);
+  top: 2.35rem;
+  bottom: .1rem;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--adm-line);
+}
+
+.adm-passi > li.is-fatto::before {
+  content: "✓";
+  border-color: var(--adm-ok);
+  background: var(--adm-ok);
+  color: #fff;
+}
+.adm-passi > li.is-fatto:not(:last-child)::after { background: var(--adm-ok); }
+.adm-passi > li.is-fatto > :first-child { color: var(--adm-ink-2); }
+
+.adm-passi > li.is-adesso::before {
+  border-color: transparent;
+  background: var(--adm-pillola);
+  color: #fff;
+  box-shadow: 0 8px 18px -10px rgba(255, 102, 0, .95);
+}
+
+/* ---------- Vuoto, ma gentile ----------
+   <div class="adm-vuoto-amico">
+     <span class="adm-vuoto-icona"><FaCalendarAlt /></span>
+     <h2>Nessuna partita in programma</h2>
+     <p>Quando ne aggiungi una compare qui e sul calendario del sito.</p>
+     <a class="adm-btn adm-btn-primary">Aggiungi una partita</a>
+   </div>
+   A differenza di .adm-empty invita a fare la prima cosa: il pulsante è
+   la parte importante. */
+.adm-vuoto-amico {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  gap: .5rem;
+  padding: clamp(2rem, 6vw, 3.25rem) 1.5rem;
+  border: 1px solid rgba(0, 43, 92, .08);
+  border-radius: var(--adm-r-xl);
+  background:
+    radial-gradient(60% 80% at 50% 0%, var(--adm-arancio-soft), transparent 70%),
+    var(--adm-surface);
+  box-shadow: var(--adm-shadow);
+  text-align: center;
+}
+.adm-vuoto-amico .adm-vuoto-icona {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  margin-bottom: .5rem;
+  border-radius: 22px;
+  background: var(--adm-surface);
+  color: var(--adm-arancio-testo);
+  font-size: 1.6rem;
+  box-shadow: 0 0 0 1px rgba(255, 102, 0, .18), 0 16px 32px -18px rgba(255, 102, 0, .7);
+}
+.adm-vuoto-amico h2,
+.adm-vuoto-amico h3 {
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+.adm-vuoto-amico p {
+  max-width: 46ch;
+  margin: 0 0 .75rem;
+  color: var(--adm-muted);
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+/* ---------- Barra delle azioni in fondo ----------
+   <div class="adm-barra-azioni-fissa">
+     <button class="adm-btn adm-btn-ghost">Annulla</button>
+     <button class="adm-btn adm-btn-primary">Salva</button>
+   </div>
+   Sul computer è la riga dei pulsanti in fondo al modulo, allineata a
+   destra. Sul telefono resta attaccata sopra alla barra delle sezioni
+   mentre si scorre il modulo: "Salva" è sempre a un pollice. */
+.adm-barra-azioni-fissa {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+
+@media (max-width: 760px) {
+  .adm-barra-azioni-fissa {
+    position: sticky;
+    /* Sopra alla barra in basso (4.2rem più la zona del gesto) */
+    bottom: calc(4.55rem + env(safe-area-inset-bottom));
+    z-index: 20;
+    flex-wrap: nowrap;
+    margin: 1.25rem -1rem 0;
+    padding: .7rem 1rem;
+    border-top: 1px solid var(--adm-line);
+    background: rgba(255, 255, 255, .96);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 -12px 24px -20px rgba(0, 26, 56, .45);
+  }
+  .adm-barra-azioni-fissa .adm-btn { flex: 1 1 0; }
+  /* L'azione principale più larga delle altre */
+  .adm-barra-azioni-fissa .adm-btn-primary,
+  .adm-barra-azioni-fissa .adm-btn-arancio { flex-grow: 2; }
+}
+
+/* ---------- Benvenuto: la fascia blu in cima a una home ----------
+   <header class="adm-benvenuto">
+     <p class="adm-occhiello">Segreteria</p>
+     <h1 class="adm-benvenuto-titolo">Ciao, <em>Emma</em></h1>
+     <p class="adm-benvenuto-testo">Ci sono 4 richieste da decidere.</p>
+     <div class="adm-benvenuto-azioni">…pulsanti…</div>
+   </header>
+   L'unico posto di lavoro con un po' di aurora, e ferma: le macchie di
+   colore non si muovono. */
+.adm-benvenuto {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
+  padding: clamp(1.4rem, 4vw, 2.25rem) clamp(1.25rem, 4vw, 2.25rem);
+  border-radius: var(--adm-r-xl);
+  background:
+    radial-gradient(50% 90% at 100% 0%, rgba(255, 102, 0, .35), transparent 70%),
+    radial-gradient(60% 90% at 0% 100%, rgba(31, 111, 209, .35), transparent 70%),
+    linear-gradient(160deg, var(--adm-navy) 0%, var(--adm-navy-deep) 75%, var(--adm-notte) 100%);
+  box-shadow: 0 30px 60px -36px rgba(0, 26, 56, .7);
+  color: #fff;
+}
+/* Il reticolo della home del sito, che sfuma verso sinistra */
+.adm-benvenuto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 60% 90% at 90% 10%, #000 10%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 90% at 90% 10%, #000 10%, transparent 70%);
+}
+.adm-benvenuto .adm-occhiello { color: var(--adm-arancio-chiaro); }
+.adm-benvenuto-titolo {
+  margin: 0;
+  font-size: clamp(1.8rem, 4.2vw, 2.7rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+.adm-benvenuto-titolo em { font-style: normal; color: var(--adm-arancio-chiaro); }
+.adm-benvenuto-testo {
+  max-width: 56ch;
+  margin: .6rem 0 0;
+  color: rgba(232, 238, 252, .85);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.adm-benvenuto-azioni { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.25rem; }
+/* Sul blu il pulsante "ghost" diventa di vetro */
+.adm-benvenuto .adm-btn-ghost {
+  border-color: rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+.adm-benvenuto .adm-btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .15); border-color: rgba(255, 255, 255, .4); }
+.adm-benvenuto .adm-btn-primary { background: #fff; color: var(--adm-navy); box-shadow: none; }
+.adm-benvenuto .adm-btn-primary:hover:not(:disabled) { background: #f2f5fa; color: var(--adm-navy); }
+
+/* ---------- Sagome d'attesa ----------
+   <div class="adm-sagoma adm-sagoma-titolo"></div>
+   <div class="adm-sagoma adm-sagoma-riga"></div>
+   <div class="adm-sagoma adm-sagoma-scheda"></div>
+   La forma di quello che sta per arrivare, al posto della rotella, quando
+   la forma la si conosce già (un elenco, una scheda). Respirano piano. */
+.adm-sagoma {
+  display: block;
+  border-radius: var(--adm-r-s);
+  background: #e6ebf2;
+  animation: adm-respiro 1.4s ease-in-out infinite;
+}
+.adm-sagoma-riga { height: 14px; width: 100%; margin: .5rem 0; }
+.adm-sagoma-titolo { height: 30px; width: min(60%, 18rem); margin-bottom: .9rem; border-radius: 10px; }
+.adm-sagoma-scheda { height: 5.25rem; border-radius: var(--adm-radius); }
+.adm-sagoma + .adm-sagoma-scheda { margin-top: .6rem; }
+
+@keyframes adm-respiro {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-tessera-azione,
+  .adm-tessera-icona,
+  .adm-tessera-freccia,
+  .adm-btn,
+  .adm-chip,
+  .adm-riquadro,
+  .adm-post-row,
+  .adm-atleta-riga,
+  .adm-nav-link { transition: none; }
+  .adm-tessera-azione:hover { transform: none; }
+  .adm-sagoma { animation: none; }
+}

@@ -1,20 +1,33 @@
-/* =========================================
-   Archivio delle notizie.
-   Stessa lingua visiva della home e del calendario.
-   Vedi NewsPage.jsx. Prefisso: nws-
-   ========================================= */
+/* =====================================================
+   Archivio delle notizie (prefisso nz-)
+   Vedi NewsPage.jsx e SchedaNotizia.jsx.
 
-.nws {
-  --nws-bg: #f6f8fb;
-  --nws-carta: #ffffff;
-  --nws-inchiostro: #0f172a;
-  --nws-testo: #475569;
-  --nws-tenue: #7c8ba1;
-  --nws-bordo: #e6ebf2;
-  --nws-arancio: #ff6600;
-  --nws-raggio: 18px;
-  --nws-ombra: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -16px rgba(15, 23, 42, .22);
-  --nws-ombra-alta: 0 4px 10px rgba(15, 23, 42, .06), 0 24px 48px -24px rgba(15, 23, 42, .3);
+   Quattro tempi: la testata blu attaccata al menu con la copertina
+   dell'ultima uscita, il nastro arancione storto con le etichette, la
+   barra dei filtri di vetro che resta in alto, il mosaico delle notizie.
+   I movimenti comuni (comparse, inclinazione, aurora, nastro, parallasse)
+   arrivano da Movimento.css; qui solo le forme e i pochi movimenti propri.
+   ===================================================== */
+
+/* Le variabili valgono anche sulla pagina della singola notizia (.nzd):
+   la fila "Continua a leggere" usa le stesse schede dell'archivio. */
+.nz,
+.nzd {
+  --nz-fondo: #f4f6fa;
+  --nz-carta: #ffffff;
+  --nz-inchiostro: #0b1526;
+  --nz-testo: #475569;
+  --nz-tenue: #66758b;
+  --nz-bordo: rgba(0, 43, 92, .09);
+  --nz-blu: var(--psd-blu, #002b5c);
+  --nz-notte: #001a38;
+  --nz-arancio: var(--psd-arancio, #ff6600);
+  /* L'arancio pieno su bianco non basta alle scritte piccole */
+  --nz-arancio-testo: #d65400;
+  --nz-raggio: 24px;
+  --nz-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  --nz-ombra: 0 1px 2px rgba(11, 21, 38, .04), 0 18px 40px -28px rgba(0, 26, 56, .45);
+  --nz-ombra-alta: 0 6px 14px rgba(11, 21, 38, .06), 0 40px 70px -34px rgba(0, 26, 56, .55);
 
   /*
    * La tavolozza del pannello, perché questa pagina usa due controlli che
@@ -26,496 +39,1072 @@
   --adm-bg: #f1f4f9;
   --adm-line: #e6ebf2;
   --adm-line-soft: #f0f3f8;
+  --adm-line-strong: #d5dce7;
   --adm-ink: #0f172a;
-  --adm-muted: #7c8ba1;
+  --adm-muted: #66758b;
   --adm-blue: #0b4fd1;
   --adm-blue-dark: #0940a8;
   --adm-blue-soft: #e7eefc;
   --adm-danger: #b42318;
   --adm-danger-soft: #fdecea;
-  --adm-radius: 12px;
+  --adm-radius: 14px;
+  --adm-tocco: 44px;
+  --adm-anello: 0 0 0 3px rgba(255, 102, 0, .18);
   --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
-
-  background: var(--nws-bg);
-  color: var(--nws-testo);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  padding: clamp(1rem, 2vw, 1.6rem) 0 clamp(3rem, 6vw, 5rem);
 }
 
-/* ---------- Intestazione ---------- */
+.nz {
+  min-height: 100vh;
+  min-height: 100svh;
+  background:
+    radial-gradient(60rem 30rem at 100% 44rem, rgba(255, 102, 0, .05), transparent 70%),
+    var(--nz-fondo);
+  color: var(--nz-testo);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  padding-bottom: clamp(3.5rem, 7vw, 6rem);
+}
 
-.nws-intestazione,
-.nws-contenitore {
+/* Il contatore condiviso (Sport/Contatore) nasconde il numero per i
+   lettori di schermo con questa classe, che vive in SportPage.css: se
+   quella pagina non è ancora stata aperta il foglio non c'è, e il numero
+   comparirebbe due volte. */
+.nz .sp-solo-lettori {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.nz .sp-contatore { font-variant-numeric: tabular-nums; }
+
+.nz-punto {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--nz-arancio);
+  box-shadow: 0 0 0 0 rgba(255, 102, 0, .6);
+  animation: nz-pulsa 2.4s ease-out infinite;
+}
+
+/* =====================================================
+   TESTATA
+   ===================================================== */
+
+.nz-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  /* Arrotondata solo sotto: sopra continua la barra di navigazione, che è
+     dello stesso blu, e le due si leggono come un pezzo solo. */
+  border-radius: 0 0 32px 32px;
+  background:
+    radial-gradient(90% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
+    linear-gradient(170deg, var(--nz-blu) 0%, var(--nz-notte) 72%, #00122a 100%);
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .55);
+}
+
+/* Reticolo sottile, come le linee di un campo, che svanisce ai bordi */
+.nz-eroe-griglia {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(75% 70% at 70% 35%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(75% 70% at 70% 35%, #000 20%, transparent 75%);
+}
+
+/* La parola gigante solo disegnata, che scorre più lenta della pagina */
+.nz-eroe-fantasma {
+  position: absolute;
+  z-index: 0;
+  left: -1.5vw;
+  bottom: 3.2rem;
+  font-size: clamp(6rem, 26vw, 23rem);
+  font-weight: 900;
+  line-height: .8;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .08);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.nz-eroe-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5.5rem) clamp(1.25rem, 5vw, 3.5rem) 0;
+}
+
+.nz-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 1.4rem;
+  padding: .45rem .95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .14);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .85);
+}
+
+.nz-titolo {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: clamp(3rem, 10vw, 7.4rem);
+  font-weight: 900;
+  line-height: .92;
+  letter-spacing: -.05em;
+  color: #fff;
+}
+/* Le discendenti ("p", "g") non vengono tagliate dal clip del gradiente */
+.nz-titolo .mv-testo-vivo { display: inline-block; padding-bottom: .1em; }
+
+.nz-sottotitolo {
+  max-width: 34rem;
+  margin: 1.3rem 0 0;
+  font-size: clamp(1.02rem, 1.8vw, 1.25rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .78);
+}
+
+/* ---------- Scorciatoie per etichetta ---------- */
+
+.nz-scorciatoie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: 1.8rem;
+}
+
+.nz-scorciatoia {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .55rem .5rem .95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .25s ease, border-color .25s ease, translate .25s var(--nz-curva);
+}
+.nz-scorciatoia small {
+  display: grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 .4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  font-size: .72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.nz-scorciatoia:hover { translate: 0 -2px; border-color: rgba(255, 255, 255, .4); background: rgba(255, 255, 255, .13); }
+.nz-scorciatoia[aria-pressed="true"] {
+  border-color: transparent;
+  background: linear-gradient(135deg, #ff7a1a, var(--nz-arancio) 50%, #ff3d00);
+  box-shadow: 0 12px 26px -12px rgba(255, 102, 0, .8);
+}
+.nz-scorciatoia[aria-pressed="true"] small { background: rgba(0, 0, 0, .18); }
+.nz-scorciatoia:focus-visible { outline: 3px solid #ffb27a; outline-offset: 3px; }
+
+/* La comparsa in fila riscrive la transizione: si rimette il
+   sollevamento, subito e senza il ritardo del turno. */
+.mv-attivo .nz-scorciatoia[data-rivela] {
+  transition:
+    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
+    translate .25s var(--nz-curva) 0s,
+    background .25s ease 0s,
+    border-color .25s ease 0s;
+}
+
+/* ---------- La copertina dell'ultima uscita ---------- */
+
+.nz-mazzo { display: none; }
+
+.nz-mazzo-dentro {
+  position: relative;
+  width: min(100%, 400px);
+  aspect-ratio: 4 / 5;
+  margin: 0 auto;
+}
+
+/* I due fogli sotto, a ventaglio: le uscite precedenti, solo foto */
+.nz-mazzo-foglio {
+  position: absolute;
+  inset: 4% 6%;
+  overflow: hidden;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7);
+  transition: rotate .7s var(--nz-curva), translate .7s var(--nz-curva);
+}
+.nz-mazzo-foglio img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.7) brightness(.55); }
+.nz-mazzo-foglio-1 { rotate: 9deg; translate: 16% 2%; }
+.nz-mazzo-foglio-2 { rotate: -10deg; translate: -16% 4%; }
+.nz-mazzo:hover .nz-mazzo-foglio-1 { rotate: 13deg; translate: 22% 1%; }
+.nz-mazzo:hover .nz-mazzo-foglio-2 { rotate: -14deg; translate: -22% 3%; }
+
+.nz-mazzo-cima {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  color: #fff;
+  text-decoration: none;
+  /* "rotate" e non transform: transform è dell'inclinazione */
+  rotate: -2deg;
+  box-shadow: 0 50px 90px -40px rgba(0, 0, 0, .8), 0 0 0 8px rgba(255, 255, 255, .04);
+}
+.nz-mazzo-cima > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 1.2s var(--nz-curva);
+}
+.nz-mazzo-cima:hover > img { scale: 1.06; }
+.nz-mazzo-cima:hover { color: #fff; }
+.nz-mazzo-cima:focus-visible { outline: 3px solid #ffb27a; outline-offset: 5px; }
+
+.nz-mazzo-velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 18, 42, .96) 0%, rgba(0, 18, 42, .6) 42%, rgba(0, 18, 42, 0) 72%);
+}
+
+.nz-mazzo-testi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  padding: 1.6rem;
+}
+
+.nz-mazzo-bollo {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  align-self: flex-start;
+  padding: .38rem .8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.nz-mazzo-titolo {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -.025em;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nz-mazzo-leggi {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .85rem;
+  font-weight: 700;
+  color: #ffb27a;
+}
+.nz-mazzo-leggi svg { transition: translate .3s var(--nz-curva); }
+.nz-mazzo-cima:hover .nz-mazzo-leggi svg { translate: 4px 0; }
+
+/* ---------- I numeri ---------- */
+
+.nz-numeri {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 1240px;
+  margin: clamp(2.2rem, 5vw, 3.4rem) auto 0;
+  /* Sotto resta il posto per il nastro, che ci sale sopra ruotato */
+  padding: 0 clamp(1.25rem, 5vw, 3.5rem) clamp(4.2rem, 7vw, 5.4rem);
+}
+.nz-numeri > div {
+  display: flex;
+  flex-direction: column-reverse; /* il numero sopra, l'etichetta sotto */
+  justify-content: flex-end;
+  gap: .3rem;
+  padding: 1rem 1.15rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .13);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+.nz-numeri dt {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .66);
+  line-height: 1.3;
+}
+.nz-numeri dd {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+/* "3 giorni fa" non è un numero: più piccolo, o non ci starebbe */
+.nz-numeri dd.nz-numero-testo {
+  display: flex;
+  align-items: flex-end;
+  min-height: 1em;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+  letter-spacing: -.02em;
+  color: #ffb27a;
+}
+
+/* =====================================================
+   NASTRO
+   ===================================================== */
+
+/* Sale sul bordo della testata: la cucitura storta fra il blu e il
+   chiaro è il punto in cui l'occhio passa dal titolo alle notizie. */
+.nz-fascia-cornice {
+  position: relative;
+  z-index: 3;
+  margin-top: -2.2rem;
+  padding: .7rem 0;
+  overflow-x: clip;
+}
+
+.nz-fascia {
+  --mv-nastro-durata: 38s;
+  padding: .95rem 0;
+  background: linear-gradient(90deg, #ff4d00, var(--nz-arancio) 40%, #ff7a1a);
+  color: #fff;
+  transform: rotate(-1.6deg) scale(1.04);
+  box-shadow: 0 20px 40px -20px rgba(255, 102, 0, .65);
+  /* A tutta larghezza la sfumatura ai lati farebbe sembrare il colore
+     sbiadito sui bordi dello schermo */
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.nz-fascia-giro { display: flex; flex: none; }
+
+.nz-fascia-voce {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-right: 1.5rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.nz-fascia-stella { font-size: .8em; color: var(--nz-blu); }
+
+/* =====================================================
+   CONTENITORE, BARRA DEI FILTRI
+   ===================================================== */
+
+.nz-contenitore {
   max-width: 1320px;
   margin: 0 auto;
   padding: 0 clamp(1rem, 4vw, 2rem);
 }
 
-.nws-intestazione { margin-bottom: clamp(1rem, 2.5vw, 1.5rem); }
-
-.nws-occhiello {
-  display: inline-block;
-  margin-bottom: .5rem;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(255, 102, 0, .1);
-  color: var(--nws-arancio);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .09em;
-  text-transform: uppercase;
+.nz-barra {
+  position: sticky;
+  /* Sotto all'intestazione quando c'è, in cima quando si è nascosta */
+  top: calc(var(--testata-visibile, 0px) + .75rem);
+  z-index: 40;
+  margin: clamp(1.4rem, 3vw, 2.2rem) 0 clamp(1.4rem, 3vw, 2rem);
+  transition: top .5s var(--nz-curva);
 }
 
-.nws-titolo-pagina {
-  margin: 0 0 .25rem;
-  color: var(--nws-inchiostro);
-  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -.02em;
-  line-height: 1.15;
-}
-
-.nws-sottotitolo {
-  margin: 0;
-  color: var(--nws-tenue);
-  font-size: clamp(.9rem, 1.5vw, 1rem);
-}
-
-/* ---------- Filtri ---------- */
-
-.nws-filtri {
-  display: grid;
-  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
-  gap: .6rem 1rem;
-  align-items: center;
-
-  margin-bottom: 1.25rem;
-  padding: .8rem;
-  border: 1px solid var(--nws-bordo);
-  border-radius: var(--nws-raggio);
-  background: var(--nws-carta);
-  box-shadow: var(--nws-ombra);
-}
-
-.nws-cerca {
+.nz-barra-vetro {
   display: flex;
   align-items: center;
   gap: .5rem;
-
-  padding: 0 .7rem;
-  height: 38px;
-  border: 1px solid var(--nws-bordo);
-  border-radius: 10px;
-  background: var(--nws-bg);
+  padding: .55rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .74);
+  border: 1px solid rgba(255, 255, 255, .9);
+  box-shadow:
+    0 0 0 1px var(--nz-bordo),
+    0 24px 50px -28px rgba(0, 26, 56, .45);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
 }
 
-.nws-cerca svg { flex: 0 0 auto; color: var(--nws-tenue); }
+.nz-barra-riga {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex: 1 1 250px;
+  min-width: 0;
+}
 
-.nws-cerca input {
+.nz-cerca {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 .9rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: rgba(0, 43, 92, .06);
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.nz-cerca:focus-within {
+  border-color: var(--nz-arancio);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 102, 0, .16);
+}
+.nz-cerca > svg { flex: none; color: var(--nz-tenue); }
+.nz-cerca input {
   flex: 1;
   min-width: 0;
   border: 0;
   background: none;
-  color: var(--nws-inchiostro);
+  color: var(--nz-inchiostro);
   font: inherit;
-  font-size: .88rem;
+  font-size: .92rem;
   outline: none;
 }
+/* La crocetta del browser nei campi di ricerca: c'è già la nostra */
+.nz-cerca input::-webkit-search-cancel-button { display: none; }
 
-.nws-filtri-campi {
+.nz-cerca-svuota {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 43, 92, .08);
+  color: var(--nz-testo);
+  font-size: .7rem;
+  cursor: pointer;
+}
+.nz-cerca-svuota:hover { background: var(--nz-arancio); color: #fff; }
+
+.nz-campi {
+  display: flex;
+  gap: .5rem;
+  flex: 3 1 620px;
+  min-width: 0;
+}
+/* I controlli del pannello sono nati per una colonna stretta: qui stanno
+   in riga e devono poter restringersi insieme. */
+.nz-campi > * { flex: 1 1 130px; min-width: 0; }
+
+.nz-barra .adm-input {
+  min-height: 44px;
+  border-radius: 14px;
+  border-color: rgba(0, 43, 92, .1);
+  background: rgba(255, 255, 255, .92);
+  font-size: .88rem;
+}
+.nz-barra .adm-input:focus,
+.nz-barra .tnd.is-aperta .tnd-bottone {
+  border-color: var(--nz-arancio);
+  box-shadow: 0 0 0 3px rgba(255, 102, 0, .16);
+}
+
+/* Il pulsante dei filtri esiste solo sul telefono */
+.nz-apri-filtri { display: none; }
+
+/* =====================================================
+   RISULTATI
+   ===================================================== */
+
+/* Chi arriva qui da un'etichetta della testata o dal cambio pagina:
+   lo scorrimento si ferma sotto alla barra, non dietro */
+.nz-risultati { scroll-margin-top: 9rem; }
+
+.nz-conto-riga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.nz-conto {
+  margin: 0;
+  color: var(--nz-tenue);
+  font-size: .95rem;
+  font-weight: 600;
+}
+.nz-conto strong {
+  color: var(--nz-inchiostro);
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.nz-accesi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nz-accesi button {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: 16rem;
+  padding: .42rem .8rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--nz-blu);
+  color: #fff;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+.nz-accesi button svg { flex: none; font-size: .65rem; opacity: .75; }
+.nz-accesi button:hover { background: var(--nz-arancio); }
+.nz-accesi .nz-accesi-tutti {
+  background: transparent;
+  color: var(--nz-arancio-testo);
+  box-shadow: inset 0 0 0 1px rgba(255, 102, 0, .35);
+}
+.nz-accesi .nz-accesi-tutti:hover { background: rgba(255, 102, 0, .1); }
+
+/* ---------- Il mosaico ---------- */
+
+.nz-mosaico {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(.9rem, 1.6vw, 1.25rem);
+}
+
+.nz-cella { display: flex; min-width: 0; }
+.nz-cella > .nz-scheda { flex: 1; }
+
+/* ---------- La scheda ---------- */
+
+.nz-scheda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--nz-raggio);
+  background: var(--nz-carta);
+  box-shadow: var(--nz-ombra);
+  color: inherit;
+  text-decoration: none;
+  /* Il sollevamento usa translate: transform è dell'inclinazione, e le
+     due proprietà si sommano invece di cancellarsi. */
+  transition: translate .35s var(--nz-curva), box-shadow .35s ease;
+}
+.mv-attivo .nz-scheda[data-inclina] {
+  transition: transform .5s var(--nz-curva), translate .35s var(--nz-curva), box-shadow .35s ease;
+}
+.mv-attivo .nz-scheda[data-inclina]:hover { transition-duration: .12s, .35s, .35s; }
+
+.nz-scheda:hover {
+  translate: 0 -6px;
+  box-shadow: var(--nz-ombra-alta);
+  color: inherit;
+}
+.nz-scheda:focus-visible {
+  outline: 3px solid var(--nz-arancio);
+  outline-offset: 3px;
+}
+
+.nz-foto-cornice {
+  position: relative;
+  display: block;
+  flex: none;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0a3d7a, var(--nz-notte));
+}
+.nz-foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 1s var(--nz-curva);
+}
+.nz-scheda:hover .nz-foto { scale: 1.07; }
+
+.nz-bollini {
+  position: absolute;
+  z-index: 2;
+  top: .85rem;
+  left: .85rem;
+  right: .85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  pointer-events: none;
+}
+
+.nz-bollino {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  max-width: 12rem;
+  padding: .32rem .7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  background: rgba(0, 20, 45, .5);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  color: #fff;
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nz-bollino-evidenza {
+  border-color: transparent;
+  background: linear-gradient(135deg, #ff7a1a, var(--nz-arancio) 55%, #ff3d00);
+  box-shadow: 0 10px 22px -10px rgba(255, 102, 0, .8);
+}
+.nz-bollino-evidenza .nz-punto { background: #fff; animation-name: nz-pulsa-chiaro; }
+.nz-bollino-altre { background: rgba(0, 20, 45, .72); }
+
+.nz-testi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  flex: 1;
+  padding: 1.1rem 1.2rem 1.15rem;
+}
+
+.nz-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: .5rem;
-}
-
-/* I controlli del pannello sono nati per una colonna stretta: qui stanno in
-   riga e devono poter restringersi insieme. */
-.nws-filtri-campi > * { flex: 1 1 150px; min-width: 0; }
-
-.nws-azzera {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-
-  flex: 0 0 auto;
-  padding: 0 .8rem;
-  height: 38px;
-  border: 1px solid var(--nws-bordo);
-  border-radius: 10px;
-  background: var(--nws-carta);
-
-  color: var(--nws-testo);
-  font: inherit;
-  font-size: .82rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.nws-azzera:hover { border-color: var(--nws-arancio); color: var(--nws-arancio); }
-
-/* Il pulsante dei filtri esiste solo sul telefono */
-.nws-apri-filtri { display: none; }
-
-.nws-conto {
-  margin: 0 0 .8rem;
-  color: var(--nws-tenue);
-  font-size: .84rem;
-}
-
-/* ---------- Griglia ---------- */
-
-.nws-griglia {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 1rem;
-}
-
-.nws-scheda {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-  border-radius: var(--nws-raggio);
-  background: var(--nws-carta);
-  box-shadow: var(--nws-ombra);
-
-  color: inherit;
-  text-decoration: none;
-
-  /* Il sollevamento usa translate: transform serve alla comparsa allo
-     scorrimento (data-rivela-gruppo sulla griglia), e le due proprietà si
-     sommano invece di cancellarsi. */
-  transition: translate .3s ease, box-shadow .3s ease;
-}
-
-.nws-scheda:hover {
-  translate: 0 -4px;
-  box-shadow: var(--nws-ombra-alta);
-}
-
-/* La comparsa riscrive la transizione con le sue tre proprietà e il suo
-   ritardo in fila: si rimettono ombra e sollevamento, subito e senza
-   ritardo, se no il passaggio del mouse aspetterebbe il turno della scheda. */
-.mv-attivo .nws-scheda[data-rivela] {
-  transition:
-    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    translate .3s ease 0s,
-    box-shadow .3s ease 0s;
-}
-
-/* Una riga arancione che si allunga sotto la foto: dice "questa si apre"
-   anche a chi non nota il mezzo sollevamento. Sulla grande no: lì la foto
-   è lo sfondo e la riga cadrebbe in mezzo al titolo. */
-.nws-scheda:not(.nws-scheda-grande)::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 1;
-  height: 3px;
-  background: linear-gradient(90deg, var(--nws-arancio), #ffb36b);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .45s cubic-bezier(.16, 1, .3, 1);
-}
-.nws-scheda:not(.nws-scheda-grande):hover::before,
-.nws-scheda:not(.nws-scheda-grande):focus-visible::before { transform: scaleX(1); }
-
-.nws-scheda:focus-visible {
-  outline: 3px solid var(--nws-arancio);
-  outline-offset: 3px;
-}
-
-.nws-foto {
-  display: block;
-  aspect-ratio: 16 / 10;
-  /* Non si stringe quando il titolo è lungo: senza, in una fila di quattro
-     schede le immagini vengono tutte alte diverse. */
-  flex: 0 0 auto;
-  background-size: cover;
-  background-position: center;
-  transition: transform .5s ease;
-}
-
-.nws-scheda:hover .nws-foto { transform: scale(1.05); }
-
-.nws-testi {
-  display: flex;
-  flex-direction: column;
-  gap: .35rem;
-  flex: 1;
-  padding: .85rem .95rem 1rem;
-}
-
-.nws-etichette {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .4rem;
-}
-
-.nws-etichetta,
-.nws-sport {
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: .68rem;
+  color: var(--nz-tenue);
+  font-size: .7rem;
   font-weight: 700;
-  white-space: nowrap;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.nz-meta-punto {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--nz-arancio);
 }
 
-/* Le etichette le scrive lo staff e possono essere lunghe: oltre una certa
-   misura si troncano, il nome intero resta nel suggerimento al passaggio. */
-.nws-etichetta {
-  max-width: 11rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background: var(--nws-arancio);
-  color: #fff;
-}
-
-/* Il "+2" dice che ce ne sono altre senza gridarlo quanto le prime */
-.nws-etichetta-altre {
-  background: rgba(255, 102, 0, .12);
-  color: var(--nws-arancio);
-}
-.nws-scheda-grande .nws-etichetta-altre {
-  background: rgba(255, 255, 255, .18);
-  color: #fff;
-}
-
-.nws-sport {
-  border: 1px solid var(--nws-bordo);
-  color: var(--nws-tenue);
-}
-
-.nws-data {
-  color: var(--nws-tenue);
-  font-size: .74rem;
-  font-weight: 600;
-}
-
-.nws-titolo {
-  color: var(--nws-inchiostro);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.28;
-  letter-spacing: -.01em;
-
-  /* Tre righe al massimo: le schede di una fila devono restare alte uguali,
-     e un titolo lunghissimo sfalserebbe tutta la riga. */
+.nz-scheda-titolo {
+  color: var(--nz-inchiostro);
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.018em;
+  /* Tre righe al massimo: le schede di una fila restano alte uguali */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.nws-sommario {
-  color: var(--nws-tenue);
-  font-size: .84rem;
-  line-height: 1.45;
-
+.nz-sommario {
+  color: var(--nz-testo);
+  font-size: .88rem;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.nws-leggi {
-  display: inline-flex;
+.nz-leggi {
+  display: flex;
   align-items: center;
-  gap: .35rem;
-
+  justify-content: space-between;
+  gap: .5rem;
   margin-top: auto;
-  padding-top: .5rem;
-  color: var(--nws-arancio);
+  padding-top: .7rem;
+  border-top: 1px solid var(--nz-bordo);
+  color: var(--nz-inchiostro);
   font-size: .82rem;
   font-weight: 700;
 }
-
-.nws-leggi svg { font-size: .7rem; transition: transform .2s ease; }
-.nws-scheda:hover .nws-leggi svg { transform: translateX(3px); }
-
-/* ---------- La prima, in evidenza ---------- */
-
-.nws-scheda-grande {
-  grid-column: 1 / -1;
-  justify-content: flex-end;
-  min-height: clamp(260px, 34vw, 380px);
+.nz-leggi-tondo {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--nz-bordo);
+  color: var(--nz-inchiostro);
+  font-size: .75rem;
+  transition: background .3s ease, color .3s ease, border-color .3s ease, rotate .4s var(--nz-curva);
+}
+.nz-scheda:hover .nz-leggi-tondo {
+  background: var(--nz-arancio);
+  border-color: var(--nz-arancio);
   color: #fff;
+  rotate: -45deg;
 }
 
-.nws-scheda-grande .nws-foto {
+/* ---------- La grande, in evidenza ---------- */
+
+.nz-scheda-grande {
+  justify-content: flex-end;
+  min-height: clamp(420px, 70vw, 520px);
+  background: var(--nz-notte);
+  color: #fff;
+}
+.nz-scheda-grande .nz-foto-cornice {
   position: absolute;
   inset: 0;
   aspect-ratio: auto;
 }
-
-.nws-velo {
+.nz-velo {
   position: absolute;
   inset: 0;
-  display: block;
-  background: linear-gradient(
-    to top,
-    rgba(5, 12, 25, .9) 0%,
-    rgba(5, 12, 25, .55) 40%,
-    rgba(5, 12, 25, .05) 75%
-  );
+  z-index: 1;
+  background:
+    linear-gradient(to top, rgba(0, 16, 38, .97) 0%, rgba(0, 16, 38, .82) 42%, rgba(0, 16, 38, .15) 78%),
+    radial-gradient(80% 60% at 0% 100%, rgba(255, 102, 0, .28), transparent 70%);
 }
-
-.nws-scheda-grande .nws-testi {
-  position: relative;
-  flex: 0 0 auto;
-  max-width: 62ch;
-  padding: clamp(1rem, 3vw, 1.8rem);
+.nz-scheda-grande .nz-testi {
+  z-index: 2;
+  flex: none;
+  gap: .8rem;
+  padding: clamp(1.3rem, 3vw, 2.2rem);
 }
-
-.nws-scheda-grande .nws-titolo {
+.nz-scheda-grande .nz-meta { color: rgba(255, 255, 255, .78); }
+.nz-scheda-grande .nz-scheda-titolo {
   color: #fff;
-  font-size: clamp(1.2rem, 2.6vw, 1.9rem);
-  -webkit-line-clamp: 2;
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -.035em;
+  max-width: 22ch;
+}
+.nz-scheda-grande .nz-sommario {
+  max-width: 56ch;
+  color: rgba(255, 255, 255, .8);
+  font-size: .98rem;
+  -webkit-line-clamp: 3;
+}
+.nz-scheda-grande .nz-leggi {
+  justify-content: flex-start;
+  gap: .8rem;
+  border-top-color: rgba(255, 255, 255, .16);
+  color: #fff;
+  font-size: .9rem;
+}
+.nz-scheda-grande .nz-leggi-tondo {
+  width: 44px;
+  height: 44px;
+  border-color: transparent;
+  background: var(--nz-arancio);
+  color: #fff;
+  box-shadow: 0 12px 26px -10px rgba(255, 102, 0, .9);
 }
 
-.nws-scheda-grande .nws-sommario { color: rgba(255, 255, 255, .8); }
-.nws-scheda-grande .nws-data { color: rgba(255, 255, 255, .75); }
+/* ---------- La larga, scura ---------- */
 
-.nws-scheda-grande .nws-sport {
-  border-color: rgba(255, 255, 255, .35);
-  color: rgba(255, 255, 255, .85);
+.nz-scheda-larga {
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgba(10, 74, 147, .9), transparent 60%),
+    linear-gradient(160deg, var(--nz-blu), var(--nz-notte));
+  color: #fff;
 }
+.nz-scheda-larga .nz-meta { color: rgba(255, 255, 255, .7); }
+.nz-scheda-larga .nz-scheda-titolo { color: #fff; font-size: 1.3rem; }
+.nz-scheda-larga .nz-sommario { color: rgba(255, 255, 255, .75); -webkit-line-clamp: 3; }
+.nz-scheda-larga .nz-leggi { color: #fff; border-top-color: rgba(255, 255, 255, .14); }
+.nz-scheda-larga .nz-leggi-tondo { border-color: rgba(255, 255, 255, .25); color: #fff; }
 
-/* ---------- Pagine ---------- */
+/* ---------- Attese e vuoti ---------- */
 
-.nws-pagine {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
+/* Sagome invece della rotella: lo spazio è già quello definitivo,
+   quindi quando le notizie arrivano la pagina non salta. */
+.nz-sagoma {
+  display: block;
+  min-height: 340px;
+  border-radius: var(--nz-raggio);
+  background: linear-gradient(100deg, #e9edf4 30%, #f6f8fb 50%, #e9edf4 70%);
+  background-size: 220% 100%;
+  animation: nz-onda 1.4s infinite linear;
 }
+.nz-sagoma-grande { min-height: 440px; }
 
-.nws-pagine button {
-  padding: .5rem 1rem;
-  border: 1px solid var(--nws-bordo);
-  border-radius: 999px;
-  background: var(--nws-carta);
-
-  color: var(--nws-inchiostro);
-  font: inherit;
-  font-size: .84rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  transition: border-color .2s ease, color .2s ease;
-}
-
-.nws-pagine button:hover:not(:disabled) {
-  border-color: var(--nws-arancio);
-  color: var(--nws-arancio);
-}
-
-.nws-pagine button:disabled { opacity: .4; cursor: default; }
-
-.nws-pagine span {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  color: var(--nws-tenue);
-  font-size: .84rem;
-}
-
-/* ---------- Vuoti e attese ---------- */
-
-.nws-vuoto {
+.nz-vuoto {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .6rem;
-
-  margin: 0;
-  padding: 3rem 1.2rem;
-  border: 1px dashed var(--nws-bordo);
-  border-radius: var(--nws-raggio);
-  background: var(--nws-carta);
-  color: var(--nws-tenue);
+  gap: .7rem;
+  padding: clamp(3rem, 8vw, 5rem) 1.2rem;
+  border-radius: var(--nz-raggio);
+  border: 1px dashed rgba(0, 43, 92, .18);
+  background: rgba(255, 255, 255, .7);
+  color: var(--nz-tenue);
   text-align: center;
 }
+.nz-vuoto > svg { font-size: 2.2rem; color: var(--nz-arancio); opacity: .8; }
+.nz-vuoto strong { color: var(--nz-inchiostro); font-size: 1.1rem; }
 
-.nws-vuoto svg { font-size: 1.8rem; opacity: .5; }
+.nz-azzera {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: .4rem;
+  padding: .7rem 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--nz-arancio);
+  color: #fff;
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 14px 28px -14px rgba(255, 102, 0, .9);
+}
+.nz-azzera:hover { background: #e85c00; }
 
-/* Sagome grigie invece della rotella: lo spazio è già quello definitivo,
-   quindi quando le notizie arrivano la pagina non salta. */
-.nws-sagoma {
-  display: block;
-  min-height: 280px;
-  border-radius: var(--nws-raggio);
-  background: linear-gradient(100deg, #eef1f6 30%, #f7f9fc 50%, #eef1f6 70%);
-  background-size: 220% 100%;
-  animation: nwsOnda 1.4s infinite linear;
+/* ---------- Pagine ---------- */
+
+.nz-pagine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
 }
 
-@keyframes nwsOnda {
+.nz-pagine-numeri {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin: 0;
+  padding: .35rem;
+  border-radius: 999px;
+  list-style: none;
+  background: var(--nz-carta);
+  box-shadow: var(--nz-ombra);
+}
+
+.nz-pagine button {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 .6rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--nz-inchiostro);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.nz-pagine button:hover:not(:disabled):not(.is-corrente) { background: rgba(0, 43, 92, .07); }
+.nz-pagine button.is-corrente {
+  background: linear-gradient(135deg, #ff7a1a, var(--nz-arancio) 55%, #ff3d00);
+  color: #fff;
+  box-shadow: 0 10px 22px -10px rgba(255, 102, 0, .9);
+}
+.nz-pagine-buco { padding: 0 .2rem; color: var(--nz-tenue); }
+
+.nz-pagine .nz-pagina-freccia {
+  width: 52px;
+  height: 52px;
+  background: var(--nz-blu);
+  color: #fff;
+  box-shadow: var(--nz-ombra);
+}
+.nz-pagine .nz-pagina-freccia:hover:not(:disabled) { background: var(--nz-arancio); }
+.nz-pagine .nz-pagina-freccia:disabled { opacity: .3; cursor: default; }
+.nz-pagine button:focus-visible { outline: 3px solid var(--nz-arancio); outline-offset: 2px; }
+
+/* =====================================================
+   MOVIMENTI PROPRI
+   ===================================================== */
+
+@keyframes nz-pulsa {
+  0% { box-shadow: 0 0 0 0 rgba(255, 102, 0, .6); }
+  70%, 100% { box-shadow: 0 0 0 10px rgba(255, 102, 0, 0); }
+}
+@keyframes nz-pulsa-chiaro {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .7); }
+  70%, 100% { box-shadow: 0 0 0 9px rgba(255, 255, 255, 0); }
+}
+@keyframes nz-onda {
   from { background-position: 180% 0; }
   to { background-position: -20% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nws-sagoma { animation: none; }
-  .nws-scheda,
-  .nws-scheda::before,
-  .nws-leggi svg,
-  .nws-foto { transition: none; }
+  .nz-punto, .nz-sagoma { animation: none; }
+  .nz-scheda, .nz-foto, .nz-leggi-tondo, .nz-mazzo-foglio,
+  .nz-mazzo-cima > img, .nz-scorciatoia, .nz-barra { transition: none; }
+  .nz-scheda:hover, .nz-scorciatoia:hover { translate: none; }
+  .nz-scheda:hover .nz-foto, .nz-mazzo-cima:hover > img { scale: none; }
 }
 
-/* ---------- Schermi medi ---------- */
+/* =====================================================
+   SCHERMI
+   ===================================================== */
 
-@media (max-width: 900px) {
-  .nws-filtri { grid-template-columns: minmax(0, 1fr); }
+/* Due colonne: la grande e la larga occupano la fila intera */
+@media (min-width: 640px) {
+  .nz-mosaico { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nz-cella-grande,
+  .nz-cella-larga { grid-column: span 2; }
+
+  .nz-scheda-larga { flex-direction: row; }
+  .nz-scheda-larga .nz-foto-cornice { width: 46%; aspect-ratio: auto; min-height: 100%; }
+  .nz-scheda-larga .nz-testi { justify-content: center; padding: 1.6rem; }
+}
+
+/* La copertina accanto al titolo, dove c'è posto */
+@media (min-width: 1000px) {
+  .nz-eroe-dentro { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); }
+  .nz-mazzo { display: block; }
+}
+
+/* Quattro colonne: la grande prende due colonne per due righe */
+@media (min-width: 1100px) {
+  .nz-mosaico { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .nz-cella-grande { grid-row: span 2; }
+  .nz-scheda-grande { min-height: 100%; }
+  .nz-scheda-larga .nz-scheda-titolo { font-size: 1.45rem; }
+}
+
+/* Su schermi medi la barra va su due righe: la ricerca sopra, i filtri
+   sotto, invece di cinque controlli schiacciati */
+@media (max-width: 1080px) {
+  .nz-barra-vetro { flex-wrap: wrap; }
+  .nz-barra-riga, .nz-campi { flex-basis: 100%; }
 }
 
 /* ---------- Telefoni ---------- */
 
 @media (max-width: 720px) {
-  /*
-   * I filtri dietro a un pulsante.
-   *
-   * Cinque controlli in cima alla pagina spingerebbero le notizie sotto la
-   * piega, e le notizie sono quello che si è venuti a leggere.
-   */
-  .nws-filtri { display: none; }
-  .nws-filtri.is-aperti { display: grid; }
+  .nz-numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  .nws-apri-filtri {
+  .nz-barra-vetro { padding: .45rem; border-radius: 20px; }
+
+  .nz-apri-filtri {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: .45rem;
-
-    margin-bottom: 1rem;
-    padding: .55rem .9rem;
-    border: 1px solid var(--nws-bordo);
-    border-radius: 999px;
-    background: var(--nws-carta);
-
-    color: var(--nws-inchiostro);
+    flex: none;
+    height: 44px;
+    padding: 0 1rem;
+    border: 0;
+    border-radius: 14px;
+    background: var(--nz-blu);
+    color: #fff;
     font: inherit;
-    font-size: .85rem;
-    font-weight: 600;
+    font-size: .86rem;
+    font-weight: 700;
     cursor: pointer;
   }
+  .nz-barra.is-aperta .nz-apri-filtri { background: var(--nz-arancio); }
 
-  /* Un puntino arancione quando un filtro è acceso: chiuso il pannello,
-     altrimenti non si saprebbe perché mancano delle notizie. */
-  .nws-pallino {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--nws-arancio);
+  /* Quanti filtri sono accesi, anche a pannello chiuso: altrimenti non si
+     saprebbe perché mancano delle notizie */
+  .nz-pallino {
+    display: grid;
+    place-items: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: var(--nz-arancio);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 800;
   }
+  .nz-barra.is-aperta .nz-pallino { background: #fff; color: var(--nz-arancio); }
 
-  .nws-filtri-campi > * { flex-basis: 100%; }
-  .nws-scheda-grande { min-height: 230px; }
+  /* I filtri dietro al pulsante: cinque controlli in cima spingerebbero
+     le notizie sotto la piega */
+  .nz-campi { display: none; }
+  .nz-barra.is-aperta .nz-campi {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .45rem;
+    padding: .1rem .05rem .1rem;
+  }
+  .nz-barra.is-aperta .nz-campi > :nth-child(1),
+  .nz-barra.is-aperta .nz-campi > :nth-child(2),
+  .nz-barra.is-aperta .nz-campi > :nth-child(5) { grid-column: 1 / -1; }
+
+  .nz-conto strong { font-size: 1.4rem; }
+}
+
+@media (max-width: 420px) {
+  .nz-occhiello { font-size: .66rem; letter-spacing: .08em; }
+  .nz-numeri > div { padding: .85rem .9rem; }
 }

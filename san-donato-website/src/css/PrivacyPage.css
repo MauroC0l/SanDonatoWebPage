@@ -1,211 +1,84 @@
-/* ============================= */
-/* PrivacyPage.css - Scoped: prv- */
-/* ============================= */
+/* =====================================================
+   Privacy — prefisso prv-
 
-:root {
-  --prv-bg: #f8fafc;
-  --prv-card-bg: #ffffff;
-  --prv-primary: #1e293b;   /* Blu scuro elegante */
-  --prv-accent: #3b82f6;    /* Blu affidabile per link */
-  --prv-text: #334155;
-  --prv-text-light: #64748b;
-  --prv-border: #e2e8f0;
-  --prv-radius: 16px;
+   I pezzi comuni ai documenti (apertura, nastro, schede dei file) stanno
+   in Documenti.css. Qui solo l'impaginazione propria: la frase a sinistra
+   e il documento a destra, che su telefono si mettono uno sotto l'altro.
+   ===================================================== */
+
+.prv-corpo {
+  display: grid;
+  gap: clamp(36px, 5vw, 56px);
+  align-items: start;
 }
 
-/* Animazione Dedicata */
-@keyframes prvEntry {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.prv-fade-in {
-  animation: prvEntry 0.6s ease-out forwards;
-  opacity: 0;
-  overflow-x: hidden;
-}
-
-/* LAYOUT */
-.privacy-page {
-  min-height: 80vh; 
-  background: var(--prv-bg);
-  /* Padding fluido */
-  padding: clamp(1.5rem, 4vw, 3rem) 1rem; 
-  font-family: 'Inter', sans-serif;
-  color: var(--prv-text);
-  display: flex;
-  justify-content: center;
-}
-
-.prv-container {
-  max-width: 800px;
-  width: 100%;
-}
-
-/* HEADER */
-.prv-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.prv-icon-circle {
-  width: 60px;
-  height: 60px;
-  background: #e0f2fe;
-  color: var(--prv-accent);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  margin: 0 auto 1rem;
-}
-
-.prv-title {
-  /* Dimensione fluida */
-  font-size: clamp(1.8rem, 4vw, 2.2rem); 
-  font-weight: 800;
-  color: var(--prv-primary);
-  margin-bottom: 0.5rem;
-}
-
-.prv-subtitle {
-  color: var(--prv-text-light);
-  font-size: 1.1rem;
-}
-
-/* CARD CONTENUTO */
-.prv-content-card {
-  background: var(--prv-card-bg);
-  border-radius: var(--prv-radius);
-  /* Padding fluido */
-  padding: clamp(1.5rem, 4vw, 2.5rem); 
-  box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
-  border: 1px solid var(--prv-border);
-}
-
-.prv-content-card h2 {
-  color: var(--prv-primary);
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.prv-content-card p {
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  color: var(--prv-text);
-}
-
-/* LISTA DOCUMENTI */
-.prv-documents-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.prv-doc-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.2rem;
-  border: 1px solid var(--prv-border);
-  border-radius: 12px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  background: #fdfdfd;
-  flex-shrink: 0;
-  min-width: 0; /* Permette la compressione se necessario */
-}
-
-.prv-doc-item:hover {
-  border-color: var(--prv-accent);
-  background: #eff6ff;
-  /* translate e non transform: i documenti compaiono in fila allo
-     scorrimento, e quella comparsa usa transform */
-  translate: 0 -2px;
-  box-shadow: 0 5px 15px rgba(59, 130, 246, 0.1);
-}
-
-/* La comparsa riscrive la transizione ("all") con le sue proprietà e il
-   suo ritardo: si rimettono quelle del passaggio del mouse, subito. */
-.mv-attivo .prv-doc-item[data-rivela] {
-  transition:
-    opacity var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    transform var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    filter var(--mv-durata) var(--mv-curva) var(--mv-ritardo, 0ms),
-    translate .3s ease 0s,
-    box-shadow .3s ease 0s,
-    border-color .3s ease 0s,
-    background-color .3s ease 0s;
-}
-
-.prv-doc-icon {
-  font-size: 2rem;
-  color: #ef4444;
-  flex-shrink: 0; /* Icona non si restringe */
-}
-
-.prv-doc-info {
-  flex-grow: 1;
-  overflow: hidden; /* Nasconde testo in eccesso se non c'è spazio */
-  min-width: 0;
-}
-
-.prv-doc-info h3 {
-  font-size: 1.1rem;
-  color: var(--prv-primary);
-  margin: 0 0 0.2rem 0;
+.prv-intro { min-width: 0; }
+.prv-intro .doc-etichetta svg { font-size: .95rem; }
+.prv .prv-attacco {
+  margin-bottom: 28px;
+  max-width: 34ch;
+  font-size: clamp(1.2rem, 2.2vw, 1.55rem);
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.45;
+  color: var(--doc-testo);
 }
 
-.prv-doc-info span {
-  font-size: 0.9rem;
-  color: var(--prv-text-light);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Il recapito per le domande: una piccola scheda, non un link perso nel
+   testo */
+.prv-domande {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+  padding: 12px 20px 12px 12px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--doc-filo);
+  color: var(--doc-inchiostro);
+  text-decoration: none;
+  transition: translate .5s var(--doc-curva), box-shadow .5s var(--doc-curva);
+}
+.prv-domande:hover {
+  color: var(--doc-inchiostro);
+  translate: 0 -3px;
+  box-shadow: 0 18px 36px -20px rgba(0, 43, 92, .45);
+}
+.prv-domande:focus-visible { outline: 3px solid var(--doc-arancio); outline-offset: 3px; }
+.prv-domande > span:last-child { min-width: 0; }
+.prv-domande-icona {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--doc-arancio), #ff3d00);
+  color: #fff;
+}
+.prv-domande-sopra {
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--doc-grigio);
+}
+.prv-domande-sotto {
+  display: block;
+  font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
-.prv-download-action {
-  font-size: 1.5rem;
-  color: var(--prv-accent);
-  opacity: 0.6;
-  transition: opacity 0.3s;
-  flex-shrink: 0;
+/* Un documento solo: niente griglia a due, una scheda piena e alta */
+.prv .prv-documenti { grid-template-columns: minmax(0, 1fr); }
+.prv-documenti .doc-file { min-height: 280px; }
+.prv-documenti .doc-file-titolo { font-size: clamp(1.15rem, 2vw, 1.4rem); }
+
+@media (min-width: 1000px) {
+  .prv-corpo { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 72px; }
+  .prv-documenti { position: sticky; top: calc(var(--testata-visibile, 0px) + 1.5rem); }
+  .prv-documenti .doc-file { min-height: 340px; padding: 34px; }
+  .prv-documenti .doc-file-foglio { width: 64px; height: 80px; }
 }
 
-.prv-doc-item:hover .prv-download-action {
-  opacity: 1;
-}
-
-/* MOBILE RESPONSIVE */
-@media (max-width: 600px) {
-  .prv-content-card {
-    padding: 1.5rem;
-    /* Assicura che la card non causi overflow su schermi molto stretti */
-    width: calc(100% - 2rem); 
-  }
-  
-  .prv-doc-item {
-    flex-direction: column;
-    text-align: center;
-    padding: 1.5rem;
-    align-items: center;
-  }
-
-  .prv-doc-info {
-    margin: 0.5rem 0;
-    text-align: center;
-  }
-  
-  /* Rimuoviamo la troncazione sui titoli quando sono impilati */
-  .prv-doc-info h3, 
-  .prv-doc-info span {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .prv-domande:hover { translate: none; }
 }

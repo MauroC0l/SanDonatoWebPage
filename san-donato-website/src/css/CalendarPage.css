@@ -1,272 +1,71 @@
-/* =========================================
-   Calendario pubblico.
-   Stessa lingua visiva della home: fondo chiaro, schede bianche con
-   ombre morbide, blu della società e arancio per quello che conta.
-   Vedi CalendarPage.jsx. Prefisso: cp-
-   ========================================= */
+/* =====================================================
+   Calendario pubblico — /calendario (prefisso cp-)
 
-.cp-dashboard-container {
-  --cp-bg: #f6f8fb;
+   Quattro parti: la testata blu attaccata alla barra di navigazione, con
+   il mese in grande e il prossimo impegno; la barra dei comandi che sale
+   sul bordo della testata e resta attaccata in alto; la spalla dei filtri
+   (sul telefono un pannello che sale dal basso); il foglio del calendario.
+
+   È uno strumento prima che una vetrina: i movimenti stanno nella
+   testata e nella spalla, mai sulla griglia, che deve essere lì subito.
+
+   Il colore di una squadra arriva dal JSX in --cp-c, su ogni elemento che
+   lo usa: pillole, righe, filtri leggono tutti la stessa variabile, e le
+   sfumature (sfondo tenue, testo scuro) si ricavano con color-mix invece
+   di scrivere tre colori per ogni squadra.
+   ===================================================== */
+
+.cp-pagina {
+  --cp-blu: var(--psd-blu, #002b5c);
+  --cp-blu-notte: #001a38;
+  --cp-arancio: var(--psd-arancio, #ff6600);
+  --cp-fondo: #f3f5f9;
   --cp-carta: #ffffff;
-  --cp-inchiostro: #0f172a;
-  --cp-testo: #475569;
-  --cp-tenue: #7c8ba1;
-  --cp-bordo: #e6ebf2;
-  --cp-bordo-tenue: #f0f3f8;
-  --cp-arancio: #ff6600;
-  --cp-blu: #002b5c;
-  --cp-raggio: 18px;
-  --cp-ombra: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -16px rgba(15, 23, 42, .22);
-  --cp-ombra-alta: 0 4px 10px rgba(15, 23, 42, .06), 0 24px 48px -24px rgba(15, 23, 42, .3);
+  --cp-inchiostro: #0b1b33;
+  --cp-testo: #3d4a5f;
+  --cp-tenue: #6b778a;
+  --cp-bordo: rgba(0, 43, 92, .09);
+  --cp-bordo-tenue: rgba(0, 43, 92, .055);
+  --cp-raggio: 24px;
+  --cp-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
+  --cp-ombra: 0 1px 2px rgba(11, 27, 51, .04), 0 18px 40px -22px rgba(11, 27, 51, .28);
+  --cp-ombra-alta: 0 2px 6px rgba(11, 27, 51, .06), 0 26px 50px -24px rgba(11, 27, 51, .38);
+  /* Altezza della barra dei comandi attaccata in alto: la spalla e le date
+     dell'elenco si fermano sotto di lei, non sotto l'intestazione. */
+  --cp-sotto-barra: calc(var(--testata-visibile, 0px) + 5.2rem);
 
-  background: var(--cp-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--cp-testo);
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-  /* Poco stacco in cima: il calendario è quello che si è venuti a vedere,
-     e tre centimetri di bianco prima del titolo lo spingono sotto la
-     piega su un portatile. */
-  padding: clamp(1rem, 2vw, 1.6rem) 0 clamp(3rem, 6vw, 5rem);
+  /* Due macchie di colore appena accennate: danno al vetro della spalla
+     qualcosa da sfocare, altrimenti su un grigio piatto non si vede. */
+  background:
+    radial-gradient(42rem 30rem at 0% 34rem, rgba(255, 102, 0, .07), transparent 70%),
+    radial-gradient(46rem 34rem at 100% 60rem, rgba(0, 90, 200, .07), transparent 70%),
+    var(--cp-fondo);
+  min-height: 100svh;
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+  overflow-x: clip;
 }
 
-/* ---------- Intestazione ---------- */
+.cp-pagina *,
+.cp-pagina *::before,
+.cp-pagina *::after { box-sizing: border-box; }
 
-.cp-intestazione {
-  max-width: 1320px;
-  margin: 0 auto clamp(.9rem, 2vw, 1.2rem);
-  padding: 0 clamp(1rem, 4vw, 2rem);
+.cp-pagina button { font-family: inherit; }
+
+.cp-pagina :focus-visible {
+  outline: 3px solid var(--cp-arancio);
+  outline-offset: 2px;
 }
 
-.cp-occhiello {
+.cp-punto {
   display: inline-block;
-  margin-bottom: .5rem;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(255, 102, 0, .1);
-  color: var(--cp-arancio);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-}
-
-.cp-titolo-pagina {
-  margin: 0 0 .25rem;
-  color: var(--cp-inchiostro);
-  /* clamp invece di tre media query: la dimensione segue la larghezza con
-     continuità, senza i salti che si vedono ruotando un telefono. */
-  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-  font-weight: 800;
-  letter-spacing: -.02em;
-  line-height: 1.15;
-}
-
-.cp-sottotitolo {
-  /* Su tutta la larghezza, non incolonnata a 56 caratteri: qui sotto c'è
-     una griglia larga quanto la pagina, e una frase stretta le lasciava
-     accanto un vuoto che sembrava un errore. Su una riga sola la frase
-     occupa anche meno spazio in altezza, che è il punto. */
-  margin: 0;
-  color: var(--cp-tenue);
-  font-size: clamp(.9rem, 1.5vw, 1rem);
-}
-
-/* ---------- Impianto ---------- */
-
-.cp-main-grid {
-  display: grid;
-  /* minmax(0,...) sulla colonna larga: senza, un titolo lungo dentro a una
-     casella allargherebbe la griglia oltre la pagina invece di andare a capo. */
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 1.25rem;
-
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 4vw, 2rem);
-  align-items: start;
-}
-
-/* ---------- Spalla ---------- */
-
-.cp-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  /* Resta in vista mentre si scorre il mese: filtri e prossimo impegno
-     servono proprio mentre si guarda la griglia. */
-  position: sticky;
-  top: 1rem;
-}
-
-.cp-card {
-  padding: 1.1rem;
-  border: 1px solid var(--cp-bordo);
-  border-radius: var(--cp-raggio);
-  background: var(--cp-carta);
-  box-shadow: var(--cp-ombra);
-}
-
-.cp-card-title {
-  margin: 0;
-  color: var(--cp-inchiostro);
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -.01em;
-}
-
-.cp-card-subtitle {
-  margin: 0 0 .9rem;
-  color: var(--cp-tenue);
-  font-size: .8rem;
-}
-
-.cp-stat-box {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-
-  padding: .85rem;
-  border-radius: 12px;
-  background: var(--cp-bg);
-}
-
-.cp-stat-icon { font-size: 1.5rem; line-height: 1; }
-
-.cp-stat-value {
-  color: var(--cp-inchiostro);
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.cp-stat-label {
-  margin-top: 2px;
-  color: var(--cp-tenue);
-  font-size: .74rem;
-}
-
-/* Il prossimo impegno: unico riquadro scuro della pagina, perché è
-   l'informazione che si viene a cercare. */
-.cp-info-box {
-  padding: 1.1rem;
-  border-radius: var(--cp-raggio);
-  background: linear-gradient(135deg, var(--cp-blu) 0%, #01407f 100%);
-  color: #fff;
-  box-shadow: var(--cp-ombra);
-}
-
-.cp-info-label {
-  margin-bottom: .5rem;
-  color: rgba(255, 255, 255, .7);
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-}
-
-.cp-info-match {
-  margin-bottom: .5rem;
-  font-size: 1.02rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.cp-info-date {
-  color: rgba(255, 255, 255, .8);
-  font-size: .8rem;
-  /* La data per esteso comincia col giorno della settimana in minuscolo */
-  text-transform: capitalize;
-}
-
-/* ---------- Filtri ---------- */
-
-.cp-filter-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-  margin-bottom: .7rem;
-}
-
-.cp-filter-title {
-  color: var(--cp-inchiostro);
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-}
-
-.cp-filter-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--cp-bg);
-  color: var(--cp-tenue);
-  font-size: .7rem;
-  font-weight: 700;
-}
-
-.cp-btn-reset {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--cp-arancio);
-  font: inherit;
-  font-size: .74rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cp-btn-reset:hover { text-decoration: underline; }
-
-.cp-filter-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-
-  width: 100%;
-  padding: .45rem .6rem;
-  margin-bottom: 2px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: none;
-
-  color: var(--cp-testo);
-  font: inherit;
-  font-size: .84rem;
-  text-align: left;
-  cursor: pointer;
-
-  transition: background-color .15s ease, color .15s ease;
-}
-
-.cp-filter-item:hover { background: var(--cp-bordo-tenue); }
-
-.cp-filter-item.cp-active {
-  background: var(--cp-bordo-tenue);
-  color: var(--cp-inchiostro);
-  font-weight: 600;
-}
-
-/* Spenta: si legge ancora ma si vede che non conta */
-.cp-filter-item.cp-inactive { opacity: .5; }
-
-.cp-filter-label {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  min-width: 0;
-}
-
-.cp-filter-label > span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cp-arancio);
+  box-shadow: 0 0 0 4px rgba(255, 102, 0, .22);
 }
 
 .cp-dot {
@@ -274,9 +73,548 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
+  background: var(--cp-c, var(--cp-arancio));
 }
 
-/* ---------- Calendario ---------- */
+/* =====================================================
+   TESTATA
+   ===================================================== */
+
+.cp-eroe {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  /* Arrotondata solo sotto: sopra continua la barra di navigazione, che è
+     dello stesso blu, e le due si leggono come un pezzo solo. */
+  border-radius: 0 0 32px 32px;
+  color: #fff;
+  background:
+    radial-gradient(80% 90% at 0% 0%, #0a3d7a 0%, transparent 60%),
+    linear-gradient(160deg, #002b5c 0%, #001a38 70%, #00122a 100%);
+  box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .55);
+}
+
+/* Reticolo sottile che svanisce verso i bordi, come nella pagina Sport:
+   qui ricorda anche le righe di un calendario. */
+.cp-eroe-trama {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 80% at 75% 30%, #000 15%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 75% 30%, #000 15%, transparent 75%);
+}
+
+.cp-eroe-fantasma {
+  position: absolute;
+  right: -1.5vw;
+  bottom: -3.5rem;
+  z-index: 0;
+  font-size: clamp(9rem, 30vw, 24rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.06em;
+  font-variant-numeric: tabular-nums;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, .08);
+  pointer-events: none;
+  user-select: none;
+}
+
+.cp-eroe-dentro {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.4rem;
+  max-width: 1320px;
+  margin: 0 auto;
+  /* In basso lo spazio per la barra dei comandi, che sale sul bordo */
+  padding: clamp(1.8rem, 5vw, 3.6rem) clamp(1rem, 4vw, 2rem) clamp(3.8rem, 6vw, 4.8rem);
+}
+
+@media (min-width: 1024px) {
+  .cp-eroe-dentro {
+    grid-template-columns: minmax(0, 1fr) 400px;
+    align-items: end;
+    gap: 2.5rem;
+  }
+}
+
+.cp-occhiello {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 0 0 1rem;
+  padding: .4rem .85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .14);
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .85);
+}
+
+.cp-titolo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .1em .3em;
+  margin: 0;
+  line-height: .95;
+}
+
+.cp-titolo-grande {
+  font-size: clamp(2.7rem, 11vw, 6.2rem);
+  font-weight: 900;
+  letter-spacing: -.05em;
+  color: #fff;
+}
+
+.cp-titolo-coda {
+  font-size: clamp(1.5rem, 4.6vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: .08em; /* il clip del gradiente non taglia le discendenti */
+}
+
+.cp-sottotitolo {
+  max-width: 36rem;
+  margin: 1rem 0 0;
+  font-size: clamp(.98rem, 1.6vw, 1.1rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, .74);
+}
+
+/* ---------- Il mosaico: prossimo impegno e numeri ---------- */
+
+.cp-eroe-mosaico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cp-prossimo {
+  position: relative;
+  grid-column: 1 / -1;
+  overflow: hidden;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  /* mv-vetro dà sfondo e bordo; qui la luce del colore della squadra */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04), 0 24px 50px -28px rgba(0, 0, 0, .6);
+}
+
+.cp-prossimo::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 70%;
+  height: 140%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--cp-c) 55%, transparent), transparent 65%);
+  opacity: .5;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.cp-prossimo-etichetta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .55rem;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .7);
+}
+
+.cp-prossimo-corpo {
+  position: relative;
+  display: grid;
+  gap: .3rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cp-prossimo-squadra {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .88);
+}
+
+.cp-prossimo-squadra .cp-dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--cp-c) 30%, transparent); }
+
+.cp-prossimo-titolo {
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.01em;
+}
+
+.cp-prossimo-quando {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .84rem;
+  color: rgba(255, 255, 255, .75);
+}
+
+.cp-prossimo-apri {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .8rem;
+  font-weight: 700;
+  color: #ffb36b;
+}
+
+.cp-prossimo-apri svg { transition: transform .3s var(--cp-curva); }
+.cp-prossimo-corpo:hover .cp-prossimo-apri svg { transform: translateX(4px); }
+
+.cp-prossimo-vuoto { position: relative; margin: 0; color: rgba(255, 255, 255, .75); font-size: .92rem; }
+
+.cp-numero {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  padding: .8rem 1rem;
+  border-radius: 18px;
+}
+
+.cp-numero strong {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.cp-numero span {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .66);
+}
+
+/* =====================================================
+   BARRA DEI COMANDI
+   ===================================================== */
+
+.cp-comandi-fascia {
+  position: sticky;
+  /* Sotto all'intestazione quando c'è, in cima quando si è nascosta:
+     --testata-visibile la pubblica l'intestazione (MyNavbar). */
+  top: calc(var(--testata-visibile, 0px) + .6rem);
+  z-index: 30;
+  max-width: 1320px;
+  margin: -1.9rem auto 0;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.cp-comandi {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .86);
+  border: 1px solid rgba(255, 255, 255, .7);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(0, 43, 92, .06), 0 20px 40px -20px rgba(0, 26, 56, .45);
+}
+
+.cp-nav-controls,
+.cp-view-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 13px;
+  background: #eef1f6;
+}
+
+.cp-btn-icon,
+.cp-btn-text,
+.cp-btn-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  height: 36px;
+  padding: 0 .8rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--cp-testo);
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.cp-btn-icon { width: 36px; padding: 0; }
+
+.cp-btn-icon:hover,
+.cp-btn-text:hover,
+.cp-btn-view:hover { color: var(--cp-inchiostro); background: rgba(255, 255, 255, .7); }
+
+.cp-btn-view.cp-active {
+  background: var(--cp-blu);
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(0, 43, 92, .8);
+}
+
+.cp-btn-view svg { font-size: .95rem; }
+
+/* Il mese nella barra compare solo quando il titolo grande è uscito
+   dallo schermo: finché si vede quello, qui sarebbe un doppione. */
+.cp-comandi-titolo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  color: var(--cp-inchiostro);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .3s ease, transform .3s var(--cp-curva);
+}
+
+.cp-comandi-titolo.is-visibile { opacity: 1; transform: none; }
+
+.cp-btn-mobile-filter {
+  position: relative;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--cp-arancio);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 18px -8px rgba(255, 102, 0, .8);
+}
+
+.cp-btn-filtri-conta {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: var(--cp-blu);
+  font-size: .64rem;
+  font-weight: 800;
+}
+
+/* =====================================================
+   IMPIANTO
+   ===================================================== */
+
+.cp-main-grid {
+  display: grid;
+  /* minmax(0,...) sulla colonna larga: senza, un titolo lungo dentro a una
+     casella allargherebbe la griglia oltre la pagina invece di tagliarsi. */
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 1.25rem;
+  max-width: 1320px;
+  margin: 1.25rem auto 0;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+  align-items: start;
+}
+
+/* =====================================================
+   SPALLA: FILTRI
+   ===================================================== */
+
+.cp-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  /* Resta in vista mentre si scorre il mese, sotto alla barra dei comandi */
+  position: sticky;
+  top: var(--cp-sotto-barra);
+}
+
+.cp-filtri {
+  padding: 1.1rem 1.1rem 1rem;
+  border-radius: var(--cp-raggio);
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(255, 255, 255, .9);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: var(--cp-ombra), inset 0 0 0 1px var(--cp-bordo-tenue);
+}
+
+.cp-filtri-testa {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .85rem;
+}
+
+.cp-filtri-titolo {
+  margin: 0;
+  color: var(--cp-inchiostro);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.cp-filtri-conta {
+  margin: .1rem 0 0;
+  color: var(--cp-tenue);
+  font-size: .78rem;
+}
+
+.cp-btn-reset {
+  margin-left: auto;
+  padding: .35rem .7rem;
+  border: 1px solid rgba(255, 102, 0, .25);
+  border-radius: 999px;
+  background: rgba(255, 102, 0, .07);
+  color: #c24e00;
+  font-size: .76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.cp-btn-reset:hover { background: rgba(255, 102, 0, .14); }
+
+.cp-filtri-gruppi {
+  display: grid;
+  gap: .9rem;
+  /* L'elenco può essere lungo: scorre lui invece di allungare la spalla
+     oltre lo schermo, dove — attaccata in alto — non si raggiungerebbe. */
+  max-height: max(12rem, calc(100svh - var(--cp-sotto-barra) - 28rem));
+  padding-bottom: 1.2rem;
+  /* Una sfumatura in fondo: dice che l'elenco continua sotto */
+  mask-image: linear-gradient(180deg, #000 calc(100% - 1.6rem), transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 1.6rem), transparent);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-right: -.4rem;
+  padding-right: .4rem;
+  scrollbar-width: thin;
+}
+
+.cp-filtri-sport {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: .45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cp-inchiostro);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.cp-filtri-sport small {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--cp-tenue);
+}
+
+.cp-filtri-sport:hover span { color: #c24e00; }
+
+.cp-filtri-pastiglie {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cp-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: 100%;
+  padding: .36rem .7rem .36rem .55rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, transform .2s var(--cp-curva);
+}
+
+.cp-filtro:hover { transform: translateY(-1px); }
+
+.cp-filtro.cp-active {
+  background: color-mix(in srgb, var(--cp-c) 13%, #fff);
+  border-color: color-mix(in srgb, var(--cp-c) 32%, transparent);
+  color: color-mix(in srgb, var(--cp-c) 35%, var(--cp-inchiostro));
+}
+
+/* Spenta: il pallino resta vuoto, del suo colore, così la si riconosce
+   ancora; il nome si fa grigio perché non conta. */
+.cp-filtro.cp-inactive {
+  background: rgba(255, 255, 255, .6);
+  border-color: #dde3ec;
+  color: #8a95a6;
+}
+
+.cp-filtro.cp-inactive .cp-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cp-c) 70%, #fff);
+}
+
+.cp-filtro-nome {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cp-filtri-applica { display: none; }
+
+/* =====================================================
+   IL FOGLIO DEL CALENDARIO
+   ===================================================== */
 
 .cp-calendar-wrapper {
   min-width: 0;
@@ -284,124 +622,43 @@
   border-radius: var(--cp-raggio);
   background: var(--cp-carta);
   box-shadow: var(--cp-ombra);
+  /* clip e non hidden: hidden farebbe del foglio un contenitore di
+     scorrimento, e le date dell'elenco non resterebbero attaccate in alto */
   overflow: hidden;
+  overflow: clip;
 }
 
-.cp-toolbar {
-  padding: .8rem 1.1rem;
-  border-bottom: 1px solid var(--cp-bordo);
-}
-
-.cp-toolbar-header-row {
+.cp-avviso-filtri {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-  margin-bottom: .6rem;
-}
-
-.cp-toolbar-title h2 {
-  margin: 0;
-  color: var(--cp-inchiostro);
-  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
-  font-weight: 800;
-  letter-spacing: -.01em;
-  text-transform: capitalize;
-}
-
-.cp-toolbar-actions-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: .6rem;
+  gap: .5rem .6rem;
+  padding: .65rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 102, 0, .15);
+  background: linear-gradient(90deg, rgba(255, 102, 0, .08), rgba(255, 102, 0, .02));
+  color: #8a3a00;
+  font-size: .84rem;
 }
 
-.cp-nav-controls {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 10px;
-  background: var(--cp-bg);
-}
+.cp-avviso-filtri svg { color: var(--cp-arancio); }
 
-.cp-btn-icon,
-.cp-btn-text {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  height: 32px;
-  padding: 0 10px;
+.cp-avviso-filtri button {
+  margin-left: auto;
+  padding: .3rem .75rem;
   border: 0;
-  border-radius: 8px;
-  background: none;
-
-  color: var(--cp-testo);
-  font: inherit;
-  font-size: .82rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  transition: background-color .15s ease, color .15s ease;
-}
-
-.cp-btn-icon { width: 32px; padding: 0; }
-
-.cp-btn-icon:hover,
-.cp-btn-text:hover {
-  background: var(--cp-carta);
-  color: var(--cp-inchiostro);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .1);
-}
-
-.cp-view-controls {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 10px;
-  background: var(--cp-bg);
-}
-
-.cp-btn-view {
-  padding: 6px 14px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-
-  color: var(--cp-tenue);
-  font: inherit;
-  font-size: .82rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  transition: background-color .15s ease, color .15s ease;
-}
-
-.cp-btn-view:hover { color: var(--cp-inchiostro); }
-
-.cp-btn-view.cp-active {
-  background: var(--cp-carta);
-  color: var(--cp-arancio);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .12);
-}
-
-.cp-btn-mobile-filter {
-  display: none;
-  align-items: center;
-  justify-content: center;
-
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--cp-bordo);
-  border-radius: 10px;
-  background: var(--cp-carta);
-  color: var(--cp-inchiostro);
+  border-radius: 999px;
+  background: var(--cp-arancio);
+  color: #fff;
+  font-size: .76rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.cp-calendar-content { padding: 0; }
+.cp-calendar-content.cp-in-attesa { min-height: 20rem; }
+
+/* Solo al cambio di vista, e solo una dissolvenza */
+.cp-entra { animation: cp-entra .35s ease both; }
+@keyframes cp-entra { from { opacity: 0; transform: translateY(6px); } }
 
 /* ---------- Griglia del mese ---------- */
 
@@ -411,423 +668,470 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
-.cp-week-header {
-  background: var(--cp-bg);
-  border-bottom: 1px solid var(--cp-bordo);
-}
+.cp-week-header { border-bottom: 1px solid var(--cp-bordo); }
 
 .cp-day-name {
-  padding: .5rem;
+  padding: .8rem .75rem .6rem;
   color: var(--cp-tenue);
   font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .06em;
+  font-weight: 800;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  text-align: center;
 }
 
+.cp-day-name.cp-weekend { color: #c24e00; }
+
 .cp-day-cell {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-
-  min-height: 112px;
-  padding: 5px;
+  gap: 4px;
+  min-height: 118px;
+  padding: 6px;
   /* Bordo solo a destra e sotto: su tutti e quattro i lati raddoppierebbe
      di spessore fra una casella e l'altra. */
   border-right: 1px solid var(--cp-bordo-tenue);
   border-bottom: 1px solid var(--cp-bordo-tenue);
   cursor: pointer;
-
   transition: background-color .15s ease;
 }
 
 .cp-day-cell:nth-child(7n) { border-right: 0; }
-.cp-day-cell:hover { background: var(--cp-bg); }
+.cp-day-cell:nth-last-child(-n + 7) { border-bottom: 0; }
+.cp-day-cell.cp-weekend { background: #fbfcfe; }
+.cp-day-cell:hover { background: #f5f8fc; }
 
 .cp-day-cell:focus-visible {
   outline: 2px solid var(--cp-arancio);
   outline-offset: -2px;
+  z-index: 1;
 }
 
-.cp-other-month { background: #fbfcfe; }
-.cp-other-month .cp-day-number { opacity: .35; }
+.cp-other-month,
+.cp-day-cell.cp-other-month.cp-weekend { background: #f8f9fb; }
+.cp-other-month .cp-day-number { opacity: .38; }
 
 .cp-day-header {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: .4rem;
+  min-height: 28px;
 }
 
 .cp-day-number {
-  color: var(--cp-testo);
-  font-size: .78rem;
-  font-weight: 600;
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--cp-inchiostro);
+  font-size: .84rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-day-cell.cp-today {
+  background: linear-gradient(180deg, rgba(255, 102, 0, .07), rgba(255, 102, 0, 0) 70%);
 }
 
 .cp-today .cp-day-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  border-radius: 999px;
   background: var(--cp-arancio);
   color: #fff;
   font-weight: 800;
+  box-shadow: 0 6px 14px -6px rgba(255, 102, 0, .9);
+}
+
+.cp-oggi-etichetta {
+  color: #c24e00;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .cp-events-container {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-height: 0;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .cp-event-pill {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
   width: 100%;
-  padding: 3px 7px;
+  min-width: 0;
+  padding: 3px 7px 3px 9px;
   border: 0;
-  border-radius: 6px;
-
-  font: inherit;
-  font-size: .7rem;
+  border-radius: 7px;
+  /* Il colore della squadra in tre dosi: la barretta a sinistra piena,
+     lo sfondo appena tinto, il testo scurito per restare leggibile. */
+  background: color-mix(in srgb, var(--cp-c) 13%, #fff);
+  box-shadow: inset 3px 0 0 var(--cp-c);
+  color: color-mix(in srgb, var(--cp-c) 42%, var(--cp-inchiostro));
+  font-size: .72rem;
   font-weight: 600;
+  line-height: 1.3;
   text-align: left;
   cursor: pointer;
-
-  /* Una riga sola e tagliata: in una casella alta tre centimetri il titolo
-     per esteso toglierebbe il posto agli altri impegni dello stesso giorno. */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  transition: filter .15s ease, transform .15s ease;
+  transition: background-color .15s ease;
 }
 
-.cp-event-pill:hover { filter: brightness(1.08); transform: translateX(1px); }
+.cp-event-pill:hover { background: color-mix(in srgb, var(--cp-c) 24%, #fff); }
+
+.cp-pill-ora {
+  flex-shrink: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-pill-text {
+  min-width: 0;
+  /* Una riga sola e tagliata: il titolo per esteso toglierebbe il posto
+     agli altri impegni dello stesso giorno. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
 
 /* Già passato: resta leggibile ma smette di chiedere attenzione */
-.cp-event-past { opacity: .45; }
+.cp-event-past { opacity: .72; filter: saturate(.55); }
 
-.cp-pill-text { pointer-events: none; }
+/* Gli eventi dei giorni grigi (mese prima, mese dopo) si vedono, ma
+   attenuati come il numero del giorno: sono lì per orientarsi. Restano
+   toccabili. */
+.cp-other-month .cp-event-pill { opacity: .45; }
+.cp-other-month .cp-event-pill:hover,
+.cp-other-month .cp-event-pill:focus-visible { opacity: .85; }
 
-/* ---------- Vista giorno ---------- */
-
-.cp-list-container {
-  display: grid;
-  gap: .6rem;
-  padding: 1.1rem;
+.cp-altri {
+  padding: 1px 4px;
+  color: var(--cp-tenue);
+  font-size: .7rem;
+  font-weight: 700;
 }
 
-.cp-list-view-item {
-  display: flex;
+.cp-day-cell:hover .cp-altri { color: #c24e00; }
+
+/* ---------- Righe (giorno ed elenco) ---------- */
+
+.cp-list-container { padding: clamp(.9rem, 2vw, 1.4rem); }
+
+.cp-righe {
+  display: grid;
+  gap: .55rem;
+  min-width: 0;
+}
+
+.cp-riga {
+  display: grid;
+  grid-template-columns: 4.1rem 4px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: .9rem;
-
-  padding: .8rem;
+  width: 100%;
+  padding: .85rem 1rem;
   border: 1px solid var(--cp-bordo);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--cp-carta);
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition: border-color .2s ease, box-shadow .25s ease, transform .25s var(--cp-curva);
 }
 
-.cp-list-view-item:hover {
-  border-color: var(--cp-arancio);
+.cp-riga:hover {
+  border-color: color-mix(in srgb, var(--cp-c) 45%, transparent);
   box-shadow: var(--cp-ombra-alta);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
-.cp-date-box {
+.cp-riga-ora {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  flex: 0 0 auto;
-  width: 54px;
-  padding: .45rem 0;
-  border-radius: 12px;
-  line-height: 1.1;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
-.cp-date-month {
-  font-size: .64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  opacity: .85;
+.cp-riga-ora strong {
+  color: var(--cp-inchiostro);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
 }
 
-.cp-date-day { font-size: 1.25rem; font-weight: 800; }
+.cp-riga-ora small { color: var(--cp-tenue); font-size: .74rem; font-weight: 600; }
 
-.cp-meta-row {
+.cp-riga-barra {
+  align-self: stretch;
+  border-radius: 4px;
+  background: var(--cp-c);
+}
+
+.cp-riga-testi {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.cp-riga-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .4rem .6rem;
-  margin-bottom: .25rem;
+  gap: .3rem .5rem;
 }
 
-.cp-category-badge {
+.cp-riga-squadra {
   padding: 2px 9px;
   border-radius: 999px;
-  font-size: .68rem;
+  background: color-mix(in srgb, var(--cp-c) 13%, #fff);
+  color: color-mix(in srgb, var(--cp-c) 42%, var(--cp-inchiostro));
+  font-size: .7rem;
   font-weight: 700;
-  white-space: nowrap;
 }
 
-.cp-meta-time,
-.cp-meta-location {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
+.cp-riga-tipo {
   color: var(--cp-tenue);
-  font-size: .78rem;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
 
-.cp-event-title {
-  margin: 0 0 .2rem;
+.cp-riga-titolo {
   color: var(--cp-inchiostro);
-  font-size: .98rem;
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
-.cp-list-arrow { flex: 0 0 auto; color: var(--cp-tenue); }
+.cp-riga-luogo {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  min-width: 0;
+  color: var(--cp-tenue);
+  font-size: .8rem;
+}
+
+.cp-riga-luogo svg { flex-shrink: 0; }
+
+.cp-riga-risultato {
+  padding: .3rem .65rem;
+  border-radius: 10px;
+  background: var(--cp-blu);
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cp-riga-freccia {
+  color: #a3adbb;
+  transition: transform .25s var(--cp-curva), color .2s ease;
+}
+
+.cp-riga:hover .cp-riga-freccia { color: var(--cp-arancio); transform: translateX(3px); }
+
+/* ---------- Elenco del mese ---------- */
+
+.cp-agenda {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp-agenda-giorno {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: .9rem 0;
+  border-bottom: 1px dashed var(--cp-bordo);
+}
+
+.cp-agenda-giorno:first-child { padding-top: 0; }
+.cp-agenda-giorno:last-child { border-bottom: 0; padding-bottom: 0; }
+
+/* La data resta attaccata sotto alla barra mentre scorrono i suoi impegni */
+.cp-agenda-data {
+  position: sticky;
+  top: calc(var(--cp-sotto-barra) - .4rem);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  padding: .55rem 0 .6rem;
+  border: 0;
+  border-radius: 16px;
+  background: #eef1f6;
+  color: var(--cp-inchiostro);
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.cp-agenda-data:hover { background: #e3e8f0; }
+
+.cp-agenda-sett {
+  color: var(--cp-tenue);
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.cp-agenda-num {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-agenda-oggi {
+  margin-top: .15rem;
+  font-size: .6rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cp-agenda-giorno.cp-today .cp-agenda-data {
+  background: linear-gradient(160deg, #ff8a3d, var(--cp-arancio));
+  color: #fff;
+  box-shadow: 0 12px 24px -12px rgba(255, 102, 0, .9);
+}
+
+.cp-agenda-giorno.cp-today .cp-agenda-sett { color: rgba(255, 255, 255, .85); }
+.cp-agenda-passato .cp-agenda-data { opacity: .6; }
+
+/* ---------- Vuoto e attesa ---------- */
 
 .cp-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: .6rem;
   padding: 3rem 1.2rem;
   border: 1px dashed var(--cp-bordo);
-  border-radius: var(--cp-raggio);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fafbfd, #fff);
   color: var(--cp-tenue);
   text-align: center;
-  font-size: .92rem;
+  font-size: .95rem;
   line-height: 1.6;
 }
 
-.cp-empty-state strong { color: var(--cp-inchiostro); text-transform: capitalize; }
+.cp-empty-state p { margin: 0; }
+.cp-empty-state strong { color: var(--cp-inchiostro); font-size: 1.1rem; }
 
-/* ---------- Attesa ---------- */
+.cp-empty-icona {
+  width: 52px;
+  height: 52px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 102, 0, .1);
+  color: var(--cp-arancio);
+}
+
+.cp-empty-azione {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .3rem;
+  padding: .55rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--cp-blu);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
 
 .cp-loader {
   width: 34px;
   height: 34px;
-  margin: 3rem auto;
-  border: 3px solid var(--cp-bordo);
+  margin: 6rem auto;
+  border: 3px solid #e3e8f0;
   border-top-color: var(--cp-arancio);
   border-radius: 50%;
-  animation: cpGira .8s linear infinite;
-}
-
-@keyframes cpGira { to { transform: rotate(360deg); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .cp-loader { animation-duration: 2.4s; }
-  .cp-list-view-item,
-  .cp-event-pill { transition: none; }
-}
-
-/* ---------- Finestra aperta ---------- */
-
-body.cp-modal-open { overflow: hidden; }
-
-/* ---------- Schermi medi ---------- */
-
-@media (max-width: 1024px) {
-  .cp-main-grid { grid-template-columns: 250px minmax(0, 1fr); }
-  .cp-day-cell { min-height: 96px; }
-}
-
-/* ---------- Telefoni ---------- */
-
-@media (max-width: 820px) {
-  .cp-main-grid { grid-template-columns: minmax(0, 1fr); }
-
-  .cp-btn-mobile-filter { display: inline-flex; }
-
-  /*
-   * I filtri diventano un pannello che sale dal basso.
-   *
-   * Di lato non ci starebbero, e sopra al calendario obbligherebbero a
-   * scorrere ogni volta per arrivare alla griglia — che è quello che si è
-   * venuti a vedere.
-   */
-  .cp-sidebar {
-    position: fixed;
-    inset: auto 0 0 0;
-    z-index: 60;
-
-    max-height: 82vh;
-    padding: .6rem 1rem 1.5rem;
-    border-radius: 20px 20px 0 0;
-    background: var(--cp-bg);
-    box-shadow: 0 -12px 40px -12px rgba(15, 23, 42, .35);
-
-    overflow-y: auto;
-    transform: translateY(102%);
-    transition: transform .28s ease;
-  }
-
-  .cp-sidebar.cp-mobile-open { transform: translateY(0); }
-
-  /* Sul telefono la spalla è un cassetto fuori schermo: le sue schede non
-     entrerebbero mai in vista da sole, e aprendolo comparirebbero in
-     ritardo mentre il cassetto sale. Qui sono subito al loro posto. */
-  .mv-attivo .cp-sidebar > [data-rivela] {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: none;
-    will-change: auto;
-  }
-
-  .cp-mobile-drag-handle {
-    width: 44px;
-    height: 4px;
-    margin: 0 auto .8rem;
-    border-radius: 999px;
-    background: var(--cp-bordo);
-  }
-
-  .cp-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 59;
-    background: rgba(10, 18, 32, .45);
-  }
-
-  .cp-btn-close-mobile {
-    display: inline-flex;
-    padding: 4px;
-    border: 0;
-    background: none;
-    color: var(--cp-tenue);
-    cursor: pointer;
-  }
-}
-
-@media (min-width: 821px) {
-  /* Fuori dal telefono non esistono: il pannello è già una colonna. */
-  .cp-mobile-drag-handle,
-  .cp-backdrop,
-  .cp-btn-close-mobile { display: none; }
-}
-
-@media (max-width: 560px) {
-  /*
-   * Sette colonne restano — un calendario con meno non è un calendario —
-   * ma basse, e gli impegni si riducono a una barretta del loro colore.
-   * Il giorno si apre con un tocco e lì si leggono per esteso.
-   */
-  .cp-day-cell { min-height: 62px; padding: 3px; }
-
-  .cp-event-pill {
-    min-height: 6px;
-    padding: 2px;
-    font-size: 0;
-  }
-
-  .cp-list-view-item { gap: .6rem; padding: .65rem; }
-  .cp-date-box { width: 46px; }
-}
-
-/* Piccoli assetti che prima stavano scritti dentro al JSX: in un foglio di
-   stile si vedono tutti insieme e si possono cambiare per punti di rottura,
-   cosa che uno style={{...}} non permette. */
-
-.cp-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: .35rem;
-}
-
-.cp-filter-titolo-gruppo {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-}
-
-.cp-info-categoria { margin-bottom: .5rem; }
-
-.cp-card-filtri {
-  /* L'elenco degli sport può essere lungo: scorre lui invece di allungare
-     la colonna oltre lo schermo. */
-  flex: 1;
-  max-height: 22rem;
-  overflow-y: auto;
+  animation: cp-gira .8s linear infinite;
 }
 
 .cp-loader-piccolo {
   width: 24px;
   height: 24px;
-  margin: 1rem auto;
-  border-color: rgba(255, 255, 255, .25);
+  margin: .8rem 0;
+  border-color: rgba(255, 255, 255, .22);
   border-top-color: #fff;
 }
 
-.cp-list-testi { flex: 1; min-width: 0; }
+@keyframes cp-gira { to { transform: rotate(360deg); } }
 
-/* ---------- Il calendario sul telefono ---------- */
+/* ---------- Finestra aperta ---------- */
 
-.cp-abbona-azioni {
+body.cp-modal-open { overflow: hidden; }
+
+/* =====================================================
+   SUL TUO TELEFONO (CalendarioSulTelefono.jsx)
+   ===================================================== */
+
+/* Il riquadro scuro della spalla: è l'unico invito della pagina, e sul
+   bianco dei filtri si fa notare senza gridare. */
+.cp-abbona {
+  position: relative;
+  isolation: isolate;
+  padding: 1.15rem;
+  border-radius: var(--cp-raggio);
+  color: #fff;
+  background:
+    radial-gradient(90% 80% at 100% 0%, rgba(255, 102, 0, .35), transparent 60%),
+    linear-gradient(160deg, #003a7a 0%, #002b5c 45%, #001a38 100%);
+  box-shadow: 0 24px 50px -26px rgba(0, 26, 56, .8);
+}
+
+.cp-abbona-testa {
   display: flex;
-  flex-wrap: wrap;
-  gap: .5rem;
-  margin-top: .75rem;
+  align-items: flex-start;
+  gap: .8rem;
+  margin-bottom: .95rem;
 }
 
-.cp-abbona-btn {
-  flex: 1 1 8rem;
-  padding: .55rem .75rem;
-  border: 1px solid var(--cp-bordo);
-  border-radius: 10px;
-  background: var(--cp-bg);
-  color: var(--cp-blu);
-  font-size: .85rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
+.cp-abbona-icona {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #ff8a3d, var(--cp-arancio));
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 20px -10px rgba(255, 102, 0, .9);
 }
 
-.cp-abbona-btn:hover { border-color: var(--cp-arancio); color: var(--cp-arancio); }
-
-/* ---------- Telefono: il pannello dei filtri ---------- */
-
-@media (max-width: 820px) {
-  /* Scorre il pannello, non la pagina dietro: arrivati in fondo lo
-     scorrimento si ferma lì invece di passare al calendario. */
-  .cp-sidebar { max-height: 88vh; overscroll-behavior: contain; }
-
-  /* Un solo scorrimento, quello del pannello. Dentro, "Sport e squadre"
-     aveva il suo, limitato a pochi centimetri: si vedevano due squadre. */
-  .cp-sidebar .cp-card-filtri { flex: none; max-height: none; overflow: visible; }
-
-  /* Voci più grandi: si toccano con il pollice, non si cliccano */
-  .cp-sidebar .cp-filter-item { padding-top: .7rem; padding-bottom: .7rem; font-size: .95rem; }
+.cp-abbona-titolo {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: #fff;
 }
 
-/* Gli eventi dei giorni grigi (mese prima, mese dopo) si vedono, ma
-   attenuati come il numero del giorno: sono lì per orientarsi, non sono il
-   mese che si sta guardando. Restano toccabili. */
-.cp-other-month .cp-event-pill { opacity: .45; }
-.cp-other-month .cp-event-pill:hover,
-.cp-other-month .cp-event-pill:focus-visible { opacity: .8; }
-
-/* ---------- Sul tuo telefono: dove sta ---------- */
+.cp-abbona-testo {
+  margin: .2rem 0 0;
+  font-size: .8rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .72);
+}
 
 /* Sul computer nella colonna di sinistra; sul telefono sotto al calendario,
    e non dentro al pannello dei filtri, dove nessuno lo cercava. */
 .cp-abbona-sotto { display: none; }
-
-@media (max-width: 820px) {
-  .cp-abbona-lato { display: none; }
-  .cp-abbona-sotto { display: block; }
-}
 
 /* ---------- La tendina delle squadre ---------- */
 
@@ -840,24 +1144,24 @@ body.cp-modal-open { overflow: hidden; }
   gap: .6rem;
   width: 100%;
   min-height: 2.9rem;
-  padding: .6rem .8rem;
-  border: 1px solid var(--cp-bordo);
-  border-radius: 10px;
-  background: var(--cp-carta);
-  color: var(--cp-inchiostro);
-  font: inherit;
+  padding: .6rem .85rem;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
   font-size: .92rem;
   text-align: left;
   cursor: pointer;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
 }
 
-.cp-scelta-bottone:hover { border-color: #cfd8e5; }
+.cp-scelta-bottone:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .35); }
+
 .cp-scelta-bottone.is-aperta,
 .cp-scelta-bottone:focus-visible {
   outline: none;
   border-color: var(--cp-arancio);
-  box-shadow: 0 0 0 3px rgba(255, 102, 0, .15);
+  box-shadow: 0 0 0 3px rgba(255, 102, 0, .3);
 }
 
 .cp-scelta-valore {
@@ -868,40 +1172,68 @@ body.cp-modal-open { overflow: hidden; }
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-weight: 600;
+  font-weight: 700;
 }
-.cp-scelta-valore.is-vuoto { color: var(--cp-tenue); font-weight: 400; }
 
-.cp-scelta-freccia { flex-shrink: 0; color: var(--cp-tenue); font-size: .8rem; transition: transform .15s ease; }
+.cp-scelta-valore.is-vuoto { color: rgba(255, 255, 255, .7); font-weight: 500; }
+
+.cp-scelta-freccia {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, .7);
+  font-size: .8rem;
+  transition: transform .2s ease;
+}
+
 .cp-scelta-bottone.is-aperta .cp-scelta-freccia { transform: rotate(180deg); }
 
-.cp-scelta-pallino { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; }
+.cp-scelta-pallino {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
 
 .cp-scelta-pannello {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(100% + 6px);
-  z-index: 30;
+  top: calc(100% + 8px);
+  z-index: 40;
   max-height: 18rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: .35rem;
+  padding: .4rem;
   border: 1px solid var(--cp-bordo);
-  border-radius: 12px;
-  background: var(--cp-carta);
-  box-shadow: var(--cp-ombra-alta);
-  animation: cp-scelta-apre .14s ease-out;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .97);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 30px 60px -20px rgba(0, 26, 56, .45);
+  color: var(--cp-inchiostro);
+  animation: cp-scelta-apre .18s var(--cp-curva);
 }
 
-.cp-scelta-gruppo + .cp-scelta-gruppo { margin-top: .2rem; padding-top: .2rem; border-top: 1px solid var(--cp-bordo-tenue); }
+/* Nella spalla attaccata in alto la tendina si apre verso l'alto: verso il
+   basso finirebbe sotto il bordo dello schermo, dove scorrendo non la si
+   raggiunge, perché la spalla scorre insieme a chi guarda. */
+.cp-abbona-lato .cp-scelta-pannello {
+  top: auto;
+  bottom: calc(100% + 8px);
+  animation-name: cp-scelta-apre-su;
+}
+
+.cp-scelta-gruppo + .cp-scelta-gruppo {
+  margin-top: .25rem;
+  padding-top: .25rem;
+  border-top: 1px solid var(--cp-bordo-tenue);
+}
 
 .cp-scelta-gruppo-titolo {
-  margin: .45rem .55rem .2rem;
+  margin: .45rem .6rem .2rem;
   color: var(--cp-tenue);
-  font-size: .68rem;
+  font-size: .66rem;
   font-weight: 800;
-  letter-spacing: .08em;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
@@ -911,26 +1243,363 @@ body.cp-modal-open { overflow: hidden; }
   gap: .6rem;
   width: 100%;
   min-height: 2.6rem;
-  padding: .5rem .55rem;
+  padding: .5rem .6rem;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: none;
   color: var(--cp-inchiostro);
-  font: inherit;
-  font-size: .92rem;
+  font-size: .9rem;
   text-align: left;
   cursor: pointer;
 }
+
 .cp-scelta-voce:hover,
-.cp-scelta-voce:focus-visible { outline: none; background: var(--cp-bg); }
-.cp-scelta-voce.is-scelta { font-weight: 700; }
+.cp-scelta-voce:focus-visible { outline: none; background: #f1f4f9; }
+.cp-scelta-voce.is-scelta { font-weight: 700; background: rgba(255, 102, 0, .07); }
 .cp-scelta-voce-nome { flex: 1; min-width: 0; }
 .cp-scelta-spunta { color: var(--cp-arancio); }
 
-.cp-abbona-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
+.cp-abbona-azioni {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+  margin-top: .75rem;
+}
 
-@keyframes cp-scelta-apre { from { opacity: 0; transform: translateY(-4px); } }
+.cp-abbona-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 2.6rem;
+  padding: .55rem .7rem;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.cp-abbona-btn:hover { background: rgba(255, 255, 255, .18); border-color: rgba(255, 255, 255, .35); color: #fff; }
+
+.cp-abbona-btn-pieno {
+  border-color: transparent;
+  background: #fff;
+  color: var(--cp-blu);
+}
+
+.cp-abbona-btn-pieno:hover { background: #ffe9da; color: var(--cp-blu); }
+
+.cp-abbona-copia { grid-column: 1 / -1; }
+
+.cp-abbona-copia.is-copiato { border-color: rgba(22, 196, 127, .6); background: rgba(22, 196, 127, .18); }
+
+@keyframes cp-scelta-apre { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes cp-scelta-apre-su { from { opacity: 0; transform: translateY(6px); } }
+
+/* =====================================================
+   SCHERMI MEDI
+   ===================================================== */
+
+@media (max-width: 1100px) {
+  .cp-main-grid { grid-template-columns: 260px minmax(0, 1fr); }
+  .cp-day-cell { min-height: 104px; }
+  .cp-pill-ora { display: none; }
+}
+
+@media (min-width: 821px) {
+  /* Fuori dal telefono non esistono: il pannello è già una colonna. */
+  .cp-mobile-drag-handle,
+  .cp-backdrop,
+  .cp-btn-close-mobile { display: none; }
+}
+
+/* =====================================================
+   TELEFONI E TABLET STRETTI
+   ===================================================== */
+
+@media (max-width: 820px) {
+  .cp-main-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .cp-btn-mobile-filter { display: inline-flex; }
+
+  /* Il mese nella barra non ci sta fra i pulsanti: compare sotto, come
+     un'etichetta che galleggia, solo quando il titolo grande è sparito. */
+  .cp-comandi-titolo {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    flex: none;
+    max-width: 80%;
+    padding: .3rem .8rem;
+    border-radius: 999px;
+    background: var(--cp-blu);
+    color: #fff;
+    font-size: .8rem;
+    box-shadow: 0 10px 20px -10px rgba(0, 26, 56, .7);
+    transform: translate(-50%, -4px);
+    pointer-events: none;
+  }
+
+  .cp-comandi-titolo.is-visibile { transform: translate(-50%, 0); }
+
+  .cp-view-controls { margin-left: auto; }
+
+  /*
+   * I filtri diventano un pannello che sale dal basso.
+   *
+   * Di lato non ci starebbero, e sopra al calendario obbligherebbero a
+   * scorrere ogni volta per arrivare alla griglia — che è quello che si è
+   * venuti a vedere.
+   */
+  .cp-sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: auto;
+    z-index: 1000;
+    max-height: 86svh;
+    padding: .55rem 0 0;
+    border-radius: 28px 28px 0 0;
+    background: rgba(246, 248, 251, .94);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: 0 -20px 50px -20px rgba(0, 26, 56, .5);
+    /* Scorre il pannello, non la pagina dietro */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateY(105%);
+    visibility: hidden;
+    transition: transform .4s var(--cp-curva), visibility 0s linear .4s;
+  }
+
+  .cp-sidebar.cp-mobile-open {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform .4s var(--cp-curva), visibility 0s;
+  }
+
+  /* Sul telefono la spalla è un cassetto fuori schermo: le sue schede non
+     entrerebbero mai in vista da sole, e aprendolo comparirebbero in
+     ritardo mentre il cassetto sale. Qui sono subito al loro posto. */
+  .mv-attivo .cp-sidebar > [data-rivela] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    will-change: auto;
+  }
+
+  .cp-filtri {
+    padding: 0 1.1rem;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .cp-mobile-drag-handle {
+    width: 44px;
+    height: 5px;
+    margin: 0 auto 1rem;
+    border-radius: 999px;
+    background: #cfd6e1;
+  }
+
+  .cp-filtri-titolo { font-size: 1.3rem; }
+
+  /* Un solo scorrimento, quello del pannello */
+  .cp-filtri-gruppi {
+    max-height: none;
+    padding-bottom: 0;
+    mask-image: none;
+    -webkit-mask-image: none;
+    overflow: visible;
+    margin-right: 0;
+    padding-right: 0;
+    gap: 1.1rem;
+  }
+
+  /* Pastiglie più grandi: si toccano con il pollice, non si cliccano */
+  .cp-filtro {
+    padding: .55rem .9rem .55rem .7rem;
+    font-size: .9rem;
+  }
+
+  .cp-btn-close-mobile {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    background: #e7ebf2;
+    color: var(--cp-inchiostro);
+    cursor: pointer;
+  }
+
+  .cp-btn-reset { margin-top: .3rem; }
+
+  /* In fondo e sempre in vista: chiude il pannello dicendo quanti impegni
+     restano con i filtri scelti. */
+  .cp-filtri-applica {
+    position: sticky;
+    bottom: 0;
+    display: block;
+    width: calc(100% + 2.2rem);
+    margin: 1.2rem -1.1rem 0;
+    padding: .8rem 1.1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(246, 248, 251, 0), rgba(246, 248, 251, .96) 30%);
+  }
+
+  .cp-filtri-applica button {
+    width: 100%;
+    min-height: 52px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--cp-arancio);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 14px 30px -12px rgba(255, 102, 0, .85);
+  }
+
+  .cp-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0, 18, 42, .5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: cp-velo .3s ease;
+  }
+
+  .cp-abbona-lato { display: none; }
+  .cp-abbona-sotto { display: block; }
+}
+
+@keyframes cp-velo { from { opacity: 0; } }
+
+@media (max-width: 560px) {
+  .cp-sottotitolo { display: none; }
+
+  .cp-eroe { border-radius: 0 0 26px 26px; }
+
+  .cp-prossimo { padding: .85rem 1rem; }
+  .cp-prossimo-titolo { font-size: 1rem; padding-right: 4.5rem; }
+  .cp-numero { padding: .7rem .9rem; }
+
+  .cp-comandi { gap: .35rem; padding: .35rem; border-radius: 16px; }
+  .cp-nav-controls, .cp-view-controls { padding: 2px; border-radius: 11px; }
+  .cp-btn-icon, .cp-btn-text, .cp-btn-view { height: 34px; font-size: .78rem; border-radius: 9px; }
+  .cp-btn-icon { width: 32px; }
+  .cp-btn-text, .cp-btn-view { padding: 0 .55rem; }
+  .cp-btn-view svg { display: none; }
+  .cp-btn-mobile-filter { width: 40px; height: 40px; }
+
+  .cp-main-grid { margin-top: 1rem; gap: 1rem; padding: 0 .75rem; }
+  .cp-comandi-fascia { padding: 0 .75rem; }
+
+  /*
+   * Sette colonne restano — un calendario con meno non è un calendario —
+   * ma basse, e gli impegni si riducono a un pallino del loro colore. Il
+   * giorno si apre con un tocco e lì si leggono per esteso.
+   */
+  .cp-day-name { padding: .7rem 0 .5rem; text-align: center; font-size: .64rem; letter-spacing: .06em; }
+
+  .cp-day-cell {
+    align-items: center;
+    gap: 3px;
+    min-height: 60px;
+    padding: 5px 2px;
+  }
+
+  .cp-day-header { justify-content: center; min-height: 30px; }
+  .cp-day-number { min-width: 30px; height: 30px; font-size: .86rem; }
+  .cp-oggi-etichetta { display: none; }
+
+  .cp-events-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .cp-event-pill {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--cp-c);
+    box-shadow: none;
+    font-size: 0;
+    /* Il tocco va alla casella, che apre il giorno: un pallino di sette
+       pixel non si centra col dito. */
+    pointer-events: none;
+  }
+
+  .cp-pill-ora, .cp-pill-text { display: none; }
+
+  .cp-altri { padding: 0; font-size: .6rem; line-height: 7px; }
+  .cp-altri-parola { display: none; }
+
+  .cp-list-container { padding: .75rem; }
+
+  .cp-riga {
+    grid-template-columns: 3.2rem 3px minmax(0, 1fr) auto;
+    gap: .7rem;
+    padding: .75rem .8rem;
+  }
+
+  .cp-riga-freccia { display: none; }
+  .cp-riga-ora strong { font-size: .98rem; }
+  .cp-riga-titolo { font-size: .95rem; }
+
+  .cp-agenda-giorno { grid-template-columns: 3.3rem minmax(0, 1fr); gap: .6rem; }
+  .cp-agenda-num { font-size: 1.35rem; }
+
+  /* Nell'elenco del mese l'ora scende sopra al titolo: la colonna della
+     data a sinistra c'è già, e due colonne strette lasciavano al titolo
+     mezzo schermo. */
+  .cp-agenda .cp-riga { grid-template-columns: 3px minmax(0, 1fr) auto; }
+  .cp-agenda .cp-riga-ora { grid-column: 2; grid-row: 1; flex-direction: row; gap: .35rem; align-items: baseline; }
+  .cp-agenda .cp-riga-ora strong { font-size: .86rem; }
+  .cp-agenda .cp-riga-barra { grid-column: 1; grid-row: 1 / span 2; }
+  .cp-agenda .cp-riga-testi { grid-column: 2; grid-row: 2; }
+  .cp-agenda .cp-riga-risultato { grid-column: 3; grid-row: 1 / span 2; }
+  .cp-agenda .cp-riga { row-gap: .15rem; }
+
+  .cp-riga-luogo { white-space: nowrap; }
+  .cp-riga-luogo > :last-child { overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* =====================================================
+   CHI HA CHIESTO MENO MOVIMENTO
+   ===================================================== */
+
 @media (prefers-reduced-motion: reduce) {
+  .cp-loader { animation-duration: 2.4s; }
+  .cp-entra,
+  .cp-backdrop,
   .cp-scelta-pannello { animation: none; }
-  .cp-scelta-freccia { transition: none; }
+  .cp-riga,
+  .cp-filtro,
+  .cp-event-pill,
+  .cp-sidebar,
+  .cp-comandi-titolo,
+  .cp-scelta-freccia,
+  .cp-prossimo-apri svg,
+  .cp-riga-freccia { transition: none; }
+  .cp-riga:hover,
+  .cp-filtro:hover { transform: none; }
 }

@@ -1,0 +1,434 @@
+/* =====================================================
+   Notizie: l'elenco (PostsListPage.jsx) e l'editor (PostEditorPage.jsx)
+
+   Solo quello che Admin.css non ha già: colori, misure e pezzi pronti
+   vengono da lì (vedi la Guida rapida in cima a quel file). Prefisso
+   "ntz-", così nessuna regola esce da queste due pagine.
+   ===================================================== */
+
+/* ---------- Testata ----------
+   Il blocco del titolo è un <div> semplice e non .adm-head-left: sul
+   telefono la testata si mette in colonna, e la base di 20rem di quella
+   classe diventava un'altezza, con un buco bianco sotto al titolo. */
+.ntz-testa > div { min-width: 0; flex: 1 1 18rem; }
+@media (max-width: 760px) {
+  .ntz-testa > div { flex-basis: auto; }
+}
+
+/* =====================================================
+   ELENCO
+   ===================================================== */
+
+/* ---------- Linguette degli stati ---------- */
+.ntz-linguette {
+  display: flex;
+  gap: .35rem;
+  margin: 0 0 1rem;
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-pill);
+  box-shadow: var(--adm-shadow-s);
+}
+.ntz-linguette::-webkit-scrollbar { display: none; }
+
+.ntz-linguetta {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: .4rem 1rem;
+  border: 0;
+  border-radius: var(--adm-r-pill);
+  background: transparent;
+  color: var(--adm-ink-2);
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, color .18s ease;
+}
+.ntz-linguetta svg { font-size: .85em; opacity: .75; }
+.ntz-linguetta:hover { background: var(--adm-surface-2); color: var(--adm-ink); }
+.ntz-linguetta:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: -3px; }
+.ntz-linguetta.is-active,
+.ntz-linguetta.is-active:hover { background: var(--adm-navy); color: #fff; }
+.ntz-linguetta.is-active svg { opacity: 1; }
+
+/* Il cestino staccato dagli stati da un filo: è un posto, non uno stato */
+.ntz-linguetta.is-cestino { position: relative; margin-left: .45rem; }
+.ntz-linguetta.is-cestino::before {
+  content: "";
+  position: absolute;
+  left: -.45rem;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  background: var(--adm-line);
+}
+.ntz-linguetta.is-cestino.is-active,
+.ntz-linguetta.is-cestino.is-active:hover { background: var(--adm-danger); }
+
+/* ---------- Cerca, etichetta, vista ---------- */
+.ntz-strumenti {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem .75rem;
+  margin-bottom: 1.25rem;
+}
+.ntz-cerca { flex: 1 1 18rem; max-width: 34rem; min-width: 0; }
+.ntz-strumenti .ntz-etichetta { flex: 0 1 15rem; min-width: 11rem; max-width: none; }
+.ntz-strumenti .adm-scambia-vista { margin-left: auto; }
+
+/* Sul telefono le linguette vanno a capo invece di scorrere di lato:
+   una voce nascosta oltre il bordo è una voce che non si trova */
+@media (max-width: 760px) {
+  .ntz-linguette {
+    flex-wrap: wrap;
+    gap: .4rem;
+    width: auto;
+    padding: 0;
+    overflow: visible;
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+  .ntz-linguetta { padding: .4rem .85rem; border: 1px solid var(--adm-line); background: var(--adm-surface); }
+  .ntz-linguetta.is-active { border-color: transparent; }
+  .ntz-linguetta.is-cestino { margin-left: 0; }
+  .ntz-linguetta.is-cestino::before { display: none; }
+  .ntz-cerca { flex-basis: 100%; max-width: none; }
+  .ntz-strumenti .ntz-etichetta { flex: 1 1 0; min-width: 0; }
+}
+
+/* ---------- Avviso del cestino ---------- */
+.ntz-cestino-avviso {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  margin-bottom: 1.25rem;
+  padding: .9rem 1rem;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-danger-line);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow-s);
+}
+.ntz-cestino-icona {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--adm-danger-soft);
+  color: var(--adm-danger);
+}
+.ntz-cestino-avviso p {
+  flex: 1 1 16rem;
+  margin: 0;
+  color: var(--adm-ink-2);
+  font-size: .92rem;
+  line-height: 1.5;
+}
+.ntz-cestino-avviso .adm-btn { margin-left: auto; }
+@media (max-width: 760px) {
+  .ntz-cestino-avviso .adm-btn { flex: 1 1 100%; }
+}
+
+/* ---------- Le righe ---------- */
+.ntz-sagoma { height: 6rem; border-radius: var(--adm-radius); }
+
+.ntz-lista .adm-post-row { padding: .85rem 1rem .85rem .85rem; }
+.ntz-lista .adm-post-thumb { width: 96px; height: 72px; }
+
+.ntz-riga .adm-post-title { font-size: 1.06rem; line-height: 1.3; }
+.ntz-riga span.adm-post-title:hover { color: var(--adm-ink); text-decoration: none; }
+
+.ntz-quando {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin: .45rem 0 0;
+  color: var(--adm-muted);
+  font-size: .83rem;
+}
+.ntz-quando svg { color: #6b2fb5; }
+
+.ntz-riga .adm-post-actions { align-items: center; }
+.ntz-modifica { min-height: 40px; padding: .4rem .9rem; }
+
+/* Sul telefono i pulsanti vanno sotto, su tutta la larghezza: accanto al
+   titolo lo schiacciavano a tre parole per riga */
+@media (max-width: 760px) {
+  .ntz-lista .adm-post-row {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: start;
+    gap: .75rem .85rem;
+  }
+  .ntz-lista .adm-post-thumb { width: 72px; height: 56px; }
+  .ntz-lista .adm-post-actions {
+    grid-column: 1 / -1;
+    padding-top: .7rem;
+    border-top: 1px solid var(--adm-line-soft);
+  }
+  .ntz-lista .adm-post-actions > :first-child { flex: 1 1 auto; }
+}
+
+/* Nella griglia il pulsante "Modifica" si prende lo spazio libero */
+.ntz-griglia .adm-post-actions > :first-child { margin-right: auto; }
+.ntz-griglia .ntz-quando { margin-bottom: .6rem; }
+
+/* =====================================================
+   EDITOR
+   ===================================================== */
+
+.ntz-editor-testa { margin-bottom: 1.25rem; }
+
+.ntz-indietro {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: var(--adm-tocco);
+  margin: 0 0 .35rem -.6rem;
+  padding: 0 .6rem;
+  border: 0;
+  border-radius: var(--adm-r-pill);
+  background: transparent;
+  color: var(--adm-blue);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ntz-indietro:hover { background: var(--adm-blue-soft); }
+.ntz-indietro:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+
+.ntz-editor-titolo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+}
+
+.ntz-editor-griglia { grid-template-columns: minmax(0, 1fr) 340px; }
+
+/* ---------- Il foglio ----------
+   Un solo riquadro bianco con titolo e testo, senza cornici dentro:
+   si scrive come su una pagina, non come in un modulo. */
+.ntz-foglio {
+  min-width: 0;
+  background: var(--adm-surface);
+  border: 1px solid rgba(0, 43, 92, .08);
+  border-radius: var(--adm-r-l);
+  box-shadow: var(--adm-shadow);
+}
+.ntz-foglio:focus-within { border-color: var(--adm-blue-line); }
+
+.ntz-titolo-campo { display: block; padding: 1.5rem 1.6rem .5rem; }
+.ntz-titolo-campo textarea {
+  display: block;
+  width: 100%;
+  min-height: 1.3em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+  background: transparent;
+  color: var(--adm-ink);
+  font: inherit;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -.03em;
+}
+.ntz-titolo-campo textarea::placeholder { color: #9aa7ba; }
+.ntz-titolo-campo textarea[aria-invalid="true"]::placeholder { color: var(--adm-danger); }
+
+/* L'editor di testo perde la sua cornice (ce l'ha già il foglio) e la
+   barra dei comandi resta in alto mentre si scrive un testo lungo */
+.ntz-foglio .adm-editor {
+  border: 0;
+  border-radius: 0 0 var(--adm-r-l) var(--adm-r-l);
+  overflow: visible;
+  background: transparent;
+}
+.ntz-foglio .adm-editor:focus-within { box-shadow: none; }
+.ntz-foglio .adm-toolbar-editor {
+  position: sticky;
+  top: var(--adm-testata-h);
+  z-index: 4;
+  gap: .2rem;
+  padding: .45rem 1.1rem;
+  border-top: 1px solid var(--adm-line-soft);
+  border-bottom: 1px solid var(--adm-line-soft);
+  background: rgba(255, 255, 255, .96);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.ntz-foglio .adm-tool { width: 38px; height: 38px; border-radius: 10px; font-size: .92rem; }
+.ntz-foglio .adm-editor-surface {
+  min-height: 420px;
+  padding: 1.25rem 1.6rem 2rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+.ntz-foglio .adm-editor-loading { border: 0; }
+
+/* ---------- La colonna accanto ---------- */
+.ntz-lato .adm-panel-title svg { color: var(--adm-arancio-testo); }
+.ntz-lato .adm-field:last-child,
+.ntz-campo-ultimo { margin-bottom: 0; }
+
+.ntz-stato {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: .4rem .6rem;
+  margin: -.25rem 0 1rem;
+  color: var(--adm-ink-2);
+  font-size: .88rem;
+  line-height: 1.45;
+}
+
+.ntz-uscita {
+  margin: 0 0 1rem;
+  padding: .9rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--adm-line-soft);
+}
+.ntz-uscita legend {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  float: left;
+  width: 100%;
+  margin-bottom: .6rem;
+}
+.ntz-uscita legend + * { clear: both; }
+.ntz-uscita .adm-hint { margin-bottom: 0; }
+
+.ntz-nota-revisione {
+  display: flex;
+  gap: .5rem;
+  margin: 0 0 1rem;
+  padding: .65rem .8rem;
+  border-radius: var(--adm-r-s);
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue-dark);
+  font-size: .84rem;
+  line-height: 1.45;
+}
+.ntz-nota-revisione svg { flex-shrink: 0; margin-top: 3px; }
+
+.ntz-pulsanti-lato { display: grid; gap: .5rem; }
+.ntz-pulsanti-lato .adm-btn-primary { order: -1; min-height: 48px; font-size: 1rem; }
+
+.ntz-vedi { margin-top: .85rem; color: var(--adm-blue); font-size: .9rem; }
+
+/* "Gestisci etichette" è un collegamento nel testo, non un altro
+   pulsante che fa concorrenza a "Pubblica" */
+.ntz-gestisci {
+  padding: .25rem 0;
+  border: 0;
+  background: none;
+  color: var(--adm-blue);
+  font: inherit;
+  font-size: .84rem;
+  cursor: pointer;
+}
+.ntz-gestisci:disabled { opacity: .5; cursor: not-allowed; }
+.ntz-lato .adm-label-riga { margin-bottom: .4rem; }
+.ntz-lato .adm-label-riga .adm-label { margin: 0; }
+.ntz-lato .adm-field .adm-hint { display: block; margin-top: .4rem; }
+
+/* ---------- Copertina ---------- */
+.ntz-copertina { position: relative; }
+.ntz-copertina img { margin-bottom: .75rem; }
+.ntz-copertina-togli {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  box-shadow: var(--adm-shadow-s);
+}
+
+/* Il riquadro vuoto è lui stesso il pulsante per caricare: è il posto
+   dove l'occhio va a cercare la foto */
+.ntz-copertina-vuota {
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+  background: var(--adm-surface-2);
+  border-width: 1.5px;
+  border-color: var(--adm-line-strong);
+  transition: border-color .18s ease, background-color .18s ease;
+}
+.ntz-copertina-vuota svg { color: var(--adm-blue); }
+.ntz-copertina-vuota strong { color: var(--adm-ink); font-size: .95rem; }
+.ntz-copertina-vuota:hover:not(:disabled) { border-color: var(--adm-blue); background: var(--adm-blue-soft); }
+.ntz-copertina-vuota:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.ntz-copertina-vuota:disabled { opacity: .6; cursor: not-allowed; }
+
+.ntz-copertina-azioni { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ntz-copertina-azioni .adm-btn { flex: 1 1 10rem; }
+
+/* ---------- Telefono e computer ---------- */
+
+/* La barra in fondo solo sul telefono; sul computer i pulsanti stanno
+   nel riquadro "Pubblicazione", che resta fermo accanto al testo */
+.ntz-barra-telefono { display: none; }
+
+@media (max-width: 900px) {
+  .ntz-editor-griglia { grid-template-columns: minmax(0, 1fr); }
+  .ntz-barra-telefono { display: flex; }
+  .ntz-pulsanti-lato { display: none; }
+}
+
+@media (max-width: 760px) {
+  .ntz-titolo-campo { padding: 1.1rem 1rem .4rem; }
+  /* I comandi su una riga sola che scorre di lato: su due righe la
+     barra ferma in alto si mangiava un terzo dello schermo */
+  .ntz-foglio .adm-toolbar-editor {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: .35rem .5rem;
+  }
+  .ntz-foglio .adm-toolbar-editor::-webkit-scrollbar { display: none; }
+  .ntz-foglio .adm-tool { flex-shrink: 0; }
+  .ntz-foglio .adm-tool-sep-grow { flex: 0 0 .5rem; }
+  .ntz-barra-telefono .adm-btn { flex: 1 1 auto; white-space: nowrap; }
+  .ntz-foglio .adm-tool { width: 40px; height: 40px; }
+  .ntz-foglio .adm-editor-surface { min-height: 300px; padding: 1rem 1rem 1.5rem; }
+}
+
+/* Fra 761 e 900 pixel la barra non è attaccata in basso (lo fa solo sul
+   telefono, in Admin.css): le si dà almeno la riga in fondo al modulo */
+@media (min-width: 761px) and (max-width: 900px) {
+  .ntz-barra-telefono {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 1.25rem 0 0;
+    padding: .75rem 0;
+    background: var(--adm-bg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ntz-linguetta,
+  .ntz-copertina-vuota { transition: none; }
+}

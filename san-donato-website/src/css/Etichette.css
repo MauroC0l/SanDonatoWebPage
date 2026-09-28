@@ -34,6 +34,8 @@
 
 .etc-testa { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
 .etc-titolo { display: flex; align-items: center; gap: .5rem; margin: 0; }
+.etc-titolo svg { color: var(--adm-arancio-testo); }
+.etc-riga:hover { background: var(--adm-surface-2); }
 
 .etc-nuova, .etc-rinomina { display: flex; gap: .5rem; align-items: center; }
 .etc-nuova .adm-input, .etc-rinomina .adm-input { flex: 1; min-width: 0; }
@@ -46,8 +48,8 @@
   padding: 0;
   max-height: 20rem;
   overflow-y: auto;
-  border: 1px solid #dde3ec;
-  border-radius: 10px;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-m);
 }
 
 .etc-riga {
@@ -55,14 +57,14 @@
   align-items: center;
   gap: .6rem;
   padding: .5rem .7rem;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid var(--adm-line-soft);
   min-height: 3rem;
 }
 .etc-riga:last-child { border-bottom: 0; }
 .etc-rinomina { flex: 1; }
 
-.etc-nome { font-weight: 600; flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.etc-quante { color: #5b6a80; font-size: .85rem; white-space: nowrap; }
+.etc-nome { font-weight: 700; color: var(--adm-ink); flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.etc-quante { color: var(--adm-muted); font-size: .85rem; white-space: nowrap; }
 .etc-azioni { display: inline-flex; gap: .3rem; }
 .etc-nota { margin: 0; }
 

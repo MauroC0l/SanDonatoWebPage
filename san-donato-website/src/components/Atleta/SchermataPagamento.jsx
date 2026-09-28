@@ -51,7 +51,12 @@ const MODI = [
   }
 ];
 
-export default function SchermataPagamento({ quota, versato, conto = null, onChiudi }) {
+/*
+ * "importoIniziale" è la cifra già scritta nel campo quando la finestra si
+ * apre: chi ha premuto "Paga metà adesso" deve trovarsi la metà, non il
+ * totale da correggere a mano. Senza, è tutto quello che resta.
+ */
+export default function SchermataPagamento({ quota, versato, conto = null, importoIniziale = null, onChiudi }) {
   const residuo = quota == null ? null : Math.max(0, quota - versato);
 
   /* Quanto manca alla prima metà, se ne manca: è l'altra cifra che ha
@@ -65,7 +70,7 @@ export default function SchermataPagamento({ quota, versato, conto = null, onChi
   const soloSeconda = conto?.primaMeta != null && conto.secondaDovuta && restoPrimaMeta === 0;
 
   const [modo, setModo] = useState("carta");
-  const [quanto, setQuanto] = useState(() => versoCampo(residuo ?? 0));
+  const [quanto, setQuanto] = useState(() => versoCampo(importoIniziale ?? residuo ?? 0));
   const [inviato, setInviato] = useState(false);
 
   // Esc chiude, come in qualunque finestra di sistema.
@@ -266,7 +271,7 @@ export default function SchermataPagamento({ quota, versato, conto = null, onChi
               </button>
               <button
                 type="button"
-                className="adm-btn adm-btn-primary"
+                className="adm-btn adm-btn-arancio"
                 onClick={procedi}
                 disabled={!valido}
               >
