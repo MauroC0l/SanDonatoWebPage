@@ -55,6 +55,20 @@ const STATUS_LABEL = {
   private: "Privata"
 };
 
+const GIORNO = 24 * 60 * 60 * 1000;
+
+/**
+ * Da quanti giorni una notizia è nel cestino, e fra quanti sparisce.
+ * "adesso" arriva da fuori, fissato all'apertura della pagina: leggere
+ * l'orologio mentre si disegna darebbe un numero diverso a ogni passaggio.
+ */
+function tempoNelCestino(post, adesso, giorniCestino) {
+  const dal = new Date(post.cestinataIl || post.modified).getTime();
+  if (isNaN(dal)) return null;
+  const da = Math.max(0, Math.floor((adesso - dal) / GIORNO));
+  return { da, mancano: Math.max(0, giorniCestino - da) };
+}
+
 const formatDate = (iso) => {
   const date = new Date(iso);
   if (isNaN(date.getTime())) return "";
@@ -95,11 +109,12 @@ export default function PostsListPage() {
   const requestKey = `${status}|${search}|${etichetta}|${page}|${reloadToken}`;
 
   const [data, setData] = useState({
-    key: null, posts: [], total: 0, totalPages: 1, error: ""
+    key: null, posts: [], total: 0, totalPages: 1, giorniCestino: 30, error: ""
   });
+  const [adesso] = useState(() => Date.now());
 
   const loading = data.key !== requestKey;
-  const { posts, total, totalPages, error } = data;
+  const { posts, total, totalPages, giorniCestino, error } = data;
 
   useEffect(() => {
     let mounted = true;
@@ -292,6 +307,16 @@ export default function PostsListPage() {
         </form>
       </div>
 
+      {nelCestino && (
+        <div className="adm-alert adm-alert-info" role="status">
+          <FaExclamationCircle aria-hidden="true" />
+          <span>
+            Le notizie nel cestino vengono <strong>cancellate per sempre dopo {giorniCestino} giorni</strong>.
+            Fino ad allora, con <strong>Ripristina</strong> tornano fra le bozze.
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="adm-alert adm-alert-error" role="alert">
           <FaExclamationCircle />
@@ -355,7 +380,7 @@ export default function PostsListPage() {
                     {/* Per una programmata la data è un appuntamento, non un
                         archivio: va letta con l'ora e introdotta da "esce". */}
                     {post.status === "trash"
-                      ? `nel cestino dal ${formatDate(post.cestinataIl || post.modified)}`
+                      ? <GiorniNelCestino tempo={tempoNelCestino(post, adesso, giorniCestino)} />
                       : post.status === "future"
                         ? `esce il ${formatDateOra(post.dateISO)}`
                         : formatDate(post.dateISO)}
@@ -366,15 +391,17 @@ export default function PostsListPage() {
 
               {nelCestino ? (
               <div className="adm-post-actions">
+                {/* Con la scritta e non solo l'icona: è il gesto che si
+                    viene a fare nel cestino, e deve vedersi al primo colpo */}
                 <button
                   type="button"
-                  className="adm-icon-btn"
+                  className="adm-btn adm-btn-secondary adm-btn-piccolo"
                   onClick={() => handleRestore(post)}
                   disabled={busyId != null}
-                  title="Ripristina: torna fra le bozze"
+                  title="Torna fra le bozze"
                   aria-label={`Ripristina ${post.title}`}
                 >
-                  <FaUndo />
+                  <FaUndo /> Ripristina
                 </button>
                 <button
                   type="button"
@@ -447,5 +474,23 @@ export default function PostsListPage() {
         </nav>
       )}
     </div>
+  );
+}
+
+/**
+ * "Nel cestino da 12 giorni · si cancella fra 18": il secondo numero
+ * diventa rosso negli ultimi cinque giorni, quando è ora di decidere.
+ */
+function GiorniNelCestino({ tempo }) {
+  if (!tempo) return "nel cestino";
+  const { da, mancano } = tempo;
+  const quando = da === 0 ? "da oggi" : da === 1 ? "da 1 giorno" : `da ${da} giorni`;
+  return (
+    <>
+      nel cestino {quando} ·{" "}
+      <span className={`adm-cestino-mancano ${mancano <= 5 ? "is-vicino" : ""}`}>
+        {mancano === 0 ? "si cancella stanotte" : mancano === 1 ? "si cancella fra 1 giorno" : `si cancella fra ${mancano} giorni`}
+      </span>
+    </>
   );
 }

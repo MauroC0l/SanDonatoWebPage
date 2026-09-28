@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "../../../../db/client.js";
 import { notizie } from "../../../../db/schema.js";
 import { impostaEtichette } from "../../../etichette.js";
-import { elencaNotizie, slugLibero } from "../../../notizie.js";
+import { elencaNotizie, slugLibero, pulisciCestinoNotizie, GIORNI_CESTINO } from "../../../notizie.js";
 import { ripulisciHtml, soloTesto, creaSlug } from "../../../sanitizza.js";
 import { puo } from "../../../autorizzazioni.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
@@ -25,6 +25,9 @@ import { schemaElencoNotizie, schemaNotiziaNuova, valida } from "../../../valida
 async function elenco(req, res) {
   const { pagina, perPagina, sport, etichetta, stato, cerca } = valida(schemaElencoNotizie, parametri(req));
 
+  // Aprendo il cestino, prima si tolgono quelle scadute
+  if (String(stato ?? "").split(",").includes("cestino")) await pulisciCestinoNotizie();
+
   const risultato = await elencaNotizie({
     pagina, perPagina, sport, etichetta, stato, cerca,
     soloPubblicate: false
@@ -32,7 +35,8 @@ async function elenco(req, res) {
 
   // Mai in cache: il pannello deve mostrare ciò che c'è adesso
   res.setHeader("Cache-Control", "no-store");
-  return json(res, risultato);
+  // Il pannello lo usa per dire fra quanti giorni ognuna sparisce
+  return json(res, { ...risultato, giorniCestino: GIORNI_CESTINO });
 }
 
 async function crea(req, res) {

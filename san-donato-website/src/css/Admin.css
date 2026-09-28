@@ -3631,3 +3631,6 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
    "Gestisci etichette" nell'editor delle notizie) */
 .adm-label-riga { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
 .adm-btn.adm-btn-piccolo { padding: .25rem .6rem; font-size: .82rem; min-height: 0; }
+
+/* Nel cestino: i giorni che mancano alla cancellazione, rossi negli ultimi cinque */
+.adm-cestino-mancano.is-vicino { color: var(--adm-danger); font-weight: 700; }

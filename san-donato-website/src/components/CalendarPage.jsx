@@ -259,16 +259,6 @@ export default function CalendarPage() {
     return futureEvents.length > 0 ? futureEvents[0] : prossimo;
   }, [filteredEvents, loading, prossimo]);
 
-  /* Aperto su un mese vuoto, il calendario dice dove si trova il prossimo
-     evento e ci porta con un tocco. Succede a inizio stagione: il mese in
-     corso è ancora vuoto e le partite cominciano il mese dopo. */
-  const fineMese = new Date(visibleYear, visibleMonth + 1, 0, 23, 59, 59);
-  const meseVuotoConProssimo = !loading && view === 'month' && eventiDelMese.length === 0
-    && prossimo && prossimo.start > fineMese;
-
-  const vaiAlProssimo = () => {
-    setCurrentDate(new Date(prossimo.start.getFullYear(), prossimo.start.getMonth(), 1));
-  };
 
 
   if (error) {
@@ -407,18 +397,6 @@ export default function CalendarPage() {
 
           <div className="cp-calendar-content">
             {loading && <div className="cp-loader"></div>}
-
-            {meseVuotoConProssimo && (
-              <div className="cp-mese-vuoto">
-                <span>
-                  Nessun evento a {MONTH_NAMES[visibleMonth].toLowerCase()}. Il prossimo è{" "}
-                  <strong>{formatDate(prossimo.start)}</strong>: {prossimo.title}.
-                </span>
-                <button type="button" className="cp-mese-vuoto-vai" onClick={vaiAlProssimo}>
-                  Vai a {MONTH_NAMES[prossimo.start.getMonth()].toLowerCase()} →
-                </button>
-              </div>
-            )}
 
             {!loading && view === 'month' && (
               <>

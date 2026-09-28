@@ -252,7 +252,9 @@ export async function listPosts({ search = "", status = "", etichetta = "", page
   return {
     posts: risultato.notizie.map(versoPannello),
     total: risultato.totale,
-    totalPages: risultato.pagine
+    totalPages: risultato.pagine,
+    // Dopo quanti giorni il cestino cancella da solo
+    giorniCestino: risultato.giorniCestino ?? 30
   };
 }
 

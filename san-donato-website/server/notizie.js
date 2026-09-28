@@ -302,3 +302,29 @@ export async function slugLibero(desiderato, escludiId = null) {
 
 // Riesportata: mezzo front-end la importa da qui.
 export { urlFile };
+
+/**
+ * Quanti giorni una notizia resta nel cestino prima di sparire per sempre.
+ * Deciso dalla società il 28 settembre 2026.
+ */
+export const GIORNI_CESTINO = 30;
+
+/**
+ * Cancella per sempre le notizie nel cestino da più di GIORNI_CESTINO
+ * giorni. Le copertine restano nella libreria dei file.
+ *
+ * Gira ogni notte con il cron (/api/cron/stagioni) e anche quando qualcuno
+ * apre il cestino: così chi lo guarda non trova mai una notizia che
+ * "sarebbe già dovuta sparire".
+ *
+ * @returns le notizie cancellate, { id, titolo }
+ */
+export async function pulisciCestinoNotizie() {
+  return getDb()
+    .delete(notizie)
+    .where(and(
+      eq(notizie.stato, "cestino"),
+      sql`coalesce(${notizie.cestinataIl}, ${notizie.aggiornataIl}) < now() - make_interval(days => ${GIORNI_CESTINO})`
+    ))
+    .returning({ id: notizie.id, titolo: notizie.titolo });
+}

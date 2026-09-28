@@ -278,7 +278,7 @@ export default function CalendariUfficialiPage() {
   const [inLettura, setInLettura] = useState(null); // "tutte" | id della fonte
   const [occupati, setOccupati] = useState(() => new Set());
   const [sportScelto, setSportScelto] = useState(""); // "" = tutti
-  // Solo i tornei aperti o chiusi a mano: gli altri seguono apertoDiSolito()
+  // Solo i tornei aperti o chiusi a mano: gli altri restano chiusi (apertoDiSolito)
   const [aperture, setAperture] = useState({});
 
   const gestisciErrore = useCallback((err) => {
@@ -459,11 +459,11 @@ export default function CalendariUfficialiPage() {
   const sportAttivo = sportPresenti.includes(sportScelto) ? sportScelto : "";
   const fontiVisibili = dati.fonti.filter((f) => !sportAttivo || sportDi(f) === sportAttivo);
 
-  /* Chiusi di norma: a stagione avviata i gironi sono tutti assegnati e la
-     pagina serve a vedere a colpo d'occhio se ogni torneo si è letto. Si
-     apre da sé il torneo che ha ancora gironi senza squadra, perché lì c'è
-     qualcosa da fare, e quello che è l'unico: chiuderlo non farebbe ordine. */
-  const apertoDiSolito = (suoi) => dati.fonti.length === 1 || suoi.some(daAssegnare);
+  /* Tutti chiusi all'apertura della pagina, deciso dalla società il 28
+     settembre 2026: la pagina serve a vedere a colpo d'occhio se ogni
+     torneo si è letto, e i gironi si aprono quando servono. Quelli da
+     assegnare li segnala comunque l'avviso in cima. */
+  const apertoDiSolito = () => false;
   const apriChiudi = (id, aperto) => setAperture((prima) => ({ ...prima, [id]: !aperto }));
 
   return (

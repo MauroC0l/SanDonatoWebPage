@@ -153,8 +153,8 @@ Resta da fare:
 - la colonna `notizie.categoria` non si usa più: va tolta con una
   migrazione, insieme a `scripts/classifica-notizie.mjs`, che la scrive
   ancora;
-- il cestino non si svuota da solo: se serve, una pulizia automatica delle
-  notizie cestinate da più di N giorni (da decidere).
+- FATTO: il cestino si svuota da solo dopo 30 giorni (cron notturno
+  /api/cron/stagioni, e ogni volta che si apre il cestino).
 
 ### Recupero della password via email
 
