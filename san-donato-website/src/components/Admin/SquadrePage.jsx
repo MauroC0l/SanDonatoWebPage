@@ -670,8 +670,11 @@ export default function SquadrePage() {
                           </span>
                         ))}
 
+                        {/* Sovrapposta come quella del calendario: dentro la
+                            scheda il pannello restava sotto al riquadro dopo */}
                         <Tendina
                           className="tnd-mini"
+                          sovrapposta
                           valore=""
                           onChange={(v) => affida(s.id, v)}
                           opzioni={persone
