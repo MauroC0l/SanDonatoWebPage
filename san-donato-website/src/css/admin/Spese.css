@@ -124,7 +124,6 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
   gap: .75rem;
 }
-.spe-elenco > li:has(> .spe-modulo) { grid-column: 1 / -1; }
 
 .spe-servizio { margin: 0; display: grid; gap: .9rem; align-content: start; }
 .spe-servizio.is-spento { background: var(--adm-surface-2); border-style: dashed; }
@@ -190,7 +189,8 @@
 }
 
 /* ---------- Il modulo ---------- */
-.spe-modulo { display: grid; gap: .9rem; margin-bottom: .75rem; }
+.spe-indietro { justify-self: start; margin-bottom: .5rem; }
+.spe-modulo { display: grid; gap: .9rem; max-width: 56rem; }
 .spe-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
 .spe-griglia-tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .spe-soglia { max-width: 18rem; }

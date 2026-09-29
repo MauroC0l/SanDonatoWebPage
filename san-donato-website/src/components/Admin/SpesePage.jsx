@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useArea } from "../../context/area";
 import {
-  FaPlus, FaPencilAlt, FaSave, FaTimes, FaTrashAlt, FaExternalLinkAlt,
+  FaPlus, FaPencilAlt, FaTrashAlt, FaExternalLinkAlt,
   FaExclamationCircle, FaExclamationTriangle, FaCheckCircle, FaPowerOff,
   FaDatabase, FaCloud, FaServer, FaEnvelope, FaGlobe, FaCalendarCheck,
   FaCodeBranch, FaPuzzlePiece, FaPlug
 } from "react-icons/fa";
-import { listSpese, creaServizio, modificaServizio, eliminaServizio, AuthError } from "../../api/adminApi";
+import { listSpese, modificaServizio, eliminaServizio, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useDialoghi } from "../../context/dialoghi";
-import { euro, versoCampo, daCampo } from "../../utils/soldi";
+import { euro } from "../../utils/soldi";
 import { byteLeggibili } from "../../utils/byte";
-import Tendina from "./Tendina";
-import CampoData from "./CampoData";
 import "../../css/Admin.css";
 import "../../css/admin/Spese.css";
 
@@ -27,6 +26,9 @@ import "../../css/admin/Spese.css";
  * Gli importi li scrive l'amministratore; i consumi (database e archivio dei
  * file) li misura il sito a ogni apertura, perché sono loro a crescere da
  * soli fino alla soglia oltre la quale si paga.
+ *
+ * Il modulo per aggiungere o correggere un servizio sta in ServizioPage, su
+ * un indirizzo suo: dentro questa pagina finiva troppo in basso.
  */
 
 const ICONA_CATEGORIA = {
@@ -40,36 +42,9 @@ const ICONA_CATEGORIA = {
   altro: FaPuzzlePiece
 };
 
-const GB = 1024 ** 3;
-
-const versoCampoData = (giorno) => (giorno ? `${giorno}T00:00:00` : "");
-function giornoLocale(iso) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 const dataLeggibile = (giorno) => new Date(`${giorno}T00:00:00`).toLocaleDateString("it-IT", {
   day: "numeric", month: "long", year: "numeric"
 });
-
-function moduloDa(s) {
-  return {
-    id: s?.id ?? null,
-    nome: s?.nome ?? "",
-    categoria: s?.categoria ?? "altro",
-    serveA: s?.serveA ?? "",
-    account: s?.account ?? "",
-    piano: s?.piano ?? "",
-    importo: versoCampo(s?.importoCentesimi ?? 0),
-    periodicita: s?.periodicita ?? "gratis",
-    rinnovoIl: s?.rinnovoIl ?? "",
-    limiti: s?.limiti ?? "",
-    urlPannello: s?.urlPannello ?? "",
-    note: s?.note ?? "",
-    misura: s?.misura ?? "",
-    sogliaGb: s?.sogliaByte ? String(+(s.sogliaByte / GB).toFixed(2)).replace(".", ",") : "",
-    attivo: s?.attivo ?? true
-  };
-}
 
 /** Il costo scritto per esteso: "Gratuito", "12,00 € al mese". */
 function costoLeggibile(s) {
@@ -82,12 +57,12 @@ function costoLeggibile(s) {
 
 export default function SpesePage() {
   const navigate = useNavigate();
+  const area = useArea();
   const { sessionExpired } = useAuth();
   const { avvisa, conferma } = useDialoghi();
 
   const [dati, setDati] = useState(null);
   const [errore, setErrore] = useState("");
-  const [modulo, setModulo] = useState(null);
   const [occupato, setOccupato] = useState(false);
 
   const gestisciErrore = useCallback((err) => {
@@ -107,53 +82,6 @@ export default function SpesePage() {
     }), [gestisciErrore]);
 
   useEffect(() => { ricarica(); }, [ricarica]);
-
-  const campo = (nome) => (valore) => setModulo((m) => ({ ...m, [nome]: valore }));
-
-  const salva = async (evento) => {
-    evento.preventDefault();
-    const m = modulo;
-    const importoCentesimi = m.periodicita === "gratis" ? 0 : daCampo(m.importo);
-    if (m.periodicita !== "gratis" && importoCentesimi == null) {
-      avvisa("Scrivi l'importo in euro, per esempio 12,50.", "errore");
-      return;
-    }
-    const soglia = m.misura && m.sogliaGb.trim() ? Number(m.sogliaGb.replace(",", ".")) : null;
-    if (m.misura && (soglia == null || !(soglia > 0))) {
-      avvisa("Scrivi quanti GB comprende il piano, per esempio 0,5.", "errore");
-      return;
-    }
-
-    const corpo = {
-      nome: m.nome.trim(),
-      categoria: m.categoria,
-      serveA: m.serveA,
-      account: m.account,
-      piano: m.piano,
-      importoCentesimi: importoCentesimi ?? 0,
-      periodicita: m.periodicita,
-      rinnovoIl: m.rinnovoIl || null,
-      limiti: m.limiti,
-      urlPannello: m.urlPannello.trim(),
-      note: m.note,
-      misura: m.misura || null,
-      sogliaByte: soglia ? Math.round(soglia * GB) : null,
-      attivo: m.attivo
-    };
-
-    setOccupato(true);
-    try {
-      if (m.id) await modificaServizio(m.id, corpo);
-      else await creaServizio(corpo);
-      avvisa(m.id ? "Servizio salvato." : "Servizio aggiunto.");
-      setModulo(null);
-      await ricarica();
-    } catch (err) {
-      gestisciErrore(err);
-    } finally {
-      setOccupato(false);
-    }
-  };
 
   const accendiSpegni = async (s) => {
     setOccupato(true);
@@ -210,123 +138,13 @@ export default function SpesePage() {
     );
   }
 
-  const { servizi, consumi, riepilogo, collegamenti, categorie, periodicita, misure } = dati;
+  const { servizi, consumi, riepilogo, collegamenti, categorie } = dati;
   const etichettaCategoria = (v) => categorie.find((c) => c.valore === v)?.etichetta ?? v;
   const attivi = servizi.filter((s) => s.attivo);
   const spenti = servizi.filter((s) => !s.attivo);
 
-  /* ---------- Il modulo ---------- */
-  const disegnaModulo = () => {
-    const m = modulo;
-    return (
-      <form className="adm-panel spe-modulo" onSubmit={salva}>
-        <h2 className="adm-panel-title">
-          {m.id ? <FaPencilAlt aria-hidden="true" /> : <FaPlus aria-hidden="true" />}
-          {m.id ? ` Modifica "${m.nome}"` : " Nuovo servizio"}
-        </h2>
-
-        <div className="spe-griglia">
-          <label className="adm-field">
-            <span className="adm-label">Nome</span>
-            <input className="adm-input" value={m.nome} onChange={(e) => campo("nome")(e.target.value)}
-              placeholder="Es. Neon" maxLength={120} required disabled={occupato} />
-          </label>
-          <div className="adm-field">
-            <span className="adm-label">Di che cosa si tratta</span>
-            <Tendina valore={m.categoria} onChange={campo("categoria")} opzioni={categorie}
-              etichettaAria="Categoria del servizio" cercabile={false} disabilitato={occupato} />
-          </div>
-        </div>
-
-        <label className="adm-field">
-          <span className="adm-label">A cosa serve</span>
-          <textarea className="adm-input" rows={2} value={m.serveA} onChange={(e) => campo("serveA")(e.target.value)}
-            placeholder="Es. Il database: atleti, quote, notizie." maxLength={600} disabled={occupato} />
-        </label>
-
-        <div className="spe-griglia">
-          <label className="adm-field">
-            <span className="adm-label">Con quale account si entra</span>
-            <input className="adm-input" value={m.account} onChange={(e) => campo("account")(e.target.value)}
-              placeholder="Es. segreteria@… oppure «con GitHub»" maxLength={200} disabled={occupato} />
-            <span className="adm-hint">Solo il nome o l&apos;email: <strong>mai la password</strong>.</span>
-          </label>
-          <label className="adm-field">
-            <span className="adm-label">Piano</span>
-            <input className="adm-input" value={m.piano} onChange={(e) => campo("piano")(e.target.value)}
-              placeholder="Es. Free, Pro" maxLength={120} disabled={occupato} />
-          </label>
-        </div>
-
-        <div className="spe-griglia spe-griglia-tre">
-          <div className="adm-field">
-            <span className="adm-label">Si paga</span>
-            <Tendina valore={m.periodicita} onChange={campo("periodicita")} opzioni={periodicita}
-              etichettaAria="Ogni quanto si paga" cercabile={false} disabilitato={occupato} />
-          </div>
-          <label className="adm-field">
-            <span className="adm-label">Importo (€)</span>
-            <input className="adm-input" inputMode="decimal" value={m.periodicita === "gratis" ? "" : m.importo}
-              onChange={(e) => campo("importo")(e.target.value)} placeholder={m.periodicita === "gratis" ? "—" : "Es. 12,50"}
-              disabled={occupato || m.periodicita === "gratis"} />
-          </label>
-          <div className="adm-field">
-            <span className="adm-label">Prossimo rinnovo <em>(facoltativo)</em></span>
-            <CampoData valore={versoCampoData(m.rinnovoIl)} onChange={(v) => campo("rinnovoIl")(v ? giornoLocale(v) : "")}
-              disabilitato={occupato} etichettaAria="Data del prossimo rinnovo" segnaposto="Scegli il giorno" />
-          </div>
-        </div>
-
-        <label className="adm-field">
-          <span className="adm-label">Cosa comprende il piano <em>(facoltativo)</em></span>
-          <textarea className="adm-input" rows={2} value={m.limiti} onChange={(e) => campo("limiti")(e.target.value)}
-            placeholder="Es. Gratis fino a 10 GB, poi 0,015 $ per GB al mese." maxLength={1000} disabled={occupato} />
-        </label>
-
-        <div className="spe-griglia">
-          <label className="adm-field">
-            <span className="adm-label">Indirizzo del pannello <em>(facoltativo)</em></span>
-            <input className="adm-input" type="url" value={m.urlPannello} onChange={(e) => campo("urlPannello")(e.target.value)}
-              placeholder="https://…" maxLength={500} disabled={occupato} />
-          </label>
-          <div className="adm-field">
-            <span className="adm-label">Consumo da misurare <em>(facoltativo)</em></span>
-            <Tendina valore={m.misura} onChange={campo("misura")}
-              opzioni={[{ valore: "", etichetta: "Nessuno" }, ...misure]}
-              etichettaAria="Consumo che il sito misura" cercabile={false} disabilitato={occupato} />
-          </div>
-        </div>
-
-        {m.misura && (
-          <label className="adm-field spe-soglia">
-            <span className="adm-label">Spazio compreso nel piano (GB)</span>
-            <input className="adm-input" inputMode="decimal" value={m.sogliaGb} onChange={(e) => campo("sogliaGb")(e.target.value)}
-              placeholder="Es. 0,5" disabled={occupato} />
-            <span className="adm-hint">Oltre l&apos;80% la home lo segnala.</span>
-          </label>
-        )}
-
-        <label className="adm-field">
-          <span className="adm-label">Note <em>(facoltativo)</em></span>
-          <textarea className="adm-input" rows={2} value={m.note} onChange={(e) => campo("note")(e.target.value)}
-            maxLength={1000} disabled={occupato} />
-        </label>
-
-        <div className="adm-scheda-azioni">
-          <button type="submit" className="adm-btn adm-btn-primary" disabled={occupato}>
-            <FaSave aria-hidden="true" /> Salva
-          </button>
-          <button type="button" className="adm-btn adm-btn-ghost" onClick={() => setModulo(null)} disabled={occupato}>
-            <FaTimes aria-hidden="true" /> Annulla
-          </button>
-        </div>
-      </form>
-    );
-  };
-
   /* ---------- Un servizio ---------- */
   const disegnaServizio = (s) => {
-    if (modulo?.id === s.id) return <li key={s.id}>{disegnaModulo()}</li>;
     const Icona = ICONA_CATEGORIA[s.categoria] ?? FaPuzzlePiece;
     const uso = riepilogo.usi.find((u) => u.servizioId === s.id);
     const righe = [
@@ -370,7 +188,7 @@ export default function SpesePage() {
               Apri il pannello <FaExternalLinkAlt aria-hidden="true" />
             </a>
           )}
-          <button type="button" className="adm-btn adm-btn-ghost adm-btn-piccolo" onClick={() => setModulo(moduloDa(s))} disabled={occupato || !!modulo}>
+          <button type="button" className="adm-btn adm-btn-ghost adm-btn-piccolo" onClick={() => navigate(`${area}/spese/${s.id}`)} disabled={occupato}>
             <FaPencilAlt aria-hidden="true" /> Modifica
           </button>
           <button type="button" className="adm-btn adm-btn-ghost adm-btn-piccolo" onClick={() => accendiSpegni(s)} disabled={occupato}>
@@ -414,13 +232,11 @@ export default function SpesePage() {
             sito, adesso.
           </p>
         </div>
-        {!modulo && (
-          <div className="adm-head-actions">
-            <button type="button" className="adm-btn adm-btn-primary" onClick={() => setModulo(moduloDa(null))}>
-              <FaPlus aria-hidden="true" /> Aggiungi un servizio
-            </button>
-          </div>
-        )}
+        <div className="adm-head-actions">
+          <button type="button" className="adm-btn adm-btn-primary" onClick={() => navigate(`${area}/spese/nuovo`)}>
+            <FaPlus aria-hidden="true" /> Aggiungi un servizio
+          </button>
+        </div>
       </div>
 
       {/* ---------- I conti ---------- */}
@@ -527,7 +343,6 @@ export default function SpesePage() {
             <p className="adm-sezione-sotto">Gli account esterni della società, uno per riquadro.</p>
           </div>
         </div>
-        {modulo && !modulo.id && disegnaModulo()}
         <ul className="spe-elenco">{attivi.map(disegnaServizio)}</ul>
       </section>
 

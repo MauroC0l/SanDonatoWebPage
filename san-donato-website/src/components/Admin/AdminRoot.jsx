@@ -50,6 +50,8 @@ const importaDocumentiPage = () => import("./DocumentiPage");
 const DocumentiPage = lazy(importaDocumentiPage);
 const importaSpesePage = () => import("./SpesePage");
 const SpesePage = lazy(importaSpesePage);
+const importaServizioPage = () => import("./ServizioPage");
+const ServizioPage = lazy(importaServizioPage);
 const importaRecuperoPasswordPage = () => import("./RecuperoPasswordPage");
 const RecuperoPasswordPage = lazy(importaRecuperoPasswordPage);
 const importaSceltaPasswordPage = () => import("./SceltaPasswordPage");
@@ -181,6 +183,7 @@ const SCHERMATE = [
   importaCalendariUfficialiPage,
   importaDocumentiPage,
   importaSpesePage,
+  importaServizioPage,
   importaRecuperoPasswordPage,
   importaSceltaPasswordPage,
   importaHomePannello,
@@ -479,6 +482,22 @@ export default function AdminRoot({ section }) {
               element={
                 <Riservato una={["spese.gestisci"]}>
                   <Pigra cosa="delle spese"><SpesePage /></Pigra>
+                </Riservato>
+              }
+            />
+            <Route
+              path="spese/nuovo"
+              element={
+                <Riservato una={["spese.gestisci"]}>
+                  <Pigra cosa="del servizio"><ServizioPage /></Pigra>
+                </Riservato>
+              }
+            />
+            <Route
+              path="spese/:id"
+              element={
+                <Riservato una={["spese.gestisci"]}>
+                  <Pigra cosa="del servizio"><ServizioPage /></Pigra>
                 </Riservato>
               }
             />
