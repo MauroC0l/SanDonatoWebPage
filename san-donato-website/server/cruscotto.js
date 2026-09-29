@@ -25,6 +25,7 @@ import {
 } from "./autorizzazioni.js";
 import { quotePerUtenti } from "./stagioni.js";
 import { conParentelaDaControllare } from "./legami.js";
+import { riepilogoSpese } from "./spese.js";
 
 /** Fra quanti giorni un certificato è "in scadenza". Stessa soglia del pannello. */
 const GIORNI_PREAVVISO = 30;
@@ -475,6 +476,17 @@ export async function componiCruscotto(utente) {
 
   if (puo(utente, "utenti.gestisci")) {
     dati.account = await quantiAccount();
+  }
+
+  /* Un riquadro in più, non il cuore della home: se non si legge (per
+     esempio su un database a cui manca ancora la tabella) la home resta
+     in piedi senza. */
+  if (puo(utente, "spese.gestisci")) {
+    try {
+      dati.spese = await riepilogoSpese();
+    } catch (e) {
+      console.error("Spese del sito non lette:", e.message);
+    }
   }
 
   return dati;

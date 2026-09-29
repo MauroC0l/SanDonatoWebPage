@@ -81,7 +81,7 @@
 .adm-eta {
   margin-left: .4rem;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--adm-blue-soft);
   color: var(--adm-blue);
   font-size: .7rem;
@@ -110,7 +110,7 @@
   margin-top: .55rem;
   padding: .55rem .65rem .65rem;
   border: 1px solid var(--adm-line-soft);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-bg);
 }
 
@@ -140,7 +140,7 @@
 
   padding: 2px 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: none;
   color: var(--adm-muted);
   font: inherit;
@@ -184,7 +184,7 @@
   align-items: center;
   gap: .6rem;
   padding: .5rem .7rem;
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid var(--adm-line-soft);
   background: var(--adm-surface);
 }
@@ -237,12 +237,12 @@
 .isc-squadre {
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem;
   margin: 0 0 1rem; padding: .7rem .9rem;
-  background: var(--adm-surface, #fff); border: 1px solid var(--adm-line, #e5e7eb); border-radius: 12px;
+  background: var(--adm-surface, #fff); border: 1px solid var(--adm-line, #e5e7eb); border-radius: 6px;
 }
 .isc-squadre-etichetta { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--adm-muted, #6b7280); margin-right: .2rem; }
 .isc-squadra {
   display: inline-flex; align-items: center; gap: .45rem;
-  padding: .3rem .75rem; border-radius: 999px; background: var(--adm-blue-soft, #eef4ff);
+  padding: .3rem .75rem; border-radius: 4px; background: var(--adm-blue-soft, #eef4ff);
   color: var(--adm-ink, #111827); font-size: .92rem;
 }
 .isc-squadra-punto { width: .6rem; height: .6rem; border-radius: 50%; background: var(--adm-blue, #2563eb); flex: none; }

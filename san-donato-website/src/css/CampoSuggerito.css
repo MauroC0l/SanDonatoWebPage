@@ -70,7 +70,7 @@
   overflow-y: auto;
 
   border: 1px solid var(--adm-line);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-surface);
   box-shadow: var(--adm-shadow);
 }
@@ -81,7 +81,7 @@
   padding: .45rem .6rem;
 
   border: 0;
-  border-radius: 7px;
+  border-radius: 4px;
   background: none;
 
   color: var(--adm-ink);
@@ -106,7 +106,7 @@
   margin: 0;
   padding: .6rem;
   border: 1px solid var(--adm-line);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-surface);
   box-shadow: var(--adm-shadow);
 

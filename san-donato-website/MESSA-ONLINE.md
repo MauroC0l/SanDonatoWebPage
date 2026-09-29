@@ -209,6 +209,96 @@ ospitare il sito" e "qualunque metodo per elaborare pagamenti dai
 visitatori". La dimostrazione fatta da volontari ci sta; il sito della
 società che incassa le quote no, e andrà su Pro.
 
+## 3-ter. L'archivio dei file (Cloudflare R2)
+
+Serve per caricare file dal sito: immagini delle notizie, documenti,
+certificati medici. Senza, ogni caricamento risponde "non ancora attivo".
+
+**Due bucket, non uno.** Nel bucket pubblico vanno immagini e documenti,
+che il sito mostra a tutti. Nel bucket riservato vanno i certificati medici,
+che sono dati sulla salute: quel bucket non ha nessun indirizzo pubblico, e
+il sito lo legge solo con link firmati che durano due minuti, dopo aver
+controllato chi li chiede (`/api/file/:id`).
+
+### Cosa fare su Cloudflare
+
+1. Crea l'account su [dash.cloudflare.com](https://dash.cloudflare.com)
+   (meglio con un'email della società, non personale) e apri **R2 Object
+   Storage**. Per attivarlo chiede una carta: il piano gratuito comprende 10
+   GB, che bastano per anni di notizie e certificati.
+2. **Create bucket**, due volte, entrambi con **Location → Specify
+   jurisdiction → European Union (EU)**. Nomi, per esempio:
+   - `psd-file` (pubblico)
+   - `psd-riservato` (riservato)
+
+   La giurisdizione UE si sceglie solo alla creazione: se sbagliata, il
+   bucket va rifatto.
+3. Nel bucket **pubblico**: Settings → **Public access** → accendi il
+   dominio `r2.dev` (per la demo va bene) oppure collega un dominio proprio
+   (es. `file.polisportivasandonato.it`, possibile se il dominio è gestito da
+   Cloudflare). L'indirizzo che ottieni è `URL_PUBBLICO_FILE`.
+   Nel bucket **riservato** non accendere niente.
+4. In **tutti e due** i bucket: Settings → **CORS Policy** → Add, e incolla
+   (con l'indirizzo vero della demo, e poi quello del sito):
+
+   ```json
+   [
+     {
+       "AllowedOrigins": ["https://INDIRIZZO-DELLA-DEMO.vercel.app", "http://localhost:5173"],
+       "AllowedMethods": ["PUT", "GET", "HEAD"],
+       "AllowedHeaders": ["content-type"],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+
+   Senza, il browser non può caricare direttamente su R2, e l'errore che si
+   vede non dice perché.
+5. R2 → **Manage API tokens** → **Create API token**: permesso **Object
+   Read & Write**, applicato ai due bucket soltanto. Alla fine Cloudflare
+   mostra *una volta sola* Access Key ID e Secret Access Key: copiali
+   subito. L'**Account ID** è nella pagina principale di R2.
+
+### Le variabili
+
+Su Vercel (progetto della demo → Settings → Environment Variables), e nel
+proprio `.env.demo` per lanciare gli script:
+
+| Variabile | Valore |
+|---|---|
+| `R2_ACCOUNT_ID` | l'Account ID |
+| `R2_BUCKET` | il nome del bucket pubblico |
+| `R2_BUCKET_PRIVATO` | il nome del bucket riservato |
+| `R2_ACCESS_KEY_ID` | l'Access Key ID del token |
+| `R2_SECRET_ACCESS_KEY` | la Secret Access Key del token |
+| `URL_PUBBLICO_FILE` | l'indirizzo pubblico del bucket pubblico, senza `/` in fondo |
+
+Poi **Redeploy**: le variabili nuove valgono solo dal deploy successivo.
+
+### Il controllo
+
+```bash
+node --env-file=.env.demo scripts/prova-r2.mjs --origine=https://INDIRIZZO-DELLA-DEMO.vercel.app
+```
+
+Scrive, rilegge e cancella un file di prova in tutti e due i bucket, e
+controlla le tre cose che, sbagliate, non danno un errore leggibile: il
+CORS, l'indirizzo pubblico, e che il bucket riservato NON si legga senza
+firma. Deve finire con "Tutto a posto".
+
+### Le immagini del vecchio sito
+
+Finché WordPress è acceso le immagini importate si leggono da lì. Prima di
+spegnerlo vanno copiate su R2:
+
+```bash
+node --env-file=.env.demo scripts/trasferisci-file-wordpress.mjs --prova   # guarda soltanto
+node --env-file=.env.demo scripts/trasferisci-file-wordpress.mjs           # copia
+```
+
+Copia i file (circa 400), aggiorna i media e gli indirizzi scritti dentro al
+testo delle notizie. Si può rilanciare: salta quello che ha già copiato.
+
 ## 4. Controlli dopo il primo deploy
 
 Nell'ordine, perché ognuno dipende dal precedente:
@@ -225,9 +315,8 @@ Nell'ordine, perché ognuno dipende dal precedente:
 
 Vanno sapute prima di mostrarle, per non scoprirle davanti al cliente.
 
-- **Caricare file nuovi.** Manca il collegamento all'archivio (Cloudflare
-  R2): il pulsante "Carica file" della libreria è spento e il messaggio lo
-  spiega. Tutto il resto della libreria si mostra davvero — i 399 file del
+- **Caricare file nuovi**, finché R2 non è collegato (sezione 3-ter): il
+  pulsante "Carica file" della libreria è spento e il messaggio lo spiega. Tutto il resto della libreria si mostra davvero — i 399 file del
   vecchio sito, le cartelle, le etichette, il cestino, il cassetto dei
   dettagli.
 - **Pagare la quota.** La schermata c'è ed è completa, ma non muove un euro:

@@ -44,7 +44,7 @@
   flex: 1 1 10rem;
   max-width: 16rem;
   height: 8px;
-  border-radius: var(--adm-r-pill);
+  border-radius: 2px;
   background: rgba(255, 255, 255, .16);
   overflow: hidden;
 }

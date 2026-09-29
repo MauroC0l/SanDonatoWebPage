@@ -159,10 +159,9 @@ una risposta identica sia che l'indirizzo esista sia che no.
 
 ### Caricamento dei file (es. certificato medico)
 
-Sulla demo e in produzione i caricamenti non funzionano: manca l'archivio
-dei file (Cloudflare R2, vedi sotto) e ogni caricamento risponde 503. In
-locale funziona con `ARCHIVIO_LOCALE=1`. Da verificare, una volta collegato
-R2, anche il percorso completo del certificato: caricamento, anteprima,
+Il codice è pronto (29 settembre 2026, vedi "Archivio dei file" sotto):
+manca solo che la società colleghi R2. Da verificare, una volta collegato,
+il percorso completo del certificato sulla demo: caricamento, anteprima,
 controllo della segreteria.
 
 ### Telefono: FATTO (28 settembre 2026)
@@ -179,21 +178,18 @@ si può cominciare.
 
 ### Archivio dei file su Cloudflare R2
 
-**Prima di andare in produzione: i certificati medici non devono essere
-pubblici.** Oggi ogni file ha un indirizzo pubblico permanente
-(`URL_PUBBLICO_FILE` + chiave casuale): chi ha il link di un certificato
-lo apre per sempre, senza entrare nel sito. Per i certificati (dati sulla
-salute) serve un bucket privato, con link firmati che scadono dopo pochi
-minuti e si danno solo a chi ha il permesso di vederli. Il bucket va creato
-con giurisdizione UE.
+**Il codice è pronto (29 settembre 2026); manca l'account della società.**
 
+- Due bucket: pubblico (immagini, documenti) e riservato (certificati). I
+  certificati non hanno indirizzo pubblico: si aprono da `/api/file/:id`,
+  che controlla chi chiede e dà un link firmato di due minuti.
+- Un atleta non può più collegare alla sua scheda un file caricato da altri.
+- `scripts/prova-r2.mjs` controlla il collegamento; `scripts/
+  trasferisci-file-wordpress.mjs` copia su R2 le immagini del vecchio sito.
 
-Servono `R2_ACCOUNT_ID`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`,
-`R2_SECRET_ACCESS_KEY` e il dominio pubblico da cui i file si leggono.
-
-Finché mancano, in produzione ogni caricamento risponde 503 con un messaggio
-esplicito. In locale si lavora lo stesso con `ARCHIVIO_LOCALE=1`, che scrive
-in `public/caricamenti/`.
+Cosa deve fare la società, passo per passo: MESSA-ONLINE.md, sezione 3-ter.
+In locale si lavora con `ARCHIVIO_LOCALE=1` (pubblici in
+`public/caricamenti/`, riservati in `archivio-privato/`).
 
 ### Hosting del database e del sito
 
@@ -226,11 +222,30 @@ Il punto 2 non è un dettaglio: l'esito non si può registrare al ritorno
 dell'utente sul sito. Chi chiude la pagina a metà avrebbe pagato senza che
 risulti, e chi ricarica la pagina di ritorno risulterebbe due volte.
 
-### Dati da uffwebsm
+### Dati da uffwebsm: estrarli, poi CONVERTIRLI
 
 Il vecchio gestionale va spento e i suoi dati — anagrafiche, pagamenti,
-certificati — devono passare di qui. Manca di sapere come estrarli:
-esportazione, accesso al database, o copiatura a mano.
+certificati — devono passare di qui. Due lavori distinti:
+
+1. **Estrarli.** Manca di sapere come: esportazione, accesso al database, o
+   copiatura a mano.
+2. **Convertirli nel nostro formato** (chiesto dalla società il 29
+   settembre 2026). Non basta copiare le colonne: nel passaggio dalla
+   vecchia forma alla nuova non devono restare buchi vuoti. Serve:
+   - una tabella di corrispondenza campo per campo (vecchio → nuovo), con
+     cosa fare dove il vecchio non ha il dato o lo ha in un'altra forma
+     (nome e cognome in un campo solo, indirizzo scritto tutto insieme,
+     date come testo, importi con la virgola, telefoni con spazi);
+   - le stesse regole che il sito applica a chi compila: codice fiscale con
+     il carattere di controllo giusto, telefono di sole cifre, CAP di cinque
+     cifre, comune dall'elenco ISTAT;
+   - le stagioni, le quote e i versamenti ricondotti a `iscrizioni_stagione`
+     e `pagamenti`, e i certificati nel bucket riservato;
+   - uno script ripetibile con una prova a secco che, prima di scrivere,
+     elenca per ogni persona i campi che resterebbero vuoti o non validi,
+     così si completano prima invece di scoprirli dopo;
+   - un confronto finale dei conteggi (persone, versamenti, somme) fra il
+     vecchio e il nuovo.
 
 ### Calendari ufficiali delle federazioni
 

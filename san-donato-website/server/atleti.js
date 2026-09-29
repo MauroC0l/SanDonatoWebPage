@@ -18,7 +18,7 @@ import { getDb } from "../db/client.js";
 import {
   utenti, squadre, richiesteIscrizione, schedeAtleta, pagamenti, media, iscrizioniStagione
 } from "../db/schema.js";
-import { urlFile } from "./file.js";
+import { urlFile, urlLettura } from "./file.js";
 import { legamiPerSegreteria, conParentelaDaControllare } from "./legami.js";
 import {
   quotePerUtenti, quotaDi, versamentiDi, storicoStagioni, stagioneCorrente
@@ -457,7 +457,7 @@ export async function trovaAtleta(utenteId, { squadreAmmesse = null, conQuote = 
     certificatoMotivo: anagrafica.certificatoMotivo,
     certificatoMediaId: anagrafica.certificatoMediaId ?? null,
     certificatoUrl: anagrafica.certificatoMediaId
-      ? urlFile(anagrafica.certificatoChiave, anagrafica.certificatoUrlWp)
+      ? urlLettura({ id: anagrafica.certificatoMediaId, chiave: anagrafica.certificatoChiave, urlWp: anagrafica.certificatoUrlWp })
       : null,
     certificatoMime: anagrafica.certificatoMime ?? null,
 

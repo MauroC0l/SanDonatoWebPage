@@ -13,7 +13,7 @@
  */
 
 import {
-  pgTable, pgEnum, serial, integer, text, boolean, timestamp, date,
+  pgTable, pgEnum, serial, integer, bigint, text, boolean, timestamp, date,
   doublePrecision, jsonb, index, uniqueIndex, primaryKey
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -349,6 +349,53 @@ export const documenti = pgTable("documenti", {
 }, (t) => [
   index("idx_documenti_sezione").on(t.sezione, t.ordine)
 ]);
+
+/**
+ * I servizi esterni su cui il sito si regge, e quanto costano.
+ *
+ * La scheda "Spese sito" dell'amministratore (29 settembre 2026): chi
+ * subentra deve sapere, senza chiedere a nessuno, dove gira il sito, dove
+ * stanno i dati, con quale account si entra in ciascun pannello e cosa si
+ * paga. Prima lo sapeva solo chi aveva messo in piedi le cose.
+ *
+ * Gli importi li scrive l'amministratore: nessuno di questi servizi manda
+ * la fattura a noi, e un numero copiato dal pannello è più onesto di uno
+ * indovinato. Quello che invece il sito sa misurare da sé — quanto occupa
+ * il database, quanti byte ci sono nell'archivio dei file — lo misura a ogni
+ * apertura: è "misura", e la soglia è quella del piano gratuito.
+ */
+export const serviziEsterni = pgTable("servizi_esterni", {
+  id: serial("id").primaryKey(),
+  nome: text("nome").notNull(),
+  // sito, database, file, email, dominio, calendari, codice, altro
+  categoria: text("categoria").notNull().default("altro"),
+  serveA: text("serve_a"),
+  // Con quale account si entra: un indirizzo email o un nome utente, MAI una password
+  account: text("account"),
+  piano: text("piano"),
+
+  importoCentesimi: integer("importo_centesimi").notNull().default(0),
+  // gratis, mese, anno, una_tantum
+  periodicita: text("periodicita").notNull().default("gratis"),
+  rinnovoIl: date("rinnovo_il"),
+
+  // Cosa comprende il piano (soprattutto quello gratuito) e cosa succede oltre
+  limiti: text("limiti"),
+  urlPannello: text("url_pannello"),
+  note: text("note"),
+
+  // "database" o "archivio": il consumo che il sito sa misurare da sé
+  misura: text("misura"),
+  sogliaByte: bigint("soglia_byte", { mode: "number" }),
+
+  ordine: integer("ordine").notNull().default(0),
+  // Spento e non cancellato: di un servizio lasciato resta traccia
+  attivo: boolean("attivo").notNull().default(true),
+
+  aggiornatoDa: integer("aggiornato_da").references(() => utenti.id, { onDelete: "set null" }),
+  creatoIl: timestamp("creato_il", { withTimezone: true }).notNull().defaultNow(),
+  aggiornatoIl: timestamp("aggiornato_il", { withTimezone: true }).notNull().defaultNow()
+});
 
 /**
  * Le etichette delle notizie: "Assemblea", "Feste", "5x1000"…

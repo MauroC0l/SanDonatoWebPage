@@ -9,7 +9,8 @@ import {
   FaUserCircle,
   FaChalkboardTeacher,
   FaLayerGroup,
-  FaFileAlt
+  FaFileAlt,
+  FaWallet
 } from "react-icons/fa";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
@@ -61,6 +62,8 @@ const SEZIONI = [
 
   // I documenti ufficiali del sito: stanno con le cose di amministrazione
   { a: "documenti", etichetta: "Documenti", gruppo: "Sistema", Icona: FaFileAlt, capacita: ["documenti.gestisci"] },
+  // I servizi esterni e quanto costano: l'inventario di chi tiene in piedi il sito
+  { a: "spese", etichetta: "Spese sito", gruppo: "Sistema", Icona: FaWallet, capacita: ["spese.gestisci"] },
   { a: "registro", etichetta: "Registro", gruppo: "Sistema", Icona: FaHistory, capacita: ["registro.leggi"] },
 
   /* In fondo, dopo tutto quello che si amministra, perché è l'unica voce
@@ -97,7 +100,7 @@ const SOGLIA_GRUPPI = 8;
  */
 const PRIORITA_MOBILE = [
   "", "partite", "richieste", "atleti", "notizie", "quote", "libreria",
-  "eventi", "iscrizione", "allenatori", "stagioni", "squadre", "calendari", "documenti", "utenti", "registro"
+  "eventi", "iscrizione", "allenatori", "stagioni", "squadre", "calendari", "documenti", "spese", "utenti", "registro"
 ];
 
 /**

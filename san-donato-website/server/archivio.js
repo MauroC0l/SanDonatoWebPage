@@ -14,10 +14,22 @@
  *
  * Configurazione richiesta (variabili d'ambiente):
  *   R2_ACCOUNT_ID          identificativo dell'account Cloudflare
- *   R2_BUCKET              nome del bucket
+ *   R2_BUCKET              bucket PUBBLICO: immagini, video, documenti
+ *   R2_BUCKET_PRIVATO      bucket RISERVATO: i certificati medici
  *   R2_ACCESS_KEY_ID       chiave del token API con permesso di scrittura
+ *                          su entrambi i bucket
  *   R2_SECRET_ACCESS_KEY   segreto corrispondente
- *   URL_PUBBLICO_FILE      dominio da cui i file si leggono pubblicamente
+ *   URL_PUBBLICO_FILE      dominio da cui si leggono i file del bucket
+ *                          pubblico (quello riservato non ne ha)
+ *
+ * I DUE BUCKET (29 settembre 2026). Prima i file stavano tutti in uno solo,
+ * con un indirizzo pubblico permanente: chi aveva il link di un certificato
+ * lo apriva per sempre, senza entrare nel sito. Ora dove finisce un file lo
+ * decide il prefisso della chiave (PREFISSI_PRIVATI in file.js), e il
+ * bucket riservato non ha nessun dominio pubblico: si legge solo con un
+ * link firmato che dura due minuti, dato da /api/file/:id a chi ha il
+ * permesso. Senza R2_BUCKET_PRIVATO un certificato NON si carica: finire
+ * nel bucket pubblico per ripiego sarebbe peggio che non caricarlo.
  *
  * IN LOCALE, senza credenziali R2, si può accendere ARCHIVIO_LOCALE=1: i
  * file finiscono in public/caricamenti/ e Vite li serve da /caricamenti.
@@ -28,16 +40,22 @@
  * Cloudflare per scrivere quel codice vorrebbe dire scriverlo alla cieca.
  */
 
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile, unlink } from "node:fs/promises";
+import { mkdir, writeFile, unlink, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ErroreHttp } from "./risposte.js";
-import { archivioLocale, urlPubblico } from "./file.js";
+import { archivioLocale, urlPubblico, chiavePrivata } from "./file.js";
 
 const DURATA_PERMESSO_SECONDI = 300; // cinque minuti per completare il caricamento
+
+/* Due minuti per aprire un certificato: abbastanza per un telefono lento,
+   troppo poco perché un link finito in una chat serva a qualcosa. */
+const DURATA_LETTURA_SECONDI = 120;
 
 let cliente = null;
 
@@ -50,6 +68,26 @@ export function archivioConfigurato() {
     process.env.R2_ACCESS_KEY_ID &&
     process.env.R2_SECRET_ACCESS_KEY
   );
+}
+
+/** Vero se anche l'archivio riservato (i certificati) è collegato. */
+export function archivioPrivatoConfigurato() {
+  if (archivioLocale()) return true;
+  return archivioConfigurato() && Boolean(process.env.R2_BUCKET_PRIVATO);
+}
+
+/** Il bucket in cui sta, o starà, una chiave. */
+function bucketDi(chiave) {
+  if (!chiavePrivata(chiave)) return process.env.R2_BUCKET;
+
+  if (!process.env.R2_BUCKET_PRIVATO) {
+    throw new ErroreHttp(
+      503,
+      "I certificati non si possono ancora caricare: manca l'archivio "
+      + "riservato, che la società deve ancora collegare."
+    );
+  }
+  return process.env.R2_BUCKET_PRIVATO;
 }
 
 function getCliente() {
@@ -93,6 +131,13 @@ function getCliente() {
  */
 const CARTELLA_LOCALE = fileURLToPath(new URL("../public/caricamenti/", import.meta.url));
 
+/* I file riservati NON vanno in public/: Vite servirebbe anche quelli a
+   chiunque conosca l'indirizzo, cioè proprio quello che il bucket riservato
+   deve impedire. Stanno fuori, e li legge solo /api/file/:id. */
+const CARTELLA_LOCALE_PRIVATA = fileURLToPath(new URL("../archivio-privato/", import.meta.url));
+
+const cartellaLocaleDi = (chiave) => (chiavePrivata(chiave) ? CARTELLA_LOCALE_PRIVATA : CARTELLA_LOCALE);
+
 /*
  * Forma ammessa per una chiave: cartella/anno/mese/casuale.estensione.
  * Serve a due cose. La prima è respingere i percorsi che tentano di
@@ -111,9 +156,25 @@ export function chiaveValida(chiave) {
 export async function scriviFileLocale(chiave, contenuto) {
   if (!chiaveValida(chiave)) throw new ErroreHttp(400, "Nome del file non valido.");
 
-  const destinazione = join(CARTELLA_LOCALE, chiave);
+  const destinazione = join(cartellaLocaleDi(chiave), chiave);
   await mkdir(dirname(destinazione), { recursive: true });
   await writeFile(destinazione, contenuto);
+}
+
+/**
+ * Legge un file riservato dal disco. Solo in modalità locale.
+ *
+ * Prova anche public/caricamenti: i certificati caricati in locale prima
+ * del 29 settembre 2026 stanno ancora lì.
+ */
+export async function leggiFileLocale(chiave) {
+  if (!chiaveValida(chiave)) throw new ErroreHttp(400, "Nome del file non valido.");
+
+  try {
+    return await readFile(join(cartellaLocaleDi(chiave), chiave));
+  } catch {
+    return readFile(join(CARTELLA_LOCALE, chiave)).catch(() => null);
+  }
 }
 
 /* =====================================================
@@ -163,8 +224,11 @@ export async function permessoDiCaricamento(chiave, mime, byte) {
    */
   if (archivioLocale()) return `/api/admin/carica-file?chiave=${encodeURIComponent(chiave)}`;
 
+  // Prima del client: senza archivio riservato l'errore giusto è quello
+  const bucket = bucketDi(chiave);
+
   const comando = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET,
+    Bucket: bucket,
     Key: chiave,
     ContentType: mime,
     ContentLength: byte
@@ -178,14 +242,34 @@ export async function eliminaFile(chiave) {
     // Il file potrebbe non esserci piu': la riga in tabella resta il
     // riferimento buono, e fallire qui bloccherebbe una cancellazione
     // legittima per un file già sparito.
-    await unlink(join(CARTELLA_LOCALE, chiave)).catch(() => {});
+    await unlink(join(cartellaLocaleDi(chiave), chiave)).catch(() => {});
     return;
   }
 
   await getCliente().send(new DeleteObjectCommand({
-    Bucket: process.env.R2_BUCKET,
+    Bucket: bucketDi(chiave),
     Key: chiave
   }));
+}
+
+/**
+ * Link firmato per LEGGERE un file riservato, valido due minuti.
+ *
+ * Si dà solo dopo aver controllato chi chiede (vedi /api/file/:id). "inline"
+ * perché un certificato si guarda nel browser; il nome è quello che il
+ * browser propone se lo si salva.
+ */
+export async function linkDiLettura(chiave, { nomeFile = null } = {}) {
+  const comando = new GetObjectCommand({
+    Bucket: bucketDi(chiave),
+    Key: chiave,
+    ResponseContentDisposition: nomeFile
+      ? `inline; filename="${nomeFile.replace(/[^\w.\- ]+/g, "_")}"`
+      : "inline",
+    ResponseCacheControl: "private, no-store"
+  });
+
+  return getSignedUrl(getCliente(), comando, { expiresIn: DURATA_LETTURA_SECONDI });
 }
 
 // Riesportati da file.js: chi lavora con l'archivio si aspetta di

@@ -22,6 +22,9 @@ import rotta_admin_documenti_index from "./rotte/admin/documenti/index.js";
 import rotta_admin_documenti_ordine from "./rotte/admin/documenti/ordine.js";
 import rotta_admin_documenti_id from "./rotte/admin/documenti/[id].js";
 import rotta_documenti from "./rotte/documenti.js";
+import rotta_admin_spese_index from "./rotte/admin/spese/index.js";
+import rotta_admin_spese_id from "./rotte/admin/spese/[id].js";
+import rotta_file_id from "./rotte/file/[id].js";
 import rotta_admin_etichette_index from "./rotte/admin/etichette/index.js";
 import rotta_admin_eventi_index from "./rotte/admin/eventi/index.js";
 import rotta_admin_iscrizioni from "./rotte/admin/iscrizioni.js";
@@ -81,6 +84,7 @@ const TABELLA = [
   ["admin/carica-file",              rotta_admin_carica_file],
   ["admin/documenti",                rotta_admin_documenti_index],
   ["admin/documenti/ordine",         rotta_admin_documenti_ordine],
+  ["admin/spese",                    rotta_admin_spese_index],
   ["admin/etichette",                rotta_admin_etichette_index],
   ["admin/eventi",                   rotta_admin_eventi_index],
   ["admin/iscrizioni",               rotta_admin_iscrizioni],
@@ -117,6 +121,7 @@ const TABELLA = [
   ["admin/calendari/[id]",           rotta_admin_calendari_id],
   ["admin/calendari/gironi/[id]",    rotta_admin_calendari_gironi_id],
   ["admin/documenti/[id]",           rotta_admin_documenti_id],
+  ["admin/spese/[id]",               rotta_admin_spese_id],
   ["admin/etichette/[id]",           rotta_admin_etichette_id],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],
   ["admin/eventi/[id]/media",        rotta_admin_eventi_id_media],
@@ -126,6 +131,7 @@ const TABELLA = [
   ["admin/quote/[id]",               rotta_admin_quote_id],
   ["admin/squadre/[id]",             rotta_admin_squadre_id],
   ["calendario/[squadra]",           rotta_calendario_squadra],
+  ["file/[id]",                      rotta_file_id],
   ["notizie/[identificativo]",       rotta_notizie_identificativo],
 ];
 

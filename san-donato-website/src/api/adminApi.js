@@ -1104,6 +1104,29 @@ export async function eliminaDocumento(id) {
   return chiedi(`/admin/documenti/${id}`, { method: "DELETE" });
 }
 
+/* =====================================================
+   Spese sito
+   ===================================================== */
+
+/** Servizi esterni, consumi misurati adesso, totali, avvisi. Solo admin. */
+export async function listSpese() {
+  return chiedi("/admin/spese");
+}
+
+export async function creaServizio(dati) {
+  const { servizio } = await chiedi("/admin/spese", { method: "POST", body: JSON.stringify(dati) });
+  return servizio;
+}
+
+export async function modificaServizio(id, dati) {
+  const { servizio } = await chiedi(`/admin/spese/${id}`, { method: "PATCH", body: JSON.stringify(dati) });
+  return servizio;
+}
+
+export async function eliminaServizio(id) {
+  return chiedi(`/admin/spese/${id}`, { method: "DELETE" });
+}
+
 /** ids: TUTTI i documenti della sezione, dal primo all'ultimo. */
 export async function riordinaDocumenti(sezione, ids) {
   return chiedi("/admin/documenti/ordine", {

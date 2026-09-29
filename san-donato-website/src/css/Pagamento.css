@@ -28,14 +28,14 @@
   --adm-ok-soft: #e3f4ec;
   --adm-warn: #9a5b00;
   --adm-warn-soft: #fdf3e4;
-  --adm-radius: 12px;
+  --adm-radius: 6px;
   /* Il blu e l'arancio della società: "Paga" è il pulsante arancio, e
      senza queste due righe resterebbe una scritta bianca sul nulla. */
   --adm-navy: #002b5c;
   --adm-arancio: #ff6600;
   --adm-arancio-testo: #b84a00;
   --adm-pillola: linear-gradient(135deg, #ff7a1a, #ff4d00);
-  --adm-r-pill: 999px;
+  --adm-r-pill: 4px;
   --adm-tocco: 44px;
 
   color: var(--adm-ink);
@@ -54,7 +54,7 @@
   max-height: min(680px, 92vh);
 
   background: var(--adm-surface);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
   overflow: hidden;
 }
@@ -131,7 +131,7 @@
 
 .pag-conto > div {
   padding: .7rem .8rem;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-bg);
 }
 
@@ -203,7 +203,7 @@
 
   padding: .8rem .9rem;
   border: 1px solid var(--adm-line);
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--adm-surface);
 
   font: inherit;

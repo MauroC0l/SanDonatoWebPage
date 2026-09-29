@@ -33,3 +33,6 @@ dist
 # File caricati mentre si lavora in locale (ARCHIVIO_LOCALE=1). In produzione
 # stanno su Cloudflare R2: qui sono copie di prova, non fanno parte del sito.
 public/caricamenti
+# I file riservati caricati in locale (certificati): fuori da public/ perché
+# Vite non li serva a chiunque, e fuori da git per la stessa ragione.
+archivio-privato

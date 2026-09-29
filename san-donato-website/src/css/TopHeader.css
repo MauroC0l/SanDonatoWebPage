@@ -151,7 +151,7 @@
 
   padding: 4px 11px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 4px;
 
   color: var(--th-testo);
   font-size: .78rem;

@@ -942,3 +942,57 @@ describe("quota famiglia fra fratelli", () => {
     expect(lA.avviso).toMatch(/già stato usato/);
   });
 });
+
+describe("certificati nell'archivio riservato", () => {
+  // Un PNG da 1×1: basta a passare dal caricamento vero, con i suoi controlli
+  const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==", "base64");
+
+  async function caricaCertificato(chiedi) {
+    const permesso = await chiedi("/admin/media", {
+      method: "POST",
+      body: JSON.stringify({ fase: "permesso", mime: "image/png", byte: PNG.length, cartella: "certificati" })
+    });
+    expect(permesso.stato).toBe(200);
+    expect(permesso.corpo.chiave.startsWith("certificati/")).toBe(true);
+
+    const put = await chiedi(permesso.corpo.urlDiCaricamento.replace(/^\/api/, ""), {
+      method: "PUT", headers: { "Content-Type": "image/png" }, body: PNG
+    });
+    expect(put.stato).toBe(204);
+
+    const registrato = await chiedi("/admin/media", {
+      method: "POST",
+      body: JSON.stringify({ fase: "registra", chiave: permesso.corpo.chiave, mime: "image/png", byte: PNG.length })
+    });
+    expect(registrato.stato).toBe(201);
+    return registrato.corpo.media;
+  }
+
+  seAccesa("un certificato non ha indirizzo pubblico e lo apre solo chi può", async () => {
+    const atleta = await entra("atleta");
+    const file = await caricaCertificato(atleta.chiedi);
+    // Non un indirizzo dell'archivio: la nostra rotta, che controlla la sessione
+    expect(file.url).toBe(`/api/file/${file.id}`);
+
+    expect((await atleta.chiedi(`/file/${file.id}`)).stato).toBe(200);
+    expect((await sessione()(`/file/${file.id}`)).stato).toBe(401);
+
+    // Non ancora collegato a una scheda: lo vede la segreteria, l'allenatore no
+    expect((await (await entra("admin")).chiedi(`/file/${file.id}`)).stato).toBe(200);
+    expect((await (await entra("coach")).chiedi(`/file/${file.id}`)).stato).toBe(404);
+  });
+
+  seAccesa("un atleta non si collega il certificato di un altro", async () => {
+    const admin = await entra("admin");
+    const altrui = await caricaCertificato(admin.chiedi);
+
+    const atleta = await entra("atleta");
+    const esito = await atleta.chiedi("/iscrizione", {
+      method: "PATCH",
+      body: JSON.stringify({ certificatoMediaId: altrui.id })
+    });
+    // 400 per il file altrui, oppure 409 se il suo certificato valido è bloccato: collegato mai
+    expect([400, 409]).toContain(esito.stato);
+    expect((await atleta.chiedi(`/file/${altrui.id}`)).stato).toBe(404);
+  });
+});

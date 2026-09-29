@@ -30,9 +30,10 @@ import {
 import { json, errore, conGestioneErrori, ErroreHttp } from "../../../risposte.js";
 import { leggiCorpo, parametri } from "../../../richiesta.js";
 import {
-  componiChiave, permessoDiCaricamento, urlPubblico, TIPI_AMMESSI, eliminaFile,
+  componiChiave, permessoDiCaricamento, TIPI_AMMESSI, eliminaFile,
   archivioConfigurato
 } from "../../../archivio.js";
+import { urlLettura } from "../../../file.js";
 
 // 25 MB per le immagini e i documenti. I video delle partite avranno una
 // soglia propria quando arriverà la Fase 3.
@@ -100,7 +101,8 @@ async function registra(req, res, dati) {
   }).returning({ id: media.id, chiave: media.chiave });
 
   return json(res, {
-    media: { id: salvato.id, url: urlPubblico(salvato.chiave) }
+    // Un certificato non ha indirizzo pubblico: si apre dalla nostra rotta
+    media: { id: salvato.id, url: urlLettura({ id: salvato.id, chiave: salvato.chiave }) }
   }, 201);
 }
 

@@ -13,9 +13,30 @@ export function archivioLocale() {
   return process.env.ARCHIVIO_LOCALE === "1";
 }
 
+/**
+ * I prefissi che finiscono nell'archivio RISERVATO: un secondo bucket,
+ * senza indirizzo pubblico. Oggi i certificati medici, che sono dati sulla
+ * salute: si aprono solo passando da /api/file/:id, che controlla chi
+ * chiede e poi dà un link firmato valido due minuti.
+ *
+ * Un elenco di prefissi e non un campo in tabella: dove sta un file lo
+ * decide la sua chiave, scritta dal server al momento del caricamento, e
+ * non una colonna che qualcuno potrebbe cambiare dopo.
+ */
+export const PREFISSI_PRIVATI = ["certificati"];
+
+/** Vero se la chiave sta nell'archivio riservato. */
+export function chiavePrivata(chiave) {
+  return typeof chiave === "string"
+    && PREFISSI_PRIVATI.some((p) => chiave.startsWith(`${p}/`));
+}
+
 /** Indirizzo pubblico di una chiave nell'archivio. */
 export function urlPubblico(chiave) {
   if (!chiave) return null;
+
+  // Un file riservato un indirizzo pubblico non ce l'ha, per costruzione
+  if (chiavePrivata(chiave)) return null;
 
   const base = (process.env.URL_PUBBLICO_FILE || (archivioLocale() ? "/caricamenti" : ""))
     .replace(/\/+$/, "");
@@ -33,4 +54,15 @@ export function urlPubblico(chiave) {
  */
 export function urlFile(chiave, urlOriginale) {
   return urlPubblico(chiave) ?? urlOriginale ?? null;
+}
+
+/**
+ * L'indirizzo da dare al browser per un media di cui si conosce l'id.
+ *
+ * Per un file riservato è la nostra rotta, che controlla la sessione a ogni
+ * apertura: un link copiato e mandato a qualcun altro non apre niente.
+ */
+export function urlLettura({ id, chiave, urlWp = null }) {
+  if (chiavePrivata(chiave)) return `/api/file/${id}`;
+  return urlFile(chiave, urlWp);
 }

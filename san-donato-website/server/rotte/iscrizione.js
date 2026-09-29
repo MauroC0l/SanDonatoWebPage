@@ -23,7 +23,7 @@
  * scrivibile per sbaglio.
  */
 
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, like, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db/client.js";
 import { squadre, richiesteIscrizione, schedeAtleta, media, pagamenti } from "../../db/schema.js";
@@ -32,7 +32,7 @@ import { assicuraQuotaAllenatore, assegnaQuoteAutomatiche } from "../quote.js";
 import { passaggioDiStagione } from "../manutenzione-stagioni.js";
 import { quotaDi, versamentiDi } from "../stagioni.js";
 import { legamiDichiaratiDa } from "../legami.js";
-import { urlFile } from "../notizie.js";
+import { urlLettura } from "../file.js";
 import { richiedeAccesso } from "../autenticazione.js";
 import { annota } from "../registro.js";
 import { json, errore, conGestioneErrori, ErroreHttp } from "../risposte.js";
@@ -278,7 +278,7 @@ async function leggi(req, res) {
       ...(scheda ?? {}),
       esiste: !!scheda,
       certificatoUrl: scheda?.certificatoMediaId
-        ? urlFile(scheda.certificatoChiave, scheda.certificatoUrlWp)
+        ? urlLettura({ id: scheda.certificatoMediaId, chiave: scheda.certificatoChiave, urlWp: scheda.certificatoUrlWp })
         : null,
       manca: cosaManca(scheda, { certificatoRichiesto: gioca }),
 
@@ -384,6 +384,26 @@ async function scrivi(req, res) {
 
     const permesso = modificabile(attuale);
     if (!permesso.si) throw new ErroreHttp(409, permesso.motivo);
+  }
+
+  /*
+   * Il file indicato come certificato dev'essere un certificato caricato da
+   * chi chiede. Senza questo controllo bastava scrivere il numero di un
+   * altro file per farselo collegare alla scheda, e poi aprirlo da
+   * /api/file/:id come se fosse il proprio: il certificato di un altro.
+   */
+  if (dati.certificatoMediaId) {
+    const [suo] = await getDb()
+      .select({ id: media.id })
+      .from(media)
+      .where(and(
+        eq(media.id, dati.certificatoMediaId),
+        eq(media.caricatoDa, req.utente.id),
+        like(media.chiave, "certificati/%"),
+        isNull(media.cestinatoIl)
+      ))
+      .limit(1);
+    if (!suo) throw new ErroreHttp(400, "Il file indicato non è un certificato che hai caricato tu.");
   }
 
   await salvaScheda(req.utente.id, dati, req.utente.id);

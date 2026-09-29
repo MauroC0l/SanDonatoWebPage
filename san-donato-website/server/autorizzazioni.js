@@ -44,6 +44,10 @@ const CAPACITA = {
        sono atti ufficiali della società, e li cambia chi amministra. */
     "documenti.gestisci",
 
+    /* I servizi esterni, i loro account e quanto costano (Spese sito, 29
+       settembre 2026): è l'inventario di chi tiene in piedi il sito. */
+    "spese.gestisci",
+
     /* Cancellare per sempre una notizia dal cestino prima dei 30 giorni:
        un gesto che non si annulla, e lo fa solo l'amministratore (28
        settembre 2026; la segreteria non ha la sezione Notizie). */

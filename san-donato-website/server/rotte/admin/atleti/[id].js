@@ -18,7 +18,10 @@
  * scheda potrebbe non esistere ancora, e allora il primo salvataggio la crea.
  */
 
+import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
+import { getDb } from "../../../../db/client.js";
+import { media } from "../../../../db/schema.js";
 import { trovaAtleta, salvaScheda } from "../../../atleti.js";
 import { puo, squadreConAtletiVisibili } from "../../../autorizzazioni.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
@@ -118,6 +121,17 @@ async function modifica(req, res) {
     ...(tieneIConti ? valida(schemaQuota, corpo) : {}),
     ...(registraCertificati ? valida(schemaCertificato, corpo) : {})
   };
+
+  /* Come certificato si collega solo un file dell'archivio riservato: un
+     file della libreria pubblica avrebbe un indirizzo aperto a tutti. */
+  if (dati.certificatoMediaId) {
+    const [file] = await getDb()
+      .select({ id: media.id })
+      .from(media)
+      .where(and(eq(media.id, dati.certificatoMediaId), like(media.chiave, "certificati/%")))
+      .limit(1);
+    if (!file) throw new ErroreHttp(400, "Il file indicato non è un certificato caricato come tale.");
+  }
 
   /*
    * Dalla tariffa scelta all'importo scritto sulla scheda.

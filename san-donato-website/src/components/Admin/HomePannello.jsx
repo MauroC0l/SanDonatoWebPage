@@ -5,12 +5,14 @@ import {
   FaTrophy, FaExclamationCircle, FaCheckCircle, FaArrowRight, FaClock,
   FaCheckDouble, FaTag, FaRunning, FaPlus, FaSearch, FaPen, FaSitemap,
   FaUserClock, FaMapMarkerAlt,
-  FaUsers, FaCalendarCheck, FaChalkboardTeacher, FaPiggyBank
+  FaUsers, FaCalendarCheck, FaChalkboardTeacher, FaPiggyBank, FaWallet,
+  FaDatabase, FaCloud
 } from "react-icons/fa";
 import { getCruscotto, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { euro } from "../../utils/soldi";
+import { byteLeggibili } from "../../utils/byte";
 import "../../css/Admin.css";
 import "../../css/admin/Cruscotto.css";
 
@@ -223,6 +225,20 @@ function daFare(dati, { area, puoValidare, soloProprie }) {
       testo: "Nessuno può segnare partite e risultati per loro: associa un allenatore.",
       a: `${area}/squadre`,
       tono: ""
+    });
+  }
+
+  /* Spese del sito: un rinnovo vicino o uno spazio quasi pieno. Una voce
+     sola anche se sono più cose: il dettaglio è nella pagina. */
+  if (dati.spese?.avvisi?.length > 0) {
+    voci.push({
+      chiave: "spese",
+      icona: FaWallet,
+      titolo: "Spese del sito da guardare",
+      conta: dati.spese.avvisi.length,
+      testo: dati.spese.avvisi[0].testo,
+      a: `${area}/spese`,
+      tono: dati.spese.avvisi.some((a) => a.tipo === "rinnovo_passato") ? "is-attenzione" : ""
     });
   }
 
@@ -581,6 +597,44 @@ export default function HomePannello() {
       </section>
 
       {sezioneProssimi}
+
+      {/* ---------- Spese del sito ----------
+          Solo per chi le gestisce: quanto si spende e quanto spazio resta
+          nei piani gratuiti, con il dettaglio a un tocco. */}
+      {dati.spese && (
+        <section className="adm-sezione" aria-labelledby="cru-spese">
+          <div className="adm-sezione-testa">
+            <div>
+              <h2 className="adm-sezione-titolo" id="cru-spese">Spese del sito</h2>
+              <p className="adm-sezione-sotto">I servizi esterni su cui si regge il sito e lo spazio che occupa adesso.</p>
+            </div>
+            <div className="adm-sezione-azioni">
+              <Link to={`${area}/spese`} className="adm-btn adm-btn-ghost">Apri le spese</Link>
+            </div>
+          </div>
+          <Link to={`${area}/spese`} className="cru-spese">
+            <span className="cru-spese-cifra">
+              <FaWallet aria-hidden="true" />
+              <span><strong>{euro(dati.spese.totali.mese)}</strong> al mese</span>
+              <span className="cru-spese-sotto">{euro(dati.spese.totali.anno)} all&apos;anno · {dati.spese.attivi} servizi</span>
+            </span>
+            {dati.spese.usi.map((u) => {
+              const percento = u.quota == null ? 0 : Math.min(100, u.quota * 100);
+              return (
+                <span key={u.servizioId} className="cru-spese-uso">
+                  <span className="cru-spese-uso-nome">
+                    {u.misura === "database" ? <FaDatabase aria-hidden="true" /> : <FaCloud aria-hidden="true" />}
+                    {u.misura === "database" ? "Database" : "File"} · {byteLeggibili(u.byte)} di {byteLeggibili(u.sogliaByte)}
+                  </span>
+                  <span className={`cru-spese-barra ${percento >= 80 ? "is-alta" : ""}`} aria-hidden="true">
+                    <span style={{ width: `${Math.max(percento, 0.5)}%` }} />
+                  </span>
+                </span>
+              );
+            })}
+          </Link>
+        </section>
+      )}
 
       {numeri.length > 0 && (
         <section className="adm-sezione" aria-labelledby="cru-numeri">

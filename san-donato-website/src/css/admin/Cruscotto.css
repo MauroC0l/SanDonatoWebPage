@@ -187,6 +187,36 @@
 }
 .cru-numero-etichetta { grid-area: etichetta; color: var(--adm-muted); font-size: .82rem; line-height: 1.3; }
 
+/* ---------- Spese del sito (solo amministratore) ---------- */
+.cru-spese {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) repeat(auto-fit, minmax(12rem, 1fr));
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-m);
+  background: var(--adm-surface);
+  color: var(--adm-ink-2);
+  text-decoration: none;
+}
+.cru-spese:hover { border-color: var(--adm-blue-line); background: var(--adm-surface-2); }
+.cru-spese:focus-visible { outline: 3px solid var(--adm-arancio); outline-offset: 2px; }
+.cru-spese-cifra { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .15rem .6rem; }
+.cru-spese-cifra svg { color: var(--adm-muted); align-self: center; }
+.cru-spese-cifra strong { color: var(--adm-ink); font-size: 1.35rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.cru-spese-sotto { grid-column: 1 / -1; color: var(--adm-muted); font-size: .82rem; }
+.cru-spese-uso { display: grid; gap: .35rem; }
+.cru-spese-uso-nome { display: flex; align-items: center; gap: .4rem; font-size: .85rem; font-weight: 600; }
+.cru-spese-uso-nome svg { color: var(--adm-muted); }
+.cru-spese-barra { height: 6px; border-radius: 2px; background: var(--adm-line-soft); overflow: hidden; }
+.cru-spese-barra span { display: block; height: 100%; background: var(--adm-blue); }
+.cru-spese-barra.is-alta span { background: var(--adm-danger); }
+
+@media (max-width: 640px) {
+  .cru-spese { grid-template-columns: 1fr; }
+}
+
 /* ---------- Attesa ---------- */
 
 .cru-sagoma-benvenuto {

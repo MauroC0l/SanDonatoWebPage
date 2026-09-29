@@ -120,7 +120,7 @@
 .lib-etichetta {
   padding: 1px 7px;
   border: 1px solid var(--adm-line);
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--adm-bg);
   color: var(--adm-muted);
   font-size: .68rem;
@@ -244,7 +244,7 @@
      pollici il modulo sotto non c'era proprio. */
   aspect-ratio: 16 / 10;
   max-height: 20vh;
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-line-soft);
   overflow: hidden;
 }
@@ -311,7 +311,7 @@
 .lib-cartella-riga {
   display: flex;
   align-items: center;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .lib-cartella {
@@ -323,7 +323,7 @@
   min-width: 0;
   padding: 7px 9px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 4px;
   background: none;
 
   color: var(--adm-ink);
@@ -390,7 +390,7 @@
   margin-top: .4rem;
   padding: 7px 9px;
   border: 1px dashed var(--adm-line);
-  border-radius: 8px;
+  border-radius: 4px;
   background: none;
 
   color: var(--adm-muted);
@@ -483,7 +483,7 @@
     width: auto;
     max-height: 86vh;
     max-height: 86svh;
-    border-radius: 18px 18px 0 0;
+    border-radius: 8px 8px 0 0;
     animation: libSale .24s ease;
   }
 
@@ -564,7 +564,7 @@
   max-height: min(720px, 92vh);
 
   background: var(--adm-surface);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
   overflow: hidden;
 }
@@ -698,7 +698,7 @@
 
   padding: .45rem .8rem;
   border: 1px solid var(--adm-line);
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--adm-surface);
   box-shadow: 0 6px 20px -8px rgba(16, 32, 56, .35);
 
@@ -725,7 +725,7 @@
   margin: 0 0 .8rem;
   padding: .55rem .7rem;
   border: 1px solid var(--adm-line-soft);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--adm-bg);
 
   color: var(--adm-muted);

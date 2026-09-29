@@ -31,7 +31,7 @@
   gap: 14px;
   max-width: 100%;
   padding: 12px 20px 12px 12px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: #fff;
   border: 1px solid var(--doc-filo);
   color: var(--doc-inchiostro);

@@ -24,7 +24,7 @@
   --nz-arancio: var(--psd-arancio, #ff6600);
   /* L'arancio pieno su bianco non basta alle scritte piccole */
   --nz-arancio-testo: #d65400;
-  --nz-raggio: 24px;
+  --nz-raggio: 8px;
   --nz-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
   --nz-ombra: 0 1px 2px rgba(11, 21, 38, .04), 0 18px 40px -28px rgba(0, 26, 56, .45);
   --nz-ombra-alta: 0 6px 14px rgba(11, 21, 38, .06), 0 40px 70px -34px rgba(0, 26, 56, .55);
@@ -47,7 +47,7 @@
   --adm-blue-soft: #e7eefc;
   --adm-danger: #b42318;
   --adm-danger-soft: #fdecea;
-  --adm-radius: 14px;
+  --adm-radius: 6px;
   --adm-tocco: 44px;
   --adm-anello: 0 0 0 3px rgba(255, 102, 0, .18);
   --adm-shadow: 0 1px 2px rgba(16, 32, 56, .06), 0 8px 24px -12px rgba(16, 32, 56, .18);
@@ -103,7 +103,7 @@
   color: #fff;
   /* Arrotondata solo sotto: sopra continua la barra di navigazione, che è
      dello stesso blu, e le due si leggono come un pezzo solo. */
-  border-radius: 0 0 32px 32px;
+  border-radius: 0 0 8px 8px;
   background:
     radial-gradient(90% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
     linear-gradient(170deg, var(--nz-blu) 0%, var(--nz-notte) 72%, #00122a 100%);
@@ -158,7 +158,7 @@
   gap: .6rem;
   margin: 0 0 1.4rem;
   padding: .45rem .95rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, .08);
   border: 1px solid rgba(255, 255, 255, .14);
   font-size: .74rem;
@@ -203,7 +203,7 @@
   align-items: center;
   gap: .5rem;
   padding: .5rem .55rem .5rem .95rem;
-  border-radius: 999px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, .18);
   background: rgba(255, 255, 255, .07);
   backdrop-filter: blur(12px);
@@ -264,7 +264,7 @@
   position: absolute;
   inset: 4% 6%;
   overflow: hidden;
-  border-radius: 26px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, .16);
   box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7);
   transition: rotate .7s var(--nz-curva), translate .7s var(--nz-curva);
@@ -282,7 +282,7 @@
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
-  border-radius: 28px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, .22);
   color: #fff;
   text-decoration: none;
@@ -322,7 +322,7 @@
   gap: .5rem;
   align-self: flex-start;
   padding: .38rem .8rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, .12);
   border: 1px solid rgba(255, 255, 255, .22);
   backdrop-filter: blur(12px);
@@ -374,7 +374,7 @@
   justify-content: flex-end;
   gap: .3rem;
   padding: 1rem 1.15rem;
-  border-radius: 20px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .07);
   border: 1px solid rgba(255, 255, 255, .13);
   backdrop-filter: blur(14px) saturate(140%);
@@ -471,7 +471,7 @@
   align-items: center;
   gap: .5rem;
   padding: .55rem;
-  border-radius: 22px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .74);
   border: 1px solid rgba(255, 255, 255, .9);
   box-shadow:
@@ -498,7 +498,7 @@
   min-width: 0;
   height: 44px;
   padding: 0 .9rem;
-  border-radius: 14px;
+  border-radius: 6px;
   border: 1px solid transparent;
   background: rgba(0, 43, 92, .06);
   transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
@@ -549,7 +549,7 @@
 
 .nz-barra .adm-input {
   min-height: 44px;
-  border-radius: 14px;
+  border-radius: 6px;
   border-color: rgba(0, 43, 92, .1);
   background: rgba(255, 255, 255, .92);
   font-size: .88rem;
@@ -609,7 +609,7 @@
   max-width: 16rem;
   padding: .42rem .8rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--nz-blu);
   color: #fff;
   font: inherit;
@@ -707,7 +707,7 @@
   gap: .4rem;
   max-width: 12rem;
   padding: .32rem .7rem;
-  border-radius: 999px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, .28);
   background: rgba(0, 20, 45, .5);
   backdrop-filter: blur(10px) saturate(150%);
@@ -917,7 +917,7 @@
   margin-top: .4rem;
   padding: .7rem 1.2rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--nz-arancio);
   color: #fff;
   font: inherit;
@@ -944,7 +944,7 @@
   gap: .35rem;
   margin: 0;
   padding: .35rem;
-  border-radius: 999px;
+  border-radius: 4px;
   list-style: none;
   background: var(--nz-carta);
   box-shadow: var(--nz-ombra);
@@ -957,7 +957,7 @@
   height: 42px;
   padding: 0 .6rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: transparent;
   color: var(--nz-inchiostro);
   font: inherit;
@@ -1052,7 +1052,7 @@
 @media (max-width: 720px) {
   .nz-numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  .nz-barra-vetro { padding: .45rem; border-radius: 20px; }
+  .nz-barra-vetro { padding: .45rem; border-radius: 8px; }
 
   .nz-apri-filtri {
     position: relative;
@@ -1063,7 +1063,7 @@
     height: 44px;
     padding: 0 1rem;
     border: 0;
-    border-radius: 14px;
+    border-radius: 6px;
     background: var(--nz-blu);
     color: #fff;
     font: inherit;

@@ -26,7 +26,7 @@
   --cnt-linea: rgba(0, 43, 92, 0.09);
   --cnt-verde: #16c47f;
   --cnt-satispay: #ff4e50;
-  --cnt-raggio: 28px;
+  --cnt-raggio: 8px;
   --cnt-curva: cubic-bezier(.16, 1, .3, 1);
 
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -126,7 +126,7 @@
   gap: 0.6rem;
   margin: 1.1rem 0 0;
   padding: 0.5rem 1rem 0.5rem 0.8rem;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: 0.92rem;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.08);
@@ -170,7 +170,7 @@
   gap: 0.6rem;
   min-height: 52px;
   padding: 0 1.6rem;
-  border-radius: 999px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
@@ -306,7 +306,7 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  border-radius: 14px;
+  border-radius: 6px;
   border: 1px solid var(--cnt-linea);
   background: #f5f7fb;
   color: var(--cnt-blu);
@@ -337,7 +337,7 @@
   display: block;
   flex: 1;
   min-height: 0;
-  border-radius: calc(var(--cnt-raggio) - 8px);
+  border-radius: calc(var(--cnt-raggio) - 4px);
   overflow: hidden;
   background: #e8edf3;
   text-decoration: none;
@@ -389,7 +389,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.1rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--cnt-blu);
   color: #fff;
   font-weight: 700;
@@ -436,7 +436,7 @@
   flex-direction: column;
   gap: 0.2rem;
   padding: 1.1rem 1.2rem;
-  border-radius: 20px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #f5f8fc, #eef2f8);
   position: relative;
 }
@@ -491,7 +491,7 @@
   align-items: center;
   gap: 0.9rem;
   padding: 0.55rem 1.2rem 0.55rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--cnt-blu);
   color: #fff;
   text-decoration: none;
@@ -530,7 +530,7 @@
   display: flex;
   flex-direction: column;
   padding: 0.7rem 1rem;
-  border-radius: 16px;
+  border-radius: 8px;
   background: #f5f7fb;
   text-decoration: none;
   color: var(--cnt-blu);
@@ -578,7 +578,7 @@
   align-items: center;
   gap: 0 0.4rem;
   padding: 0.7rem 0.6rem 0.7rem 1rem;
-  border-radius: 16px;
+  border-radius: 8px;
   border: 1px dashed rgba(0, 43, 92, 0.2);
   min-width: 0;
 }
@@ -598,7 +598,7 @@
   color: var(--cnt-testo);
   overflow-wrap: anywhere;
 }
-.cnt-fiscale .cnt-copia { grid-column: 2; grid-row: 1 / span 2; width: 36px; height: 36px; border-radius: 12px; }
+.cnt-fiscale .cnt-copia { grid-column: 2; grid-row: 1 / span 2; width: 36px; height: 36px; border-radius: 6px; }
 
 /* =============== Pagamenti =============== */
 
@@ -615,7 +615,7 @@
   place-items: center;
   width: clamp(48px, 7vw, 64px);
   aspect-ratio: 1;
-  border-radius: 18px;
+  border-radius: 8px;
   background: var(--cnt-arancio);
   color: #fff;
   font-size: clamp(1.4rem, 3vw, 1.9rem);
@@ -681,7 +681,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffb070;
@@ -694,7 +694,7 @@
   margin-left: auto;
   width: 46px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: 4px;
   flex-shrink: 0;
   background:
     linear-gradient(90deg, transparent 32%, rgba(0, 0, 0, 0.18) 32% 34%, transparent 34% 66%, rgba(0, 0, 0, 0.18) 66% 68%, transparent 68%),
@@ -736,7 +736,7 @@
   min-height: 46px;
   padding: 0 1.3rem;
   border: none;
-  border-radius: 999px;
+  border-radius: 4px;
   background: #fff;
   color: var(--cnt-blu);
   font: inherit;
@@ -754,7 +754,7 @@
 .cnt-banca-logo {
   align-self: flex-start;
   padding: 0.55rem 0.9rem;
-  border-radius: 14px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.94);
   line-height: 0;
 }
@@ -817,7 +817,7 @@
   gap: 0.7rem;
   min-height: 52px;
   padding: 0 1.7rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--cnt-satispay);
   color: #fff;
   font-weight: 800;
@@ -833,7 +833,7 @@
   width: 172px;
   height: 172px;
   padding: 10px;
-  border-radius: 22px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid var(--cnt-linea);
   box-shadow: 0 20px 40px -24px rgba(0, 43, 92, 0.45);
@@ -877,7 +877,7 @@
   gap: 0.6rem;
   max-width: 100%;
   padding: 0.85rem 1.3rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(0, 26, 56, 0.92);
   color: #fff;
   font-weight: 600;

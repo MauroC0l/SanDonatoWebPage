@@ -20,7 +20,7 @@
   --hp-blu: #002b5c;
   --hp-notte: #001a38;
   --hp-rosso: #e11d48;
-  --hp-raggio: 24px;
+  --hp-raggio: 8px;
   --hp-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
   --hp-ombra: 0 1px 2px rgba(11, 21, 38, .04), 0 18px 40px -28px rgba(0, 26, 56, .4);
   --hp-ombra-alta: 0 4px 10px rgba(11, 21, 38, .06), 0 30px 60px -30px rgba(0, 26, 56, .5);
@@ -155,7 +155,7 @@
   min-height: 46px;
   padding: 0 1.3rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--hp-inchiostro);
   color: #fff;
   font: inherit;
@@ -277,7 +277,7 @@
   top: 1.1rem;
   left: 1.1rem;
   padding: .4rem .85rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, .14);
   border: 1px solid rgba(255, 255, 255, .25);
   -webkit-backdrop-filter: blur(12px);
@@ -329,7 +329,7 @@
 .hs-miniatura {
   aspect-ratio: 16 / 10;
   margin: 8px 8px 0;
-  border-radius: 17px;
+  border-radius: 8px;
   /* La miniatura non deve restringersi quando il titolo è lungo: senza
      questo, in una fila di schede le immagini vengono tutte alte diverse
      e la riga sembra storta. */
@@ -377,7 +377,7 @@
 
 .hs-nuova {
   padding: 2px 9px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--hp-arancio);
   color: #fff;
   font-size: .66rem;
@@ -389,7 +389,7 @@
 .hs-categoria {
   padding: 2px 9px;
   border: 1px solid currentColor;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: .68rem;
   font-weight: 700;
   opacity: .85;
@@ -422,7 +422,7 @@
   overflow: hidden;
   margin: 0 12px;
   padding: clamp(3.5rem, 7vw, 6rem) 0;
-  border-radius: 32px;
+  border-radius: 8px;
   color: #fff;
   background:
     radial-gradient(70% 90% at 100% 0%, #0a3d7a 0%, transparent 60%),
@@ -493,7 +493,7 @@
 /* Vetro scuro, come le cifre delle testate di Sport e Sponsor */
 .hs-scheda {
   padding: clamp(1.2rem, 2.5vw, 1.6rem);
-  border-radius: 28px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .06);
   border: 1px solid rgba(255, 255, 255, .12);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
@@ -532,7 +532,7 @@
 .hs-diretta {
   padding: 1rem;
   border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 20px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .04);
 }
 
@@ -553,7 +553,7 @@
 
 .hs-targhetta {
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, .12);
   color: #fff;
   font-size: .68rem;
@@ -596,7 +596,7 @@
   gap: .5rem;
   margin-bottom: .75rem;
   padding: .65rem .9rem;
-  border-radius: 14px;
+  border-radius: 6px;
   background: rgba(0, 0, 0, .28);
   color: #fff;
 }
@@ -628,7 +628,7 @@
   min-height: 46px;
   padding: .55rem;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: .9rem;
   font-weight: 700;
   text-decoration: none;
@@ -668,7 +668,7 @@
   min-height: 36px;
   padding: 0 .95rem;
   border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, .07);
   color: #fff;
   font: inherit;
@@ -693,7 +693,7 @@
   width: 100%;
   padding: .7rem .6rem;
   border: 0;
-  border-radius: 16px;
+  border-radius: 8px;
   background: none;
   color: #fff;
   font: inherit;
@@ -714,7 +714,7 @@
   flex: 0 0 auto;
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: 8px;
   background:
     radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, .3), transparent 60%),
     var(--hs-colore);
@@ -787,7 +787,7 @@
   font-size: .9rem;
   font-weight: 700;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .hs-calendario svg { font-size: .75rem; transition: transform .35s var(--hp-curva); }
 .hs-calendario:hover { color: #fff; }
@@ -809,7 +809,7 @@
   width: 100%;
   padding: clamp(1.8rem, 4.5vw, 3.2rem);
   border: 0;
-  border-radius: 32px;
+  border-radius: 8px;
   background:
     radial-gradient(80% 120% at 100% 0%, #ffb36b 0%, transparent 55%),
     linear-gradient(135deg, #ff7a1a 0%, var(--hp-arancio) 45%, #e63e00 100%);
@@ -876,7 +876,7 @@
   gap: .6rem;
   min-height: 54px;
   padding: 0 1.7rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: #fff;
   color: #c43d00;
   font-size: 1rem;
@@ -979,7 +979,7 @@
     width: 104px;
     aspect-ratio: 1;
     margin: 8px 0 8px 8px;
-    border-radius: 16px;
+    border-radius: 8px;
   }
 
   .hs-notizia-piccola .hs-notizia-testi,
@@ -997,9 +997,9 @@
   .hs-notizie-fila > .hs-posto:nth-child(n+5) .hs-scheletro { min-height: 120px; }
   .hs-scheletro-grande { min-height: 380px; }
 
-  .hs-campo { margin: 0 8px; border-radius: 26px; }
+  .hs-campo { margin: 0 8px; border-radius: 8px; }
 
-  .hs-newsletter { border-radius: 26px; }
+  .hs-newsletter { border-radius: 8px; }
   .hs-newsletter-azione { width: 100%; justify-content: center; }
 }
 

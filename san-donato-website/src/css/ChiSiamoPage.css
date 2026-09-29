@@ -137,7 +137,7 @@
   gap: 10px;
   min-height: 48px;
   padding: 0 26px;
-  border-radius: 999px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
@@ -396,7 +396,7 @@
   flex-direction: column-reverse; /* il numero sopra, l'etichetta sotto */
   gap: .3rem;
   padding: 1rem 1.1rem;
-  border-radius: 20px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .07);
   border: 1px solid rgba(255, 255, 255, .13);
   backdrop-filter: blur(14px) saturate(140%);
@@ -562,7 +562,7 @@
   text-underline-offset: 5px;
 }
 .chs-tappa-link:hover svg { transform: translateY(3px); }
-.chs-tappa-link:focus-visible { outline: 3px solid var(--chs-arancio); outline-offset: 3px; border-radius: 6px; }
+.chs-tappa-link:focus-visible { outline: 3px solid var(--chs-arancio); outline-offset: 3px; border-radius: 4px; }
 
 /* =====================================================
    IL MANIFESTO
@@ -587,7 +587,7 @@
   flex-direction: column;
   min-height: 220px;
   padding: 26px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(11, 21, 38, .07);
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
@@ -616,7 +616,7 @@
   place-items: center;
   width: 54px;
   height: 54px;
-  border-radius: 18px;
+  border-radius: 8px;
   font-size: 1.35rem;
   color: #fff;
   background: linear-gradient(135deg, var(--chs-blu), #0a4a93);
@@ -688,7 +688,7 @@
   overflow: hidden;
   isolation: isolate;
   margin: clamp(72px, 10vw, 128px) 8px 0;
-  border-radius: 32px;
+  border-radius: 8px;
   color: #fff;
   background:
     radial-gradient(70% 60% at 0% 0%, #0a3d7a 0%, transparent 60%),
@@ -722,7 +722,7 @@
   display: flex;
   flex-direction: column;
   padding: 26px;
-  border-radius: 26px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .06);
   border: 1px solid rgba(255, 255, 255, .12);
   backdrop-filter: blur(14px) saturate(140%);
@@ -748,7 +748,7 @@
   place-items: center;
   width: 52px;
   height: 52px;
-  border-radius: 16px;
+  border-radius: 8px;
   font-size: 1.35rem;
   color: #fff;
   background: linear-gradient(135deg, var(--chs-arancio), #ff3d00);
@@ -827,7 +827,7 @@
   flex-direction: column;
   gap: 22px;
   padding: 28px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(11, 21, 38, .07);
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
@@ -842,7 +842,7 @@
   place-items: center;
   width: 72px;
   height: 72px;
-  border-radius: 22px;
+  border-radius: 8px;
   font-size: 2rem;
   color: #fff;
   background: linear-gradient(135deg, var(--chs-blu), #0a4a93);
@@ -897,7 +897,7 @@
   min-width: 0;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 30px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(11, 21, 38, .07);
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
@@ -927,7 +927,7 @@
 }
 .chs-kit-bollino {
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: .7rem;
   font-weight: 800;
   letter-spacing: .12em;
@@ -1011,7 +1011,7 @@
   position: relative;
   min-width: 0;
   padding: 28px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid rgba(11, 21, 38, .07);
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -20px rgba(11, 21, 38, .25);
@@ -1056,7 +1056,7 @@
   grid-column: 1 / -1;
   height: 10px;
   overflow: hidden;
-  border-radius: 999px;
+  border-radius: 2px;
   background: #eef1f6;
 }
 .chs-barra-piena {
@@ -1084,7 +1084,7 @@
   place-items: center;
   min-height: 76px;
   padding: 12px;
-  border-radius: 20px;
+  border-radius: 8px;
   text-align: center;
   font-size: clamp(1.2rem, 2.4vw, 1.45rem);
   font-weight: 900;
@@ -1135,7 +1135,7 @@
   min-height: 40px;
   padding: 0 16px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   font: inherit;
   font-size: .9rem;
   font-weight: 800;
@@ -1165,7 +1165,7 @@
 .chs-cifre-link svg { transition: transform .35s var(--chs-curva); }
 .chs-cifre-link:hover { color: #fff; }
 .chs-cifre-link:hover svg { transform: translateX(4px); }
-.chs-cifre-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 6px; }
+.chs-cifre-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 4px; }
 
 /* =====================================================
    INVITO FINALE
@@ -1176,7 +1176,7 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 32px;
+  border-radius: 8px;
   color: #fff;
   background: linear-gradient(160deg, var(--chs-blu), var(--chs-notte));
   box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .8);

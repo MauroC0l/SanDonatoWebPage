@@ -1,0 +1,201 @@
+/* =====================================================
+   Spese sito (prefisso spe-)
+
+   L'inventario dei servizi esterni e dei loro costi. Pannelli, pulsanti e
+   campi vengono da Admin.css; qui solo le cifre in cima, le barre dello
+   spazio occupato e la scheda di un servizio. Angoli piccoli, come il resto
+   del pannello dal 29 settembre 2026.
+   ===================================================== */
+
+/* ---------- Le tre cifre ---------- */
+.spe-cifre {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+.spe-cifra {
+  display: grid;
+  gap: .2rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--adm-line);
+  border-left: 3px solid var(--adm-navy);
+  border-radius: var(--adm-r-m);
+  background: var(--adm-surface);
+}
+.spe-cifra-etichetta {
+  color: var(--adm-muted);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.spe-cifra strong {
+  color: var(--adm-ink);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.spe-cifra .adm-hint { margin: 0; }
+
+.spe-avvisi ul { margin: 0; padding-left: 1.1rem; display: grid; gap: .25rem; }
+
+/* ---------- Spazio occupato ---------- */
+.spe-consumi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: .75rem;
+}
+.spe-consumo { margin: 0; display: grid; gap: .45rem; }
+.spe-consumo-nome {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  margin: 0;
+  color: var(--adm-ink-2);
+  font-size: .9rem;
+  font-weight: 700;
+}
+.spe-consumo-nome svg { color: var(--adm-muted); }
+.spe-consumo-cifra { margin: 0; color: var(--adm-ink-2); }
+.spe-consumo-cifra strong { color: var(--adm-ink); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.spe-consumo-nota { margin: 0; }
+
+.spe-barra {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--adm-line-soft);
+  overflow: hidden;
+}
+.spe-barra span {
+  display: block;
+  height: 100%;
+  background: var(--adm-blue);
+  transition: width .4s ease;
+}
+.spe-barra.is-alta span { background: var(--adm-danger); }
+
+/* ---------- Collegamenti ---------- */
+.spe-collegamenti {
+  list-style: none;
+  margin: 0;
+  padding: .25rem 1.15rem;
+}
+.spe-collegamenti li {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 17rem) minmax(0, 1fr);
+  align-items: center;
+  gap: .35rem 1rem;
+  padding: .7rem 0;
+}
+.spe-collegamenti li + li { border-top: 1px solid var(--adm-line-soft); }
+.spe-collegamento-nome { font-weight: 700; color: var(--adm-ink); }
+.spe-collegamenti .adm-hint { margin: 0; }
+
+.spe-stato {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  justify-self: start;
+  padding: .2rem .5rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-s);
+  font-size: .8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.spe-stato.is-ok { color: var(--adm-ok); border-color: var(--adm-ok-line); background: var(--adm-ok-soft); }
+.spe-stato.is-manca { color: var(--adm-danger); border-color: var(--adm-danger-line); background: var(--adm-danger-soft); }
+.spe-stato.is-locale,
+.spe-stato.is-facoltativa { color: var(--adm-muted); background: var(--adm-surface-2); }
+
+@media (max-width: 760px) {
+  .spe-collegamenti li { grid-template-columns: 1fr; }
+}
+
+/* ---------- Un servizio ---------- */
+.spe-elenco {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  gap: .75rem;
+}
+.spe-elenco > li:has(> .spe-modulo) { grid-column: 1 / -1; }
+
+.spe-servizio { margin: 0; display: grid; gap: .9rem; align-content: start; }
+.spe-servizio.is-spento { background: var(--adm-surface-2); border-style: dashed; }
+.spe-servizio.is-spento .spe-servizio-nome h3 { color: var(--adm-muted); }
+
+.spe-servizio-testa {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem;
+}
+.spe-servizio-icona {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: var(--adm-r-s);
+  background: var(--adm-blue-soft);
+  color: var(--adm-blue);
+}
+.spe-servizio-nome { display: grid; gap: .05rem; min-width: 0; }
+.spe-servizio-nome h3 {
+  margin: 0;
+  color: var(--adm-ink);
+  font-size: 1.05rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.spe-servizio-nome .adm-hint { margin: 0; }
+
+.spe-costo {
+  padding: .25rem .55rem;
+  border: 1px solid var(--adm-line);
+  border-radius: var(--adm-r-s);
+  color: var(--adm-ink);
+  font-size: .85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.spe-costo.is-gratis { color: var(--adm-ok); border-color: var(--adm-ok-line); background: var(--adm-ok-soft); }
+
+.spe-dati { margin: 0; display: grid; gap: .5rem; }
+.spe-dati > div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: .75rem;
+}
+.spe-dati dt { color: var(--adm-muted); font-size: .82rem; font-weight: 700; }
+.spe-dati dd { margin: 0; color: var(--adm-ink-2); font-size: .9rem; line-height: 1.45; overflow-wrap: anywhere; }
+.spe-dati .is-da-compilare dd { color: var(--adm-arancio-testo); font-style: italic; }
+
+@media (max-width: 520px) {
+  .spe-dati > div { grid-template-columns: 1fr; gap: .1rem; }
+}
+
+.spe-servizio-azioni {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  padding-top: .75rem;
+  border-top: 1px solid var(--adm-line-soft);
+}
+
+/* ---------- Il modulo ---------- */
+.spe-modulo { display: grid; gap: .9rem; margin-bottom: .75rem; }
+.spe-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.spe-griglia-tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.spe-soglia { max-width: 18rem; }
+
+@media (max-width: 760px) {
+  .spe-griglia,
+  .spe-griglia-tre { grid-template-columns: 1fr; }
+}

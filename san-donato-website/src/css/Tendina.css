@@ -57,7 +57,7 @@
 
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-radius: var(--adm-r-m, 14px);
+  border-radius: var(--adm-r-m, 6px);
   box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -24px rgba(0, 26, 56, .5);
   overflow: hidden;
 
@@ -143,7 +143,7 @@
 
   background: transparent;
   border: 0;
-  border-radius: 10px;
+  border-radius: 6px;
 
   font: inherit;
   font-size: 0.92rem;
@@ -194,7 +194,7 @@
   width: 18px;
   height: 18px;
   border: 1.5px solid var(--adm-line-strong, var(--adm-line));
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--adm-surface);
   color: #fff;
   font-size: 0.6rem;

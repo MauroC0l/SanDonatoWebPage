@@ -109,7 +109,7 @@
   height: 1.3rem;
   margin-left: .4rem;
   padding: 0 .35rem;
-  border-radius: var(--adm-r-pill);
+  border-radius: 999px;
   background: var(--adm-line-soft);
   color: var(--adm-ink-2);
   font-size: .72rem;

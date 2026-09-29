@@ -80,7 +80,7 @@
 .qta-barra {
   height: 10px;
   background: var(--adm-line-soft);
-  border-radius: 999px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
@@ -88,7 +88,7 @@
   display: block;
   height: 100%;
   background: var(--adm-blue);
-  border-radius: 999px;
+  border-radius: 2px;
   /* Si riempie all'apertura: senza, appare già piena e non si legge come
      un progresso. */
   transition: width .5s ease;
@@ -196,7 +196,7 @@
   max-height: min(560px, 90vh);
 
   background: var(--adm-surface);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
   overflow: hidden;
 }
@@ -236,7 +236,7 @@
   gap: .8rem;
 
   padding: .6rem .65rem;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 
 .qta-storico li:nth-child(odd) { background: var(--adm-bg); }
