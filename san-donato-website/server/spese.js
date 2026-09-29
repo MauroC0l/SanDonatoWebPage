@@ -15,19 +15,11 @@
 import { and, asc, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../db/client.js";
-import { serviziEsterni, media } from "../db/schema.js";
+import { serviziEsterni, categorieServizi, media } from "../db/schema.js";
 import { ErroreHttp } from "./risposte.js";
 
-export const CATEGORIE = [
-  { valore: "sito", etichetta: "Sito" },
-  { valore: "database", etichetta: "Database" },
-  { valore: "file", etichetta: "Archivio dei file" },
-  { valore: "email", etichetta: "Email e newsletter" },
-  { valore: "dominio", etichetta: "Dominio" },
-  { valore: "calendari", etichetta: "Calendari" },
-  { valore: "codice", etichetta: "Codice" },
-  { valore: "altro", etichetta: "Altro" }
-];
+// La categoria di chi non ne ha un'altra: non si può togliere
+export const CATEGORIA_DI_RISERVA = "altro";
 
 export const PERIODICITA = [
   { valore: "gratis", etichetta: "Gratuito" },
@@ -197,7 +189,8 @@ const testo = (max) => z.string().trim().max(max).transform((v) => v || null).nu
 
 const campi = {
   nome: z.string().trim().min(2, "Scrivi il nome del servizio.").max(120),
-  categoria: z.enum(CATEGORIE.map((c) => c.valore)),
+  // Che esista lo controlla il database (controllaCategoria): l'elenco non è più fisso
+  categoria: z.string().trim().min(1).max(60),
   serveA: testo(600),
   account: testo(200),
   piano: testo(120),
@@ -216,7 +209,7 @@ const campi = {
 
 export const schemaServizioNuovo = z.object({
   ...campi,
-  categoria: campi.categoria.default("altro"),
+  categoria: campi.categoria.default(CATEGORIA_DI_RISERVA),
   importoCentesimi: campi.importoCentesimi.default(0),
   periodicita: campi.periodicita.default("gratis")
 });
@@ -235,8 +228,16 @@ function controllaSegreti(dati) {
   }
 }
 
+async function controllaCategoria(valore) {
+  if (valore == null) return;
+  const [riga] = await getDb().select({ valore: categorieServizi.valore })
+    .from(categorieServizi).where(eq(categorieServizi.valore, valore)).limit(1);
+  if (!riga) throw new ErroreHttp(400, "Questa categoria non c'è più: scegline un'altra.");
+}
+
 export async function creaServizio(dati, autoreId) {
   controllaSegreti(dati);
+  await controllaCategoria(dati.categoria);
   const db = getDb();
   const [{ ultimo }] = await db.select({ ultimo: sql`coalesce(max(${serviziEsterni.ordine}), 0)::int` }).from(serviziEsterni);
   const [creato] = await db.insert(serviziEsterni)
@@ -247,6 +248,7 @@ export async function creaServizio(dati, autoreId) {
 
 export async function modificaServizio(id, dati, autoreId) {
   controllaSegreti(dati);
+  await controllaCategoria(dati.categoria);
   const [aggiornato] = await getDb().update(serviziEsterni)
     .set({ ...dati, aggiornatoDa: autoreId, aggiornatoIl: new Date() })
     .where(eq(serviziEsterni.id, id))
@@ -259,4 +261,88 @@ export async function eliminaServizio(id) {
   const [tolto] = await getDb().delete(serviziEsterni).where(eq(serviziEsterni.id, id)).returning();
   if (!tolto) throw new ErroreHttp(404, "Servizio non trovato.");
   return tolto;
+}
+
+/* =====================================================
+   Categorie ("Di che cosa si tratta")
+   ===================================================== */
+
+/** Le categorie in ordine, con quanti servizi usano ciascuna. */
+export async function elencaCategorie() {
+  return getDb()
+    .select({
+      valore: categorieServizi.valore,
+      etichetta: categorieServizi.etichetta,
+      quanti: sql`count(${serviziEsterni.id})::int`
+    })
+    .from(categorieServizi)
+    .leftJoin(serviziEsterni, eq(serviziEsterni.categoria, categorieServizi.valore))
+    .groupBy(categorieServizi.valore, categorieServizi.etichetta, categorieServizi.ordine)
+    .orderBy(asc(categorieServizi.ordine), asc(categorieServizi.etichetta));
+}
+
+export const schemaCategoria = z.object({
+  etichetta: z.string().trim().min(2, "Scrivi il nome della categoria.").max(40)
+});
+
+/**
+ * "Hosting e server" -> "hosting-e-server": il valore che resta scritto nel
+ * servizio. Si ricava una volta, alla nascita, e non segue le rinomine.
+ */
+export function valoreDaEtichetta(etichetta) {
+  const base = etichetta.normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+  return base || "categoria";
+}
+
+async function etichettaOccupata(etichetta, escludi = null) {
+  const [riga] = await getDb().select({ valore: categorieServizi.valore })
+    .from(categorieServizi)
+    .where(sql`lower(${categorieServizi.etichetta}) = lower(${etichetta})`)
+    .limit(1);
+  return Boolean(riga && riga.valore !== escludi);
+}
+
+export async function creaCategoria(etichetta) {
+  if (await etichettaOccupata(etichetta)) throw new ErroreHttp(409, `La categoria "${etichetta}" c'è già.`);
+  const db = getDb();
+  const esistenti = new Set((await db.select({ valore: categorieServizi.valore }).from(categorieServizi)).map((r) => r.valore));
+  const base = valoreDaEtichetta(etichetta);
+  let valore = base;
+  for (let n = 2; esistenti.has(valore); n++) valore = `${base}-${n}`;
+
+  // In coda, ma prima di "Altro", che resta l'ultima voce
+  const [{ ultimo }] = await db.select({ ultimo: sql`coalesce(max(${categorieServizi.ordine}), 0)::int` })
+    .from(categorieServizi).where(sql`${categorieServizi.valore} <> ${CATEGORIA_DI_RISERVA}`);
+  await db.update(categorieServizi).set({ ordine: ultimo + 2 }).where(eq(categorieServizi.valore, CATEGORIA_DI_RISERVA));
+  const [creata] = await db.insert(categorieServizi).values({ valore, etichetta, ordine: ultimo + 1 }).returning();
+  return creata;
+}
+
+export async function rinominaCategoria(valore, etichetta) {
+  if (await etichettaOccupata(etichetta, valore)) {
+    throw new ErroreHttp(409, `Un'altra categoria si chiama già "${etichetta}".`);
+  }
+  const [rinominata] = await getDb().update(categorieServizi).set({ etichetta })
+    .where(eq(categorieServizi.valore, valore)).returning();
+  if (!rinominata) throw new ErroreHttp(404, "Categoria non trovata.");
+  return rinominata;
+}
+
+/** Si toglie solo una categoria che nessun servizio usa, e mai "Altro". */
+export async function eliminaCategoria(valore) {
+  if (valore === CATEGORIA_DI_RISERVA) {
+    throw new ErroreHttp(409, "\"Altro\" non si toglie: è la categoria di chi non ne ha un'altra.");
+  }
+  const db = getDb();
+  const [{ quanti }] = await db.select({ quanti: sql`count(*)::int` })
+    .from(serviziEsterni).where(eq(serviziEsterni.categoria, valore));
+  if (quanti > 0) {
+    throw new ErroreHttp(409, quanti === 1
+      ? "Un servizio usa ancora questa categoria: spostalo su un'altra, poi toglila."
+      : `${quanti} servizi usano ancora questa categoria: spostali su un'altra, poi toglila.`);
+  }
+  const [tolta] = await db.delete(categorieServizi).where(eq(categorieServizi.valore, valore)).returning();
+  if (!tolta) throw new ErroreHttp(404, "Categoria non trovata.");
+  return tolta;
 }

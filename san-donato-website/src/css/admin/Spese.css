@@ -195,6 +195,24 @@
 .spe-griglia-tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .spe-soglia { max-width: 18rem; }
 
+/* "Modifica le voci" accanto a "Di che cosa si tratta": un collegamento nel
+   testo, come "Gestisci etichette" nell'editor delle notizie */
+.spe-gestisci {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .1rem 0;
+  border: 0;
+  background: none;
+  color: var(--adm-blue);
+  font: inherit;
+  font-size: .82rem;
+  cursor: pointer;
+}
+.spe-gestisci svg { font-size: .7rem; }
+.spe-gestisci:disabled { opacity: .5; cursor: not-allowed; }
+.spe-modulo .adm-label-riga .adm-label { margin: 0; }
+
 @media (max-width: 760px) {
   .spe-griglia,
   .spe-griglia-tre { grid-template-columns: 1fr; }

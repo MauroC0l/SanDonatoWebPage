@@ -9,7 +9,7 @@
 
 import {
   elencaServizi, misuraConsumi, riassumi, creaServizio, schemaServizioNuovo,
-  CATEGORIE, PERIODICITA, MISURE
+  elencaCategorie, PERIODICITA, MISURE
 } from "../../../spese.js";
 import { archivioConfigurato, archivioPrivatoConfigurato } from "../../../archivio.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
@@ -21,15 +21,15 @@ import { valida } from "../../../validazione.js";
 export default conGestioneErrori(
   richiedeCapacita("spese.gestisci", async (req, res) => {
     if (req.method === "GET") {
-      let servizi, consumi;
+      let servizi, consumi, categorie;
       try {
-        [servizi, consumi] = await Promise.all([elencaServizi(), misuraConsumi()]);
+        [servizi, consumi, categorie] = await Promise.all([elencaServizi(), misuraConsumi(), elencaCategorie()]);
       } catch (e) {
         /* 42P01: la tabella non c'è. Succede su un database a cui non è
-           ancora stata applicata la migrazione 0030: meglio dirlo così che
+           ancora state applicate le migrazioni 0030 e 0031: meglio dirlo così che
            con un "errore interno" che non spiega niente. */
         if ((e.code ?? e.cause?.code) === "42P01") {
-          throw new ErroreHttp(503, "Le spese non si possono ancora mostrare: al database manca un aggiornamento (migrazione 0030). Va applicato da chi gestisce il sito.");
+          throw new ErroreHttp(503, "Le spese non si possono ancora mostrare: al database manca un aggiornamento (migrazioni 0030 e 0031). Va applicato da chi gestisce il sito.");
         }
         throw e;
       }
@@ -48,7 +48,7 @@ export default conGestioneErrori(
           googleDrive: Boolean(process.env.GOOGLE_DRIVE_API_KEY),
           newsletter: Boolean(process.env.MAILERLITE_API_KEY || process.env.VITE_MAILERLITE_API_KEY)
         },
-        categorie: CATEGORIE,
+        categorie,
         periodicita: PERIODICITA,
         misure: MISURE
       });

@@ -1127,6 +1127,26 @@ export async function eliminaServizio(id) {
   return chiedi(`/admin/spese/${id}`, { method: "DELETE" });
 }
 
+/** Le voci di "Di che cosa si tratta", con quanti servizi usano ciascuna. */
+export async function listCategorieServizi() {
+  const { categorie } = await chiedi("/admin/spese/categorie");
+  return categorie;
+}
+
+export async function creaCategoriaServizi(etichetta) {
+  const { categoria } = await chiedi("/admin/spese/categorie", { method: "POST", body: JSON.stringify({ etichetta }) });
+  return categoria;
+}
+
+export async function rinominaCategoriaServizi(valore, etichetta) {
+  const { categoria } = await chiedi(`/admin/spese/categorie/${encodeURIComponent(valore)}`, { method: "PATCH", body: JSON.stringify({ etichetta }) });
+  return categoria;
+}
+
+export async function eliminaCategoriaServizi(valore) {
+  return chiedi(`/admin/spese/categorie/${encodeURIComponent(valore)}`, { method: "DELETE" });
+}
+
 /** ids: TUTTI i documenti della sezione, dal primo all'ultimo. */
 export async function riordinaDocumenti(sezione, ids) {
   return chiedi("/admin/documenti/ordine", {

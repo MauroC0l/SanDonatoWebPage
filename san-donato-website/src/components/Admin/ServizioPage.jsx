@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaSave, FaTimes, FaExclamationCircle } from "react-icons/fa";
-import { listSpese, creaServizio, modificaServizio, AuthError } from "../../api/adminApi";
+import { FaArrowLeft, FaSave, FaTimes, FaExclamationCircle, FaPencilAlt } from "react-icons/fa";
+import { listSpese, listCategorieServizi, creaServizio, modificaServizio, AuthError } from "../../api/adminApi";
 import { useAuth } from "../../context/auth";
 import { useArea } from "../../context/area";
 import { useDialoghi } from "../../context/dialoghi";
 import { versoCampo, daCampo } from "../../utils/soldi";
 import Tendina from "./Tendina";
 import CampoData from "./CampoData";
+import GestioneCategorieServizi from "./GestioneCategorieServizi";
 import "../../css/Admin.css";
 import "../../css/admin/Spese.css";
 
@@ -60,6 +61,7 @@ export default function ServizioPage() {
   const [modulo, setModulo] = useState(null);
   const [errore, setErrore] = useState("");
   const [occupato, setOccupato] = useState(false);
+  const [categorieAperte, setCategorieAperte] = useState(false);
 
   const esci = useCallback(() => navigate(`${area}/spese`), [navigate, area]);
 
@@ -91,6 +93,19 @@ export default function ServizioPage() {
     }), [nuovo, id, gestisciErrore]);
 
   useEffect(() => { carica(); }, [carica]);
+
+  /* Chiusa la finestra delle categorie, la tendina rilegge l'elenco. Se la
+     categoria scelta è stata tolta nel frattempo, si torna su "Altro". */
+  const chiudiCategorie = async () => {
+    setCategorieAperte(false);
+    try {
+      const categorie = await listCategorieServizi();
+      setElenchi((e) => ({ ...e, categorie }));
+      setModulo((m) => (categorie.some((c) => c.valore === m.categoria) ? m : { ...m, categoria: "altro" }));
+    } catch (err) {
+      gestisciErrore(err);
+    }
+  };
 
   const campo = (nome) => (valore) => setModulo((m) => ({ ...m, [nome]: valore }));
 
@@ -185,7 +200,12 @@ export default function ServizioPage() {
               placeholder="Es. Neon" maxLength={120} required disabled={occupato} autoFocus={nuovo} />
           </label>
           <div className="adm-field">
-            <span className="adm-label">Di che cosa si tratta</span>
+            <div className="adm-label-riga">
+              <span className="adm-label">Di che cosa si tratta</span>
+              <button type="button" className="spe-gestisci" onClick={() => setCategorieAperte(true)} disabled={occupato}>
+                <FaPencilAlt aria-hidden="true" /> Modifica le voci
+              </button>
+            </div>
             <Tendina valore={m.categoria} onChange={campo("categoria")} opzioni={categorie}
               etichettaAria="Categoria del servizio" cercabile={false} disabilitato={occupato} />
           </div>
@@ -274,6 +294,8 @@ export default function ServizioPage() {
           </button>
         </div>
       </form>
+
+      {categorieAperte && <GestioneCategorieServizi onChiudi={chiudiCategorie} />}
     </div>
   );
 }

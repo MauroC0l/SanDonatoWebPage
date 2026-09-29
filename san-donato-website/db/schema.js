@@ -398,6 +398,20 @@ export const serviziEsterni = pgTable("servizi_esterni", {
 });
 
 /**
+ * Le voci di "Di che cosa si tratta" nelle Spese sito.
+ *
+ * Erano fisse nel codice; dal 29 settembre 2026 le aggiunge, rinomina e
+ * toglie l'amministratore. Il servizio tiene il "valore", che non cambia
+ * mai: rinominare tocca solo l'etichetta, e i servizi restano al loro posto.
+ * "altro" non si toglie: è dove finisce un servizio senza categoria.
+ */
+export const categorieServizi = pgTable("categorie_servizi", {
+  valore: text("valore").primaryKey(),
+  etichetta: text("etichetta").notNull(),
+  ordine: integer("ordine").notNull().default(0)
+});
+
+/**
  * Le etichette delle notizie: "Assemblea", "Feste", "5x1000"…
  *
  * Le crea, le rinomina e le cancella la redazione, dall'editor delle

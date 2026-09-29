@@ -218,6 +218,13 @@
       "when": 1790634011539,
       "tag": "0030_special_vertigo",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790680634946,
+      "tag": "0031_categorie_servizi",
+      "breakpoints": true
     }
   ]
 }

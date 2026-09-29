@@ -24,6 +24,8 @@ import rotta_admin_documenti_id from "./rotte/admin/documenti/[id].js";
 import rotta_documenti from "./rotte/documenti.js";
 import rotta_admin_spese_index from "./rotte/admin/spese/index.js";
 import rotta_admin_spese_id from "./rotte/admin/spese/[id].js";
+import rotta_admin_spese_categorie_index from "./rotte/admin/spese/categorie/index.js";
+import rotta_admin_spese_categorie_valore from "./rotte/admin/spese/categorie/[valore].js";
 import rotta_file_id from "./rotte/file/[id].js";
 import rotta_admin_etichette_index from "./rotte/admin/etichette/index.js";
 import rotta_admin_eventi_index from "./rotte/admin/eventi/index.js";
@@ -85,6 +87,7 @@ const TABELLA = [
   ["admin/documenti",                rotta_admin_documenti_index],
   ["admin/documenti/ordine",         rotta_admin_documenti_ordine],
   ["admin/spese",                    rotta_admin_spese_index],
+  ["admin/spese/categorie",          rotta_admin_spese_categorie_index],
   ["admin/etichette",                rotta_admin_etichette_index],
   ["admin/eventi",                   rotta_admin_eventi_index],
   ["admin/iscrizioni",               rotta_admin_iscrizioni],
@@ -122,6 +125,7 @@ const TABELLA = [
   ["admin/calendari/gironi/[id]",    rotta_admin_calendari_gironi_id],
   ["admin/documenti/[id]",           rotta_admin_documenti_id],
   ["admin/spese/[id]",               rotta_admin_spese_id],
+  ["admin/spese/categorie/[valore]", rotta_admin_spese_categorie_valore],
   ["admin/etichette/[id]",           rotta_admin_etichette_id],
   ["admin/eventi/[id]",              rotta_admin_eventi_id],
   ["admin/eventi/[id]/media",        rotta_admin_eventi_id_media],
