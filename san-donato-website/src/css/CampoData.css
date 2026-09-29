@@ -42,7 +42,7 @@
 
   background: transparent;
   border: 0;
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--adm-muted);
   font-size: 0.7rem;
   cursor: pointer;
@@ -64,7 +64,7 @@
 
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
-  border-radius: var(--adm-r-l, 8px);
+  border-radius: var(--adm-r-l, 12px);
   box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -24px rgba(0, 26, 56, .5);
   overflow: hidden;
 
@@ -95,7 +95,7 @@
   font-weight: 800;
   padding: 0.3rem 0.45rem;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   color: var(--adm-ink);
   text-transform: capitalize;
@@ -190,7 +190,7 @@
   padding: 0.3rem 0.7rem;
   background: var(--adm-line-soft);
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
 
   font: inherit;
   font-size: 0.78rem;
@@ -247,7 +247,7 @@
   padding: 0.3rem 0.4rem;
   background: transparent;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
 
   font: inherit;
   font-size: 0.78rem;

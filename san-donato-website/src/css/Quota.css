@@ -196,7 +196,7 @@
   max-height: min(560px, 90vh);
 
   background: var(--adm-surface);
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 24px 64px -20px rgba(10, 18, 32, .5);
   overflow: hidden;
 }

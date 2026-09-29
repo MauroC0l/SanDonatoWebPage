@@ -176,6 +176,21 @@ il prefisso +39 si tolgono prima di salvare.
 Non sono lavori di programmazione: senza una decisione o una credenziale non
 si può cominciare.
 
+### Account dei servizi esterni sotto PSD San Donato
+
+Chiesto il 29 settembre 2026: tutti gli account dei servizi esterni vanno
+spostati sull'account della società, **PSD San Donato
+(psdsandonato@gmail.com)**, invece che su quelli personali di chi li ha
+aperti. Oggi sono: Vercel, Neon, GitHub (il repository), Cloudflare R2 (da
+creare direttamente lì), MailerLite, Google Cloud (chiave di Drive, se
+usata), il dominio e l'hosting del vecchio WordPress.
+
+Per ciascuno, in ordine: invitare psdsandonato@gmail.com come proprietario
+(o trasferire il progetto), controllare che entri, poi togliere l'account
+personale. Nessuna chiave cambia se si trasferisce il progetto; se invece
+si ricrea, vanno aggiornate le variabili su Vercel. Man mano, aggiornare la
+riga "Account" nella scheda Spese sito.
+
 ### Archivio dei file su Cloudflare R2
 
 **Il codice è pronto (29 settembre 2026); manca l'account della società.**

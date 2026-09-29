@@ -17,7 +17,7 @@
   align-items: flex-start;
   gap: 16px;
   padding: clamp(22px, 3vw, 32px);
-  border-radius: 8px;
+  border-radius: 14px;
   box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .6);
 }
 .c5xm-codice-etichetta {
@@ -41,7 +41,7 @@
   display: grid;
   place-items: center;
   aspect-ratio: 3 / 4;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, .1);
   border: 1px solid rgba(255, 255, 255, .16);
   font-size: clamp(1rem, 4.4vw, 1.6rem);
@@ -83,7 +83,7 @@
 .c5xm-modulo-cornice { position: relative; max-width: 760px; }
 .c5xm-modulo {
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   background:
     repeating-linear-gradient(0deg, transparent 0 27px, rgba(0, 43, 92, .035) 27px 28px),
     #fff;
@@ -131,7 +131,7 @@
   gap: 0;
   max-width: 440px;
   border: 2px solid var(--doc-inchiostro);
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
 }
 .c5xm-caselle span {
@@ -183,7 +183,7 @@
   flex: 1;
   overflow: hidden;
   padding: 26px;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   border: 1px solid var(--doc-filo);
   box-shadow: 0 14px 34px -24px rgba(11, 21, 38, .35);
@@ -228,7 +228,7 @@
 
 .c5xm-rend-testo { margin: 0 0 28px; color: var(--doc-grigio); }
 .c5xm-rend-scheda {
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   border: 1px solid var(--doc-filo);
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 24px 50px -32px rgba(11, 21, 38, .35);
@@ -279,7 +279,7 @@
   min-width: 44px;
   min-height: 44px;
   padding: 0 14px;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--doc-carta);
   color: var(--doc-blu);
   font-size: .88rem;
@@ -331,7 +331,7 @@
     width: min(180px, 30%);
     height: 6px;
     margin-left: 14px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: rgba(0, 43, 92, .07);
     overflow: hidden;
   }

@@ -128,7 +128,7 @@
   max-width: 420px;
   height: 104px;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 .gal-linea {
   position: absolute;
@@ -192,7 +192,7 @@
   gap: 10px;
   min-height: 50px;
   padding: 0 24px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
@@ -231,7 +231,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, .14);
   box-shadow: 0 24px 50px -28px rgba(0, 0, 0, .7);
 }

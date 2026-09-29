@@ -8,7 +8,7 @@
   --nl-success: #22c55e;
   --nl-text-main: #1e293b;
   --nl-text-muted: #94a3b8;
-  --nl-radius: 8px;
+  --nl-radius: 12px;
   --nl-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
   --nl-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -133,7 +133,7 @@
   padding: 1.7rem 1.2rem 0.7rem 1.2rem;
   font-size: 1rem;
   border: 2px solid #f1f5f9;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #f8fafc;
   transition: var(--nl-transition);
   font-weight: 500;
@@ -183,7 +183,7 @@
   background: var(--nl-primary);
   color: white;
   padding: 1.1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
   font-weight: 700;
   font-size: 1.1rem;
@@ -203,7 +203,7 @@
 
 .nl-feedback {
   padding: 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
@@ -249,7 +249,7 @@
   background: #f1f5f9;
   border: none;
   padding: 0.8rem 2rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 700;
   color: var(--nl-primary);
   cursor: pointer;

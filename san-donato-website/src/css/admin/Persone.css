@@ -192,7 +192,7 @@
     padding: .7rem 2.4rem .7rem .8rem;
     column-gap: .75rem;
   }
-  .prs-pagina .adm-tessera-icona { width: 40px; height: 40px; border-radius: 6px; font-size: 1rem; }
+  .prs-pagina .adm-tessera-icona { width: 40px; height: 40px; border-radius: 8px; font-size: 1rem; }
   .prs-pagina .adm-tessera-titolo { font-size: .98rem; }
 }
 
@@ -287,7 +287,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--prs-tono-soft);
   color: var(--prs-tono);
   font-size: 1.1rem;

@@ -51,7 +51,7 @@
 
   width: min(27rem, 100%);
   padding: clamp(1.5rem, 4vw, 2.4rem);
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   box-shadow: 0 4px 10px rgba(11, 21, 38, .06), 0 28px 56px -28px rgba(0, 26, 56, .5);
 }
@@ -80,7 +80,7 @@
   width: clamp(120px, 13vw, 168px);
   height: clamp(120px, 13vw, 168px);
   margin-bottom: 1rem;
-  border-radius: 8px;
+  border-radius: 14px;
 }
 
 .sga-lato .sga-riga { width: 60%; max-width: 20rem; }
@@ -91,13 +91,13 @@
 
 .sga-campo {
   height: 58px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .sga-pulsante {
   height: 56px;
   margin-top: .4rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(242, 97, 0, .22);
 }
 

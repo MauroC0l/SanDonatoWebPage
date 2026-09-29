@@ -14,14 +14,25 @@ import {
 import { archivioConfigurato, archivioPrivatoConfigurato } from "../../../archivio.js";
 import { richiedeCapacita } from "../../../autenticazione.js";
 import { annota } from "../../../registro.js";
-import { json, errore, conGestioneErrori } from "../../../risposte.js";
+import { json, errore, conGestioneErrori, ErroreHttp } from "../../../risposte.js";
 import { leggiCorpo } from "../../../richiesta.js";
 import { valida } from "../../../validazione.js";
 
 export default conGestioneErrori(
   richiedeCapacita("spese.gestisci", async (req, res) => {
     if (req.method === "GET") {
-      const [servizi, consumi] = await Promise.all([elencaServizi(), misuraConsumi()]);
+      let servizi, consumi;
+      try {
+        [servizi, consumi] = await Promise.all([elencaServizi(), misuraConsumi()]);
+      } catch (e) {
+        /* 42P01: la tabella non c'è. Succede su un database a cui non è
+           ancora stata applicata la migrazione 0030: meglio dirlo così che
+           con un "errore interno" che non spiega niente. */
+        if ((e.code ?? e.cause?.code) === "42P01") {
+          throw new ErroreHttp(503, "Le spese non si possono ancora mostrare: al database manca un aggiornamento (migrazione 0030). Va applicato da chi gestisce il sito.");
+        }
+        throw e;
+      }
       res.setHeader("Cache-Control", "no-store");
       return json(res, {
         servizi,

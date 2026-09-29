@@ -110,17 +110,17 @@
 
   /* ---------- Forme ----------
      Il 29/09/2026 la società ha chiesto un aspetto più sobrio: con angoli
-     da 20-28px e bottoni a pillola il sito sembrava un giocattolo. Ora gli
-     angoli restano appena smussati (schede 8px, campi e bottoni 4-6px) e
-     --adm-r-pill non fa più la pillola: è un angolo da 4px come gli altri.
-     Restano tondi solo i cerchi veri (avatar, pallini, contatori), che
-     usano 50% o 999px scritti a mano. */
-  --adm-r-s: 4px;
-  --adm-r-m: 6px;
-  --adm-r-l: 8px;
-  --adm-r-xl: 8px;
-  --adm-r-pill: 4px;
-  --adm-radius: 6px;
+     da 20-28px e bottoni a pillola il sito sembrava un giocattolo. Squadrato
+     del tutto però era troppo (detto lo stesso giorno): la misura giusta è
+     a metà. Schede 12px, campi e bottoni 6-8px, e --adm-r-pill non fa più
+     la pillola ma un bottone appena smussato. Restano tondi solo i cerchi
+     veri (avatar, pallini, contatori), con 50% o 999px scritti a mano. */
+  --adm-r-s: 6px;
+  --adm-r-m: 8px;
+  --adm-r-l: 12px;
+  --adm-r-xl: 14px;
+  --adm-r-pill: 6px;
+  --adm-radius: 10px;
 
   --adm-shadow-s: 0 1px 2px rgba(11, 21, 38, .05);
   --adm-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 12px 32px -22px rgba(0, 26, 56, .35);
@@ -279,7 +279,7 @@
   width: 42px;
   height: 42px;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 10px 24px -10px rgba(255, 102, 0, .55);
   color: var(--adm-navy);
@@ -639,7 +639,7 @@
   width: 40px;
   height: 40px;
   border: 1px solid var(--adm-line);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--adm-surface);
   color: var(--adm-ink-2);
   cursor: pointer;
@@ -675,7 +675,7 @@
   width: 100%;
   min-height: var(--adm-tocco, 44px);
   border: 1px solid var(--adm-line-strong, #b4c0d0);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: .6rem .85rem;
   font: inherit;
   font-size: .95rem;
@@ -961,7 +961,7 @@ textarea.adm-input { min-height: 6rem; }
   margin: 0 auto 2rem;
   padding: 10px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, .6),
@@ -1138,7 +1138,7 @@ textarea.adm-input { min-height: 6rem; }
   width: 100%;
   min-height: 58px;
   border: 1.5px solid var(--adm-line);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--adm-surface-2);
   padding: 1.5rem 1rem .5rem 2.95rem;
   font: inherit;
@@ -1197,7 +1197,7 @@ textarea.adm-input { min-height: 6rem; }
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--adm-muted);
   cursor: pointer;
@@ -1229,7 +1229,7 @@ textarea.adm-input { min-height: 6rem; }
   height: 22px;
   flex-shrink: 0;
   border: 1.5px solid var(--adm-line-strong);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-surface);
   position: relative;
   transition: background .15s, border-color .15s;
@@ -1418,7 +1418,7 @@ textarea.adm-input { min-height: 6rem; }
   margin: calc(-2.6rem - 42px) auto 1.1rem;
   padding: 6px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   box-shadow: 0 0 0 1px rgba(0, 43, 92, .06), 0 18px 36px -18px rgba(0, 26, 56, .55);
 }
@@ -1461,7 +1461,7 @@ textarea.adm-input { min-height: 6rem; }
     margin: calc(-2.4rem - 40px) auto 1rem;
     padding: 6px;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: 14px;
     background: #fff;
     box-shadow: 0 0 0 1px rgba(0, 43, 92, .06), 0 18px 36px -18px rgba(0, 26, 56, .55);
   }
@@ -1610,7 +1610,7 @@ textarea.adm-input { min-height: 6rem; }
 .adm-post-thumb {
   width: 72px;
   height: 54px;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
   background: var(--adm-line-soft);
@@ -1702,7 +1702,7 @@ textarea.adm-input { min-height: 6rem; }
   width: 64px;
   height: 64px;
   margin-bottom: 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--adm-arancio-soft);
   color: var(--adm-arancio-testo);
   font-size: 1.6rem;
@@ -1752,7 +1752,7 @@ svg.adm-empty-icon {
   background: var(--adm-surface);
   border: 1px solid var(--adm-line);
   border-left: 3px solid var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
 }
 
@@ -1792,7 +1792,7 @@ svg.adm-empty-icon {
   color: var(--adm-muted);
   background: var(--adm-line-soft);
   padding: 0.05rem 0.35rem;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 @media (max-width: 860px) {
@@ -1843,7 +1843,7 @@ svg.adm-empty-icon {
   width: 100%;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-bottom: 0.6rem;
   background: var(--adm-line-soft);
 }
@@ -1856,7 +1856,7 @@ svg.adm-empty-icon {
   padding: 1.6rem 1rem;
   margin-bottom: 0.75rem;
   border: 1px dashed var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--adm-muted);
   font-size: 0.82rem;
   text-align: center;
@@ -1869,7 +1869,7 @@ svg.adm-empty-icon {
   gap: 0.55rem;
   background: var(--adm-blue-soft);
   color: var(--adm-blue-dark);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 0.65rem 0.8rem;
   font-size: 0.83rem;
   line-height: 1.5;
@@ -1906,7 +1906,7 @@ svg.adm-empty-icon {
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
   color: var(--adm-muted);
   font-size: 0.85rem;
@@ -1939,7 +1939,7 @@ svg.adm-empty-icon {
   font-style: italic;
 }
 .adm-editor-surface a { color: var(--adm-blue); text-decoration: underline; }
-.adm-editor-surface img { max-width: 100%; border-radius: 4px; }
+.adm-editor-surface img { max-width: 100%; border-radius: 6px; }
 
 .adm-editor-surface p.is-editor-empty:first-child::before {
   content: "Scrivi qui la notizia…";
@@ -2027,7 +2027,7 @@ svg.adm-empty-icon {
   height: 20px;
   flex-shrink: 0;
   border: 1.5px solid var(--adm-line-strong);
-  border-radius: 4px;
+  border-radius: 5px;
   background: var(--adm-surface);
   position: relative;
   transition: background .15s ease, border-color .15s ease;
@@ -2112,7 +2112,7 @@ svg.adm-empty-icon {
 .adm-media-voce {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--adm-line);
   background: var(--adm-bg);
@@ -2136,7 +2136,7 @@ svg.adm-empty-icon {
   top: 2px;
   right: 2px;
   background: rgba(255, 255, 255, .92);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 /* ---------- Persone ---------- */
@@ -2661,7 +2661,7 @@ svg.adm-empty-icon {
   gap: 0.2rem;
   padding: 0.55rem 0.7rem;
   background: var(--adm-line-soft);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.88rem;
 }
 
@@ -2771,7 +2771,7 @@ svg.adm-empty-icon {
 
   padding: 0.5rem 0.7rem;
   background: var(--adm-line-soft);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
 }
 
@@ -2832,7 +2832,7 @@ svg.adm-empty-icon {
   height: 2.2rem;
   padding: 2px;
   border: 1px solid var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-surface);
   cursor: pointer;
 }
@@ -3043,7 +3043,7 @@ svg.adm-empty-icon {
   padding: 0.2rem 0.5rem;
   background: var(--adm-warn-soft);
   color: var(--adm-warn);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -3158,7 +3158,7 @@ svg.adm-empty-icon {
 
   background: var(--adm-surface);
   border: 1px solid currentColor;
-  border-radius: 4px;
+  border-radius: 6px;
 
   font-size: 0.82rem;
   font-weight: 700;
@@ -3236,7 +3236,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   flex-wrap: wrap;
 
   padding: 0.5rem 0.6rem;
-  border-radius: 4px;
+  border-radius: 6px;
   color: inherit;
   text-decoration: none;
   font-size: 0.86rem;
@@ -3531,7 +3531,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   display: inline-block;
   padding: 2px 8px;
   border: 1px solid var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-surface);
   color: var(--adm-muted);
   font-size: .72rem;
@@ -3565,7 +3565,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 
   padding: .5rem .85rem;
   border: 1px solid var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-surface);
 
   color: var(--adm-ink);
@@ -3794,7 +3794,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   margin: .8rem 0 0;
   padding: .6rem .7rem;
   border: 1px solid var(--adm-line);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-bg);
   font-size: .88rem;
   line-height: 1.4;
@@ -3868,7 +3868,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   padding: 0.7rem 0.9rem;
   max-width: 60rem;
   border-left: 3px solid var(--adm-blue);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 6px 6px 0;
   background: var(--adm-blue-soft);
   color: var(--adm-blue-dark);
   font-size: 0.88rem;
@@ -4029,7 +4029,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   min-height: 3.35rem;
   padding: .3rem .15rem;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: none;
   color: var(--adm-ink-2);
   font: inherit;
@@ -4080,7 +4080,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--adm-surface);
   box-shadow: 0 30px 60px -20px rgba(0, 20, 50, .55), 0 0 0 1px rgba(0, 43, 92, .06);
   animation: adm-menu-foglio .2s var(--adm-curva);
@@ -4115,7 +4115,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   min-height: 4.8rem;
   padding: .7rem .3rem;
   border: 1px solid var(--adm-line-soft);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--adm-surface-2);
   color: var(--adm-ink);
   font-size: .8rem;
@@ -4140,7 +4140,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   gap: .6rem;
   min-height: 3rem;
   padding: .5rem .75rem;
-  border-radius: 6px;
+  border-radius: 8px;
   text-align: left;
 }
 .adm-menu-gruppo .adm-menu-voce svg { flex-shrink: 0; font-size: 1.05rem; }
@@ -4327,7 +4327,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   display: inline-block;
   margin-left: 0.5rem;
   padding: 0.05rem 0.45rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--adm-warn-soft);
   color: var(--adm-warn);
   font-size: 0.72rem;
@@ -4396,7 +4396,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-stg-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1.2rem; }
 .adm-stg-titolo { margin: 0 0 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--adm-muted); }
 .adm-stg-numeri { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: 0.5rem; }
-.adm-stg-numero { display: flex; flex-direction: column; padding: 0.55rem 0.7rem; background: var(--adm-line-soft); border-radius: 4px; }
+.adm-stg-numero { display: flex; flex-direction: column; padding: 0.55rem 0.7rem; background: var(--adm-line-soft); border-radius: 6px; }
 .adm-stg-numero.is-attenzione { background: var(--adm-warn-soft); }
 .adm-stg-cifra { font-size: 1.25rem; font-weight: 700; color: var(--adm-ink); }
 .adm-stg-testo { font-size: 0.78rem; color: var(--adm-muted); }
@@ -4404,7 +4404,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
 .adm-stg-var.is-su { color: var(--adm-ok); }
 .adm-stg-var.is-giu { color: var(--adm-danger); }
 .adm-stg-sport { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0; padding: 0; }
-.adm-stg-sport li { padding: 0.15rem 0.6rem; border-radius: 4px; background: var(--adm-blue-soft); color: var(--adm-blue-dark); font-size: 0.82rem; }
+.adm-stg-sport li { padding: 0.15rem 0.6rem; border-radius: 6px; background: var(--adm-blue-soft); color: var(--adm-blue-dark); font-size: 0.82rem; }
 .adm-stg-barra { height: 0.55rem; border-radius: 2px; background: var(--adm-line-soft); overflow: hidden; margin: 0.8rem 0 0.35rem; }
 .adm-stg-barra > span { display: block; height: 100%; background: var(--adm-ok); }
 
@@ -4557,7 +4557,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   place-items: center;
   width: 48px;
   height: 48px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--adm-tono-soft);
   color: var(--adm-tono);
   font-size: 1.2rem;
@@ -4739,7 +4739,7 @@ a.hom-tessera:hover { border-color: var(--adm-blue); background: #fbfcfe; }
   width: 68px;
   height: 68px;
   margin-bottom: .5rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--adm-surface);
   color: var(--adm-arancio-testo);
   font-size: 1.6rem;

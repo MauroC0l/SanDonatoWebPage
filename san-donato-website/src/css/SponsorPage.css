@@ -75,7 +75,7 @@
   gap: 10px;
   min-height: 48px;
   padding: 0 26px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
@@ -303,7 +303,7 @@
   width: clamp(140px, 18vw, 200px);
   height: clamp(68px, 8vw, 88px);
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
   box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .5);
 }
@@ -393,7 +393,7 @@
   flex-direction: column;
   min-height: 200px;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   color: var(--spn-inchiostro);
   text-decoration: none;
@@ -518,7 +518,7 @@
   display: none;
   flex: none;
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--spn-carta);
   font-size: .68rem;
   font-weight: 700;
@@ -555,7 +555,7 @@
   position: relative;
   overflow: hidden;
   padding: 22px 64px 22px 78px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #fff;
   border: 1px solid rgba(11, 21, 38, .07);
   transition: transform .5s var(--spn-curva), box-shadow .5s var(--spn-curva);
@@ -585,7 +585,7 @@
   place-items: center;
   width: 42px;
   height: 42px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1.05rem;
   color: #fff;
   background: linear-gradient(135deg, var(--spn-blu), #0a4a93);
@@ -612,7 +612,7 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 8px;
+  border-radius: 14px;
   color: #fff;
   background: linear-gradient(160deg, var(--spn-blu), var(--spn-notte));
   box-shadow: 0 40px 80px -40px rgba(0, 26, 56, .8);
@@ -670,7 +670,7 @@
 }
 .spn-invito-recapiti a:hover { color: #fff; }
 .spn-invito-recapiti a:hover span { background-size: 100% 1.5px; }
-.spn-invito-recapiti a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 4px; }
+.spn-invito-recapiti a:focus-visible { outline: 2px solid #fff; outline-offset: 4px; border-radius: 6px; }
 
 /* ---------- Schermi più larghi ---------- */
 
@@ -696,7 +696,7 @@
     gap: 40px;
   }
   .spn-griglia { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-  .spn-scheda { min-height: 280px; padding: 24px; border-radius: 8px; }
+  .spn-scheda { min-height: 280px; padding: 24px; border-radius: 14px; }
   .spn-scheda-logo img { max-height: calc(min(104px, 100%) * var(--spn-zoom, 1)); }
   .spn-griglia-cella:nth-child(5n + 1) .spn-scheda-logo img {
     max-width: 70%;

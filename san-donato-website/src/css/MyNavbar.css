@@ -135,7 +135,7 @@
 
   padding: .55rem .8rem;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: transparent;
 
   color: rgba(255, 255, 255, .74);
@@ -169,7 +169,7 @@
   width: var(--nb-w, 0px);
   height: 38px;
   margin-top: -19px;
-  border-radius: 4px;
+  border-radius: 6px;
   background:
     radial-gradient(120% 140% at 30% 0%, rgba(255, 255, 255, .35), transparent 55%),
     linear-gradient(135deg, #ff7a1a, #ff4d00);
@@ -203,7 +203,7 @@
   gap: 2px;
   width: 260px;
   padding: .5rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, .96);
   border: 1px solid rgba(255, 255, 255, .8);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
@@ -219,7 +219,7 @@
   align-items: center;
   gap: .75rem;
   padding: .55rem .65rem;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #0b1b33;
   font-size: .9rem;
   font-weight: 600;
@@ -274,7 +274,7 @@
   align-items: center;
   min-height: 40px;
   padding: 0 1.05rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #ff7a1a, #ff4d00);
   box-shadow: 0 10px 22px -10px rgba(255, 102, 0, .9), inset 0 1px 0 rgba(255, 255, 255, .25);
   color: #fff;
@@ -296,7 +296,7 @@
   height: 44px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, .18);
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .06);
   color: #fff;
   cursor: pointer;
@@ -458,7 +458,7 @@
 .ms-voce:focus-visible {
   outline: 2px solid var(--psd-arancio, #ff6600);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 /* I documenti: tessere piccole in due colonne, sotto alla voce */
@@ -476,7 +476,7 @@
   gap: .55rem;
   min-height: 44px;
   padding: .5rem .75rem;
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .07);
   border: 1px solid rgba(255, 255, 255, .12);
   color: #fff;
@@ -510,7 +510,7 @@
   justify-content: center;
   gap: .5rem;
   min-height: 52px;
-  border-radius: 4px;
+  border-radius: 6px;
   color: #fff;
   font-weight: 700;
   text-decoration: none;

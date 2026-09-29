@@ -66,7 +66,7 @@
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 14px 14px;
   background:
     radial-gradient(90% 80% at 85% 0%, #0a4a93 0%, transparent 55%),
     linear-gradient(170deg, var(--nz-blu, #002b5c) 0%, var(--nz-notte, #001a38) 75%, #00122a 100%);
@@ -146,7 +146,7 @@
   align-items: center;
   gap: .55rem;
   padding: .55rem 1rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, .1);
   border: 1px solid rgba(255, 255, 255, .2);
   backdrop-filter: blur(14px) saturate(140%);
@@ -171,7 +171,7 @@
 .nzd-etichetta {
   max-width: 16rem;
   padding: .36rem .8rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #ff7a1a, var(--psd-arancio, #ff6600) 55%, #ff3d00);
   color: #fff;
   font-size: .7rem;
@@ -265,7 +265,7 @@
   aspect-ratio: 16 / 9;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--nz-notte, #001a38);
   box-shadow: 0 50px 90px -45px rgba(0, 26, 56, .75), 0 0 0 1px rgba(0, 43, 92, .06);
@@ -290,7 +290,7 @@
   align-items: center;
   gap: .5rem;
   padding: .55rem .95rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(0, 20, 45, .5);
   border: 1px solid rgba(255, 255, 255, .25);
   backdrop-filter: blur(12px);
@@ -418,7 +418,7 @@
   position: relative;
   margin: 2.2em 0;
   padding: 1.7rem 1.8rem 1.7rem 4.4rem;
-  border-radius: 8px;
+  border-radius: 14px;
   background:
     radial-gradient(70% 90% at 100% 0%, rgba(10, 74, 147, .9), transparent 60%),
     linear-gradient(160deg, var(--nz-blu, #002b5c), var(--nz-notte, #001a38));
@@ -451,7 +451,7 @@
   max-width: 100%;
   height: auto;
   margin: 1.8em auto;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 30px 60px -38px rgba(0, 26, 56, .6);
   cursor: zoom-in;
 }
@@ -482,14 +482,14 @@
 
 .nzd-corpo code {
   padding: .1em .35em;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(0, 43, 92, .07);
   font-size: .9em;
 }
 .nzd-corpo pre {
   margin: 0 0 1.4em;
   padding: 1rem 1.2rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #0b1526;
   color: #e2e8f0;
   font-size: .88em;
@@ -554,7 +554,7 @@
   aspect-ratio: 1;
   margin: 0;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* Il testo mentre arriva: righe grigie della forma di un paragrafo */
@@ -562,7 +562,7 @@
 .nzd-corpo-attesa span {
   display: block;
   height: 1.05rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: linear-gradient(100deg, #e6ebf2 30%, #f4f6fa 50%, #e6ebf2 70%);
   background-size: 220% 100%;
   animation: nzd-onda 1.4s infinite linear;
@@ -581,7 +581,7 @@
   gap: 1rem 1.5rem;
   margin-top: clamp(2.2rem, 5vw, 3rem);
   padding: 1.4rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 14px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(11, 21, 38, .04), 0 18px 40px -28px rgba(0, 26, 56, .45);
 }
@@ -657,7 +657,7 @@
   bottom: calc(100% + .5rem);
   right: 0;
   padding: .35rem .7rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--nz-inchiostro, #0b1526);
   color: #fff;
   font-size: .75rem;
@@ -676,7 +676,7 @@
   isolation: isolate;
   margin: clamp(4rem, 8vw, 6rem) 12px 0;
   padding: clamp(3rem, 6vw, 4.8rem) 0;
-  border-radius: 8px;
+  border-radius: 14px;
   background:
     radial-gradient(60% 70% at 100% 0%, rgba(10, 74, 147, .9), transparent 60%),
     radial-gradient(50% 60% at 0% 100%, rgba(255, 102, 0, .2), transparent 70%),
@@ -734,7 +734,7 @@
   gap: .6rem;
   padding: .95rem 1.5rem;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: linear-gradient(135deg, #ff7a1a, var(--psd-arancio, #ff6600) 55%, #ff3d00);
   color: #fff;
   font: inherit;
@@ -787,7 +787,7 @@
 .nzd-finestra-foto {
   max-width: 100%;
   max-height: 88vh;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 40px 100px -30px rgba(0, 0, 0, .8);
   cursor: default;
   animation: nzd-avvicina .45s var(--mv-curva, ease);
@@ -829,7 +829,7 @@
   background-size: 220% 100%;
   animation: nzd-onda 1.4s infinite linear;
 }
-.nzd-sagoma-corta { width: 9rem; height: 1.8rem; border-radius: 4px; margin-bottom: 1.6rem; }
+.nzd-sagoma-corta { width: 9rem; height: 1.8rem; border-radius: 6px; margin-bottom: 1.6rem; }
 .nzd-sagoma-titolo { width: min(100%, 44rem); height: clamp(2.2rem, 5vw, 4rem); }
 .nzd-sagoma-meta { width: min(70%, 28rem); }
 .nzd-attesa-testo { margin: 1.4rem 0 0; color: rgba(255, 255, 255, .7); font-size: .95rem; }
@@ -902,9 +902,9 @@
 }
 
 @media (max-width: 640px) {
-  .nzd-foto { aspect-ratio: 4 / 3; border-radius: 8px; }
+  .nzd-foto { aspect-ratio: 4 / 3; border-radius: 12px; }
   .nzd-corpo blockquote { padding: 3.6rem 1.3rem 1.4rem; font-size: 1.12em; }
   .nzd-corpo blockquote::before { left: 1.1rem; top: .3rem; }
   .nzd-fine { padding: 1.4rem 1.2rem 1.2rem; }
-  .nzd-altre { margin-left: 0; margin-right: 0; border-radius: 8px; }
+  .nzd-altre { margin-left: 0; margin-right: 0; border-radius: 14px; }
 }

@@ -54,7 +54,7 @@
   place-items: center;
   width: 48px;
   height: 48px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--adm-navy);
   color: #fff;
   font-size: 1rem;
@@ -224,7 +224,7 @@
   box-shadow: var(--adm-shadow-s);
 }
 .ric-decisa .ric-nome { font-size: 1.02rem; }
-.ric-decisa .ric-iniziali { width: 40px; height: 40px; border-radius: 6px; font-size: .85rem; }
+.ric-decisa .ric-iniziali { width: 40px; height: 40px; border-radius: 8px; font-size: .85rem; }
 .ric-riapri { flex-shrink: 0; align-self: center; }
 
 /* ---------- Attesa ---------- */
@@ -236,7 +236,7 @@
 
 @media (max-width: 760px) {
   .ric-scheda { padding: 1rem; }
-  .ric-iniziali { width: 42px; height: 42px; border-radius: 6px; font-size: .9rem; }
+  .ric-iniziali { width: 42px; height: 42px; border-radius: 8px; font-size: .9rem; }
 
   /* Una squadra per riga se i nomi sono lunghi: il tocco resta largo */
   .ric-squadra { flex: 1 1 auto; }
@@ -267,7 +267,7 @@
   width: 64px;
   height: 64px;
   margin-bottom: 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--adm-warn-soft);
   color: var(--adm-warn);
   font-size: 1.5rem;

@@ -26,7 +26,7 @@
   --cp-tenue: #6b778a;
   --cp-bordo: rgba(0, 43, 92, .09);
   --cp-bordo-tenue: rgba(0, 43, 92, .055);
-  --cp-raggio: 8px;
+  --cp-raggio: 14px;
   --cp-curva: var(--mv-curva, cubic-bezier(.16, 1, .3, 1));
   --cp-ombra: 0 1px 2px rgba(11, 27, 51, .04), 0 18px 40px -22px rgba(11, 27, 51, .28);
   --cp-ombra-alta: 0 2px 6px rgba(11, 27, 51, .06), 0 26px 50px -24px rgba(11, 27, 51, .38);
@@ -86,7 +86,7 @@
   isolation: isolate;
   /* Arrotondata solo sotto: sopra continua la barra di navigazione, che è
      dello stesso blu, e le due si leggono come un pezzo solo. */
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 14px 14px;
   color: #fff;
   background:
     radial-gradient(80% 90% at 0% 0%, #0a3d7a 0%, transparent 60%),
@@ -151,7 +151,7 @@
   gap: .6rem;
   margin: 0 0 1rem;
   padding: .4rem .85rem;
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, .08);
   border: 1px solid rgba(255, 255, 255, .14);
   font-size: .74rem;
@@ -206,7 +206,7 @@
   grid-column: 1 / -1;
   overflow: hidden;
   padding: 1rem 1.1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   /* mv-vetro dà sfondo e bordo; qui la luce del colore della squadra */
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04), 0 24px 50px -28px rgba(0, 0, 0, .6);
 }
@@ -298,7 +298,7 @@
   flex-direction: column;
   gap: .2rem;
   padding: .8rem 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .cp-numero strong {
@@ -339,7 +339,7 @@
   align-items: center;
   gap: .5rem;
   padding: .4rem;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, .86);
   border: 1px solid rgba(255, 255, 255, .7);
   backdrop-filter: blur(18px) saturate(160%);
@@ -353,7 +353,7 @@
   align-items: center;
   gap: 2px;
   padding: 3px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #eef1f6;
 }
 
@@ -419,7 +419,7 @@
   width: 42px;
   height: 42px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--cp-arancio);
   color: #fff;
   cursor: pointer;
@@ -507,7 +507,7 @@
   margin-left: auto;
   padding: .35rem .7rem;
   border: 1px solid rgba(255, 102, 0, .25);
-  border-radius: 4px;
+  border-radius: 6px;
   background: rgba(255, 102, 0, .07);
   color: #c24e00;
   font-size: .76rem;
@@ -574,7 +574,7 @@
   max-width: 100%;
   padding: .36rem .7rem .36rem .55rem;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: .8rem;
   font-weight: 600;
   line-height: 1.2;
@@ -646,7 +646,7 @@
   margin-left: auto;
   padding: .3rem .75rem;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--cp-arancio);
   color: #fff;
   font-size: .76rem;
@@ -764,7 +764,7 @@
   min-width: 0;
   padding: 3px 7px 3px 9px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   /* Il colore della squadra in tre dosi: la barretta a sinistra piena,
      lo sfondo appena tinto, il testo scurito per restare leggibile. */
   background: color-mix(in srgb, var(--cp-c) 13%, #fff);
@@ -833,7 +833,7 @@
   width: 100%;
   padding: .85rem 1rem;
   border: 1px solid var(--cp-bordo);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--cp-carta);
   color: inherit;
   text-align: left;
@@ -884,7 +884,7 @@
 
 .cp-riga-squadra {
   padding: 2px 9px;
-  border-radius: 4px;
+  border-radius: 6px;
   background: color-mix(in srgb, var(--cp-c) 13%, #fff);
   color: color-mix(in srgb, var(--cp-c) 42%, var(--cp-inchiostro));
   font-size: .7rem;
@@ -967,7 +967,7 @@
   gap: .1rem;
   padding: .55rem 0 .6rem;
   border: 0;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #eef1f6;
   color: var(--cp-inchiostro);
   cursor: pointer;
@@ -1017,7 +1017,7 @@
   gap: .6rem;
   padding: 3rem 1.2rem;
   border: 1px dashed var(--cp-bordo);
-  border-radius: 8px;
+  border-radius: 12px;
   background: linear-gradient(180deg, #fafbfd, #fff);
   color: var(--cp-tenue);
   text-align: center;
@@ -1032,7 +1032,7 @@
   width: 52px;
   height: 52px;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 102, 0, .1);
   color: var(--cp-arancio);
 }
@@ -1044,7 +1044,7 @@
   margin-top: .3rem;
   padding: .55rem 1rem;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--cp-blu);
   color: #fff;
   font-size: .85rem;
@@ -1107,7 +1107,7 @@ body.cp-modal-open { overflow: hidden; }
   flex-shrink: 0;
   width: 42px;
   height: 42px;
-  border-radius: 6px;
+  border-radius: 8px;
   background: linear-gradient(160deg, #ff8a3d, var(--cp-arancio));
   color: #fff;
   font-size: 1.1rem;
@@ -1146,7 +1146,7 @@ body.cp-modal-open { overflow: hidden; }
   min-height: 2.9rem;
   padding: .6rem .85rem;
   border: 1px solid rgba(255, 255, 255, .22);
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .1);
   color: #fff;
   font-size: .92rem;
@@ -1204,7 +1204,7 @@ body.cp-modal-open { overflow: hidden; }
   overscroll-behavior: contain;
   padding: .4rem;
   border: 1px solid var(--cp-bordo);
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, .97);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -1274,7 +1274,7 @@ body.cp-modal-open { overflow: hidden; }
   min-height: 2.6rem;
   padding: .55rem .7rem;
   border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .1);
   color: #fff;
   font-size: .82rem;
@@ -1338,7 +1338,7 @@ body.cp-modal-open { overflow: hidden; }
     flex: none;
     max-width: 80%;
     padding: .3rem .8rem;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--cp-blu);
     color: #fff;
     font-size: .8rem;
@@ -1365,7 +1365,7 @@ body.cp-modal-open { overflow: hidden; }
     z-index: 1000;
     max-height: 86svh;
     padding: .55rem 0 0;
-    border-radius: 8px 8px 0 0;
+    border-radius: 14px 14px 0 0;
     background: rgba(246, 248, 251, .94);
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
@@ -1464,7 +1464,7 @@ body.cp-modal-open { overflow: hidden; }
     width: 100%;
     min-height: 52px;
     border: 0;
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--cp-arancio);
     color: #fff;
     font-size: 1rem;
@@ -1492,15 +1492,15 @@ body.cp-modal-open { overflow: hidden; }
 @media (max-width: 560px) {
   .cp-sottotitolo { display: none; }
 
-  .cp-eroe { border-radius: 0 0 8px 8px; }
+  .cp-eroe { border-radius: 0 0 14px 14px; }
 
   .cp-prossimo { padding: .85rem 1rem; }
   .cp-prossimo-titolo { font-size: 1rem; padding-right: 4.5rem; }
   .cp-numero { padding: .7rem .9rem; }
 
-  .cp-comandi { gap: .35rem; padding: .35rem; border-radius: 8px; }
+  .cp-comandi { gap: .35rem; padding: .35rem; border-radius: 12px; }
   .cp-nav-controls, .cp-view-controls { padding: 2px; border-radius: 6px; }
-  .cp-btn-icon, .cp-btn-text, .cp-btn-view { height: 34px; font-size: .78rem; border-radius: 4px; }
+  .cp-btn-icon, .cp-btn-text, .cp-btn-view { height: 34px; font-size: .78rem; border-radius: 6px; }
   .cp-btn-icon { width: 32px; }
   .cp-btn-text, .cp-btn-view { padding: 0 .55rem; }
   .cp-btn-view svg { display: none; }

@@ -12,7 +12,7 @@
   display: inline-flex;
   align-items: center;
   gap: .75rem;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #fff;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -37,7 +37,7 @@
   width: 46px;
   height: 46px;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, .5),
@@ -84,7 +84,7 @@
 
 @media (max-width: 767px) {
   .tm-link { gap: .6rem; }
-  .tm-tessera { width: 40px; height: 40px; border-radius: 6px; }
+  .tm-tessera { width: 40px; height: 40px; border-radius: 8px; }
   .tm-nome-sopra { font-size: .58rem; letter-spacing: .2em; }
   .tm-nome-sotto { font-size: 1.12rem; }
 }
